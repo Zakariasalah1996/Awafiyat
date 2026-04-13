@@ -1,0 +1,414 @@
+import { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  I18nManager,
+  Platform,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ScreenContainer } from "@/components/screen-container";
+import { useUser } from "@/lib/user-context";
+import { getRecipeById } from "@/lib/data/recipes";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useColors } from "@/hooks/use-colors";
+import * as Haptics from "expo-haptics";
+
+I18nManager.forceRTL(true);
+
+export default function RecipeDetailScreen() {
+  const router = useRouter();
+  const colors = useColors();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { profile, saveRecipe, unsaveRecipe, rateRecipe, incrementRecipesViewed } = useUser();
+  const recipe = getRecipeById(id || "");
+
+  const [userRating, setUserRating] = useState(() => {
+    const existing = profile.triedRecipes.find((r) => r.recipeId === id);
+    return existing?.rating || 0;
+  });
+
+  const isSaved = profile.savedRecipes.includes(id || "");
+
+  const handleSave = useCallback(async () => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (isSaved) {
+      await unsaveRecipe(id || "");
+    } else {
+      await saveRecipe(id || "");
+    }
+  }, [isSaved, id, saveRecipe, unsaveRecipe]);
+
+  const handleRate = useCallback(
+    async (rating: number) => {
+      if (Platform.OS !== "web") {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      setUserRating(rating);
+      await rateRecipe(id || "", rating);
+    },
+    [id, rateRecipe]
+  );
+
+  if (!recipe) {
+    return (
+      <ScreenContainer className="p-6" edges={["top", "bottom", "left", "right"]}>
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-xl text-foreground">الوصفة غير موجودة</Text>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={{ marginTop: 16 }}
+            className="bg-primary px-6 py-3 rounded-xl"
+          >
+            <Text className="text-white font-bold">الرجوع</Text>
+          </TouchableOpacity>
+        </View>
+      </ScreenContainer>
+    );
+  }
+
+  const difficultyLabel =
+    recipe.difficulty === "easy"
+      ? "سهلة"
+      : recipe.difficulty === "medium"
+      ? "متوسطة"
+      : "صعبة";
+
+  const difficultyColor =
+    recipe.difficulty === "easy"
+      ? colors.success
+      : recipe.difficulty === "medium"
+      ? colors.warning
+      : colors.error;
+
+  return (
+    <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View className="px-5 pt-4 pb-2 flex-row items-center justify-between">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: colors.surface,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <IconSymbol name="chevron.right" size={20} color={colors.foreground} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSave}>
+            <IconSymbol
+              name={isSaved ? "heart.fill" : "heart"}
+              size={28}
+              color={isSaved ? colors.error : colors.muted}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Recipe Image Placeholder */}
+        <View
+          className="mx-5 rounded-2xl items-center justify-center"
+          style={{
+            height: 200,
+            backgroundColor: colors.secondary || colors.surface,
+          }}
+        >
+          <Text style={{ fontSize: 60 }}>
+            {recipe.category === "hearty"
+              ? "🍖"
+              : recipe.category === "quick"
+              ? "⚡"
+              : recipe.category === "healthy"
+              ? "🥗"
+              : "🍰"}
+          </Text>
+          <Text
+            className="text-foreground font-bold mt-2"
+            style={{ fontSize: 12, opacity: 0.6 }}
+          >
+            {recipe.isIraqi ? "🇮🇶 أكلة عراقية" : "🌍 أكلة عربية"}
+          </Text>
+        </View>
+
+        {/* Title & Description */}
+        <View className="px-5 mt-4">
+          <Text
+            className="text-foreground font-bold"
+            style={{ fontSize: 24, textAlign: "right", writingDirection: "rtl" }}
+          >
+            {recipe.name}
+          </Text>
+          <Text
+            className="text-muted mt-2"
+            style={{
+              fontSize: 15,
+              lineHeight: 24,
+              textAlign: "right",
+              writingDirection: "rtl",
+            }}
+          >
+            {recipe.description}
+          </Text>
+        </View>
+
+        {/* Quick Info Cards */}
+        <View className="flex-row px-5 mt-4 gap-2">
+          <View
+            className="flex-1 rounded-xl p-3 items-center"
+            style={{ backgroundColor: colors.surface }}
+          >
+            <Text style={{ fontSize: 20 }}>⏱️</Text>
+            <Text className="text-foreground font-bold mt-1" style={{ fontSize: 13 }}>
+              {recipe.prepTime + recipe.cookTime} دقيقة
+            </Text>
+            <Text className="text-muted" style={{ fontSize: 11 }}>
+              الوقت الكلي
+            </Text>
+          </View>
+          <View
+            className="flex-1 rounded-xl p-3 items-center"
+            style={{ backgroundColor: colors.surface }}
+          >
+            <Text style={{ fontSize: 20 }}>👥</Text>
+            <Text className="text-foreground font-bold mt-1" style={{ fontSize: 13 }}>
+              {recipe.servings} أشخاص
+            </Text>
+            <Text className="text-muted" style={{ fontSize: 11 }}>
+              الحصص
+            </Text>
+          </View>
+          <View
+            className="flex-1 rounded-xl p-3 items-center"
+            style={{ backgroundColor: colors.surface }}
+          >
+            <Text style={{ fontSize: 20 }}>🔥</Text>
+            <Text className="text-foreground font-bold mt-1" style={{ fontSize: 13 }}>
+              {recipe.calories} سعرة
+            </Text>
+            <Text className="text-muted" style={{ fontSize: 11 }}>
+              لكل حصة
+            </Text>
+          </View>
+          <View
+            className="flex-1 rounded-xl p-3 items-center"
+            style={{ backgroundColor: colors.surface }}
+          >
+            <Text style={{ fontSize: 20, color: difficultyColor }}>●</Text>
+            <Text
+              className="font-bold mt-1"
+              style={{ fontSize: 13, color: difficultyColor }}
+            >
+              {difficultyLabel}
+            </Text>
+            <Text className="text-muted" style={{ fontSize: 11 }}>
+              الصعوبة
+            </Text>
+          </View>
+        </View>
+
+        {/* Nutrition Info */}
+        <View className="mx-5 mt-4 rounded-xl p-4" style={{ backgroundColor: colors.surface }}>
+          <Text
+            className="text-foreground font-bold mb-3"
+            style={{ fontSize: 16, textAlign: "right", writingDirection: "rtl" }}
+          >
+            القيمة الغذائية (لكل حصة)
+          </Text>
+          <View className="flex-row justify-between">
+            <View className="items-center flex-1">
+              <Text className="text-primary font-bold" style={{ fontSize: 18 }}>
+                {recipe.protein}g
+              </Text>
+              <Text className="text-muted" style={{ fontSize: 12 }}>
+                بروتين
+              </Text>
+            </View>
+            <View className="items-center flex-1">
+              <Text className="text-primary font-bold" style={{ fontSize: 18 }}>
+                {recipe.carbs}g
+              </Text>
+              <Text className="text-muted" style={{ fontSize: 12 }}>
+                كربوهيدرات
+              </Text>
+            </View>
+            <View className="items-center flex-1">
+              <Text className="text-primary font-bold" style={{ fontSize: 18 }}>
+                {recipe.fat}g
+              </Text>
+              <Text className="text-muted" style={{ fontSize: 12 }}>
+                دهون
+              </Text>
+            </View>
+            <View className="items-center flex-1">
+              <Text className="text-primary font-bold" style={{ fontSize: 18 }}>
+                {recipe.fiber}g
+              </Text>
+              <Text className="text-muted" style={{ fontSize: 12 }}>
+                ألياف
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Ingredients */}
+        <View className="px-5 mt-5">
+          <Text
+            className="text-foreground font-bold mb-3"
+            style={{ fontSize: 18, textAlign: "right", writingDirection: "rtl" }}
+          >
+            المكونات
+          </Text>
+          {recipe.ingredients.map((ing, index) => (
+            <View
+              key={index}
+              className="flex-row items-center py-2 border-b border-border"
+              style={{ flexDirection: "row-reverse" }}
+            >
+              <View
+                className="rounded-full mr-3 items-center justify-center"
+                style={{
+                  width: 28,
+                  height: 28,
+                  backgroundColor: colors.primary + "20",
+                  marginLeft: 10,
+                }}
+              >
+                <Text className="text-primary font-bold" style={{ fontSize: 12 }}>
+                  {index + 1}
+                </Text>
+              </View>
+              <Text
+                className="text-foreground flex-1"
+                style={{
+                  fontSize: 15,
+                  textAlign: "right",
+                  writingDirection: "rtl",
+                }}
+              >
+                {ing.name}
+              </Text>
+              <Text className="text-muted" style={{ fontSize: 14 }}>
+                {ing.amount}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Steps */}
+        <View className="px-5 mt-5">
+          <Text
+            className="text-foreground font-bold mb-3"
+            style={{ fontSize: 18, textAlign: "right", writingDirection: "rtl" }}
+          >
+            طريقة التحضير
+          </Text>
+          {recipe.steps.map((step, index) => (
+            <View
+              key={index}
+              className="flex-row mb-3"
+              style={{ flexDirection: "row-reverse" }}
+            >
+              <View
+                className="rounded-full items-center justify-center"
+                style={{
+                  width: 32,
+                  height: 32,
+                  backgroundColor: colors.primary,
+                  marginLeft: 12,
+                  flexShrink: 0,
+                }}
+              >
+                <Text className="text-white font-bold" style={{ fontSize: 14 }}>
+                  {index + 1}
+                </Text>
+              </View>
+              <View
+                className="flex-1 rounded-xl p-3"
+                style={{ backgroundColor: colors.surface }}
+              >
+                <Text
+                  className="text-foreground"
+                  style={{
+                    fontSize: 15,
+                    lineHeight: 24,
+                    textAlign: "right",
+                    writingDirection: "rtl",
+                  }}
+                >
+                  {step}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Tips */}
+        {recipe.tips && (
+          <View
+            className="mx-5 mt-4 rounded-xl p-4"
+            style={{ backgroundColor: colors.primary + "15" }}
+          >
+            <Text
+              className="text-primary font-bold mb-2"
+              style={{ fontSize: 16, textAlign: "right", writingDirection: "rtl" }}
+            >
+              نصيحة من عافيات
+            </Text>
+            <Text
+              className="text-foreground"
+              style={{
+                fontSize: 14,
+                lineHeight: 22,
+                textAlign: "right",
+                writingDirection: "rtl",
+              }}
+            >
+              {recipe.tips}
+            </Text>
+          </View>
+        )}
+
+        {/* Rating */}
+        <View className="px-5 mt-5">
+          <Text
+            className="text-foreground font-bold mb-3"
+            style={{ fontSize: 16, textAlign: "right", writingDirection: "rtl" }}
+          >
+            قيمي هاي الأكلة
+          </Text>
+          <View className="flex-row justify-center gap-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <TouchableOpacity key={star} onPress={() => handleRate(star)}>
+                <Text
+                  style={{
+                    fontSize: 32,
+                    color: star <= userRating ? "#FFD700" : colors.border,
+                  }}
+                >
+                  {star <= userRating ? "★" : "☆"}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {userRating > 0 && (
+            <Text
+              className="text-muted text-center mt-2"
+              style={{ fontSize: 13 }}
+            >
+              شكراً على تقييمج! ألف عافية
+            </Text>
+          )}
+        </View>
+      </ScrollView>
+    </ScreenContainer>
+  );
+}
