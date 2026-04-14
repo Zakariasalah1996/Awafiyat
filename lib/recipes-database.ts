@@ -21,23 +21,15 @@ export interface Recipe {
   image?: string;
 }
 
+// الوصفات الأساسية الحقيقية (23 وصفة)
 export const RECIPES_DATABASE: Recipe[] = [
-  // الأطباق الرئيسية العراقية
   {
     id: "recipe_1",
     name: "مسقعة البيض العراقية",
     nameEn: "Iraqi Eggplant Casserole",
     category: "main",
     cuisine: "iraqi",
-    ingredients: [
-      "باذنجان",
-      "بيض",
-      "لحم مفروم",
-      "بصل",
-      "ثوم",
-      "طماطم",
-      "توابل",
-    ],
+    ingredients: ["باذنجان", "بيض", "لحم مفروم", "بصل", "ثوم", "طماطم", "توابل"],
     instructions: [
       "قطع الباذنجان وقليه",
       "اطبخ اللحم مع البصل والثوم",
@@ -62,15 +54,7 @@ export const RECIPES_DATABASE: Recipe[] = [
     nameEn: "Iraqi Stuffed Grape Leaves",
     category: "main",
     cuisine: "iraqi",
-    ingredients: [
-      "أوراق العنب",
-      "لحم مفروم",
-      "أرز",
-      "بصل",
-      "نعناع",
-      "توابل",
-      "مرق",
-    ],
+    ingredients: ["أوراق العنب", "لحم مفروم", "أرز", "بصل", "نعناع", "توابل", "مرق"],
     instructions: [
       "اغسل أوراق العنب",
       "اخلط اللحم والأرز والبصل",
@@ -95,14 +79,7 @@ export const RECIPES_DATABASE: Recipe[] = [
     nameEn: "Iraqi Kibbeh",
     category: "main",
     cuisine: "iraqi",
-    ingredients: [
-      "لحم مفروم",
-      "برغل",
-      "بصل",
-      "صنوبر",
-      "توابل",
-      "زيت",
-    ],
+    ingredients: ["لحم مفروم", "برغل", "بصل", "صنوبر", "توابل", "زيت"],
     instructions: [
       "انقع البرغل في الماء",
       "اخلط البرغل واللحم والبصل",
@@ -127,14 +104,7 @@ export const RECIPES_DATABASE: Recipe[] = [
     nameEn: "Iraqi Stew",
     category: "main",
     cuisine: "iraqi",
-    ingredients: [
-      "لحم بقري",
-      "بصل",
-      "طماطم",
-      "حمص",
-      "توابل",
-      "مرق",
-    ],
+    ingredients: ["لحم بقري", "بصل", "طماطم", "حمص", "توابل", "مرق"],
     instructions: [
       "اطبخ اللحم حتى يصبح طري",
       "أضف البصل والثوم",
@@ -159,14 +129,7 @@ export const RECIPES_DATABASE: Recipe[] = [
     nameEn: "Iraqi Fasha",
     category: "main",
     cuisine: "iraqi",
-    ingredients: [
-      "لحم مفروم",
-      "كبدة",
-      "قلب",
-      "بصل",
-      "ثوم",
-      "توابل",
-    ],
+    ingredients: ["لحم مفروم", "كبدة", "قلب", "بصل", "ثوم", "توابل"],
     instructions: [
       "قطع الكبدة والقلب",
       "اقلِ البصل والثوم",
@@ -185,22 +148,13 @@ export const RECIPES_DATABASE: Recipe[] = [
     difficulty: "medium",
     emoji: "🥘",
   },
-
-  // الأطباق الجانبية
   {
     id: "recipe_6",
     name: "الحمص بالطحينة",
     nameEn: "Hummus",
     category: "side",
     cuisine: "arab",
-    ingredients: [
-      "حمص معلب",
-      "طحينة",
-      "ليمون",
-      "ثوم",
-      "زيت زيتون",
-      "ملح",
-    ],
+    ingredients: ["حمص معلب", "طحينة", "ليمون", "ثوم", "زيت زيتون", "ملح"],
     instructions: [
       "صفِ الحمص",
       "ضعه في الخلاط",
@@ -221,52 +175,11 @@ export const RECIPES_DATABASE: Recipe[] = [
   },
   {
     id: "recipe_7",
-    name: "الباذنجان المخلل",
-    nameEn: "Pickled Eggplant",
-    category: "side",
-    cuisine: "arab",
-    ingredients: [
-      "باذنجان",
-      "خل",
-      "ثوم",
-      "فلفل",
-      "ملح",
-      "ماء",
-    ],
-    instructions: [
-      "قطع الباذنجان",
-      "اسلقه قليلاً",
-      "ضعه في برطمان",
-      "اسكب محلول الخل والملح",
-      "اترك 3 أيام قبل التقديم",
-    ],
-    prepTime: "20 دقيقة",
-    cookTime: "10 دقيقة",
-    servings: 6,
-    calories: 40,
-    protein: 1,
-    carbs: 8,
-    fat: 0,
-    healthTags: ["all", "diabetes", "obesity"],
-    difficulty: "easy",
-    emoji: "🥒",
-  },
-  {
-    id: "recipe_8",
     name: "الفتوش",
     nameEn: "Fattoush Salad",
     category: "side",
     cuisine: "arab",
-    ingredients: [
-      "خس",
-      "طماطم",
-      "خيار",
-      "فجل",
-      "بقدونس",
-      "خبز محمص",
-      "ليمون",
-      "زيت",
-    ],
+    ingredients: ["خس", "طماطم", "خيار", "فجل", "بقدونس", "خبز محمص", "ليمون", "زيت"],
     instructions: [
       "قطع الخضار",
       "ضعها في طبق",
@@ -285,23 +198,13 @@ export const RECIPES_DATABASE: Recipe[] = [
     difficulty: "easy",
     emoji: "🥗",
   },
-
-  // الشوربات
   {
-    id: "recipe_9",
+    id: "recipe_8",
     name: "شوربة العدس العراقية",
     nameEn: "Iraqi Lentil Soup",
     category: "soup",
     cuisine: "iraqi",
-    ingredients: [
-      "عدس أحمر",
-      "بصل",
-      "ثوم",
-      "كمون",
-      "ملح",
-      "زيت",
-      "ماء",
-    ],
+    ingredients: ["عدس أحمر", "بصل", "ثوم", "كمون", "ملح", "زيت", "ماء"],
     instructions: [
       "اغسل العدس",
       "ضعه في قدر مع الماء",
@@ -321,85 +224,12 @@ export const RECIPES_DATABASE: Recipe[] = [
     emoji: "🍲",
   },
   {
-    id: "recipe_10",
-    name: "شوربة الشعيرية",
-    nameEn: "Vermicelli Soup",
-    category: "soup",
-    cuisine: "arab",
-    ingredients: [
-      "شعيرية",
-      "مرق دجاج",
-      "بصل",
-      "ثوم",
-      "ملح",
-      "فلفل",
-    ],
-    instructions: [
-      "اسخن المرق",
-      "أضف البصل والثوم",
-      "أضف الشعيرية",
-      "اطبخ 10 دقائق",
-      "تبل حسب الرغبة",
-    ],
-    prepTime: "10 دقيقة",
-    cookTime: "15 دقيقة",
-    servings: 4,
-    calories: 180,
-    protein: 6,
-    carbs: 28,
-    fat: 4,
-    healthTags: ["all"],
-    difficulty: "easy",
-    emoji: "🍜",
-  },
-  {
-    id: "recipe_11",
-    name: "شوربة الخضار الصحية",
-    nameEn: "Vegetable Soup",
-    category: "soup",
-    cuisine: "arab",
-    ingredients: [
-      "جزر",
-      "كوسا",
-      "بصل",
-      "طماطم",
-      "كرفس",
-      "ماء",
-      "ملح",
-    ],
-    instructions: [
-      "قطع الخضار",
-      "ضعها في قدر مع الماء",
-      "اطبخ 25 دقيقة",
-      "أضف الملح والتوابل",
-      "قدم ساخناً",
-    ],
-    prepTime: "15 دقيقة",
-    cookTime: "30 دقيقة",
-    servings: 4,
-    calories: 80,
-    protein: 3,
-    carbs: 16,
-    fat: 1,
-    healthTags: ["all", "diabetes", "obesity"],
-    difficulty: "easy",
-    emoji: "🥕",
-  },
-
-  // الخبز
-  {
-    id: "recipe_12",
-    name: "الخبز العراقي (الصاج)",
+    id: "recipe_9",
+    name: "الخبز العراقي",
     nameEn: "Iraqi Bread",
     category: "bread",
     cuisine: "iraqi",
-    ingredients: [
-      "دقيق",
-      "ماء",
-      "ملح",
-      "خميرة",
-      "زيت",
-    ],
+    ingredients: ["دقيق", "ماء", "ملح", "خميرة", "زيت"],
     instructions: [
       "اخلط الدقيق والماء والملح",
       "أضف الخميرة والزيت",
@@ -419,50 +249,12 @@ export const RECIPES_DATABASE: Recipe[] = [
     emoji: "🍞",
   },
   {
-    id: "recipe_13",
-    name: "الخبز الأسمر الصحي",
-    nameEn: "Whole Wheat Bread",
-    category: "bread",
-    cuisine: "arab",
-    ingredients: [
-      "دقيق أسمر",
-      "ماء",
-      "ملح",
-      "خميرة",
-    ],
-    instructions: [
-      "اخلط الدقيق الأسمر والماء",
-      "أضف الملح والخميرة",
-      "اترك العجين ساعة",
-      "شكل الخبز",
-      "اخبز في الفرن 25 دقيقة",
-    ],
-    prepTime: "15 دقيقة",
-    cookTime: "85 دقيقة",
-    servings: 8,
-    calories: 200,
-    protein: 8,
-    carbs: 38,
-    fat: 1,
-    healthTags: ["all", "diabetes", "obesity"],
-    difficulty: "medium",
-    emoji: "🌾",
-  },
-
-  // الحلويات
-  {
-    id: "recipe_14",
+    id: "recipe_10",
     name: "البقلاوة العراقية",
     nameEn: "Iraqi Baklava",
     category: "dessert",
     cuisine: "iraqi",
-    ingredients: [
-      "عجينة فيلو",
-      "فستق",
-      "سمن",
-      "عسل",
-      "قرفة",
-    ],
+    ingredients: ["عجينة فيلو", "فستق", "سمن", "عسل", "قرفة"],
     instructions: [
       "ضع طبقات من العجينة والفستق",
       "ادهن بالسمن",
@@ -482,111 +274,12 @@ export const RECIPES_DATABASE: Recipe[] = [
     emoji: "🥐",
   },
   {
-    id: "recipe_15",
-    name: "الكنافة العراقية",
-    nameEn: "Iraqi Kunafa",
-    category: "dessert",
-    cuisine: "iraqi",
-    ingredients: [
-      "كنافة",
-      "جبن",
-      "سمن",
-      "شيرة",
-      "فستق",
-    ],
-    instructions: [
-      "ضع الكنافة في القالب",
-      "أضف الجبن والفستق",
-      "ادهن بالسمن",
-      "اخبز 20 دقيقة",
-      "صب الشيرة الساخنة",
-    ],
-    prepTime: "15 دقيقة",
-    cookTime: "25 دقيقة",
-    servings: 8,
-    calories: 320,
-    protein: 6,
-    carbs: 38,
-    fat: 16,
-    healthTags: ["none"],
-    difficulty: "easy",
-    emoji: "🧁",
-  },
-  {
-    id: "recipe_16",
-    name: "تمر بالسمسم",
-    nameEn: "Dates with Sesame",
-    category: "dessert",
-    cuisine: "arab",
-    ingredients: [
-      "تمر",
-      "سمسم",
-      "عسل",
-    ],
-    instructions: [
-      "أزل نوى التمر",
-      "ضع السمسم في طبق",
-      "لف التمر بالسمسم",
-      "رتبها في طبق",
-      "صب العسل خفيف",
-    ],
-    prepTime: "10 دقيقة",
-    cookTime: "0 دقيقة",
-    servings: 6,
-    calories: 180,
-    protein: 3,
-    carbs: 28,
-    fat: 6,
-    healthTags: ["all"],
-    difficulty: "easy",
-    emoji: "📅",
-  },
-
-  // الإفطار
-  {
-    id: "recipe_17",
-    name: "المنسف العراقي",
-    nameEn: "Iraqi Mansaf",
-    category: "breakfast",
-    cuisine: "iraqi",
-    ingredients: [
-      "خبز",
-      "لبن",
-      "لحم",
-      "صنوبر",
-      "بقدونس",
-    ],
-    instructions: [
-      "ضع الخبز في الطبق",
-      "اسكب اللبن عليه",
-      "ضع اللحم في الأعلى",
-      "رش الصنوبر والبقدونس",
-      "قدم ساخناً",
-    ],
-    prepTime: "10 دقيقة",
-    cookTime: "0 دقيقة",
-    servings: 4,
-    calories: 420,
-    protein: 28,
-    carbs: 32,
-    fat: 18,
-    healthTags: ["none"],
-    difficulty: "easy",
-    emoji: "🥛",
-  },
-  {
-    id: "recipe_18",
+    id: "recipe_11",
     name: "الفول المدمس",
     nameEn: "Fava Beans",
     category: "breakfast",
     cuisine: "arab",
-    ingredients: [
-      "فول",
-      "ثوم",
-      "ليمون",
-      "زيت",
-      "ملح",
-    ],
+    ingredients: ["فول", "ثوم", "ليمون", "زيت", "ملح"],
     instructions: [
       "اسخن الفول",
       "أضف الثوم المهروس",
@@ -606,18 +299,12 @@ export const RECIPES_DATABASE: Recipe[] = [
     emoji: "🫘",
   },
   {
-    id: "recipe_19",
+    id: "recipe_12",
     name: "البيض بالطماطم",
     nameEn: "Eggs with Tomato",
     category: "breakfast",
     cuisine: "arab",
-    ingredients: [
-      "بيض",
-      "طماطم",
-      "بصل",
-      "ثوم",
-      "توابل",
-    ],
+    ingredients: ["بيض", "طماطم", "بصل", "ثوم", "توابل"],
     instructions: [
       "اقلِ البصل والثوم",
       "أضف الطماطم المفرومة",
@@ -636,85 +323,13 @@ export const RECIPES_DATABASE: Recipe[] = [
     difficulty: "easy",
     emoji: "🍳",
   },
-
-  // الأطباق الكردية
   {
-    id: "recipe_20",
-    name: "الكليجة الكردية",
-    nameEn: "Kurdish Kleicha",
-    category: "dessert",
-    cuisine: "kurdish",
-    ingredients: [
-      "دقيق",
-      "سمن",
-      "تمر",
-      "ملح",
-      "بيض",
-    ],
-    instructions: [
-      "اخلط الدقيق والسمن",
-      "شكل العجين",
-      "حشي بالتمر",
-      "اخبز 20 دقيقة",
-      "اترك تبرد",
-    ],
-    prepTime: "20 دقيقة",
-    cookTime: "25 دقيقة",
-    servings: 12,
-    calories: 240,
-    protein: 3,
-    carbs: 28,
-    fat: 12,
-    healthTags: ["none"],
-    difficulty: "medium",
-    emoji: "🍪",
-  },
-
-  // وصفات صحية إضافية
-  {
-    id: "recipe_21",
-    name: "سلطة الجرجير الصحية",
-    nameEn: "Arugula Salad",
-    category: "side",
-    cuisine: "arab",
-    ingredients: [
-      "جرجير",
-      "ليمون",
-      "زيت زيتون",
-      "ملح",
-      "فلفل",
-    ],
-    instructions: [
-      "اغسل الجرجير",
-      "ضعه في طبق",
-      "اسكب الليمون والزيت",
-      "تبل بالملح والفلفل",
-      "قدم فوراً",
-    ],
-    prepTime: "5 دقائق",
-    cookTime: "0 دقيقة",
-    servings: 2,
-    calories: 60,
-    protein: 2,
-    carbs: 4,
-    fat: 4,
-    healthTags: ["all", "diabetes", "obesity"],
-    difficulty: "easy",
-    emoji: "🥬",
-  },
-  {
-    id: "recipe_22",
+    id: "recipe_13",
     name: "الدجاج المشوي الصحي",
     nameEn: "Grilled Chicken",
     category: "main",
     cuisine: "arab",
-    ingredients: [
-      "صدور دجاج",
-      "ليمون",
-      "ثوم",
-      "زيت",
-      "توابل",
-    ],
+    ingredients: ["صدور دجاج", "ليمون", "ثوم", "زيت", "توابل"],
     instructions: [
       "اخلط الليمون والثوم والزيت",
       "تبل الدجاج",
@@ -734,18 +349,12 @@ export const RECIPES_DATABASE: Recipe[] = [
     emoji: "🍗",
   },
   {
-    id: "recipe_23",
+    id: "recipe_14",
     name: "السمك المشوي",
     nameEn: "Grilled Fish",
     category: "main",
     cuisine: "arab",
-    ingredients: [
-      "سمك",
-      "ليمون",
-      "ملح",
-      "فلفل",
-      "زيت",
-    ],
+    ingredients: ["سمك", "ليمون", "ملح", "فلفل", "زيت"],
     instructions: [
       "نظف السمك",
       "تبل بالملح والفلفل",
@@ -764,47 +373,285 @@ export const RECIPES_DATABASE: Recipe[] = [
     difficulty: "easy",
     emoji: "🐟",
   },
+  {
+    id: "recipe_15",
+    name: "سلطة الجرجير الصحية",
+    nameEn: "Arugula Salad",
+    category: "side",
+    cuisine: "arab",
+    ingredients: ["جرجير", "ليمون", "زيت زيتون", "ملح", "فلفل"],
+    instructions: [
+      "اغسل الجرجير",
+      "ضعه في طبق",
+      "اسكب الليمون والزيت",
+      "تبل بالملح والفلفل",
+      "قدم فوراً",
+    ],
+    prepTime: "5 دقائق",
+    cookTime: "0 دقيقة",
+    servings: 2,
+    calories: 60,
+    protein: 2,
+    carbs: 4,
+    fat: 4,
+    healthTags: ["all", "diabetes", "obesity"],
+    difficulty: "easy",
+    emoji: "🥬",
+  },
+  {
+    id: "recipe_16",
+    name: "المنسف العراقي",
+    nameEn: "Iraqi Mansaf",
+    category: "breakfast",
+    cuisine: "iraqi",
+    ingredients: ["خبز", "لبن", "لحم", "صنوبر", "بقدونس"],
+    instructions: [
+      "ضع الخبز في الطبق",
+      "اسكب اللبن عليه",
+      "ضع اللحم في الأعلى",
+      "رش الصنوبر والبقدونس",
+      "قدم ساخناً",
+    ],
+    prepTime: "10 دقيقة",
+    cookTime: "0 دقيقة",
+    servings: 4,
+    calories: 420,
+    protein: 28,
+    carbs: 32,
+    fat: 18,
+    healthTags: ["none"],
+    difficulty: "easy",
+    emoji: "🥛",
+  },
+  {
+    id: "recipe_17",
+    name: "شوربة الخضار الصحية",
+    nameEn: "Vegetable Soup",
+    category: "soup",
+    cuisine: "arab",
+    ingredients: ["جزر", "كوسا", "بصل", "طماطم", "كرفس", "ماء", "ملح"],
+    instructions: [
+      "قطع الخضار",
+      "ضعها في قدر مع الماء",
+      "اطبخ 25 دقيقة",
+      "أضف الملح والتوابل",
+      "قدم ساخناً",
+    ],
+    prepTime: "15 دقيقة",
+    cookTime: "30 دقيقة",
+    servings: 4,
+    calories: 80,
+    protein: 3,
+    carbs: 16,
+    fat: 1,
+    healthTags: ["all", "diabetes", "obesity"],
+    difficulty: "easy",
+    emoji: "🥕",
+  },
+  {
+    id: "recipe_18",
+    name: "الكنافة العراقية",
+    nameEn: "Iraqi Kunafa",
+    category: "dessert",
+    cuisine: "iraqi",
+    ingredients: ["كنافة", "جبن", "سمن", "شيرة", "فستق"],
+    instructions: [
+      "ضع الكنافة في القالب",
+      "أضف الجبن والفستق",
+      "ادهن بالسمن",
+      "اخبز 20 دقيقة",
+      "صب الشيرة الساخنة",
+    ],
+    prepTime: "15 دقيقة",
+    cookTime: "25 دقيقة",
+    servings: 8,
+    calories: 320,
+    protein: 6,
+    carbs: 38,
+    fat: 16,
+    healthTags: ["none"],
+    difficulty: "easy",
+    emoji: "🧁",
+  },
+  {
+    id: "recipe_19",
+    name: "تمر بالسمسم",
+    nameEn: "Dates with Sesame",
+    category: "dessert",
+    cuisine: "arab",
+    ingredients: ["تمر", "سمسم", "عسل"],
+    instructions: [
+      "أزل نوى التمر",
+      "ضع السمسم في طبق",
+      "لف التمر بالسمسم",
+      "رتبها في طبق",
+      "صب العسل خفيف",
+    ],
+    prepTime: "10 دقيقة",
+    cookTime: "0 دقيقة",
+    servings: 6,
+    calories: 180,
+    protein: 3,
+    carbs: 28,
+    fat: 6,
+    healthTags: ["all"],
+    difficulty: "easy",
+    emoji: "📅",
+  },
+  {
+    id: "recipe_20",
+    name: "الكليجة الكردية",
+    nameEn: "Kurdish Kleicha",
+    category: "dessert",
+    cuisine: "kurdish",
+    ingredients: ["دقيق", "سمن", "تمر", "ملح", "بيض"],
+    instructions: [
+      "اخلط الدقيق والسمن",
+      "شكل العجين",
+      "حشي بالتمر",
+      "اخبز 20 دقيقة",
+      "اترك تبرد",
+    ],
+    prepTime: "20 دقيقة",
+    cookTime: "25 دقيقة",
+    servings: 12,
+    calories: 240,
+    protein: 3,
+    carbs: 28,
+    fat: 12,
+    healthTags: ["none"],
+    difficulty: "medium",
+    emoji: "🍪",
+  },
+  {
+    id: "recipe_21",
+    name: "شوربة الشعيرية",
+    nameEn: "Vermicelli Soup",
+    category: "soup",
+    cuisine: "arab",
+    ingredients: ["شعيرية", "مرق دجاج", "بصل", "ثوم", "ملح", "فلفل"],
+    instructions: [
+      "اسخن المرق",
+      "أضف البصل والثوم",
+      "أضف الشعيرية",
+      "اطبخ 10 دقائق",
+      "تبل حسب الرغبة",
+    ],
+    prepTime: "10 دقيقة",
+    cookTime: "15 دقيقة",
+    servings: 4,
+    calories: 180,
+    protein: 6,
+    carbs: 28,
+    fat: 4,
+    healthTags: ["all"],
+    difficulty: "easy",
+    emoji: "🍜",
+  },
+  {
+    id: "recipe_22",
+    name: "الخبز الأسمر الصحي",
+    nameEn: "Whole Wheat Bread",
+    category: "bread",
+    cuisine: "arab",
+    ingredients: ["دقيق أسمر", "ماء", "ملح", "خميرة"],
+    instructions: [
+      "اخلط الدقيق الأسمر والماء",
+      "أضف الملح والخميرة",
+      "اترك العجين ساعة",
+      "شكل الخبز",
+      "اخبز في الفرن 25 دقيقة",
+    ],
+    prepTime: "15 دقيقة",
+    cookTime: "85 دقيقة",
+    servings: 8,
+    calories: 200,
+    protein: 8,
+    carbs: 38,
+    fat: 1,
+    healthTags: ["all", "diabetes", "obesity"],
+    difficulty: "medium",
+    emoji: "🌾",
+  },
+  {
+    id: "recipe_23",
+    name: "الباذنجان المخلل",
+    nameEn: "Pickled Eggplant",
+    category: "side",
+    cuisine: "arab",
+    ingredients: ["باذنجان", "خل", "ثوم", "فلفل", "ملح", "ماء"],
+    instructions: [
+      "قطع الباذنجان",
+      "اسلقه قليلاً",
+      "ضعه في برطمان",
+      "اسكب محلول الخل والملح",
+      "اترك 3 أيام قبل التقديم",
+    ],
+    prepTime: "20 دقيقة",
+    cookTime: "10 دقيقة",
+    servings: 6,
+    calories: 40,
+    protein: 1,
+    carbs: 8,
+    fat: 0,
+    healthTags: ["all", "diabetes", "obesity"],
+    difficulty: "easy",
+    emoji: "🥒",
+  },
 ];
 
-// إضافة 177 وصفة إضافية لتصل إلى 200+
-const ADDITIONAL_RECIPES: Recipe[] = Array.from({ length: 177 }, (_, i) => {
-  const healthTagsOptions: (HealthCondition | "all")[] = ["all", "diabetes", "hypertension", "obesity", "cholesterol", "none"];
-  return {
-    id: `recipe_${24 + i}`,
-    name: `وصفة ${24 + i}`,
-    nameEn: `Recipe ${24 + i}`,
-    category: ["main", "side", "soup", "bread", "dessert", "breakfast"][
-      Math.floor(Math.random() * 6)
-    ] as any,
-    cuisine: ["iraqi", "arab", "kurdish"][Math.floor(Math.random() * 3)] as any,
-    ingredients: [
-      "مكون 1",
-      "مكون 2",
-      "مكون 3",
-      "مكون 4",
-    ],
-    instructions: [
-      "خطوة 1",
-      "خطوة 2",
-      "خطوة 3",
-    ],
-    prepTime: `${Math.floor(Math.random() * 30) + 5} دقائق`,
-    cookTime: `${Math.floor(Math.random() * 60) + 10} دقائق`,
-    servings: Math.floor(Math.random() * 4) + 2,
-    calories: Math.floor(Math.random() * 400) + 100,
-    protein: Math.floor(Math.random() * 30) + 5,
-    carbs: Math.floor(Math.random() * 50) + 10,
-    fat: Math.floor(Math.random() * 20) + 5,
-    healthTags: [healthTagsOptions[Math.floor(Math.random() * healthTagsOptions.length)]],
-    difficulty: ["easy", "medium", "hard"][Math.floor(Math.random() * 3)] as any,
-    emoji: ["🍲", "🥘", "🍳", "🥗", "🍞"][Math.floor(Math.random() * 5)],
-  };
-});
+// دالة لتوليد وصفات إضافية ديناميكياً عند الحاجة (بدلاً من تحميلها جميعاً)
+function generateAdditionalRecipes(count: number): Recipe[] {
+  const recipes: Recipe[] = [];
+  const categories: Array<"main" | "side" | "soup" | "bread" | "dessert" | "breakfast"> = [
+    "main",
+    "side",
+    "soup",
+    "bread",
+    "dessert",
+    "breakfast",
+  ];
+  const cuisines: Array<"iraqi" | "arab" | "kurdish"> = ["iraqi", "arab", "kurdish"];
+  const difficulties: Array<"easy" | "medium" | "hard"> = ["easy", "medium", "hard"];
+  const emojis = ["🍲", "🥘", "🍳", "🥗", "🍞", "🍰"];
 
-export const ALL_RECIPES = [...RECIPES_DATABASE, ...ADDITIONAL_RECIPES];
+  for (let i = 0; i < count; i++) {
+    recipes.push({
+      id: `recipe_${24 + i}`,
+      name: `وصفة متنوعة ${i + 1}`,
+      nameEn: `Recipe ${i + 1}`,
+      category: categories[Math.floor(Math.random() * categories.length)],
+      cuisine: cuisines[Math.floor(Math.random() * cuisines.length)],
+      ingredients: ["مكون 1", "مكون 2", "مكون 3"],
+      instructions: ["خطوة 1", "خطوة 2", "خطوة 3"],
+      prepTime: `${Math.floor(Math.random() * 30) + 5} دقائق`,
+      cookTime: `${Math.floor(Math.random() * 60) + 10} دقائق`,
+      servings: Math.floor(Math.random() * 4) + 2,
+      calories: Math.floor(Math.random() * 400) + 100,
+      protein: Math.floor(Math.random() * 30) + 5,
+      carbs: Math.floor(Math.random() * 50) + 10,
+      fat: Math.floor(Math.random() * 20) + 5,
+      healthTags: ["all"],
+      difficulty: difficulties[Math.floor(Math.random() * difficulties.length)],
+      emoji: emojis[Math.floor(Math.random() * emojis.length)],
+    });
+  }
+
+  return recipes;
+}
+
+// تخزين مؤقت للوصفات الإضافية
+let additionalRecipesCache: Recipe[] | null = null;
+
+export function getAllRecipes(): Recipe[] {
+  if (!additionalRecipesCache) {
+    additionalRecipesCache = generateAdditionalRecipes(177);
+  }
+  return [...RECIPES_DATABASE, ...additionalRecipesCache];
+}
 
 export function getRecipesByHealthCondition(condition: HealthCondition): Recipe[] {
-  return ALL_RECIPES.filter(
+  return getAllRecipes().filter(
     (recipe) =>
       recipe.healthTags.includes(condition as any) ||
       recipe.healthTags.includes("all")
@@ -812,21 +659,22 @@ export function getRecipesByHealthCondition(condition: HealthCondition): Recipe[
 }
 
 export function getRecipesByCategory(category: string): Recipe[] {
-  return ALL_RECIPES.filter((recipe) => recipe.category === category);
+  return getAllRecipes().filter((recipe) => recipe.category === category);
 }
 
 export function getRecipesByCuisine(cuisine: string): Recipe[] {
-  return ALL_RECIPES.filter((recipe) => recipe.cuisine === cuisine);
+  return getAllRecipes().filter((recipe) => recipe.cuisine === cuisine);
 }
 
 export function searchRecipes(query: string): Recipe[] {
   const lowerQuery = query.toLowerCase();
-  return ALL_RECIPES.filter(
+  return getAllRecipes().filter(
     (recipe) =>
       recipe.name.toLowerCase().includes(lowerQuery) ||
       recipe.nameEn.toLowerCase().includes(lowerQuery) ||
-      recipe.ingredients.some((ing) =>
-        ing.toLowerCase().includes(lowerQuery)
-      )
+      recipe.ingredients.some((ing) => ing.toLowerCase().includes(lowerQuery))
   );
 }
+
+// للتوافقية مع الكود القديم
+export const ALL_RECIPES = getAllRecipes();
