@@ -31,6 +31,9 @@ module.exports = {
         '2xl': ['25px', '30px'],
         '3xl': ['28px', '33px'],
       },
+      fontFamily: {
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+      },
     },
   },
   plugins: [
