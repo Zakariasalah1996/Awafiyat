@@ -4,45 +4,63 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   I18nManager,
   Platform,
-  Alert,
+  Modal,
+  FlatList,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useUser } from "@/lib/user-context";
 import { RECIPES, getRecipesByMealType } from "@/lib/data/recipes";
+import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
+import { getFoodCategoryImage } from "@/lib/food-category-images";
 import * as Haptics from "expo-haptics";
 
 I18nManager.forceRTL(true);
 
 const DAYS = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
-const MEALS = [
-  { key: "breakfast" as const, label: "فطور", emoji: "🌅", defaultTime: "08:00 AM" },
-  { key: "lunch" as const, label: "غداء", emoji: "☀️", defaultTime: "01:00 PM" },
-  { key: "dinner" as const, label: "عشاء", emoji: "🌙", defaultTime: "08:00 PM" },
-];
 
-// دالة لتحويل الوقت من 24 ساعة إلى 12 ساعة
-const convertTo12Hour = (time24: string): string => {
-  const [hours, minutes] = time24.split(":");
-  let hour = parseInt(hours);
-  const ampm = hour >= 12 ? "PM" : "AM";
-  hour = hour % 12 || 12;
-  return `${String(hour).padStart(2, "0")}:${minutes} ${ampm}`;
+// تحويل الفترة إلى عربي
+const getPeriodLabel = (hour: number): string => {
+  if (hour >= 5 && hour < 12) return "صباحاً";
+  if (hour >= 12 && hour < 17) return "ظهراً";
+  return "مساءً";
 };
 
-// دالة لتحويل الوقت من 12 ساعة إلى 24 ساعة
-const convertTo24Hour = (time12: string): string => {
-  const [time, ampm] = time12.split(" ");
-  let [hours, minutes] = time.split(":");
-  let hour = parseInt(hours);
-  if (ampm === "AM" && hour === 12) hour = 0;
-  if (ampm === "PM" && hour !== 12) hour += 12;
-  return `${String(hour).padStart(2, "0")}:${minutes}`;
+// إنشاء قائمة الأوقات المتاحة
+const generateTimeOptions = (): { value: string; label: string; hour: number }[] => {
+  const options: { value: string; label: string; hour: number }[] = [];
+  for (let h = 5; h <= 23; h++) {
+    for (const m of [0, 30]) {
+      const hour12 = h % 12 || 12;
+      const minuteStr = String(m).padStart(2, "0");
+      const period = getPeriodLabel(h);
+      const value = `${String(h).padStart(2, "0")}:${minuteStr}`;
+      const label = `${hour12}:${minuteStr} ${period}`;
+      options.push({ value, label, hour: h });
+    }
+  }
+  return options;
+};
+
+const TIME_OPTIONS = generateTimeOptions();
+
+const MEALS = [
+  { key: "breakfast" as const, label: "فطور", emoji: "🌅", defaultTime: "08:00" },
+  { key: "lunch" as const, label: "غداء", emoji: "☀️", defaultTime: "13:00" },
+  { key: "dinner" as const, label: "عشاء", emoji: "🌙", defaultTime: "20:00" },
+];
+
+// تحويل الوقت المخزن إلى عرض عربي
+const formatTimeArabic = (time24: string): string => {
+  const [hours, minutes] = time24.split(":");
+  const h = parseInt(hours);
+  const hour12 = h % 12 || 12;
+  const period = getPeriodLabel(h);
+  return `${hour12}:${minutes} ${period}`;
 };
 
 interface MealPlan {
@@ -67,9 +85,9 @@ export default function MealPlannerScreen() {
 
   const [step, setStep] = useState<"times" | "plan" | "done">("times");
   const [mealTimes, setMealTimes] = useState<MealTimes>({
-    breakfast: "08:00 AM",
-    lunch: "01:00 PM",
-    dinner: "08:00 PM",
+    breakfast: "08:00",
+    lunch: "13:00",
+    dinner: "20:00",
   });
   const [selectedDay, setSelectedDay] = useState(0);
   const [mealPlan, setMealPlan] = useState<MealPlan>(() => {
@@ -83,6 +101,9 @@ export default function MealPlannerScreen() {
     day: string;
     meal: "breakfast" | "lunch" | "dinner";
   } | null>(null);
+
+  // حالة القائمة المنسدلة لاختيار الوقت
+  const [showTimePicker, setShowTimePicker] = useState<"breakfast" | "lunch" | "dinner" | null>(null);
 
   // الأيام المتاحة (يومين مجاني، أسبوع كامل للمشتركين)
   const availableDays = isSubscribed ? DAYS : DAYS.slice(0, 2);
@@ -160,6 +181,28 @@ export default function MealPlannerScreen() {
     setShowRecipePicker(null);
   };
 
+  const handleSelectTime = (mealKey: "breakfast" | "lunch" | "dinner", timeValue: string) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setMealTimes((prev) => ({ ...prev, [mealKey]: timeValue }));
+    setShowTimePicker(null);
+  };
+
+  // فلتر الأوقات المناسبة لكل وجبة
+  const getFilteredTimeOptions = (mealKey: "breakfast" | "lunch" | "dinner") => {
+    switch (mealKey) {
+      case "breakfast":
+        return TIME_OPTIONS.filter((t) => t.hour >= 5 && t.hour <= 11);
+      case "lunch":
+        return TIME_OPTIONS.filter((t) => t.hour >= 11 && t.hour <= 16);
+      case "dinner":
+        return TIME_OPTIONS.filter((t) => t.hour >= 17 && t.hour <= 23);
+      default:
+        return TIME_OPTIONS;
+    }
+  };
+
   // شاشة ضبط أوقات الوجبات
   if (step === "times") {
     return (
@@ -223,34 +266,36 @@ export default function MealPlannerScreen() {
                     متى تاكلين {meal.label === "فطور" ? "الفطور" : meal.label === "غداء" ? "الغداء" : "العشاء"}؟
                   </Text>
                 </View>
-                <View
-                  className="flex-row items-center justify-center gap-2"
-                  style={{ flexDirection: "row-reverse" }}
+
+                {/* زر اختيار الوقت - قائمة منسدلة */}
+                <TouchableOpacity
+                  onPress={() => setShowTimePicker(meal.key)}
+                  style={{
+                    backgroundColor: colors.background,
+                    borderWidth: 2,
+                    borderColor: colors.primary,
+                    borderRadius: 12,
+                    paddingVertical: 14,
+                    paddingHorizontal: 20,
+                    alignItems: "center",
+                    flexDirection: "row-reverse",
+                    justifyContent: "center",
+                    gap: 8,
+                  }}
+                  activeOpacity={0.7}
                 >
-                  <TextInput
-                    className="text-foreground text-center rounded-xl"
+                  <Text style={{ fontSize: 12, color: colors.primary }}>🕐</Text>
+                  <Text
                     style={{
-                      width: 120,
-                      height: 50,
-                      backgroundColor: colors.background,
                       fontSize: 22,
                       fontWeight: "700",
-                      borderWidth: 2,
-                      borderColor: colors.primary,
+                      color: colors.foreground,
                     }}
-                    value={mealTimes[meal.key]}
-                    onChangeText={(t) =>
-                      setMealTimes((prev) => ({ ...prev, [meal.key]: t }))
-                    }
-                    placeholder="00:00"
-                    placeholderTextColor={colors.muted}
-                    keyboardType="numbers-and-punctuation"
-                    maxLength={5}
-                  />
-                  <Text className="text-muted" style={{ fontSize: 13 }}>
-                    (مثال: {meal.defaultTime})
+                  >
+                    {formatTimeArabic(mealTimes[meal.key])}
                   </Text>
-                </View>
+                  <Text style={{ fontSize: 14, color: colors.muted }}>▼</Text>
+                </TouchableOpacity>
               </View>
             ))}
 
@@ -266,6 +311,98 @@ export default function MealPlannerScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+
+        {/* Time Picker Modal */}
+        <Modal
+          visible={showTimePicker !== null}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowTimePicker(null)}
+        >
+          <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" }}>
+            <View
+              style={{
+                backgroundColor: colors.background,
+                borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+                maxHeight: "60%",
+                paddingBottom: 30,
+              }}
+            >
+              {/* Modal Header */}
+              <View
+                style={{
+                  flexDirection: "row-reverse",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingHorizontal: 20,
+                  paddingVertical: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.border,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "700",
+                    color: colors.foreground,
+                    textAlign: "right",
+                  }}
+                >
+                  {showTimePicker === "breakfast"
+                    ? "🌅 وقت الفطور"
+                    : showTimePicker === "lunch"
+                    ? "☀️ وقت الغداء"
+                    : "🌙 وقت العشاء"}
+                </Text>
+                <TouchableOpacity onPress={() => setShowTimePicker(null)}>
+                  <Text style={{ fontSize: 16, color: colors.primary, fontWeight: "600" }}>
+                    إلغاء
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Time Options List */}
+              <FlatList
+                data={showTimePicker ? getFilteredTimeOptions(showTimePicker) : []}
+                keyExtractor={(item) => item.value}
+                renderItem={({ item }) => {
+                  const isSelected = showTimePicker && mealTimes[showTimePicker] === item.value;
+                  return (
+                    <TouchableOpacity
+                      onPress={() => showTimePicker && handleSelectTime(showTimePicker, item.value)}
+                      style={{
+                        paddingVertical: 14,
+                        paddingHorizontal: 24,
+                        flexDirection: "row-reverse",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        backgroundColor: isSelected ? colors.primary + "15" : "transparent",
+                        borderBottomWidth: 0.5,
+                        borderBottomColor: colors.border,
+                      }}
+                      activeOpacity={0.6}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 20,
+                          fontWeight: isSelected ? "700" : "500",
+                          color: isSelected ? colors.primary : colors.foreground,
+                        }}
+                      >
+                        {item.label}
+                      </Text>
+                      {isSelected && (
+                        <Text style={{ fontSize: 20, color: colors.primary }}>✓</Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                }}
+                showsVerticalScrollIndicator={false}
+              />
+            </View>
+          </View>
+        </Modal>
       </ScreenContainer>
     );
   }
@@ -328,36 +465,44 @@ export default function MealPlannerScreen() {
             <IconSymbol name="xmark.circle.fill" size={28} color={colors.muted} />
           </TouchableOpacity>
         </View>
-        <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-          {suggestedRecipes.map((recipe) => (
+        <FlatList
+          data={suggestedRecipes}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          renderItem={({ item: recipe }) => (
             <TouchableOpacity
-              key={recipe.id}
               onPress={() => selectRecipe(recipe.id, recipe.name)}
-              className="mx-5 mb-2 rounded-xl p-4 flex-row items-center"
+              className="mx-5 mb-2 rounded-xl overflow-hidden flex-row items-center"
               style={{
                 backgroundColor: colors.surface,
                 flexDirection: "row-reverse",
               }}
               activeOpacity={0.7}
             >
-              <Text style={{ fontSize: 28 }}>
-                {recipe.category === "hearty" ? "🍖" : recipe.category === "quick" ? "⚡" : "🥗"}
-              </Text>
-              <View className="flex-1 mx-3">
+              <View style={{ width: 60, height: 60 }}>
+                <Image
+                  source={recipe.image ? getFoodCategoryImage(recipe.image) : getFoodCategoryImage("iraqi-rice")}
+                  style={{ width: 60, height: 60 }}
+                  contentFit="cover"
+                />
+              </View>
+              <View className="flex-1 mx-3 py-3">
                 <Text
                   className="text-foreground font-bold"
                   style={{ fontSize: 15, textAlign: "right", writingDirection: "rtl" }}
                 >
                   {recipe.name}
                 </Text>
-                <Text className="text-muted" style={{ fontSize: 12 }}>
+                <Text className="text-muted" style={{ fontSize: 12, textAlign: "right" }}>
                   {recipe.calories} سعرة | {recipe.prepTime + recipe.cookTime} دقيقة
                 </Text>
               </View>
-              <IconSymbol name="plus.circle.fill" size={24} color={colors.primary} />
+              <View style={{ paddingLeft: 12 }}>
+                <IconSymbol name="plus.circle.fill" size={24} color={colors.primary} />
+              </View>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+          )}
+        />
       </ScreenContainer>
     );
   }
@@ -515,7 +660,7 @@ export default function MealPlannerScreen() {
                         {meal.label}
                       </Text>
                       <Text className="text-muted" style={{ fontSize: 12 }}>
-                        {mealTimes[meal.key]}
+                        {formatTimeArabic(mealTimes[meal.key])}
                       </Text>
                     </View>
                   </View>

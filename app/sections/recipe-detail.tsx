@@ -11,8 +11,10 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useUser } from "@/lib/user-context";
 import { getRecipeById } from "@/lib/data/recipes";
+import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
+import { getFoodCategoryImage } from "@/lib/food-category-images";
 import * as Haptics from "expo-haptics";
 
 I18nManager.forceRTL(true);
@@ -114,29 +116,25 @@ export default function RecipeDetailScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Recipe Image Placeholder */}
+        {/* Recipe Image */}
         <View
-          className="mx-5 rounded-2xl items-center justify-center"
-          style={{
-            height: 200,
-            backgroundColor: colors.secondary || colors.surface,
-          }}
+          className="mx-5 rounded-2xl overflow-hidden"
+          style={{ height: 220 }}
         >
-          <Text style={{ fontSize: 60 }}>
-            {recipe.category === "hearty"
-              ? "🍖"
-              : recipe.category === "quick"
-              ? "⚡"
-              : recipe.category === "healthy"
-              ? "🥗"
-              : "🍰"}
-          </Text>
-          <Text
-            className="text-foreground font-bold mt-2"
-            style={{ fontSize: 12, opacity: 0.6 }}
+          <Image
+            source={recipe.image ? getFoodCategoryImage(recipe.image) : getFoodCategoryImage("iraqi-rice")}
+            style={{ width: "100%", height: "100%" }}
+            contentFit="cover"
+            transition={300}
+          />
+          <View
+            className="absolute bottom-3 left-3 rounded-full px-3 py-1"
+            style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
           >
-            {recipe.isIraqi ? "🇮🇶 أكلة عراقية" : "🌍 أكلة عربية"}
-          </Text>
+            <Text style={{ fontSize: 12, color: "#fff", fontWeight: "600" }}>
+              {recipe.isIraqi ? "🇮🇶 أكلة عراقية" : "🌍 أكلة عربية"}
+            </Text>
+          </View>
         </View>
 
         {/* Title & Description */}

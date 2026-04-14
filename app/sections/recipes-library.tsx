@@ -21,13 +21,15 @@ import {
   getRecipesByHealth,
   searchRecipes,
 } from "@/lib/data/recipes";
+import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
+import { getFoodCategoryImage } from "@/lib/food-category-images";
 import * as Haptics from "expo-haptics";
 
 I18nManager.forceRTL(true);
 
-type FilterType = "all" | "quick" | "hearty" | "healthy" | "dessert";
+type FilterType = "all" | "quick" | "hearty" | "healthy" | "dessert" | "appetizer" | "snack";
 
 const FILTERS: { key: FilterType; label: string; emoji: string }[] = [
   { key: "all", label: "الكل", emoji: "📋" },
@@ -35,6 +37,8 @@ const FILTERS: { key: FilterType; label: string; emoji: string }[] = [
   { key: "hearty", label: "دسمة", emoji: "🍖" },
   { key: "healthy", label: "صحية", emoji: "🥗" },
   { key: "dessert", label: "حلويات", emoji: "🍰" },
+  { key: "appetizer", label: "مقبلات", emoji: "🥙" },
+  { key: "snack", label: "وجبات خفيفة", emoji: "🥜" },
 ];
 
 const MEAL_FILTERS: { key: MealType | "all"; label: string }[] = [
@@ -133,30 +137,27 @@ export default function RecipesLibraryScreen() {
           }}
           activeOpacity={0.7}
         >
-          {/* Recipe Header with emoji */}
+          {/* Recipe Image */}
           <View
-            className="p-4 items-center"
+            className="overflow-hidden"
             style={{
-              backgroundColor: colors.primary + "10",
-              height: 100,
-              justifyContent: "center",
+              height: 140,
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
             }}
           >
-            <Text style={{ fontSize: 40 }}>
-              {item.category === "hearty"
-                ? "🍖"
-                : item.category === "quick"
-                ? "⚡"
-                : item.category === "healthy"
-                ? "🥗"
-                : "🍰"}
-            </Text>
+            <Image
+              source={item.image ? getFoodCategoryImage(item.image) : getFoodCategoryImage("iraqi-rice")}
+              style={{ width: "100%", height: "100%" }}
+              contentFit="cover"
+              transition={200}
+            />
             {item.isIraqi && (
               <View
                 className="absolute top-2 left-2 rounded-full px-2 py-1"
-                style={{ backgroundColor: colors.primary + "30" }}
+                style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
               >
-                <Text style={{ fontSize: 10, color: colors.primary }}>
+                <Text style={{ fontSize: 10, color: "#fff" }}>
                   عراقية 🇮🇶
                 </Text>
               </View>
@@ -164,9 +165,9 @@ export default function RecipesLibraryScreen() {
             {isHealthMatch && profile.healthCondition !== "none" && (
               <View
                 className="absolute top-2 right-2 rounded-full px-2 py-1"
-                style={{ backgroundColor: colors.success + "30" }}
+                style={{ backgroundColor: "rgba(34,197,94,0.8)" }}
               >
-                <Text style={{ fontSize: 10, color: colors.success }}>
+                <Text style={{ fontSize: 10, color: "#fff" }}>
                   مناسبة لصحتك
                 </Text>
               </View>
