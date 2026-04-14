@@ -19,6 +19,7 @@ const MAPPING = {
   "diamond.fill": "diamond",
   "cart.fill": "shopping-cart",
   "heart.fill": "favorite",
+  "heart": "favorite-border",
   "bell.fill": "notifications",
   "gear": "settings",
   "fork.knife": "restaurant",

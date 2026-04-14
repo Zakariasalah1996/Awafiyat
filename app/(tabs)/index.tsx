@@ -96,6 +96,16 @@ export default function HomeScreen() {
       route: "/sections/health-tips",
       emoji: "🩺",
     },
+    {
+      id: "beverages",
+      title: "مشروبات وعصائر",
+      subtitle: "مشروبات ساخنة وباردة وعصائر طبيعية",
+      icon: "local-cafe",
+      iconColor: "#8B4513",
+      bgColor: "#FFF8F0",
+      route: "/sections/beverages",
+      emoji: "☕",
+    },
   ];
 
   return (

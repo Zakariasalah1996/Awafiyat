@@ -97,6 +97,8 @@ export default function RootLayout() {
               <Stack.Screen name="sections/shopping-list" options={{ gestureEnabled: true }} />
               <Stack.Screen name="sections/tried-recipes" options={{ gestureEnabled: true }} />
               <Stack.Screen name="sections/about" options={{ gestureEnabled: true }} />
+              <Stack.Screen name="sections/beverages" options={{ gestureEnabled: true }} />
+              <Stack.Screen name="sections/family-members" options={{ gestureEnabled: true }} />
             </Stack>
             <StatusBar style="auto" />
           </QueryClientProvider>

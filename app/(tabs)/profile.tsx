@@ -188,27 +188,26 @@ export default function ProfileScreen() {
         </View>
 
         {/* Family Members */}
-        <View className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border" style={{ borderColor: colors.border }}>
-          <View className="flex-row items-center justify-between mb-3">
-            <View className="flex-row items-center">
-              <Text className="text-lg ml-2">👨‍👩‍👧‍👦</Text>
+        <TouchableOpacity
+          onPress={() => router.push("/sections/family-members" as any)}
+          className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border flex-row items-center justify-between"
+          style={{ borderColor: colors.border }}
+          activeOpacity={0.7}
+        >
+          <View className="flex-row items-center">
+            <Text className="text-lg ml-2">👨‍👩‍👧‍👦</Text>
+            <View>
               <Text className="text-base font-bold text-foreground">أفراد العائلة</Text>
+              <Text className="text-sm text-muted">
+                {profile.familyMembers.length + 1} فرد (أنت + {profile.familyMembers.length})
+              </Text>
             </View>
-            <TouchableOpacity
-              onPress={() => {
-                const newMember = { id: Date.now().toString(), name: `فرد ${profile.familyMembers.length + 1}` };
-                updateProfile({ familyMembers: [...profile.familyMembers, newMember] });
-              }}
-              className="px-3 py-1 rounded-lg"
-              style={{ backgroundColor: `${colors.primary}15` }}
-            >
-              <Text className="text-sm font-medium" style={{ color: colors.primary }}>+ إضافة فرد</Text>
-            </TouchableOpacity>
           </View>
-          <Text className="text-sm text-muted">
-            عدد أفراد العائلة: {profile.familyMembers.length + 1} (أنت + {profile.familyMembers.length})
-          </Text>
-        </View>
+          <View className="flex-row items-center">
+            <Text className="text-sm font-medium" style={{ color: colors.primary }}>إدارة</Text>
+            <MaterialIcons name="chevron-left" size={20} color={colors.muted} />
+          </View>
+        </TouchableOpacity>
 
         {/* Notification Settings */}
         <View className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border" style={{ borderColor: colors.border }}>

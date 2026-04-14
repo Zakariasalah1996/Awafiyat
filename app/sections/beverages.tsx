@@ -7,6 +7,7 @@ import {
   I18nManager,
   FlatList,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useUser } from "@/lib/user-context";
@@ -252,6 +253,7 @@ const CATEGORIES = [
 ];
 
 export default function BeveragesScreen() {
+  const router = useRouter();
   const colors = useColors();
   const { profile } = useUser();
   const [selectedCategory, setSelectedCategory] = useState<string>("hot");
@@ -329,9 +331,29 @@ export default function BeveragesScreen() {
     <ScreenContainer edges={["top", "bottom", "left", "right"]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View className="px-5 pt-6 pb-4">
-          <Text className="text-3xl font-bold text-foreground mb-1">🥤 المشروبات</Text>
-          <Text className="text-base text-muted">مشروبات صحية وعراقية تقليدية</Text>
+        <View className="px-5 pt-4 pb-2 flex-row items-center justify-between" style={{ flexDirection: "row-reverse" }}>
+          <Text
+            className="text-foreground font-bold"
+            style={{ fontSize: 22, textAlign: "right" }}
+          >
+            ☕ مشروبات وعصائر
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: colors.surface,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <MaterialIcons name="chevron-right" size={20} color={colors.foreground} />
+          </TouchableOpacity>
+        </View>
+        <View className="px-5 pb-4">
+          <Text className="text-base text-muted" style={{ textAlign: "right" }}>مشروبات صحية وعراقية تقليدية</Text>
         </View>
 
         {/* Category Filter */}
