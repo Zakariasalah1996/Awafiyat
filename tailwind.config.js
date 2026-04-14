@@ -22,6 +22,15 @@ module.exports = {
   theme: {
     extend: {
       colors: tailwindColors,
+      fontSize: {
+        xs: ['13px', '16px'],
+        sm: ['15px', '18px'],
+        base: ['17px', '20px'],
+        lg: ['19px', '23px'],
+        xl: ['22px', '26px'],
+        '2xl': ['25px', '30px'],
+        '3xl': ['28px', '33px'],
+      },
     },
   },
   plugins: [

@@ -21,10 +21,29 @@ I18nManager.forceRTL(true);
 
 const DAYS = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
 const MEALS = [
-  { key: "breakfast" as const, label: "فطور", emoji: "🌅", defaultTime: "08:00" },
-  { key: "lunch" as const, label: "غداء", emoji: "☀️", defaultTime: "13:00" },
-  { key: "dinner" as const, label: "عشاء", emoji: "🌙", defaultTime: "20:00" },
+  { key: "breakfast" as const, label: "فطور", emoji: "🌅", defaultTime: "08:00 AM" },
+  { key: "lunch" as const, label: "غداء", emoji: "☀️", defaultTime: "01:00 PM" },
+  { key: "dinner" as const, label: "عشاء", emoji: "🌙", defaultTime: "08:00 PM" },
 ];
+
+// دالة لتحويل الوقت من 24 ساعة إلى 12 ساعة
+const convertTo12Hour = (time24: string): string => {
+  const [hours, minutes] = time24.split(":");
+  let hour = parseInt(hours);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+  return `${String(hour).padStart(2, "0")}:${minutes} ${ampm}`;
+};
+
+// دالة لتحويل الوقت من 12 ساعة إلى 24 ساعة
+const convertTo24Hour = (time12: string): string => {
+  const [time, ampm] = time12.split(" ");
+  let [hours, minutes] = time.split(":");
+  let hour = parseInt(hours);
+  if (ampm === "AM" && hour === 12) hour = 0;
+  if (ampm === "PM" && hour !== 12) hour += 12;
+  return `${String(hour).padStart(2, "0")}:${minutes}`;
+};
 
 interface MealPlan {
   [day: string]: {
@@ -48,9 +67,9 @@ export default function MealPlannerScreen() {
 
   const [step, setStep] = useState<"times" | "plan" | "done">("times");
   const [mealTimes, setMealTimes] = useState<MealTimes>({
-    breakfast: "08:00",
-    lunch: "13:00",
-    dinner: "20:00",
+    breakfast: "08:00 AM",
+    lunch: "01:00 PM",
+    dinner: "08:00 PM",
   });
   const [selectedDay, setSelectedDay] = useState(0);
   const [mealPlan, setMealPlan] = useState<MealPlan>(() => {

@@ -6,6 +6,8 @@ export type HealthCondition = "diabetes" | "hypertension" | "obesity" | "cholest
 export interface FamilyMember {
   id: string;
   name: string;
+  healthCondition?: HealthCondition;
+  age?: string;
 }
 
 export interface MealTimes {
