@@ -239,13 +239,13 @@ export default function MealPlannerScreen() {
               className="text-foreground font-bold mb-1"
               style={{ fontSize: 18, textAlign: "right", writingDirection: "rtl" }}
             >
-              متى تاكلين عادةً؟
+              ما أوقات وجباتك المعتادة؟
             </Text>
             <Text
               className="text-muted mb-6"
               style={{ fontSize: 14, textAlign: "right", writingDirection: "rtl" }}
             >
-              حددي أوقات وجباتج حتى ننبهج بالوقت المناسب
+              حدد أوقات وجباتك لنذكّرك في الوقت المناسب
             </Text>
 
             {MEALS.map((meal) => (
@@ -429,7 +429,7 @@ export default function MealPlannerScreen() {
             }}
           >
             سنبدأ من باجر بإذن الله{"\n"}
-            راح ننبهج بأوقات الوجبات{"\n"}
+            سنذكّرك بأوقات الوجبات{"\n"}
             ألف عافية مقدماً
           </Text>
           <TouchableOpacity

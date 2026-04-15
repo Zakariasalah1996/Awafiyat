@@ -417,7 +417,7 @@ export default function ShoppingListScreen() {
               className="text-muted mt-3"
               style={{ fontSize: 15, textAlign: "center" }}
             >
-              قائمة التسوق فارغة{"\n"}أضيفي المنتجات اللي تحتاجينها
+              قائمة التسوق فارغة{"\n"}أضف المنتجات التي تحتاجها
             </Text>
           </View>
         )}

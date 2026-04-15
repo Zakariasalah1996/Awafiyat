@@ -87,7 +87,7 @@ export default function FridgeScreen() {
       setAiResponse(typeof text === "string" ? text : "");
     } catch (error) {
       setAiResponse(
-        "عذراً عيني، صار خطأ بالاتصال. حاولي مرة ثانية بعد شوية! 😊"
+        "عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى بعد قليل! 😊"
       );
     } finally {
       setIsLoading(false);
@@ -387,7 +387,7 @@ export default function FridgeScreen() {
                         textAlign: "center",
                       }}
                     >
-                      خليج شوية عيني 😊
+                      يرجى الانتظار قليلاً 😊
                     </Text>
                   </View>
                 ) : (
@@ -456,7 +456,7 @@ export default function FridgeScreen() {
                         }}
                       >
                         <Text style={{ color: "#E65100", fontSize: 15, fontWeight: "600" }}>
-                          اقتراح ثاني 🔄
+                          اقتراح آخر 🔄
                         </Text>
                       </TouchableOpacity>
                       <TouchableOpacity

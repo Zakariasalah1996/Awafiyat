@@ -188,7 +188,7 @@ export default function TriedRecipesScreen() {
                 writingDirection: "rtl",
               }}
             >
-              لمن تجربين وصفة وتقيمينها{"\n"}راح تنحفظ هنا
+              عند تجربة وصفة وتقييمها{"\n"}ستُحفظ هنا
             </Text>
             <TouchableOpacity
               onPress={() => router.back()}

@@ -1,0 +1,17 @@
+Gulf Recipe Image URLs (Compressed WebP):
+
+kabsa: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp
+machboos: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-machboos-7VRhZnMz2V9qSQMXaa2M2V.webp
+harees: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-harees-3mKe26BKKX8F6fohBdbE3k.webp
+jareesh: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-jareesh-V9VSyMCZWP4MsNiPGSnfW8.webp
+thareed: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-thareed-V3BaCDpyQRSdEreokgu5M4.webp
+mandi: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mandi-Y2XYJcgNu6bjPMKXTd3J9b.webp
+luqaimat: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-luqaimat-DbywUVZwms8U4hX5795imk.webp
+saloona: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-saloona-JW3f2Jmbzywt6aY7D2MLqt.webp
+mutabbaq: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp
+margoog: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-margoog-D4kAQDiNkB8ABp45e5vtru.webp
+zurbian: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-zurbian-m7JdXTFbYVbp5ccU3ngDAL.webp
+balaleet: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-balaleet-EPhdyZ9PswzhXVLLg76LMt.webp
+karak_tea: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-karak-tea-HPajSEE6kYi2AQQFEeTpeR.webp
+arabic_coffee: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-arabic-coffee-Tg7Nx8pZoRNB4WZEpwZ3yj.webp
+kunafa: https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kunafa-iSxWk6DSaB4kifMcrN4AWb.webp

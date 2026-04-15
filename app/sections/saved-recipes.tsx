@@ -178,7 +178,7 @@ export default function SavedRecipesScreen() {
                 writingDirection: "rtl",
               }}
             >
-              لمن تعجبج وصفة، اضغطي على القلب{"\n"}حتى تنحفظ هنا
+              عندما تعجبك وصفة، اضغط على القلب{"\n"}لحفظها هنا
             </Text>
             <TouchableOpacity
               onPress={() => router.back()}

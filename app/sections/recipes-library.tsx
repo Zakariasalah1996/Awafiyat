@@ -16,6 +16,7 @@ import {
   type Recipe,
   type MealType,
   type RecipeCategory,
+  type CountryOrigin,
   getRecipesByMealType,
   getRecipesByCategory,
   getRecipesByHealth,
@@ -48,6 +49,44 @@ const MEAL_FILTERS: { key: MealType | "all"; label: string }[] = [
   { key: "dinner", label: "عشاء" },
 ];
 
+const COUNTRY_FILTERS: { key: CountryOrigin | "all"; label: string; flag: string }[] = [
+  { key: "all", label: "جميع الدول", flag: "🌍" },
+  { key: "iraqi", label: "عراقية", flag: "🇮🇶" },
+  { key: "saudi", label: "سعودية", flag: "🇸🇦" },
+  { key: "emirati", label: "إماراتية", flag: "🇦🇪" },
+  { key: "egyptian", label: "مصرية", flag: "🇪🇬" },
+  { key: "khaleeji", label: "خليجية", flag: "🏜️" },
+  { key: "kurdish", label: "كردية", flag: "🏔️" },
+  { key: "levantine", label: "شامية", flag: "🫒" },
+];
+
+const COUNTRY_TO_ORIGIN: Record<string, CountryOrigin> = {
+  iraq: "iraqi",
+  saudi: "saudi",
+  uae: "emirati",
+  egypt: "egyptian",
+};
+
+const ORIGIN_FLAG: Record<string, string> = {
+  iraqi: "🇮🇶",
+  saudi: "🇸🇦",
+  emirati: "🇦🇪",
+  egyptian: "🇪🇬",
+  khaleeji: "🏜️",
+  kurdish: "🏔️",
+  levantine: "🫒",
+};
+
+const ORIGIN_LABEL: Record<string, string> = {
+  iraqi: "عراقية",
+  saudi: "سعودية",
+  emirati: "إماراتية",
+  egyptian: "مصرية",
+  khaleeji: "خليجية",
+  kurdish: "كردية",
+  levantine: "شامية",
+};
+
 export default function RecipesLibraryScreen() {
   const router = useRouter();
   const colors = useColors();
@@ -60,7 +99,11 @@ export default function RecipesLibraryScreen() {
   const [activeMeal, setActiveMeal] = useState<MealType | "all">(
     (params.mealType as MealType) || "all"
   );
+  const [activeCountry, setActiveCountry] = useState<CountryOrigin | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // تحديد الدولة المفضلة من ملف المستخدم
+  const userOrigin = profile.country ? COUNTRY_TO_ORIGIN[profile.country] : undefined;
 
   const filteredRecipes = useMemo(() => {
     let result = [...RECIPES];
@@ -80,10 +123,29 @@ export default function RecipesLibraryScreen() {
       result = result.filter((r) => r.mealType.includes(activeMeal));
     }
 
+    // فلتر الدولة
+    if (activeCountry !== "all") {
+      result = result.filter((r) => r.origin === activeCountry);
+    }
+
+    // ترتيب: وصفات دولة المستخدم أولاً
+    if (userOrigin && activeCountry === "all") {
+      result.sort((a, b) => {
+        const aMatch = a.origin === userOrigin;
+        const bMatch = b.origin === userOrigin;
+        if (aMatch && !bMatch) return -1;
+        if (!aMatch && bMatch) return 1;
+        return 0;
+      });
+    }
+
     // فلتر الحالة الصحية
     if (profile.healthCondition !== "none") {
-      // نعرض الوصفات المناسبة للحالة الصحية أولاً
-      result.sort((a, b) => {
+      const healthSorted = [...result];
+      healthSorted.sort((a, b) => {
+        const aOrig = a.origin === userOrigin ? 0 : 1;
+        const bOrig = b.origin === userOrigin ? 0 : 1;
+        if (aOrig !== bOrig) return aOrig - bOrig;
         const aMatch =
           a.healthTags.includes(profile.healthCondition as any) ||
           a.healthTags.includes("all");
@@ -94,10 +156,11 @@ export default function RecipesLibraryScreen() {
         if (!aMatch && bMatch) return 1;
         return 0;
       });
+      return healthSorted;
     }
 
     return result;
-  }, [activeFilter, activeMeal, searchQuery, profile.healthCondition]);
+  }, [activeFilter, activeMeal, activeCountry, searchQuery, profile.healthCondition, userOrigin]);
 
   const handleToggleSave = useCallback(
     async (recipeId: string) => {
@@ -120,6 +183,8 @@ export default function RecipesLibraryScreen() {
       const isHealthMatch =
         item.healthTags.includes(profile.healthCondition as any) ||
         item.healthTags.includes("all");
+      const originFlag = item.origin ? ORIGIN_FLAG[item.origin] || "" : "";
+      const originLabel = item.origin ? ORIGIN_LABEL[item.origin] || "" : "";
 
       return (
         <TouchableOpacity
@@ -152,16 +217,17 @@ export default function RecipesLibraryScreen() {
               contentFit="cover"
               transition={200}
             />
-            {item.isIraqi && (
+            {/* Country badge */}
+            {originLabel ? (
               <View
                 className="absolute top-2 left-2 rounded-full px-2 py-1"
                 style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
               >
                 <Text style={{ fontSize: 10, color: "#fff" }}>
-                  عراقية 🇮🇶
+                  {originFlag} {originLabel}
                 </Text>
               </View>
-            )}
+            ) : null}
             {isHealthMatch && profile.healthCondition !== "none" && (
               <View
                 className="absolute top-2 right-2 rounded-full px-2 py-1"
@@ -284,12 +350,48 @@ export default function RecipesLibraryScreen() {
               writingDirection: "rtl",
               height: 44,
             }}
-            placeholder="ابحثي عن وصفة..."
+            placeholder="ابحث عن وصفة..."
             placeholderTextColor={colors.muted}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
         </View>
+      </View>
+
+      {/* Country Filters */}
+      <View className="mb-2">
+        <FlatList
+          horizontal
+          inverted
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20, gap: 6 }}
+          data={COUNTRY_FILTERS}
+          keyExtractor={(item) => item.key}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => setActiveCountry(item.key)}
+              className="rounded-full px-3 py-1.5 flex-row items-center gap-1"
+              style={{
+                backgroundColor:
+                  activeCountry === item.key ? colors.primary : colors.surface,
+                flexDirection: "row-reverse",
+                borderWidth: activeCountry === item.key ? 0 : 1,
+                borderColor: colors.border,
+              }}
+            >
+              <Text style={{ fontSize: 13 }}>{item.flag}</Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: activeCountry === item.key ? "700" : "500",
+                  color: activeCountry === item.key ? "#fff" : colors.foreground,
+                }}
+              >
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
       </View>
 
       {/* Category Filters */}
@@ -385,7 +487,7 @@ export default function RecipesLibraryScreen() {
               className="text-muted mt-3"
               style={{ fontSize: 16, textAlign: "center" }}
             >
-              ما لگينا وصفات بهالبحث{"\n"}جربي كلمات ثانية عيني
+              لم نجد وصفات بهذا البحث{"\n"}جرّب كلمات أخرى
             </Text>
           </View>
         }

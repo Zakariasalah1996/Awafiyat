@@ -1,9 +1,9 @@
-// قاعدة بيانات الوصفات العراقية والعربية
+// قاعدة بيانات الوصفات العراقية والعربية والخليجية
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 export type RecipeCategory = "quick" | "hearty" | "healthy" | "dessert" | "appetizer" | "snack";
 export type HealthTag = "diabetes" | "hypertension" | "obesity" | "cholesterol" | "all";
 export type Difficulty = "easy" | "medium" | "hard";
-
+export type CountryOrigin = "iraqi" | "saudi" | "uae" | "emirati" | "egyptian" | "kurdish" | "khaleeji" | "levantine" | "general";
 export interface Recipe {
   id: string;
   name: string;
@@ -24,6 +24,7 @@ export interface Recipe {
   steps: string[];
   tips: string;
   isIraqi: boolean;
+  origin?: CountryOrigin;
   image?: string;
 }
 
@@ -52,7 +53,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل أخضر مفروم", amount: "حزمة" },
       { name: "شبت مفروم", amount: "حزمة" },
       { name: "كركم", amount: "ملعقة صغيرة" },
-      { name: "زيت نباتي", amount: "2 ملعقة كبيرة" },
+      { name: "زيت نباتي - عراقي", amount: "2 ملعقة كبيرة" },
     ],
     steps: [
       "اعجني الطحين مع الماء والملح حتى تحصلين على عجينة طرية",
@@ -63,6 +64,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "عيني قدميه مع جبن أو قيمر وشاي استكان، ألف عافية!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "breakfast_2",
@@ -87,7 +89,7 @@ export const RECIPES: Recipe[] = [
       { name: "فلفل أخضر", amount: "1 حبة" },
       { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
       { name: "زيت نباتي", amount: "ملعقة كبيرة" },
-      { name: "كركم", amount: "ربع ملعقة صغيرة" },
+      { name: "كركم - عراقي", amount: "ربع ملعقة صغيرة" },
     ],
     steps: [
       "حمي الزيت بالمقلاة وقلي البصل حتى يصير ذهبي",
@@ -98,6 +100,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "قدميها مع صمون حار وشاي، أحلى فطور عراقي!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "breakfast_3",
@@ -119,7 +122,7 @@ export const RECIPES: Recipe[] = [
       { name: "قيمر (قشطة عراقية)", amount: "كوب" },
       { name: "عسل طبيعي", amount: "4 ملاعق كبيرة" },
       { name: "صمون عراقي", amount: "4 حبات" },
-      { name: "شاي استكان", amount: "للتقديم" },
+      { name: "شاي استكان - عراقي", amount: "للتقديم" },
     ],
     steps: [
       "سخني الصمون بالفرن أو التاوة حتى يصير حار",
@@ -130,6 +133,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "عيني هذا الفطور غني بالسعرات، إذا عندج سكري قللي العسل واستبدليه بتمرة وحدة",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "breakfast_4",
@@ -154,7 +158,7 @@ export const RECIPES: Recipe[] = [
       { name: "ثوم مهروس", amount: "فص" },
       { name: "كمون", amount: "نصف ملعقة صغيرة" },
       { name: "زيت زيتون", amount: "ملعقة كبيرة" },
-      { name: "بقدونس مفروم", amount: "للتزيين" },
+      { name: "بقدونس مفروم - عراقي", amount: "للتزيين" },
     ],
     steps: [
       "سخني الفول بقدر صغير على نار هادئة",
@@ -165,6 +169,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الفول غني بالألياف ويساعد على تنظيم السكر بالدم، أكلة مثالية لمرضى السكري",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "breakfast_5",
@@ -189,7 +194,7 @@ export const RECIPES: Recipe[] = [
       { name: "سكر", amount: "ملعقة كبيرة" },
       { name: "ملح", amount: "نصف ملعقة صغيرة" },
       { name: "قيمر للتقديم", amount: "كوب" },
-      { name: "دبس تمر للتقديم", amount: "نصف كوب" },
+      { name: "دبس تمر للتقديم - عراقي", amount: "نصف كوب" },
     ],
     steps: [
       "اعجني الطحين مع الماء والملح والسكر حتى تحصلين على عجينة ناعمة",
@@ -201,6 +206,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الكاهي من أشهر الحلويات العراقية للفطور، إذا تريدين تقللين السعرات استخدمي زيت زيتون بدل السمن",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
 
   // ============ وصفات الغداء - أكلات عراقية رئيسية ============
@@ -230,7 +236,7 @@ export const RECIPES: Recipe[] = [
       { name: "كركم", amount: "ملعقة صغيرة" },
       { name: "ملح", amount: "حسب الرغبة" },
       { name: "خبز عراقي (صمون أو تنور)", amount: "4 أرغفة" },
-      { name: "حمص مسلوق", amount: "كوب (اختياري)" },
+      { name: "حمص مسلوق - عراقي", amount: "كوب (اختياري)" },
     ],
     steps: [
       "اسلقي اللحم مع البصلة الكاملة وشيلي الريم (الرغوة)",
@@ -242,6 +248,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر التشريب الطيب هو النومي بصرة، يعطي نكهة عراقية ما تنلگاها بأي أكلة ثانية!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "lunch_2",
@@ -273,7 +280,7 @@ export const RECIPES: Recipe[] = [
       { name: "نعناع مجفف", amount: "ملعقة كبيرة" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
       { name: "زيت نباتي", amount: "ربع كوب" },
-      { name: "تمر هندي", amount: "2 ملعقة كبيرة" },
+      { name: "تمر هندي - عراقي", amount: "2 ملعقة كبيرة" },
     ],
     steps: [
       "اخلطي الرز مع اللحم المفروم ومعجون الطماطة والبهارات والنعناع والملح والزيت",
@@ -286,6 +293,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر الدولمة العراقية هو التمر هندي اللي يعطيها الطعم الحامض المميز، لا تنسينه عيني!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "lunch_3",
@@ -315,7 +323,7 @@ export const RECIPES: Recipe[] = [
       { name: "قرفة (عود)", amount: "1" },
       { name: "زعفران", amount: "ربع ملعقة صغيرة" },
       { name: "سمن", amount: "3 ملاعق كبيرة" },
-      { name: "مكسرات (لوز وزبيب)", amount: "للتزيين" },
+      { name: "مكسرات (لوز وزبيب) - عراقي", amount: "للتزيين" },
     ],
     steps: [
       "انقعي الرز بماء دافئ نصف ساعة ثم صفيه",
@@ -329,6 +337,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للبرياني الصحي: استخدمي صدر دجاج بدل اللحم وقللي السمن، وزيدي الخضروات",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "lunch_4",
@@ -354,7 +363,7 @@ export const RECIPES: Recipe[] = [
       { name: "صنوبر أو جوز", amount: "ربع كوب" },
       { name: "بهارات كبة", amount: "ملعقة كبيرة" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
-      { name: "زيت للقلي", amount: "كمية كافية" },
+      { name: "زيت للقلي - عراقي", amount: "كمية كافية" },
     ],
     steps: [
       "انقعي البرغل بماء ساخن 15 دقيقة ثم صفيه",
@@ -366,6 +375,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر الكبة المقرمشة هو إن العجينة تكون باردة والزيت يكون حار، ألف عافية!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "lunch_5",
@@ -393,7 +403,7 @@ export const RECIPES: Recipe[] = [
       { name: "نومي بصرة", amount: "2 حبة" },
       { name: "بهارات", amount: "ملعقة كبيرة" },
       { name: "كركم", amount: "نصف ملعقة صغيرة" },
-      { name: "زيت", amount: "2 ملعقة كبيرة" },
+      { name: "زيت - عراقي", amount: "2 ملعقة كبيرة" },
     ],
     steps: [
       "قلي البصل بالزيت حتى يذبل ثم أضيفي اللحم وحمريه",
@@ -404,6 +414,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "البامية غنية بالألياف وتساعد على تنظيم السكر بالدم، أكلة ممتازة لمرضى السكري!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "lunch_6",
@@ -429,7 +440,7 @@ export const RECIPES: Recipe[] = [
       { name: "بهارات", amount: "ملعقة صغيرة" },
       { name: "كركم", amount: "نصف ملعقة صغيرة" },
       { name: "ملح", amount: "حسب الرغبة" },
-      { name: "زيت", amount: "2 ملعقة كبيرة" },
+      { name: "زيت - عراقي", amount: "2 ملعقة كبيرة" },
     ],
     steps: [
       "انقعي الرز بماء دافئ 20 دقيقة",
@@ -441,6 +452,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "أكلة سريعة ولذيذة، قدميها مع سلطة خيار ولبن، عوافي!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "lunch_7",
@@ -466,7 +478,7 @@ export const RECIPES: Recipe[] = [
       { name: "كركم", amount: "ملعقة صغيرة" },
       { name: "ملح", amount: "حسب الرغبة" },
       { name: "تمر هندي", amount: "ملعقة كبيرة" },
-      { name: "زيت زيتون", amount: "2 ملعقة كبيرة" },
+      { name: "زيت زيتون - عراقي", amount: "2 ملعقة كبيرة" },
     ],
     steps: [
       "نظفي السمك وافتحيه من الظهر بشكل مسطح",
@@ -478,6 +490,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "السمك المسكوف من أصح الأكلات العراقية! غني بأوميغا 3 ومفيد للقلب والدماغ",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "lunch_8",
@@ -516,6 +529,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الجوز غني بالدهون الصحية المفيدة للقلب والدماغ، أكلة لذيذة ومغذية!",
     isIraqi: true,
+    origin: "general" as CountryOrigin,
   },
   {
     id: "lunch_9",
@@ -541,7 +555,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطة", amount: "ملعقة كبيرة" },
       { name: "بهارات", amount: "ملعقة صغيرة" },
       { name: "ملح", amount: "حسب الرغبة" },
-      { name: "زيت", amount: "ملعقة كبيرة" },
+      { name: "زيت - عراقي", amount: "ملعقة كبيرة" },
     ],
     steps: [
       "قلي البصل ثم حمري اللحم",
@@ -552,6 +566,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الفاصوليا الخضراء قليلة السعرات وغنية بالألياف، ممتازة لمن يريد ينقص وزنه!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "lunch_10",
@@ -578,7 +593,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطة", amount: "2 ملعقة كبيرة" },
       { name: "نومي بصرة", amount: "2 حبة" },
       { name: "بهارات", amount: "ملعقة كبيرة" },
-      { name: "كركم", amount: "نصف ملعقة صغيرة" },
+      { name: "كركم - عراقي", amount: "نصف ملعقة صغيرة" },
     ],
     steps: [
       "حضري عجينة الكبة: اخلطي البرغل مع اللحم المفروم والبهارات",
@@ -590,6 +605,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "هاي الأكلة تدفي بالشتاء وتشبع، ألف عافية على قلبكم!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
 
   // ============ وصفات العشاء / وصفات سريعة ============
@@ -617,7 +633,7 @@ export const RECIPES: Recipe[] = [
       { name: "كمون", amount: "ملعقة صغيرة" },
       { name: "كركم", amount: "نصف ملعقة صغيرة" },
       { name: "فلفل حار (اختياري)", amount: "حسب الرغبة" },
-      { name: "خبز للتقديم", amount: "4 أرغفة" },
+      { name: "خبز للتقديم - عراقي", amount: "4 أرغفة" },
     ],
     steps: [
       "قلي البصل والثوم بالزيت",
@@ -628,6 +644,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الحمص غني بالبروتين النباتي والألياف، بديل ممتاز عن اللحوم!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "dinner_2",
@@ -652,7 +669,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "1 حبة" },
       { name: "كركم", amount: "نصف ملعقة صغيرة" },
       { name: "سمن أو زيت", amount: "2 ملعقة كبيرة" },
-      { name: "ملح", amount: "حسب الرغبة" },
+      { name: "ملح - عراقي", amount: "حسب الرغبة" },
     ],
     steps: [
       "انقعي الرز 20 دقيقة وصفيه",
@@ -663,6 +680,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "أكلة خفيفة ومثالية للعشاء، قدميها مع لبن ومخلل!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "dinner_3",
@@ -689,7 +707,7 @@ export const RECIPES: Recipe[] = [
       { name: "كمون", amount: "ملعقة صغيرة" },
       { name: "كركم", amount: "نصف ملعقة صغيرة" },
       { name: "ليمون", amount: "1 حبة" },
-      { name: "ملح وفلفل", amount: "حسب الرغبة" },
+      { name: "ملح وفلفل - عراقي", amount: "حسب الرغبة" },
     ],
     steps: [
       "اغسلي العدس جيداً",
@@ -701,6 +719,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "العدس كنز غذائي! غني بالحديد والبروتين والألياف، مفيد لجميع الأمراض المزمنة",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "dinner_4",
@@ -737,6 +756,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "وجبة مثالية لجميع الحالات الصحية! غنية بالبروتين وقليلة الدهون المشبعة",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
   },
 
   // ============ وصفات صحية خاصة بالأمراض ============
@@ -775,6 +795,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "التبولة من أصح السلطات! قليلة السعرات وغنية بالفيتامينات، مناسبة لجميع الأمراض",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
   },
   {
     id: "healthy_2",
@@ -800,7 +821,7 @@ export const RECIPES: Recipe[] = [
       { name: "ليمون", amount: "1 حبة" },
       { name: "زيت زيتون", amount: "2 ملعقة كبيرة" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
-      { name: "زعتر", amount: "ملعقة صغيرة" },
+      { name: "زعتر - عراقي", amount: "ملعقة صغيرة" },
     ],
     steps: [
       "تبلي الدجاج بكل البهارات والثوم وعصير الليمون وزيت الزيتون",
@@ -811,6 +832,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "صدر الدجاج المشوي أفضل مصدر بروتين قليل الدهون، مثالي لمن يريد ينقص وزنه!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
 
   // ============ حلويات عراقية ============
@@ -840,7 +862,7 @@ export const RECIPES: Recipe[] = [
       { name: "قطر (شيرة): سكر", amount: "2 كوب" },
       { name: "ماء للقطر", amount: "كوب" },
       { name: "ليمون", amount: "عصير نصف حبة" },
-      { name: "ماء ورد", amount: "ملعقة كبيرة" },
+      { name: "ماء ورد - عراقي", amount: "ملعقة كبيرة" },
     ],
     steps: [
       "حضري القطر: اغلي السكر مع الماء والليمون حتى يتماسك، أضيفي ماء الورد",
@@ -852,6 +874,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لمرضى السكري: يمكن استبدال السكر بالعسل الطبيعي وتقليل الكمية",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "dessert_2",
@@ -885,6 +908,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "حلوى صحية طبيعية بدون سكر مضاف! التمر العراقي أحلى شي بالدنيا",
     isIraqi: true,
+    origin: "general" as CountryOrigin,
   },
   // ============ وصفات إضافية جديدة ============
   {
@@ -910,7 +934,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "1 حبة" },
       { name: "ثوم مهروس", amount: "3 فصوص" },
       { name: "طماطة", amount: "2 حبة" },
-      { name: "بهارات مشكلة", amount: "ملعقة صغيرة" },
+      { name: "بهارات مشكلة - عراقية", amount: "ملعقة صغيرة" },
     ],
     steps: [
       "قطعي الباذنجان شرائح واقليها بالزيت حتى تصير ذهبية",
@@ -921,6 +945,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "أكلة عراقية تقليدية مشبعة، ممكن تقللين الزيت بشوي الباذنجان بدل القلي!",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "new_2",
@@ -955,6 +980,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الحمص غني بالبروتين النباتي والألياف، مناسب لجميع الحالات الصحية!",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
   },
   {
     id: "new_3",
@@ -992,6 +1018,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الفتوش من أصح السلطات! قليلة السعرات وغنية بالفيتامينات",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
   },
   {
     id: "new_4",
@@ -1027,6 +1054,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "شوربة مثالية لجميع الأمراض المزمنة! قليلة السعرات وغنية بالفيتامينات",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
   },
   {
     id: "new_5",
@@ -1050,7 +1078,7 @@ export const RECIPES: Recipe[] = [
       { name: "ثوم مهروس", amount: "4 فصوص" },
       { name: "زيت زيتون", amount: "2 ملعقة" },
       { name: "أعشاب مشكلة", amount: "ملعقة كبيرة" },
-      { name: "ملح وفلفل", amount: "حسب الرغبة" },
+      { name: "ملح وفلفل - عراقي", amount: "حسب الرغبة" },
     ],
     steps: [
       "تبلي الدجاج بالليمون والثوم والأعشاب",
@@ -1061,6 +1089,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "أفضل مصدر بروتين قليل الدهون! مثالي لمن يريد ينقص وزنه",
     isIraqi: false,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "new_6",
@@ -1084,7 +1113,7 @@ export const RECIPES: Recipe[] = [
       { name: "ثوم", amount: "3 فصوص" },
       { name: "زيت زيتون", amount: "2 ملعقة" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
-      { name: "بقدونس", amount: "حزمة" },
+      { name: "بقدونس - عراقي", amount: "حزمة" },
     ],
     steps: [
       "نظفي السمك وتبليه بالملح والفلفل",
@@ -1095,6 +1124,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "السمك غني بأوميغا 3 المفيدة للقلب والدماغ!",
     isIraqi: false,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "new_7",
@@ -1117,7 +1147,7 @@ export const RECIPES: Recipe[] = [
       { name: "جبن عكاوي", amount: "250 غرام" },
       { name: "سمن", amount: "نصف كوب" },
       { name: "شيرة (قطر)", amount: "كوب" },
-      { name: "فستق مطحون", amount: "ربع كوب" },
+      { name: "فستق مطحون - عراقي", amount: "ربع كوب" },
     ],
     steps: [
       "افرمي الكنافة واخلطيها مع السمن المذاب",
@@ -1129,6 +1159,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الكنافة العراقية ألذ شي! قدميها ساخنة مع الشيرة الباردة",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "new_8",
@@ -1152,7 +1183,7 @@ export const RECIPES: Recipe[] = [
       { name: "سمن مذاب", amount: "كوب" },
       { name: "عسل", amount: "كوب" },
       { name: "قرفة", amount: "ملعقة صغيرة" },
-      { name: "ماء ورد", amount: "ملعقة كبيرة" },
+      { name: "ماء ورد - عراقي", amount: "ملعقة كبيرة" },
     ],
     steps: [
       "ضعي طبقات من العجينة مع دهن كل طبقة بالسمن",
@@ -1164,6 +1195,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "البقلاوة العراقية من أفخر الحلويات! اتركيها تبرد تماماً قبل التقديم",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
   {
     id: "new_9",
@@ -1196,6 +1228,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "حلوى صحية طبيعية! التمر العراقي مع الجوز أفضل سناك",
     isIraqi: true,
+    origin: "general" as CountryOrigin,
   },
   {
     id: "new_10",
@@ -1229,6 +1262,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الخبز الأسمر أفضل بكثير من الأبيض! غني بالألياف ومناسب لمرضى السكري",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
   },
   {
     id: "new_11",
@@ -1262,6 +1296,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الجرجير والرمان مزيج صحي رائع! غني بمضادات الأكسدة",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
   },
   {
     id: "new_12",
@@ -1284,7 +1319,7 @@ export const RECIPES: Recipe[] = [
       { name: "سمن", amount: "كوب" },
       { name: "تمر", amount: "2 كوب" },
       { name: "هيل", amount: "ملعقة صغيرة" },
-      { name: "ماء ورد", amount: "ملعقة كبيرة" },
+      { name: "ماء ورد - عراقي", amount: "ملعقة كبيرة" },
     ],
     steps: [
       "اخلطي الطحين مع السمن المذاب",
@@ -1295,6 +1330,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الكليجة رمز الأعياد العراقية! ألف عافية",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   },
 
   // ============ Batch 1 ============
@@ -1322,7 +1358,7 @@ export const RECIPES: Recipe[] = [
     { name: "زيتون أسود", amount: "ربع كوب شرائح" },
     { name: "زيت زيتون", amount: "2 ملعقة كبيرة" },
     { name: "نعناع يابس", amount: "نصف ملعقة صغيرة" },
-    { name: "فليفلة حمراء ناعمة", amount: "نصف ملعقة صغيرة" }
+    { name: "فليفلة حمراء ناعمة - كردية", amount: "نصف ملعقة صغيرة" }
   ],
   steps: [
     "نفرم الطماطم والفليفلة ناعم.",
@@ -1333,6 +1369,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "ممكن تستخدمون أي نوع جبن تحبوه مثل القشقوان أو جبن العرب.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "kurdish-dishes"
 },
 {
@@ -1369,6 +1406,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لزيادة القيمة الغذائية، يمكن إضافة قطع من دهن الخروف المقلي (الكزك) للشوربة.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "kurdish-dishes"
 },
 {
@@ -1406,6 +1444,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يؤكل هذا الخبز طازجاً مع الجبن الكردي (جبنة لور) والعسل أو المربى.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-bread"
 },
 {
@@ -1431,7 +1470,7 @@ export const RECIPES: Recipe[] = [
     { name: "طحين", amount: "3 ملاعق كبيرة" },
     { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
     { name: "كركم", amount: "1 ملعقة صغيرة" },
-    { name: "زيت للقلي", amount: "كمية كافية" }
+    { name: "زيت للقلي - كردي", amount: "كمية كافية" }
   ],
   steps: [
     "نخلط البقدونس والبصل الأخضر المفروم في وعاء كبير.",
@@ -1443,6 +1482,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على نكهة أغنى، يمكن إضافة أنواع أخرى من الأعشاب مثل الكزبرة أو الشبت.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "kurdish-dishes"
 },
 {
@@ -1483,6 +1523,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن حشو الكليجة بالجوز المفروم المخلوط مع السكر وماء الورد بدلاً من التمر.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-desserts-and-sweets"
 },
 {
@@ -1519,6 +1560,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على قوام كريمي أكثر، يمكن إضافة القليل من القشطة (القيمر) في المرحلة الأخيرة.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-desserts-and-sweets"
 },
 {
@@ -1558,6 +1600,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن استبدال الحصى بصينية خبز عادية، لكن الحصى يعطي الخبز ملمسه التقليدي المميز.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-bread"
 },
 {
@@ -1581,7 +1624,7 @@ export const RECIPES: Recipe[] = [
     { name: "خميرة فورية", amount: "1 ملعقة كبيرة" },
     { name: "سكر", amount: "1 ملعقة صغيرة" },
     { name: "ملح", amount: "1 ملعقة صغيرة" },
-    { name: "ماء دافئ", amount: "2 كوب" }
+    { name: "ماء دافئ - كردي", amount: "2 كوب" }
   ],
   steps: [
     "نذوب الخميرة والسكر في نصف كوب من الماء الدافئ ونتركها لتتفاعل.",
@@ -1593,6 +1636,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على خبز طري، يمكن تغطية الأرغفة الساخنة بقطعة قماش نظيفة فور خروجها من الفرن.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "iraqi-bread"
 },
 {
@@ -1625,6 +1669,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة الجوز المفروم إلى الخليط قبل سكبه في الصينية لإضافة نكهة وقوام مميز.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-desserts-and-sweets"
 },
 {
@@ -1651,7 +1696,7 @@ export const RECIPES: Recipe[] = [
     { name: "حليب دافئ", amount: "1 كوب" },
     { name: "زيت نباتي", amount: "ربع كوب" },
     { name: "جبن كردي (أو جبن فيتا)", amount: "2 كوب" },
-    { name: "بقدونس مفروم", amount: "نصف كوب" }
+    { name: "بقدونس مفروم - كردي", amount: "نصف كوب" }
   ],
   steps: [
     "نخلط مكونات العجينة الجافة، ثم نضيف السوائل ونعجن جيداً لنحصل على عجينة طرية.",
@@ -1663,6 +1708,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة حبة البركة إلى حشوة الجبن لمزيد من النكهة.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "kurdish-dishes"
 },
 {
@@ -1699,6 +1745,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة الفلفل الأخضر الحار المفروم مع البصل لإعطاء الطبق نكهة حارة.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "dairy-and-eggs"
 },
 {
@@ -1732,6 +1779,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "كلما طالت مدة تصفية اللبنة، كلما أصبح قوامها أكثر كثافة. يمكن تشكيلها على هيئة كرات صغيرة وحفظها في زيت الزيتون.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "dairy-and-eggs"
 },
 {
@@ -1754,7 +1802,7 @@ export const RECIPES: Recipe[] = [
     { name: "حليب غنم أو بقر طازج", amount: "4 لتر" },
     { name: "منفحة (Rennet)", amount: "نصف ملعقة صغيرة" },
     { name: "ملح خشن", amount: "نصف كوب" },
-    { name: "ماء", amount: "1 لتر (للمحلول الملحي)" }
+    { name: "ماء - كردي", amount: "1 لتر (للمحلول الملحي)" }
   ],
   steps: [
     "نسخن الحليب على نار هادئة حتى يصل إلى درجة حرارة 35-40 درجة مئوية (فاتر).",
@@ -1768,6 +1816,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة حبة البركة أو بذور المحلب إلى الجبن قبل كبسه لإعطائه نكهة مميزة.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "dairy-and-eggs"
 },
 {
@@ -1792,7 +1841,7 @@ export const RECIPES: Recipe[] = [
     { name: "ملح", amount: "نصف ملعقة صغيرة" },
     { name: "سمنة أو زبدة مذابة", amount: "1 كوب" },
     { name: "قيمر (قشطة) للتقديم", amount: "حسب الرغبة" },
-    { name: "شيرة (قطر) أو عسل للتقديم", amount: "حسب الرغبة" }
+    { name: "شيرة (قطر) أو عسل للتقديم - عراقي", amount: "حسب الرغبة" }
   ],
   steps: [
     "نعجن الطحين والماء والملح جيداً حتى نحصل على عجينة متماسكة، ونتركها ترتاح لمدة 30 دقيقة.",
@@ -1804,6 +1853,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "سر نجاح الكاهي يكمن في فرد العجينة بشكل رقيق جداً واستخدام كمية وفيرة من السمنة بين الطبقات.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "iraqi-breakfast"
 },
 {
@@ -1830,7 +1880,7 @@ export const RECIPES: Recipe[] = [
     { name: "بصل مفروم", amount: "2 حبة" },
     { name: "شبنت مفروم", amount: "1 باقة" },
     { name: "ثوم مهروس", amount: "5 فصوص" },
-    { name: "سمنة حيوانية", amount: "3 ملاعق كبيرة" }
+    { name: "سمنة حيوانية - كردية", amount: "3 ملاعق كبيرة" }
   ],
   steps: [
     "نخلط الأرز مع اللحم المفروم، البصل، الشبنت، نصف كمية الثوم، والبهارات.",
@@ -1842,6 +1892,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يفضل استخدام لحم الغنم مع العظم في قاع القدر لإضافة نكهة غنية للدولما.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "stuffed-dishes"
 },
 {
@@ -1877,6 +1928,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يجب أن تكون العجينة لينة جداً ليسهل فردها بشكل رقيق. يمكن استخدام وسادة خاصة لفرد العجين على الصاج.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-bread"
 },
 {
@@ -1902,7 +1954,7 @@ export const RECIPES: Recipe[] = [
     { name: "حمص مسلوق", amount: "1 كوب" },
     { name: "شبنت وبقدونس مفروم", amount: "1 كوب" },
     { name: "نعناع مجفف", amount: "1 ملعقة كبيرة" },
-    { name: "ملح", amount: "حسب الرغبة" }
+    { name: "ملح - كردي", amount: "حسب الرغبة" }
   ],
   steps: [
     "في قدر، نخفق اللبن جيداً حتى يصبح ناعماً.",
@@ -1914,6 +1966,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على قوام كريمي ومنع اللبن من التكتل، يمكن خفق بيضة أو ملعقة من النشا مع اللبن البارد قبل وضعه على النار.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "iraqi-soups-and-stews"
 },
 {
@@ -1939,7 +1992,7 @@ export const RECIPES: Recipe[] = [
     { name: "طماطم مفرومة ناعم", amount: "1 حبة" },
     { name: "طحين", amount: "2 ملعقة كبيرة" },
     { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
-    { name: "بابريكا", amount: "1 ملعقة صغيرة" }
+    { name: "بابريكا - عراقي", amount: "1 ملعقة صغيرة" }
   ],
   steps: [
     "في وعاء، نخلط اللحم المفروم مع البصل، البقدونس، والطماطم.",
@@ -1951,6 +2004,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة القليل من دبس الرمان إلى خليط اللحم لإضافة نكهة حامضة وحلوة مميزة. يمكن أيضاً شوي الشفتة بدلاً من قليها لوجبة صحية أكثر.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "grilled-meats-kebab-tikka-mashwi"
 },
 {
@@ -1973,7 +2027,7 @@ export const RECIPES: Recipe[] = [
     { name: "زبادي كردي (ماست) أو زبادي يوناني", amount: "1 كوب" },
     { name: "عسل جبلي", amount: "2 ملعقة كبيرة" },
     { name: "جوز (عين الجمل)", amount: "ربع كوب" },
-    { name: "رشة قرفة (اختياري)", amount: "رشة" }
+    { name: "رشة قرفة (اختياري) - كردي", amount: "رشة" }
   ],
   steps: [
     "نضع الزبادي في وعاء التقديم.",
@@ -1984,6 +2038,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على أفضل نكهة، استخدم زبادي كامل الدسم وعسل طبيعي ذو جودة عالية. يمكن تحميص الجوز قليلاً قبل إضافته لتعزيز نكهته.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "dairy-and-eggs"
 },
 {
@@ -2009,7 +2064,7 @@ export const RECIPES: Recipe[] = [
     { name: "بيض", amount: "3-4 بيضات" },
     { name: "زيت أو سمنة", amount: "2 ملعقة كبيرة" },
     { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
-    { name: "سبع بهارات", amount: "نصف ملعقة صغيرة" }
+    { name: "سبع بهارات - عراقي", amount: "نصف ملعقة صغيرة" }
   ],
   steps: [
     "نسخن الزيت أو السمنة في مقلاة ونقلي البصل حتى يصبح ذهبي اللون.",
@@ -2022,6 +2077,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لإضافة نكهة مميزة، يمكن إضافة القليل من البقدونس المفروم أو الكرفس مع الطماطم. يفضل استخدام مقلاة من الحديد الزهر (الكاست آيرون) لتحضير المخلمة.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "meat-stews-casseroles"
 },
 {
@@ -2046,7 +2102,7 @@ export const RECIPES: Recipe[] = [
     { name: "جبن موزاريلا مبشور", amount: "1 كوب" },
     { name: "بقدونس مفروم", amount: "نصف كوب" },
     { name: "بيضة (اختياري)", amount: "1 حبة" },
-    { name: "زيت للقلي", amount: "كمية وفيرة" }
+    { name: "زيت للقلي - عراقي", amount: "كمية وفيرة" }
   ],
   steps: [
     "نفتت جبن الفيتا ونخلطه مع جبن الموزاريلا والبقدونس المفروم.",
@@ -2059,6 +2115,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن خبز البورك في الفرن بدلاً من قليه للحصول على نسخة صحية أكثر. تدهن اللفائف بقليل من الزيت أو البيض وتخبز على درجة 200 مئوية حتى تصبح ذهبية.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "pickles-and-appetizers"
 },
 {
@@ -2085,7 +2142,7 @@ export const RECIPES: Recipe[] = [
     { name: "صودا الخبز (بيكنج صودا)", amount: "1 ملعقة صغيرة" },
     { name: "كمون مطحون", amount: "1 ملعقة كبيرة" },
     { name: "ملح", amount: "حسب الرغبة" },
-    { name: "زيت للقلي", amount: "كمية وفيرة" }
+    { name: "زيت للقلي - عراقي", amount: "كمية وفيرة" }
   ],
   steps: [
     "ننقع الحمص المجروش في الماء لمدة ليلة كاملة.",
@@ -2098,6 +2155,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "سر قرمشة الفلافل هو استخدام الحمص المجروش بدلاً من الحمص الكامل، وعدم فرم العجينة بشكل ناعم جداً. تضاف صودا الخبز قبل القلي مباشرة.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "legumes-and-beans"
 },
 {
@@ -2123,7 +2181,7 @@ export const RECIPES: Recipe[] = [
     { name: "دهن حر (سمن بلدي)", amount: "4 ملاعق كبيرة" },
     { name: "بصل مفروم (اختياري)", amount: "1 حبة" },
     { name: "ملح", amount: "حسب الرغبة" },
-    { name: "بطنج (نعناع بري) للزينة", amount: "قليل" }
+    { name: "بطنج (نعناع بري) للزينة - عراقية", amount: "قليل" }
   ],
   steps: [
     "نسلق الباقلاء في الماء مع الملح حتى تنضج تماماً.",
@@ -2137,6 +2195,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على طعم أغنى، استخدم الدهن الحر الأصلي. يمكن إضافة عصير الليمون أو الطرشي (المخلل) عند التقديم.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "legumes-and-beans"
 },
 {
@@ -2176,6 +2235,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن حشو الجرك بالتمر أو الحلقوم قبل تشكيله لإضافة المزيد من الحلاوة والنكهة.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-bread"
 },
 {
@@ -2201,7 +2261,7 @@ export const RECIPES: Recipe[] = [
     { name: "بصل مفروم (للحشوة)", amount: "2 حبة" },
     { name: "بقدونس مفروم (للحشوة)", amount: "نصف كوب" },
     { name: "ملح وبهارات مشكلة", amount: "حسب الرغبة" },
-    { name: "لوز أو صنوبر مقلي (للحشوة)", amount: "ربع كوب" }
+    { name: "لوز أو صنوبر مقلي (للحشوة) - كردي", amount: "ربع كوب" }
   ],
   steps: [
     "نخلط البرغل والجريش مع قليل من الملح وننقعهما في ماء دافئ لمدة ساعة.",
@@ -2213,6 +2273,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على عجينة متماسكة لا تتفتت أثناء السلق، يجب عجنها لفترة طويلة. يمكن إضافة قطعة صغيرة من لحم الهبرة الخالي من الدهن إلى العجينة لزيادة تماسكها.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "stuffed-dishes"
 },
   // ============ Batch 2 ============
@@ -2240,7 +2301,7 @@ export const RECIPES: Recipe[] = [
       { name: "كرفس مفروم", amount: "نصف كوب" },
       { name: "لوز مقلي", amount: "ربع كوب" },
       { name: "بهارات مشكلة", amount: "1 ملعقة كبيرة" },
-      { name: "ملح وفلفل", amount: "حسب الرغبة" }
+      { name: "ملح وفلفل - كردي", amount: "حسب الرغبة" }
     ],
     steps: [
       "نخلط الجريش والبرغل مع قليل من الماء والملح ونتركه لمدة نصف ساعة.",
@@ -2252,6 +2313,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على كبة مقرمشة، يمكن قليها بالزيت بعد سلقها.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "stuffed-dishes"
   },
   {
@@ -2278,7 +2340,7 @@ export const RECIPES: Recipe[] = [
       { name: "بازلاء", amount: "1 كوب" },
       { name: "بطاطا مقطعة مكعبات", amount: "2" },
       { name: "لوز وزبيب", amount: "للتزيين" },
-      { name: "بهارات برياني", amount: "2 ملعقة كبيرة" }
+      { name: "بهارات برياني - كردي", amount: "2 ملعقة كبيرة" }
     ],
     steps: [
       "نسلق اللحم مع البصل والبهارات حتى ينضج.",
@@ -2290,6 +2352,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام الدجاج بدلاً من اللحم.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-rice"
   },
   {
@@ -2316,7 +2379,7 @@ export const RECIPES: Recipe[] = [
       { name: "رز مصري", amount: "2 كوب" },
       { name: "لحم مفروم", amount: "300 غرام" },
       { name: "دبس رمان", amount: "نصف كوب" },
-      { name: "عصير ليمون", amount: "ربع كوب" }
+      { name: "عصير ليمون - كردي", amount: "ربع كوب" }
     ],
     steps: [
       "نحضر الحشوة بخلط الرز واللحم والخضروات المفرومة ودبس الرمان والليمون والبهارات.",
@@ -2328,6 +2391,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لزيادة الحموضة، يمكن إضافة شرائح الليمون أثناء الطبخ.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "stuffed-dishes"
   },
   {
@@ -2354,7 +2418,7 @@ export const RECIPES: Recipe[] = [
       { name: "قرنفل", amount: "5 حبات" },
       { name: "ورق غار", amount: "3" },
       { name: "زعفران", amount: "قليل" },
-      { name: "مكسرات للتزيين", amount: "حسب الرغبة" }
+      { name: "مكسرات للتزيين - كردي", amount: "حسب الرغبة" }
     ],
     steps: [
       "نسلق فخذ الغنم مع البصل والبهارات الصحيحة حتى ينضج تماماً.",
@@ -2366,6 +2430,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "ينصح بنقع اللحم بالبهارات ليلة كاملة قبل الطبخ.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi"
   },
   {
@@ -2392,7 +2457,7 @@ export const RECIPES: Recipe[] = [
       { name: "خبز تنور", amount: "للتقديم" },
       { name: "كركم", amount: "1 ملعقة صغيرة" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
-      { name: "زيت", amount: "ربع كوب" }
+      { name: "زيت - كردي", amount: "ربع كوب" }
     ],
     steps: [
       "نسلق اللحم مع البصل والكركم والنومي بصرة.",
@@ -2404,6 +2469,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة البطاطا والجزر إلى التشريب لزيادة القيمة الغذائية.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -2430,7 +2496,7 @@ export const RECIPES: Recipe[] = [
       { name: "سماق", amount: "1 ملعقة كبيرة" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
       { name: "زيت زيتون", amount: "2 ملعقة كبيرة" },
-      { name: "خبز", amount: "للتقديم" }
+      { name: "خبز - كردي", amount: "للتقديم" }
     ],
     steps: [
       "نخلط اللحم المفروم مع البصل والبقدونس والبهارات والملح والفلفل.",
@@ -2442,6 +2508,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على كباب طري، يجب أن يحتوي اللحم على نسبة من الدهن.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi"
   },
   {
@@ -2468,7 +2535,7 @@ export const RECIPES: Recipe[] = [
       { name: "فلفل أخضر", amount: "2" },
       { name: "معجون طماطم", amount: "2 ملعقة كبيرة" },
       { name: "دبس رمان", amount: "2 ملعقة كبيرة" },
-      { name: "بهارات مشكلة", amount: "1 ملعقة كبيرة" }
+      { name: "بهارات مشكلة - عراقية", amount: "1 ملعقة كبيرة" }
     ],
     steps: [
       "نقلي اللحم حتى يحمر.",
@@ -2480,6 +2547,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة أي نوع من الخضروات حسب الرغبة مثل الباذنجان أو الكوسا.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "meat-stews-casseroles"
   },
   {
@@ -2506,7 +2574,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيت", amount: "ربع كوب" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
       { name: "ماء", amount: "6 أكواب" },
-      { name: "ثوم مهروس", amount: "3 فصوص" }
+      { name: "ثوم مهروس - كردي", amount: "3 فصوص" }
     ],
     steps: [
       "ننقع الفاصوليا في الماء ليلة كاملة.",
@@ -2518,6 +2586,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "تقدم مع الرز الأبيض.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -2544,7 +2613,7 @@ export const RECIPES: Recipe[] = [
       { name: "زبيب", amount: "نصف كوب" },
       { name: "بهارات دجاج", amount: "1 ملعقة كبيرة" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
-      { name: "زيت", amount: "ربع كوب" }
+      { name: "زيت - كردي", amount: "ربع كوب" }
     ],
     steps: [
       "نسلق الدجاجة مع البصل والبهارات.",
@@ -2556,6 +2625,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن تحمير الدجاج في الفرن قبل تفتيته لإضافة نكهة مميزة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "chicken-dishes"
   },
   {
@@ -2582,7 +2652,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطم", amount: "1 ملعقة كبيرة" },
       { name: "فلفل أخضر", amount: "1" },
       { name: "ملح وبهارات", amount: "حسب الرغبة" },
-      { name: "زيت", amount: "3 ملاعق كبيرة" }
+      { name: "زيت - مصري", amount: "3 ملاعق كبيرة" }
     ],
     steps: [
       "نخلط اللحم مع البصل والبقدونس والبهارات ونشكلها على شكل أصابع.",
@@ -2594,6 +2664,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة البطاطا المقلية إلى الطبق.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "meat-stews-casseroles"
   },
   {
@@ -2620,7 +2691,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيت زيتون", amount: "2 ملعقة كبيرة" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
       { name: "عصير ليمون", amount: "للتقديم" },
-      { name: "ماء", amount: "5 أكواب" }
+      { name: "ماء - كردي", amount: "5 أكواب" }
     ],
     steps: [
       "نقلي البصل والجزر في زيت الزيتون حتى يذبلا.",
@@ -2632,6 +2703,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الكركم لإعطاء الشوربة لوناً أصفر جميلاً.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -2670,6 +2742,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام أي نوع من الخضروات الموسمية.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "meat-stews-casseroles"
   },
   {
@@ -2696,7 +2769,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطم", amount: "3 ملاعق كبيرة" },
       { name: "نومي بصرة مطحون", amount: "1 ملعقة كبيرة" },
       { name: "هيل مطحون", amount: "1 ملعقة صغيرة" },
-      { name: "زيت", amount: "نصف كوب" }
+      { name: "زيت - كردي", amount: "نصف كوب" }
     ],
     steps: [
       "نطبخ الرز حتى يصبح ليناً جداً (شلة).",
@@ -2708,6 +2781,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يجب طبخ الرز بكمية وافرة من الماء ليصبح كالعصيدة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-rice"
   },
   {
@@ -2734,7 +2808,7 @@ export const RECIPES: Recipe[] = [
       { name: "نعناع مجفف", amount: "1 ملعقة كبيرة" },
       { name: "شبت مفروم", amount: "نصف كوب" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
-      { name: "ثوم مهروس", amount: "3 فصوص" }
+      { name: "ثوم مهروس - مصري", amount: "3 فصوص" }
     ],
     steps: [
       "نخلط اللحم مع الرز والملح والفلفل ونشكلها كرات صغيرة.",
@@ -2746,6 +2820,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يجب الاستمرار في تحريك اللبن لمنعه من التكتل.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "kurdish-dishes"
   },
   {
@@ -2772,7 +2847,7 @@ export const RECIPES: Recipe[] = [
       { name: "فلفل أخضر", amount: "2" },
       { name: "ملح", amount: "حسب الرغبة" },
       { name: "زيت", amount: "ربع كوب" },
-      { name: "ماء ساخن", amount: "4 أكواب" }
+      { name: "ماء ساخن - كردي", amount: "4 أكواب" }
     ],
     steps: [
       "ننقع السماق في الماء الساخن لمدة ساعة ثم نصفيه.",
@@ -2784,6 +2859,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "تقدم مع الرز الأبيض أو البرغل.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -2822,6 +2898,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الحمص المسلوق لزيادة البروتين والألياف.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "kurdish-dishes"
   },
   {
@@ -2848,7 +2925,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون فليفلة", amount: "1 ملعقة كبيرة" },
       { name: "زعتر مجفف", amount: "1 ملعقة كبيرة" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
-      { name: "زيت زيتون", amount: "ربع كوب" }
+      { name: "زيت زيتون - كردي", amount: "ربع كوب" }
     ],
     steps: [
       "نخلط جميع مكونات التتبيلة مع الدجاج.",
@@ -2860,6 +2937,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "كلما طالت مدة نقع الدجاج في التتبيلة، كان طعمه أفضل.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi"
   },
   {
@@ -2886,7 +2964,7 @@ export const RECIPES: Recipe[] = [
       { name: "نعناع مجفف", amount: "1 ملعقة كبيرة" },
       { name: "ثوم مهروس", amount: "3 فصوص" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
-      { name: "زيت", amount: "3 ملاعق كبيرة" }
+      { name: "زيت - عراقي", amount: "3 ملاعق كبيرة" }
     ],
     steps: [
       "نحفر الكوسا ونحتفظ باللب.",
@@ -2898,6 +2976,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الصنوبر المقلي إلى الحشوة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "vegetable-dishes"
   },
   {
@@ -2924,7 +3003,7 @@ export const RECIPES: Recipe[] = [
       { name: "دبس رمان", amount: "ربع كوب" },
       { name: "زيت زيتون", amount: "نصف كوب" },
       { name: "كمون، فلفل أحمر حلبي", amount: "حسب الرغبة" },
-      { name: "بقدونس مفروم", amount: "للتزيين" }
+      { name: "بقدونس مفروم - مصري", amount: "للتزيين" }
     ],
     steps: [
       "نضع البرغل في وعاء كبير ونضيف البصل المبشور والمعاجين والبهارات.",
@@ -2936,6 +3015,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يفضل ارتداء قفازات أثناء العجن ورش اليدين بالماء البارد من وقت لآخر.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "pickles-and-appetizers"
   },
   {
@@ -2974,6 +3054,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة القليل من الكريمة في النهاية لطبق أغنى.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "chicken-dishes"
   },
   {
@@ -3000,7 +3081,7 @@ export const RECIPES: Recipe[] = [
       { name: "شبت مفروم", amount: "نصف كوب" },
       { name: "نومي بصرة", amount: "1" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
-      { name: "زيت", amount: "ربع كوب" }
+      { name: "زيت - عراقي", amount: "ربع كوب" }
     ],
     steps: [
       "نقلي البصل في الزيت ثم نضيف اللحم ونقلبه.",
@@ -3012,6 +3093,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "إضافة الشبت يعطي نكهة مميزة لمرقة السبانخ.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -3038,7 +3120,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل", amount: "1" },
       { name: "بهارات مقلوبة", amount: "1 ملعقة كبيرة" },
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
-      { name: "زيت للقلي", amount: "كمية وافرة" }
+      { name: "زيت للقلي - كردي", amount: "كمية وافرة" }
     ],
     steps: [
       "نسلق الدجاج مع البصل والبهارات.",
@@ -3050,6 +3132,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة القرنبيط (الزهرة) المقلي إلى المقلوبة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "chicken-dishes"
   },
   {
@@ -3088,6 +3171,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "تقدم مع الخبز المحمص والليمون.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "legumes-and-beans"
   },
   {
@@ -3114,7 +3198,7 @@ export const RECIPES: Recipe[] = [
       { name: "ملح وفلفل", amount: "حسب الرغبة" },
       { name: "زيت زيتون", amount: "ربع كوب" },
       { name: "طماطم كرزية", amount: "للشوي" },
-      { name: "فلفل أخضر", amount: "للشوي" }
+      { name: "فلفل أخضر - عراقي", amount: "للشوي" }
     ],
     steps: [
       "نخلط اللحم مع البصل والبهارات.",
@@ -3126,6 +3210,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن تقديم هذا الكباب مع صلصة اللبن بالثوم.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi"
   },
   {
@@ -3164,6 +3249,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "خبز الشيش برك في الفرن قبل طبخه باللبن يمنعه من الذوبان.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "kurdish-dishes"
   },
   // ============ Batch 3 ============
@@ -3200,6 +3286,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على كاهي هش ومقرمش، يجب فرد العجينة بشكل رقيق جداً.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-breakfast"
   }
 ,
@@ -3236,6 +3323,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة القليل من صودا الخبز عند سلق الحمص لتسريع عملية النضج.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "legumes-and-beans"
   }
 ,
@@ -3261,7 +3349,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل", amount: "2" },
       { name: "ثوم", amount: "رأس كامل" },
       { name: "نومي بصرة", amount: "2" },
-      { name: "ملح وفلفل أسود", amount: "حسب الرغبة" }
+      { name: "ملح وفلفل أسود - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "تنظف الباجة جيداً وتغسل بالماء والملح والخل.",
@@ -3272,6 +3360,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن طبخ الباجة في قدر الضغط لتقليل وقت الطهي إلى ساعتين تقريباً.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "meat-stews-casseroles"
   }
 ,
@@ -3297,7 +3386,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصلة كبيرة", amount: "1" },
       { name: "حمص مسلوق", amount: "كوب" },
       { name: "نومي بصرة", amount: "2" },
-      { name: "ملح وفلفل وكركم", amount: "حسب الرغبة" }
+      { name: "ملح وفلفل وكركم - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "في قدر على النار، نحمّص البصل قليلاً ثم نضيف قطع اللحم ونقلبها حتى يتغير لونها.",
@@ -3308,6 +3397,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على نكهة أغنى، يمكن تحمير قطع اللحم بالزيت قبل سلقها.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   }
 ,
@@ -3332,7 +3422,7 @@ export const RECIPES: Recipe[] = [
       { name: "طحين أبيض", amount: "2 كوب" },
       { name: "خميرة فورية", amount: "ملعقة كبيرة" },
       { name: "ملح", amount: "ملعقة صغيرة" },
-      { name: "ماء دافئ", amount: "كوبان ونصف" }
+      { name: "ماء دافئ - عراقي", amount: "كوبان ونصف" }
     ],
     steps: [
       "في وعاء كبير، نخلط الطحين الأسمر والأبيض والملح والخميرة.",
@@ -3343,6 +3433,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة القليل من حبة البركة أو السمسم على وجه الخبز قبل خبزه لإضافة نكهة مميزة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-bread"
   }
 ,
@@ -3368,7 +3459,7 @@ export const RECIPES: Recipe[] = [
       { name: "طماطم مفرومة", amount: "نصف حبة" },
       { name: "بصل مفروم", amount: "ربع حبة" },
       { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
-      { name: "زبدة أو زيت", amount: "ملعقة كبيرة" }
+      { name: "زبدة أو زيت - عراقي", amount: "ملعقة كبيرة" }
     ],
     steps: [
       "في مقلاة، نذوب الزبدة ونقلي البصل حتى يذبل.",
@@ -3379,6 +3470,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة قطع من البسطرمة أو اللحم المفروم مع البيض لزيادة القيمة الغذائية.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-bread"
   }
 ,
@@ -3415,6 +3507,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة أنواع أخرى من الخضروات مثل الفلفل الملون أو الكراث المفروم لإغناء النكهة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "dairy-and-eggs"
   }
 ,
@@ -3453,6 +3546,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على فلافل هشة من الداخل، لا تبالغ في فرم المكونات واترك قوامها خشناً قليلاً.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "legumes-and-beans"
   }
 ,
@@ -3489,6 +3583,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على أفضل نكهة، استخدم حمصاً طازجاً مسلوقاً في المنزل بدلاً من المعلب.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "legumes-and-beans"
   }
 ,
@@ -3514,7 +3609,7 @@ export const RECIPES: Recipe[] = [
       { name: "عصير ليمون", amount: "ربع كوب" },
       { name: "ثوم مهروس", amount: "فصان" },
       { name: "كمون", amount: "ملعقة صغيرة" },
-      { name: "زيت زيتون وبقدونس للزينة", amount: "حسب الرغبة" }
+      { name: "زيت زيتون وبقدونس للزينة - عراقية", amount: "حسب الرغبة" }
     ],
     steps: [
       "نصفي الفول من الماء ونضعه في قدر على النار ليسخن قليلاً.",
@@ -3525,6 +3620,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لتقديم طبق أغنى، يمكن إضافة اللبن الزبادي إلى خليط الطحينة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "legumes-and-beans"
   }
 ,
@@ -3548,7 +3644,7 @@ export const RECIPES: Recipe[] = [
       { name: "بيض", amount: "4" },
       { name: "ماء", amount: "كمية كافية لغمر البيض" },
       { name: "كركم مطحون", amount: "ملعقة صغيرة" },
-      { name: "ملح", amount: "نصف ملعقة صغيرة" }
+      { name: "ملح - عراقي", amount: "نصف ملعقة صغيرة" }
     ],
     steps: [
       "نضع البيض في قدر صغير.",
@@ -3559,6 +3655,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يقدم هذا البيض عادة مع الصمون الحار والخضروات الطازجة كجزء من فطور متكامل.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "dairy-and-eggs"
   }
 ,
@@ -3582,7 +3679,7 @@ export const RECIPES: Recipe[] = [
       { name: "طحين أبيض", amount: "3 أكواب" },
       { name: "ماء", amount: "كوب ونصف" },
       { name: "ملح", amount: "ملعقة صغيرة" },
-      { name: "زيت", amount: "ملعقتان كبيرتان" }
+      { name: "زيت - عراقي", amount: "ملعقتان كبيرتان" }
     ],
     steps: [
       "في وعاء، نخلط الطحين والملح.",
@@ -3594,6 +3691,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يحتاج خبز الرقاق إلى ممارسة لإتقان فرده على الصاج، يمكن البدء بكمية صغيرة من العجين.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-bread"
   }
 ,
@@ -3632,6 +3730,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على لحم بعجين مقرمش، يجب فرد العجينة بشكل رقيق جداً وخبزها على حرارة عالية.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "stuffed-dishes"
   }
 ,
@@ -3670,6 +3769,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "عصر حشوة السبانخ جيداً خطوة مهمة لمنع العجينة من أن تصبح رطبة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "vegetable-dishes"
   }
 ,
@@ -3696,7 +3796,7 @@ export const RECIPES: Recipe[] = [
       { name: "بيض", amount: "3" },
       { name: "زيت أو سمنة", amount: "ملعقتان كبيرتان" },
       { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
-      { name: "بقدونس مفروم للزينة", amount: "اختياري" }
+      { name: "بقدونس مفروم للزينة - عراقية", amount: "اختياري" }
     ],
     steps: [
       "في مقلاة واسعة، يسخن الزيت ويقلى البصل حتى يذبل.",
@@ -3708,6 +3808,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة مكعبات صغيرة من البطاطا المقلية إلى المخلمة لجعلها وجبة أغنى.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "dairy-and-eggs"
   }
 ,
@@ -3745,6 +3846,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لإضافة نكهة حارة، يمكن إضافة القليل من الفلفل الأخضر الحار المفروم مع البصل.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "dairy-and-eggs"
   }
 ,
@@ -4101,7 +4203,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطم", amount: "3 ملاعق كبيرة" },
       { name: "عصير طماطم", amount: "1 كوب" },
       { name: "زيت نباتي", amount: "2 ملعقة كبيرة" },
-      { name: "ملح وفلفل أسود", amount: "حسب الرغبة" }
+      { name: "ملح وفلفل أسود - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "بجدر على النار، نحمس البصل بالزيت لحد ما يذبل ويشقر لونه.",
@@ -4113,6 +4215,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "حمس المعجون زين بالزيت ينطي لون وطعم أطيب للمرقة، ولا تضيفون الملح بالبداية حتى اللحم يستوي بسرعة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -4137,7 +4240,7 @@ export const RECIPES: Recipe[] = [
       { name: "شبنت طازج مفروم", amount: "1 باقة كبيرة" },
       { name: "بصل مفروم", amount: "1 حبة" },
       { name: "زيت أو دهن حر", amount: "3 ملاعق كبيرة" },
-      { name: "ملح", amount: "حسب الرغبة" }
+      { name: "ملح - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "نسلق الباقلاء نص سلقة بماي وملح ونصفيها.",
@@ -4149,6 +4252,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "استعملوا دهن حر (سمن حيواني) بدل الزيت العادي حتى تحصلون على النكهة العراقية الأصلية.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-rice"
   },
   {
@@ -4174,7 +4278,7 @@ export const RECIPES: Recipe[] = [
       { name: "بهارات قوزي (هيل، دارسين، قرنفل، نومي بصرة)", amount: "2 ملعقة كبيرة" },
       { name: "لوز وكشمش (زبيب) مقلي للتزيين", amount: "نصف كوب" },
       { name: "شعرية محمسة", amount: "1 كوب" },
-      { name: "ملح وزيت", amount: "حسب الحاجة" }
+      { name: "ملح وزيت - عراقي", amount: "حسب الحاجة" }
     ],
     steps: [
       "نغسل اللحم زين ونخليه بجدر ضغط وية البصل والبهارات الصحيحة ونحمسه شوية، بعدين نضيف ماي حار ونسلقه لحد ما يستوي تماماً.",
@@ -4186,6 +4290,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر القوزي الناجح هو سلق اللحم على نار هادية لفترة طويلة حتى يصير ترف ويفصل عن العظم.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "meat-stews-casseroles"
   },
   {
@@ -4211,7 +4316,7 @@ export const RECIPES: Recipe[] = [
       { name: "لحم مفروم (للحشوة)", amount: "500 غرام" },
       { name: "بصل مفروم ناعم", amount: "2 حبة" },
       { name: "كرفس مفروم", amount: "نصف باقة" },
-      { name: "بهارات كبة وفلفل أسود", amount: "1 ملعقة صغيرة" }
+      { name: "بهارات كبة وفلفل أسود - عراقي", amount: "1 ملعقة صغيرة" }
     ],
     steps: [
       "نسلق التمن وية الكركم والملح وماي زايد لحد ما يعجن، وبعدين نعجنه زين وية البطاطا المسلوقة لحد ما تصير عجينة متماسكة.",
@@ -4223,6 +4328,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "بللوا إيديكم بشوية ماي وانتو تشكلون الكبة حتى لا تلزق العجينة وتطلع مرتبة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "stuffed-dishes"
   },
   {
@@ -4248,7 +4354,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مقطع شرائح", amount: "2 حبة" },
       { name: "لحم مفروم", amount: "300 غرام" },
       { name: "معجون طماطم", amount: "3 ملاعق كبيرة" },
-      { name: "دبس الرمان", amount: "2 ملعقة كبيرة" }
+      { name: "دبس الرمان - عراقي", amount: "2 ملعقة كبيرة" }
     ],
     steps: [
       "نحمس اللحم المفروم وية شوية بصل مفروم وملح وفلفل أسود لحد ما يستوي.",
@@ -4260,6 +4366,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "حتى الباذنجان ما يشرب زيت هواية بالقلي، نكعوه بماي وملح لمدة نص ساعة قبل القلي ونشفوه زين.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "vegetable-dishes"
   },
   {
@@ -4285,7 +4392,7 @@ export const RECIPES: Recipe[] = [
       { name: "نومي بصرة (ليمون مجفف)", amount: "2 حبة" },
       { name: "كركم وبهارات دجاج", amount: "1 ملعقة كبيرة" },
       { name: "خبز عراقي (تنور)", amount: "3 أرغفة" },
-      { name: "ملح وزيت", amount: "حسب الحاجة" }
+      { name: "ملح وزيت - عراقي", amount: "حسب الحاجة" }
     ],
     steps: [
       "بجدر على النار، نحمس البصل بالزيت لحد ما يذبل، ونضيف قطع الدجاج ونحمسها زين لحد ما يتغير لونها.",
@@ -4297,6 +4404,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "ثقبوا النومي بصرة بالسكينة قبل ما تضيفوها للتشريب حتى تطلع حموضتها الطيبة بالمرق.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "chicken-dishes"
   },
   {
@@ -4322,7 +4430,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "1 حبة كبيرة" },
       { name: "نومي بصرة", amount: "3 حبات" },
       { name: "زيت", amount: "نصف كوب" },
-      { name: "ملح وكركم", amount: "حسب الرغبة" }
+      { name: "ملح وكركم - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "نحمس الخضار (السبزي) المفرومة بكمية زينة من الزيت على نار هادية لفترة طويلة لحد ما يتغير لونها وتصير غامقة (هذي أهم خطوة).",
@@ -4334,6 +4442,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر نجاح مرقة السبزي هو حمس الخضار زين بالزيت لحد ما تطلع ريحتها ويتغير لونها بدون ما تحترق.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -4358,7 +4467,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم ناعم", amount: "1 حبة صغيرة" },
       { name: "زيت زيتون أو دهن", amount: "2 ملعقة كبيرة" },
       { name: "ماي حار أو مرق دجاج", amount: "4 أكواب" },
-      { name: "ملح", amount: "حسب الرغبة" }
+      { name: "ملح - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "بجدر على النار، نحمس البصل بالزيت لحد ما يذبل.",
@@ -4370,6 +4479,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "البرغل الخشن أحسن للطبخ من الناعم، وما يحتاج تنكيع هواية، بس غسلوه زين.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-rice"
   },
   {
@@ -4393,7 +4503,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مبشور ومعصور من الماي", amount: "1 حبة كبيرة" },
       { name: "ملح", amount: "1 ملعقة كبيرة" },
       { name: "سماق (للتقديم)", amount: "حسب الرغبة" },
-      { name: "طماطم وبصل للشوي", amount: "حسب الرغبة" }
+      { name: "طماطم وبصل للشوي - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "نعجن اللحم المفروم وية البصل المعصور والملح زين بالإيد لمدة 5-10 دقايق لحد ما تتجانس العجينة وتصير تلزق.",
@@ -4405,6 +4515,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر الكباب العراقي إنه ما ينحطله أي بهارات غير الملح، ولازم اللحم يكون بيه نسبة دهن (لية) حتى يطلع ترف.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi"
   },
   {
@@ -4430,7 +4541,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطم", amount: "1 ملعقة صغيرة" },
       { name: "ثوم مهروس", amount: "3 فصوص" },
       { name: "زيت زيتون", amount: "2 ملعقة كبيرة" },
-      { name: "ملح، فلفل أسود، بابريكا", amount: "حسب الرغبة" }
+      { name: "ملح، فلفل أسود، بابريكا - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "بكاسة كبيرة، نخلط اللبن، عصير الليمون، معجون الطماطم، الثوم، الزيت، والبهارات.",
@@ -4442,6 +4553,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "اللبن الزبادي بالتتبيلة يخلي صدر الدجاج ترف وما ينشف بالشوي.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi"
   },
   {
@@ -4467,7 +4579,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "1 حبة" },
       { name: "معجون طماطم", amount: "3 ملاعق كبيرة" },
       { name: "عصير طماطم", amount: "1 كوب" },
-      { name: "ملح ونومي بصرة مطحون", amount: "حسب الرغبة" }
+      { name: "ملح ونومي بصرة مطحون - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "نحمس البصل واللحم بجدر على النار لحد ما يتغير لون اللحم.",
@@ -4479,6 +4591,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لا تقطعون القرع قطع صغيرة حيل حتى لا ينمرد بالطبخ ويحافظ على شكله.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -4504,7 +4617,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم ناعم", amount: "2 حبة" },
       { name: "كرفس مفروم", amount: "نصف باقة" },
       { name: "معجون طماطم", amount: "4 ملاعق كبيرة" },
-      { name: "ملح، فلفل أسود، بهارات مشكلة", amount: "حسب الرغبة" }
+      { name: "ملح، فلفل أسود، بهارات مشكلة - عراقية", amount: "حسب الرغبة" }
     ],
     steps: [
       "نحفر الباذنجان والشجر ونفرغهم من اللب، ونقليهم نص قلي بالزيت ونعوفهم يبردون.",
@@ -4516,6 +4629,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "قلي الباذنجان والشجر قبل الحشي ينطيهم طعم أطيب ويخليهم يحافظون على شكلهم بالطبخ.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "stuffed-dishes"
   },
   {
@@ -4541,7 +4655,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "2 حبة" },
       { name: "معجون طماطم (للمرقة)", amount: "3 ملاعق كبيرة" },
       { name: "شعرية (للمرقة)", amount: "نصف كوب" },
-      { name: "ملح وبهارات كبة", amount: "حسب الرغبة" }
+      { name: "ملح وبهارات كبة - عراقية", amount: "حسب الرغبة" }
     ],
     steps: [
       "ننكع البرغل والجريش بشوية ماي دافي وملح لمدة نص ساعة، بعدين نعجنهم زين لحد ما تصير عجينة متماسكة.",
@@ -4553,6 +4667,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لا تخلون ماي هواية بالعجينة حتى لا تنفتح الكبة بالسلق، واعجنوها زين بالإيد.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "stuffed-dishes"
   },
   {
@@ -4578,7 +4693,7 @@ export const RECIPES: Recipe[] = [
       { name: "دبس الرمان", amount: "نصف كوب" },
       { name: "سكر (اختياري لموازنة الحموضة)", amount: "1 ملعقة كبيرة" },
       { name: "زيت", amount: "2 ملعقة كبيرة" },
-      { name: "ملح وفلفل أسود", amount: "حسب الرغبة" }
+      { name: "ملح وفلفل أسود - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "نحمس البصل بالزيت لحد ما يذبل، ونضيف قطع الدجاج ونحمسها لحد ما يتغير لونها.",
@@ -4590,6 +4705,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "طبخ الفسنجون على نار هادية جداً هو السر حتى الجوز يذب دهنه وتثخن المرقة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -4615,7 +4731,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "1 حبة" },
       { name: "معجون طماطم", amount: "3 ملاعق كبيرة" },
       { name: "عصير طماطم", amount: "1 كوب" },
-      { name: "ملح وفلفل أسود", amount: "حسب الرغبة" }
+      { name: "ملح وفلفل أسود - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "نحمس البصل واللحم بجدر لحد ما يتغير لون اللحم.",
@@ -4626,6 +4742,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الشجر يستوي بسرعة، فلا تخلوه يطبخ هواية حتى لا ينمرد ويصير عجين بالمرقة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -4651,7 +4768,7 @@ export const RECIPES: Recipe[] = [
       { name: "بهارات سمك وكركم", amount: "2 ملعقة كبيرة" },
       { name: "نومي بصرة مطحون", amount: "1 ملعقة كبيرة" },
       { name: "كشمش (زبيب) مقلي", amount: "نصف كوب" },
-      { name: "ملح وزيت", amount: "حسب الحاجة" }
+      { name: "ملح وزيت - عراقي", amount: "حسب الحاجة" }
     ],
     steps: [
       "نتبل قطع السمك بالملح والكركم وبهارات السمك ونقليها بالزيت لحد ما تتحمر وتستوي، ونعوفها على جهة.",
@@ -4663,6 +4780,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "استعمال زيت قلي السمك لطبخ التمن ينطي نكهة بحرية تخبل للمطبك.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "fish-dishes"
   },
   {
@@ -4688,7 +4806,7 @@ export const RECIPES: Recipe[] = [
       { name: "عصير طماطم فريش", amount: "3 أكواب" },
       { name: "معجون طماطم", amount: "2 ملعقة كبيرة" },
       { name: "زيت", amount: "2 ملعقة كبيرة" },
-      { name: "ملح", amount: "حسب الرغبة" }
+      { name: "ملح - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "نسلق اللحم نص سلقة ونصفي الماي مالته (السوب) ونحتفظ بيه.",
@@ -4700,6 +4818,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لا تقلبون البامية هواية بالملعقة وهي تنطبخ حتى لا تنفتح وتطلع بذورها وتصير المرقة لزجة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -4725,7 +4844,7 @@ export const RECIPES: Recipe[] = [
       { name: "بطاطا مقطعة دوائر ومقلية", amount: "2 حبة" },
       { name: "طماطم مقطعة دوائر", amount: "3 حبات" },
       { name: "بصل مقطع دوائر", amount: "1 حبة" },
-      { name: "بهارات برياني أو سبع بهارات", amount: "2 ملعقة كبيرة" }
+      { name: "بهارات برياني أو سبع بهارات - عراقي", amount: "2 ملعقة كبيرة" }
     ],
     steps: [
       "نتبل التمن المغسول بالبهارات والملح.",
@@ -4738,6 +4857,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "اضغطوا على التمن زين بالملعقة قبل ما تضيفون الماي حتى تطلع المقلوبة قالب واحد من تقلبوها.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "chicken-dishes"
   },
   {
@@ -4762,7 +4882,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم شرائح (للتزيين)", amount: "2 حبة" },
       { name: "زيت أو دهن حر", amount: "3 ملاعق كبيرة" },
       { name: "كمون مطحون", amount: "1 ملعقة صغيرة" },
-      { name: "ملح", amount: "حسب الرغبة" }
+      { name: "ملح - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "نغسل الماش ونسلقه بماي لحد ما يستوي نص استواء (لا تخلوه ينمرد).",
@@ -4774,6 +4894,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الكمون ضروري وية الماش حتى يمنع النفخة وينطي طعم مميز للأكلة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "legumes-and-beans"
   },
   {
@@ -4799,7 +4920,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطم", amount: "3 ملاعق كبيرة" },
       { name: "عصير طماطم", amount: "1 كوب" },
       { name: "زيت", amount: "2 ملعقة كبيرة" },
-      { name: "ملح", amount: "حسب الرغبة" }
+      { name: "ملح - عراقي", amount: "حسب الرغبة" }
     ],
     steps: [
       "نسلق الفاصوليا المنكعة بماي لحد ما تستوي وتصير طرية، ونصفيها.",
@@ -4811,6 +4932,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "تنكيع الفاصوليا ليلة كاملة يسرع عملية الطبخ ويخليها تستوي بالتساوي.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "legumes-and-beans"
   },
   {
@@ -4836,7 +4958,7 @@ export const RECIPES: Recipe[] = [
       { name: "بزاليا وجزر مسلوق", amount: "1 كوب" },
       { name: "شعرية محمسة ومطبوخة", amount: "1 كوب" },
       { name: "بهارات برياني عراقية", amount: "2 ملعقة كبيرة" },
-      { name: "لوز وكشمش مقلي للتزيين", amount: "نصف كوب" }
+      { name: "لوز وكشمش مقلي للتزيين - عراقي", amount: "نصف كوب" }
     ],
     steps: [
       "نطبخ التمن بماي سلق الدجاج ونضيفله ملعقة من بهارات البرياني والملح.",
@@ -4848,6 +4970,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "بهارات البرياني العراقية تختلف عن الهندية، تكون أقل حرارة وبيها هيل ودارسين وكبابة تنطي طعم مميز.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-rice"
   },
   {
@@ -4872,7 +4995,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "1 حبة" },
       { name: "معجون طماطم", amount: "3 ملاعق كبيرة" },
       { name: "نومي بصرة", amount: "1 حبة" },
-      { name: "زيت وملح", amount: "حسب الحاجة" }
+      { name: "زيت وملح - عراقي", amount: "حسب الحاجة" }
     ],
     steps: [
       "نحمس البصل واللحم بالزيت لحد ما يتغير لون اللحم.",
@@ -4883,6 +5006,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لا تقطعون البطاطا صغار حيل حتى لا تنمرد بالمرقة، وخلوها مكعبات وسط.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   {
@@ -4907,7 +5031,7 @@ export const RECIPES: Recipe[] = [
       { name: "لحم مفروم", amount: "250 غرام" },
       { name: "بصل مفروم", amount: "1 حبة" },
       { name: "بهارات مشكلة (سبع بهارات)", amount: "1 ملعقة صغيرة" },
-      { name: "زيت وملح", amount: "حسب الحاجة" }
+      { name: "زيت وملح - عراقي", amount: "حسب الحاجة" }
     ],
     steps: [
       "بجدر على النار، نحمس البصل واللحم المفروم لحد ما يستوي اللحم.",
@@ -4919,6 +5043,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "برش الجزر خشن أحسن من الناعم حتى يبين شكله وطعمه بالتمن وما يعجن.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-rice"
   },
   {
@@ -4944,7 +5069,7 @@ export const RECIPES: Recipe[] = [
       { name: "طماطم مقطعة دوائر", amount: "3 حبات" },
       { name: "فلفل أخضر مقطع شرائح", amount: "1 حبة" },
       { name: "معجون طماطم", amount: "3 ملاعق كبيرة" },
-      { name: "بهارات دجاج، ملح، زيت", amount: "حسب الحاجة" }
+      { name: "بهارات دجاج، ملح، زيت - عراقي", amount: "حسب الحاجة" }
     ],
     steps: [
       "نتبل قطع الدجاج بالملح وبهارات الدجاج وشوية زيت.",
@@ -4956,6 +5081,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "تكدرون تقلون البطاطا نص قلي قبل ما تخلوها بالتبسي حتى تطلع أطيب وتستوي أسرع.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "chicken-dishes"
   },
   {
@@ -4981,7 +5107,7 @@ export const RECIPES: Recipe[] = [
       { name: "كشمش (زبيب)", amount: "نصف كوب" },
       { name: "سكر", amount: "نصف كوب (حسب الرغبة)" },
       { name: "زيت أو دهن", amount: "2 ملعقة كبيرة" },
-      { name: "هيل مطحون", amount: "1 ملعقة صغيرة" }
+      { name: "هيل مطحون - عراقي", amount: "1 ملعقة صغيرة" }
     ],
     steps: [
       "نحمس اللحم بالدهن لحد ما يتغير لونه، ونصب عليه ماي حار ونسلقه لحد ما يستوي.",
@@ -4993,6 +5119,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "كمية السكر تعتمد على ذوقكم، تكدرون تزيدون أو تقللون حسب الرغبة، وبعض الناس يضيفون ملعقة معجون طماطم لكسر الحلاوة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews"
   },
   // ============ Batch 5 ============
@@ -5018,7 +5145,7 @@ export const RECIPES: Recipe[] = [
     { name: "زيت زيتون", amount: "2 ملعقة كبيرة" },
     { name: "كمون", amount: "1 ملعقة صغيرة" },
     { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
-    { name: "ماء", amount: "4 أكواب" }
+    { name: "ماء - عراقي", amount: "4 أكواب" }
   ],
   steps: [
     "نغسل الماش وننقعه لمدة ساعة.",
@@ -5030,6 +5157,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لشوربة أغنى، يمكن إضافة قطع دجاج صغيرة أو لحم مفروم.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "iraqi-soups-and-stews"
 },
 {
@@ -5066,6 +5194,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لجعل السلطة صحية أكثر، قلل من كمية الملح والزيت.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "fresh-salads"
 },
 {
@@ -5089,7 +5218,7 @@ export const RECIPES: Recipe[] = [
     { name: "زيت زيتون", amount: "2 ملعقة كبيرة" },
     { name: "ثوم مهروس", amount: "2 فص" },
     { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
-    { name: "بقدونس مفروم", amount: "للتزيين" }
+    { name: "بقدونس مفروم - عراقي", amount: "للتزيين" }
   ],
   steps: [
     "نقطع الباذنجان إلى شرائح دائرية.",
@@ -5101,6 +5230,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لتقليل السعرات الحرارية، يمكن شوي الباذنجان بدون زيت.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "vegetable-dishes"
 },
 {
@@ -5137,6 +5267,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على حمص كريمي أكثر، قشر حبات الحمص قبل خلطها.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "legumes-and-beans"
 },
 {
@@ -5161,7 +5292,7 @@ export const RECIPES: Recipe[] = [
     { name: "زيت", amount: "2 ملعقة كبيرة" },
     { name: "كمون", amount: "1 ملعقة صغيرة" },
     { name: "كركم", amount: "1/2 ملعقة صغيرة" },
-    { name: "ماء", amount: "4 أكواب" }
+    { name: "ماء - عراقي", amount: "4 أكواب" }
   ],
   steps: [
     "نغسل العدس جيداً.",
@@ -5173,6 +5304,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة عصرة ليمون عند التقديم لتعزيز النكهة.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "iraqi-soups-and-stews"
 }
 ,
@@ -5210,6 +5342,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لشوربة نباتية، استبدل الدجاج ومرقه بالخضروات ومرق الخضروات.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-soups-and-stews"
 },
 {
@@ -5234,7 +5367,7 @@ export const RECIPES: Recipe[] = [
     { name: "لبن زبادي", amount: "1 كوب" },
     { name: "طحينة (راشي)", amount: "1/4 كوب" },
     { name: "ثوم مهروس", amount: "2 فص" },
-    { name: "صنوبر مقلي", amount: "للتزيين" }
+    { name: "صنوبر مقلي - عراقي", amount: "للتزيين" }
   ],
   steps: [
     "نضع الخبز المحمص في طبق التقديم.",
@@ -5246,6 +5379,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة القليل من الكمون لصلصة اللبن لتعزيز النكهة.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "legumes-and-beans"
 },
 {
@@ -5282,6 +5416,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على نكهة أغنى، استخدم البطاطا الصغيرة واسلقها بقشرها.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "fresh-salads"
 },
 {
@@ -5306,7 +5441,7 @@ export const RECIPES: Recipe[] = [
     { name: "طحينة (راشي)", amount: "3 ملعقة كبيرة" },
     { name: "ثوم مهروس", amount: "2 فص" },
     { name: "عصير ليمون", amount: "2 ملعقة كبيرة" },
-    { name: "زيت زيتون", amount: "للتزيين" }
+    { name: "زيت زيتون - عراقي", amount: "للتزيين" }
   ],
   steps: [
     "نشوي الباذنجان على النار مباشرة أو في الفرن حتى يصبح طرياً.",
@@ -5318,6 +5453,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على نكهة مدخنة، أضف القليل من البابريكا المدخنة.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "pickles-and-appetizers"
 },
 {
@@ -5342,7 +5478,7 @@ export const RECIPES: Recipe[] = [
     { name: "بصل مفروم", amount: "1/2 حبة" },
     { name: "فلفل أخضر مفروم", amount: "1/2 حبة" },
     { name: "بقدونس مفروم", amount: "1/4 كوب" },
-    { name: "دبس الرمان", amount: "2 ملعقة كبيرة" }
+    { name: "دبس الرمان - عراقي", amount: "2 ملعقة كبيرة" }
   ],
   steps: [
     "نشوي الباذنجان ونقشره ونهرسه.",
@@ -5354,6 +5490,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على أفضل نكهة، استخدم باذنجان طازج وثقيل الوزن.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "pickles-and-appetizers"
 }
 ,
@@ -5391,6 +5528,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة أي نوع من الخضروات المتوفرة لديك.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "vegetable-dishes"
 },
 {
@@ -5427,6 +5565,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لجعلها وجبة متكاملة، أضف بعض التونة أو الدجاج المشوي.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "fresh-salads"
 },
 {
@@ -5449,7 +5588,7 @@ export const RECIPES: Recipe[] = [
     { name: "لبن زبادي", amount: "2 كوب" },
     { name: "ماء بارد", amount: "2 كوب" },
     { name: "ملح", amount: "1/2 ملعقة صغيرة" },
-    { name: "نعناع مجفف (اختياري)", amount: "1 ملعقة صغيرة" }
+    { name: "نعناع مجفف (اختياري) - عراقي", amount: "1 ملعقة صغيرة" }
   ],
   steps: [
     "نضع اللبن الزبادي في وعاء كبير.",
@@ -5461,6 +5600,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على شنينة أكثر دسماً، استخدم لبن كامل الدسم.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "healthy-smoothies-and-drinks"
 },
 {
@@ -5496,6 +5636,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحفاظ على لون الشمندر، أضف ملعقة خل إلى ماء السلق.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "fresh-salads"
 },
 {
@@ -5532,6 +5673,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لجاجيك أقل دسماً، استخدم لبن قليل الدسم.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "pickles-and-appetizers"
 }
 ,
@@ -5569,6 +5711,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن استخدام مزيج من أنواع الفطر المختلفة لنكهة أغنى.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-soups-and-stews"
 },
 {
@@ -5605,6 +5748,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة بعض الصنوبر المقلي للزينة والقرمشة.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "pasta-and-noodles-iraqi-style"
 },
 {
@@ -5641,6 +5785,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحفاظ على قرمشة الجرجير، لا تضف الصلصة إلا عند التقديم.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "fresh-salads"
 },
 {
@@ -5665,7 +5810,7 @@ export const RECIPES: Recipe[] = [
     { name: "بصل مفروم", amount: "1/2 حبة" },
     { name: "زيت", amount: "2 ملعقة كبيرة" },
     { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
-    { name: "بقدونس مفروم", amount: "للتزيين" }
+    { name: "بقدونس مفروم - عراقي", amount: "للتزيين" }
   ],
   steps: [
     "نحمس البصل بالزيت في مقلاة حتى يذبل.",
@@ -5677,6 +5822,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة الفلفل الحار المفروم لمحبي النكهة الحارة.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "dairy-and-eggs"
 },
 {
@@ -5713,6 +5859,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن تعديل كمية السكر حسب حلاوة الفواكه المجففة.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "fresh-fruits-and-natural-desserts"
 }
 ,
@@ -5750,6 +5897,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة الحمص المسلوق لزيادة البروتين في الشوربة.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-soups-and-stews"
 },
 {
@@ -5774,7 +5922,7 @@ export const RECIPES: Recipe[] = [
     { name: "خبز مقلي أو محمص", amount: "1 رغيف" },
     { name: "لبن زبادي", amount: "1 كوب" },
     { name: "ثوم مهروس", amount: "1 فص" },
-    { name: "بقدونس مفروم", amount: "للتزيين" }
+    { name: "بقدونس مفروم - عراقي", amount: "للتزيين" }
   ],
   steps: [
     "نقلي مكعبات البطاطا حتى تصبح ذهبية اللون، ثم نرفعها على ورق نشاف.",
@@ -5786,6 +5934,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لنسخة صحية أكثر، يمكن شوي الخضروات في الفرن بدلاً من القلي.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "fresh-salads"
 },
 {
@@ -5822,6 +5971,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "استخدم الطماطم الطازجة بدلاً من العصير المعلب لنكهة أفضل.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-soups-and-stews"
 },
 {
@@ -5846,7 +5996,7 @@ export const RECIPES: Recipe[] = [
     { name: "مايونيز", amount: "1/2 كوب" },
     { name: "سكر", amount: "1 ملعقة كبيرة" },
     { name: "خل أبيض", amount: "2 ملعقة كبيرة" },
-    { name: "عصير ليمون", amount: "1 ملعقة كبيرة" }
+    { name: "عصير ليمون - عراقي", amount: "1 ملعقة كبيرة" }
   ],
   steps: [
     "نخلط الملفوف المفروم والجزر المبشور في وعاء كبير.",
@@ -5858,6 +6008,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن إضافة القليل من اللبن الزبادي للصلصة لجعلها أخف.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "fresh-salads"
 },
 {
@@ -5894,6 +6045,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لتعزيز النكهة، يمكن تحميص القرنابيط في الفرن قبل إضافته للشوربة.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "vegetable-dishes"
 },
   // ============ Batch 6 ============
@@ -5921,7 +6073,7 @@ export const RECIPES: Recipe[] = [
     { name: "ماء ورد", amount: "ملعقتان كبيرتان" },
     { name: "سمن", amount: "3 ملاعق كبيرة" },
     { name: "بيض", amount: "4 بيضات" },
-    { name: "ملح", amount: "رشة" }
+    { name: "ملح - إماراتي", amount: "رشة" }
   ],
   steps: [
     "في قدر على النار، نحمص الشعيرية بالسمن حتى يصبح لونها ذهبي.",
@@ -5933,7 +6085,8 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على نكهة أغنى، يمكن إضافة القليل من ماء الزهر مع ماء الورد.",
   isIraqi: false,
-  image: "gulf-cuisine"
+    origin: "uae" as CountryOrigin,
+  image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-balaleet-EPhdyZ9PswzhXVLLg76LMt.webp"
 },
 {
   id: "gb_2",
@@ -5955,7 +6108,7 @@ export const RECIPES: Recipe[] = [
     { name: "طحين أبيض", amount: "كوبان" },
     { name: "ماء", amount: "كوب ونصف (تقريباً)" },
     { name: "ملح", amount: "ملعقة صغيرة" },
-    { name: "زيت", amount: "ملعقة كبيرة" }
+    { name: "زيت - إماراتي", amount: "ملعقة كبيرة" }
   ],
   steps: [
     "في وعاء، نخلط الطحين والملح.",
@@ -5967,6 +6120,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "يمكن التحكم في سماكة الخبز حسب الرغبة، كلما كان أرق كان أفضل.",
   isIraqi: false,
+    origin: "uae" as CountryOrigin,
   image: "iraqi-bread"
 },
 {
@@ -5994,7 +6148,7 @@ export const RECIPES: Recipe[] = [
     { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
     { name: "زعفران", amount: "رشة" },
     { name: "بيض", amount: "بيضة واحدة" },
-    { name: "ماء دافئ", amount: "كوبان ونصف" }
+    { name: "ماء دافئ - إماراتي", amount: "كوبان ونصف" }
   ],
   steps: [
     "في وعاء، نخلط جميع المكونات الجافة: الطحين، السكر، حليب البودرة، الخميرة، البيكنج باودر، الهيل والزعفران.",
@@ -6006,7 +6160,8 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "للحصول على جباب هش، تأكد من أن العجينة سائلة وليست سميكة جداً.",
   isIraqi: false,
-  image: "gulf-cuisine"
+    origin: "uae" as CountryOrigin,
+  image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"
 },
 
   {
@@ -6046,7 +6201,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على لقيمات مقرمشة، يجب أن يكون الزيت حاراً والعجينة متخمرة جيداً.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-luqaimat-DbywUVZwms8U4hX5795imk.webp",
   },
   {
     id: "gb_5",
@@ -6083,6 +6239,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة رشة من الكمون أو الكزبرة المطحونة لإضافة نكهة مميزة.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -6109,7 +6266,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "كمون مطحون", amount: "نصف ملعقة صغيرة" },
       { name: "ملح", amount: "حسب الرغبة" },
-      { name: "بقدونس مفروم", amount: "للتزيين" },
+      { name: "بقدونس مفروم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الفول من ماء التعليب ونغسله جيداً.",
@@ -6121,6 +6278,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على قوام كريمي، يمكن خلط الفول مع الطحينة في الخلاط الكهربائي.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -6147,7 +6305,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطم", amount: "ملعقة كبيرة" },
       { name: "ثوم مهروس", amount: "فصان" },
       { name: "زيت", amount: "3 ملاعق كبيرة" },
-      { name: "بهارات مشكلة", amount: "نصف ملعقة صغيرة" },
+      { name: "بهارات مشكلة - إماراتية", amount: "نصف ملعقة صغيرة" },
     ],
     steps: [
       "في مقلاة واسعة، نسخن الزيت ونقلي البصل حتى يصبح ذهبي اللون.",
@@ -6160,6 +6318,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة جبن فيتا أو جبن حلوم مبشور على الوجه قبل نضج البيض تماماً.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -6185,7 +6344,7 @@ export const RECIPES: Recipe[] = [
       { name: "خميرة", amount: "ملعقة صغيرة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
       { name: "زعفران", amount: "رشة" },
-      { name: "سكر", amount: "ملعقتان كبيرتان (اختياري)" },
+      { name: "سكر - إماراتي", amount: "ملعقتان كبيرتان (اختياري)" },
     ],
     steps: [
       "ننقع التمر في الماء الدافئ لمدة 15 دقيقة ثم نخلطه في الخلاط لنحصل على عصير تمر.",
@@ -6198,7 +6357,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام دبس التمر بدلاً من نقع التمر للحصول على نتيجة أسرع.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1000",
@@ -6237,7 +6397,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على لقيمات مقرمشة، يجب أن يكون الزيت حاراً والعجينة متخمرة جيداً.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-luqaimat-DbywUVZwms8U4hX5795imk.webp",
   },
   {
     id: "recipe_1001",
@@ -6274,6 +6435,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة رشة من الكمون أو الكزبرة المطحونة لإضافة نكهة مميزة.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -6300,7 +6462,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "كمون مطحون", amount: "نصف ملعقة صغيرة" },
       { name: "ملح", amount: "حسب الرغبة" },
-      { name: "بقدونس مفروم", amount: "للتزيين" },
+      { name: "بقدونس مفروم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الفول من ماء التعليب ونغسله جيداً.",
@@ -6312,6 +6474,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على قوام كريمي، يمكن خلط الفول مع الطحينة في الخلاط الكهربائي.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -6338,7 +6501,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطم", amount: "ملعقة كبيرة" },
       { name: "ثوم مهروس", amount: "فصان" },
       { name: "زيت", amount: "3 ملاعق كبيرة" },
-      { name: "بهارات مشكلة", amount: "نصف ملعقة صغيرة" },
+      { name: "بهارات مشكلة - إماراتية", amount: "نصف ملعقة صغيرة" },
     ],
     steps: [
       "في مقلاة واسعة، نسخن الزيت ونقلي البصل حتى يصبح ذهبي اللون.",
@@ -6351,6 +6514,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة جبن فيتا أو جبن حلوم مبشور على الوجه قبل نضج البيض تماماً.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -6376,7 +6540,7 @@ export const RECIPES: Recipe[] = [
       { name: "خميرة", amount: "ملعقة صغيرة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
       { name: "زعفران", amount: "رشة" },
-      { name: "سكر", amount: "ملعقتان كبيرتان (اختياري)" },
+      { name: "سكر - إماراتي", amount: "ملعقتان كبيرتان (اختياري)" },
     ],
     steps: [
       "ننقع التمر في الماء الدافئ لمدة 15 دقيقة ثم نخلطه في الخلاط لنحصل على عصير تمر.",
@@ -6389,7 +6553,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام دبس التمر بدلاً من نقع التمر للحصول على نتيجة أسرع.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1005",
@@ -6428,7 +6593,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على لقيمات مقرمشة، يجب أن يكون الزيت حاراً والعجينة متخمرة جيداً.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-luqaimat-DbywUVZwms8U4hX5795imk.webp",
   },
   {
     id: "recipe_1006",
@@ -6465,6 +6631,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة رشة من الكمون أو الكزبرة المطحونة لإضافة نكهة مميزة.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -6491,7 +6658,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "كمون مطحون", amount: "نصف ملعقة صغيرة" },
       { name: "ملح", amount: "حسب الرغبة" },
-      { name: "بقدونس مفروم", amount: "للتزيين" },
+      { name: "بقدونس مفروم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الفول من ماء التعليب ونغسله جيداً.",
@@ -6503,6 +6670,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على قوام كريمي، يمكن خلط الفول مع الطحينة في الخلاط الكهربائي.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -6529,7 +6697,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطم", amount: "ملعقة كبيرة" },
       { name: "ثوم مهروس", amount: "فصان" },
       { name: "زيت", amount: "3 ملاعق كبيرة" },
-      { name: "بهارات مشكلة", amount: "نصف ملعقة صغيرة" },
+      { name: "بهارات مشكلة - إماراتية", amount: "نصف ملعقة صغيرة" },
     ],
     steps: [
       "في مقلاة واسعة، نسخن الزيت ونقلي البصل حتى يصبح ذهبي اللون.",
@@ -6542,6 +6710,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة جبن فيتا أو جبن حلوم مبشور على الوجه قبل نضج البيض تماماً.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -6567,7 +6736,7 @@ export const RECIPES: Recipe[] = [
       { name: "خميرة", amount: "ملعقة صغيرة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
       { name: "زعفران", amount: "رشة" },
-      { name: "سكر", amount: "ملعقتان كبيرتان (اختياري)" },
+      { name: "سكر - إماراتي", amount: "ملعقتان كبيرتان (اختياري)" },
     ],
     steps: [
       "ننقع التمر في الماء الدافئ لمدة 15 دقيقة ثم نخلطه في الخلاط لنحصل على عصير تمر.",
@@ -6580,7 +6749,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام دبس التمر بدلاً من نقع التمر للحصول على نتيجة أسرع.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1010",
@@ -6619,7 +6789,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على لقيمات مقرمشة، يجب أن يكون الزيت حاراً والعجينة متخمرة جيداً.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-luqaimat-DbywUVZwms8U4hX5795imk.webp",
   },
   {
     id: "recipe_1011",
@@ -6656,6 +6827,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة رشة من الكمون أو الكزبرة المطحونة لإضافة نكهة مميزة.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -6682,7 +6854,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "كمون مطحون", amount: "نصف ملعقة صغيرة" },
       { name: "ملح", amount: "حسب الرغبة" },
-      { name: "بقدونس مفروم", amount: "للتزيين" },
+      { name: "بقدونس مفروم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الفول من ماء التعليب ونغسله جيداً.",
@@ -6694,6 +6866,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على قوام كريمي، يمكن خلط الفول مع الطحينة في الخلاط الكهربائي.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -6720,7 +6893,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطم", amount: "ملعقة كبيرة" },
       { name: "ثوم مهروس", amount: "فصان" },
       { name: "زيت", amount: "3 ملاعق كبيرة" },
-      { name: "بهارات مشكلة", amount: "نصف ملعقة صغيرة" },
+      { name: "بهارات مشكلة - إماراتية", amount: "نصف ملعقة صغيرة" },
     ],
     steps: [
       "في مقلاة واسعة، نسخن الزيت ونقلي البصل حتى يصبح ذهبي اللون.",
@@ -6733,6 +6906,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة جبن فيتا أو جبن حلوم مبشور على الوجه قبل نضج البيض تماماً.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -6758,7 +6932,7 @@ export const RECIPES: Recipe[] = [
       { name: "خميرة", amount: "ملعقة صغيرة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
       { name: "زعفران", amount: "رشة" },
-      { name: "سكر", amount: "ملعقتان كبيرتان (اختياري)" },
+      { name: "سكر - إماراتي", amount: "ملعقتان كبيرتان (اختياري)" },
     ],
     steps: [
       "ننقع التمر في الماء الدافئ لمدة 15 دقيقة ثم نخلطه في الخلاط لنحصل على عصير تمر.",
@@ -6771,7 +6945,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام دبس التمر بدلاً من نقع التمر للحصول على نتيجة أسرع.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1015",
@@ -6810,7 +6985,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على لقيمات مقرمشة، يجب أن يكون الزيت حاراً والعجينة متخمرة جيداً.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-luqaimat-DbywUVZwms8U4hX5795imk.webp",
   },
   {
     id: "recipe_1016",
@@ -6847,6 +7023,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة رشة من الكمون أو الكزبرة المطحونة لإضافة نكهة مميزة.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -6873,7 +7050,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "كمون مطحون", amount: "نصف ملعقة صغيرة" },
       { name: "ملح", amount: "حسب الرغبة" },
-      { name: "بقدونس مفروم", amount: "للتزيين" },
+      { name: "بقدونس مفروم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الفول من ماء التعليب ونغسله جيداً.",
@@ -6885,6 +7062,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على قوام كريمي، يمكن خلط الفول مع الطحينة في الخلاط الكهربائي.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -6911,7 +7089,7 @@ export const RECIPES: Recipe[] = [
       { name: "معجون طماطم", amount: "ملعقة كبيرة" },
       { name: "ثوم مهروس", amount: "فصان" },
       { name: "زيت", amount: "3 ملاعق كبيرة" },
-      { name: "بهارات مشكلة", amount: "نصف ملعقة صغيرة" },
+      { name: "بهارات مشكلة - إماراتية", amount: "نصف ملعقة صغيرة" },
     ],
     steps: [
       "في مقلاة واسعة، نسخن الزيت ونقلي البصل حتى يصبح ذهبي اللون.",
@@ -6924,6 +7102,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة جبن فيتا أو جبن حلوم مبشور على الوجه قبل نضج البيض تماماً.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -6949,7 +7128,7 @@ export const RECIPES: Recipe[] = [
       { name: "خميرة", amount: "ملعقة صغيرة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
       { name: "زعفران", amount: "رشة" },
-      { name: "سكر", amount: "ملعقتان كبيرتان (اختياري)" },
+      { name: "سكر - إماراتي", amount: "ملعقتان كبيرتان (اختياري)" },
     ],
     steps: [
       "ننقع التمر في الماء الدافئ لمدة 15 دقيقة ثم نخلطه في الخلاط لنحصل على عصير تمر.",
@@ -6962,7 +7141,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام دبس التمر بدلاً من نقع التمر للحصول على نتيجة أسرع.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "gb_9",
@@ -6999,7 +7179,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "التحريك المستمر هو سر نجاح العصيدة ومنع تكتلها.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "gb_10",
@@ -7024,7 +7205,7 @@ export const RECIPES: Recipe[] = [
       { name: "عسل", amount: "3 ملاعق كبيرة" },
       { name: "سمن أو زبدة", amount: "ملعقة كبيرة" },
       { name: "جبن شيدر مبشور", amount: "للتزيين (اختياري)" },
-      { name: "مكسرات", amount: "للتزيين (اختياري)" },
+      { name: "مكسرات - سعودي", amount: "للتزيين (اختياري)" },
     ],
     steps: [
       "نفرم الخبز الأسمر فرماً ناعماً في محضرة الطعام.",
@@ -7036,7 +7217,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يفضل استخدام الموز الناضج جداً للحصول على حلاوة ونكهة أفضل.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "gb_11",
@@ -7062,7 +7244,7 @@ export const RECIPES: Recipe[] = [
       { name: "عصير ليمون", amount: "ملعقتان كبيرتان" },
       { name: "ثوم مهروس", amount: "فص واحد" },
       { name: "سمن", amount: "ملعقتان كبيرتان" },
-      { name: "صنوبر", amount: "للتزيين" },
+      { name: "صنوبر - مصري", amount: "للتزيين" },
     ],
     steps: [
       "في طبق التقديم، نضع طبقة من الخبز المحمص.",
@@ -7074,7 +7256,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الباذنجان المقلي كطبقة إضافية لجعل الفتة أغنى.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "gb_12",
@@ -7113,7 +7296,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام حشوات مختلفة مثل جبن العكاوي أو السبانخ حسب الرغبة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "gb_13",
@@ -7150,6 +7334,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر نكهة الكرك في تركه على نار هادئة (يخدر) لمدة كافية بعد إضافة الحليب.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "hot-beverages",
   },
   {
@@ -7187,7 +7372,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "التحريك المستمر هو سر نجاح العصيدة ومنع تكتلها.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1021",
@@ -7212,7 +7398,7 @@ export const RECIPES: Recipe[] = [
       { name: "عسل", amount: "3 ملاعق كبيرة" },
       { name: "سمن أو زبدة", amount: "ملعقة كبيرة" },
       { name: "جبن شيدر مبشور", amount: "للتزيين (اختياري)" },
-      { name: "مكسرات", amount: "للتزيين (اختياري)" },
+      { name: "مكسرات - سعودي", amount: "للتزيين (اختياري)" },
     ],
     steps: [
       "نفرم الخبز الأسمر فرماً ناعماً في محضرة الطعام.",
@@ -7224,7 +7410,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يفضل استخدام الموز الناضج جداً للحصول على حلاوة ونكهة أفضل.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1022",
@@ -7250,7 +7437,7 @@ export const RECIPES: Recipe[] = [
       { name: "عصير ليمون", amount: "ملعقتان كبيرتان" },
       { name: "ثوم مهروس", amount: "فص واحد" },
       { name: "سمن", amount: "ملعقتان كبيرتان" },
-      { name: "صنوبر", amount: "للتزيين" },
+      { name: "صنوبر - مصري", amount: "للتزيين" },
     ],
     steps: [
       "في طبق التقديم، نضع طبقة من الخبز المحمص.",
@@ -7262,7 +7449,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الباذنجان المقلي كطبقة إضافية لجعل الفتة أغنى.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1023",
@@ -7301,7 +7489,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام حشوات مختلفة مثل جبن العكاوي أو السبانخ حسب الرغبة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1024",
@@ -7338,6 +7527,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر نكهة الكرك في تركه على نار هادئة (يخدر) لمدة كافية بعد إضافة الحليب.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "hot-beverages",
   },
   {
@@ -7375,7 +7565,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "التحريك المستمر هو سر نجاح العصيدة ومنع تكتلها.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1026",
@@ -7400,7 +7591,7 @@ export const RECIPES: Recipe[] = [
       { name: "عسل", amount: "3 ملاعق كبيرة" },
       { name: "سمن أو زبدة", amount: "ملعقة كبيرة" },
       { name: "جبن شيدر مبشور", amount: "للتزيين (اختياري)" },
-      { name: "مكسرات", amount: "للتزيين (اختياري)" },
+      { name: "مكسرات - سعودي", amount: "للتزيين (اختياري)" },
     ],
     steps: [
       "نفرم الخبز الأسمر فرماً ناعماً في محضرة الطعام.",
@@ -7412,7 +7603,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يفضل استخدام الموز الناضج جداً للحصول على حلاوة ونكهة أفضل.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1027",
@@ -7438,7 +7630,7 @@ export const RECIPES: Recipe[] = [
       { name: "عصير ليمون", amount: "ملعقتان كبيرتان" },
       { name: "ثوم مهروس", amount: "فص واحد" },
       { name: "سمن", amount: "ملعقتان كبيرتان" },
-      { name: "صنوبر", amount: "للتزيين" },
+      { name: "صنوبر - مصري", amount: "للتزيين" },
     ],
     steps: [
       "في طبق التقديم، نضع طبقة من الخبز المحمص.",
@@ -7450,7 +7642,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الباذنجان المقلي كطبقة إضافية لجعل الفتة أغنى.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1028",
@@ -7489,7 +7682,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام حشوات مختلفة مثل جبن العكاوي أو السبانخ حسب الرغبة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1029",
@@ -7526,6 +7720,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر نكهة الكرك في تركه على نار هادئة (يخدر) لمدة كافية بعد إضافة الحليب.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "hot-beverages",
   },
   {
@@ -7563,7 +7758,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "التحريك المستمر هو سر نجاح العصيدة ومنع تكتلها.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1031",
@@ -7588,7 +7784,7 @@ export const RECIPES: Recipe[] = [
       { name: "عسل", amount: "3 ملاعق كبيرة" },
       { name: "سمن أو زبدة", amount: "ملعقة كبيرة" },
       { name: "جبن شيدر مبشور", amount: "للتزيين (اختياري)" },
-      { name: "مكسرات", amount: "للتزيين (اختياري)" },
+      { name: "مكسرات - سعودي", amount: "للتزيين (اختياري)" },
     ],
     steps: [
       "نفرم الخبز الأسمر فرماً ناعماً في محضرة الطعام.",
@@ -7600,7 +7796,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يفضل استخدام الموز الناضج جداً للحصول على حلاوة ونكهة أفضل.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1032",
@@ -7626,7 +7823,7 @@ export const RECIPES: Recipe[] = [
       { name: "عصير ليمون", amount: "ملعقتان كبيرتان" },
       { name: "ثوم مهروس", amount: "فص واحد" },
       { name: "سمن", amount: "ملعقتان كبيرتان" },
-      { name: "صنوبر", amount: "للتزيين" },
+      { name: "صنوبر - مصري", amount: "للتزيين" },
     ],
     steps: [
       "في طبق التقديم، نضع طبقة من الخبز المحمص.",
@@ -7638,7 +7835,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الباذنجان المقلي كطبقة إضافية لجعل الفتة أغنى.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1033",
@@ -7677,7 +7875,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام حشوات مختلفة مثل جبن العكاوي أو السبانخ حسب الرغبة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1034",
@@ -7714,6 +7913,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر نكهة الكرك في تركه على نار هادئة (يخدر) لمدة كافية بعد إضافة الحليب.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "hot-beverages",
   },
   {
@@ -7751,7 +7951,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "التحريك المستمر هو سر نجاح العصيدة ومنع تكتلها.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1036",
@@ -7776,7 +7977,7 @@ export const RECIPES: Recipe[] = [
       { name: "عسل", amount: "3 ملاعق كبيرة" },
       { name: "سمن أو زبدة", amount: "ملعقة كبيرة" },
       { name: "جبن شيدر مبشور", amount: "للتزيين (اختياري)" },
-      { name: "مكسرات", amount: "للتزيين (اختياري)" },
+      { name: "مكسرات - سعودي", amount: "للتزيين (اختياري)" },
     ],
     steps: [
       "نفرم الخبز الأسمر فرماً ناعماً في محضرة الطعام.",
@@ -7788,7 +7989,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يفضل استخدام الموز الناضج جداً للحصول على حلاوة ونكهة أفضل.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1037",
@@ -7814,7 +8016,7 @@ export const RECIPES: Recipe[] = [
       { name: "عصير ليمون", amount: "ملعقتان كبيرتان" },
       { name: "ثوم مهروس", amount: "فص واحد" },
       { name: "سمن", amount: "ملعقتان كبيرتان" },
-      { name: "صنوبر", amount: "للتزيين" },
+      { name: "صنوبر - مصري", amount: "للتزيين" },
     ],
     steps: [
       "في طبق التقديم، نضع طبقة من الخبز المحمص.",
@@ -7826,7 +8028,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الباذنجان المقلي كطبقة إضافية لجعل الفتة أغنى.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1038",
@@ -7865,7 +8068,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام حشوات مختلفة مثل جبن العكاوي أو السبانخ حسب الرغبة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1039",
@@ -7902,6 +8106,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر نكهة الكرك في تركه على نار هادئة (يخدر) لمدة كافية بعد إضافة الحليب.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "hot-beverages",
   },
   {
@@ -7939,7 +8144,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الصبر والتحريك المستمر هما مفتاح نجاح الحلوى البحرينية للحصول على القوام واللون الصحيح.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "gb_15",
@@ -7979,7 +8185,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "دهن القالب بالطحينة (الراشي) بدلاً من الزبدة يعطي الكيك نكهة مميزة ولوناً ذهبياً جميلاً.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "gb_16",
@@ -8017,6 +8224,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز منتفخ، يجب أن تكون العجينة مرتاحة جيداً والزيت حار عند القلي.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -8053,6 +8261,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام قدر الضغط لتقليل وقت سلق الحمص بشكل كبير.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -8077,7 +8286,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "نصف حبة" },
       { name: "زيت أو سمن", amount: "3 ملاعق كبيرة" },
       { name: "خبز عربي", amount: "رغيف واحد مقطع" },
-      { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
+      { name: "ملح وفلفل أسود - مصري", amount: "حسب الرغبة" },
     ],
     steps: [
       "إذا كانت الباقلاء معلبة، نصفيها ونغسلها. إذا كانت مجمدة، نسلقها حتى تنضج.",
@@ -8090,6 +8299,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لإضافة نكهة حامضة، يمكن إضافة قليل من عصير الليمون أو السماق على الوجه.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -8127,7 +8337,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الصبر والتحريك المستمر هما مفتاح نجاح الحلوى البحرينية للحصول على القوام واللون الصحيح.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1041",
@@ -8167,7 +8378,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "دهن القالب بالطحينة (الراشي) بدلاً من الزبدة يعطي الكيك نكهة مميزة ولوناً ذهبياً جميلاً.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1042",
@@ -8205,6 +8417,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز منتفخ، يجب أن تكون العجينة مرتاحة جيداً والزيت حار عند القلي.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -8241,6 +8454,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام قدر الضغط لتقليل وقت سلق الحمص بشكل كبير.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -8265,7 +8479,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "نصف حبة" },
       { name: "زيت أو سمن", amount: "3 ملاعق كبيرة" },
       { name: "خبز عربي", amount: "رغيف واحد مقطع" },
-      { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
+      { name: "ملح وفلفل أسود - مصري", amount: "حسب الرغبة" },
     ],
     steps: [
       "إذا كانت الباقلاء معلبة، نصفيها ونغسلها. إذا كانت مجمدة، نسلقها حتى تنضج.",
@@ -8278,6 +8492,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لإضافة نكهة حامضة، يمكن إضافة قليل من عصير الليمون أو السماق على الوجه.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -8315,7 +8530,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الصبر والتحريك المستمر هما مفتاح نجاح الحلوى البحرينية للحصول على القوام واللون الصحيح.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1046",
@@ -8355,7 +8571,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "دهن القالب بالطحينة (الراشي) بدلاً من الزبدة يعطي الكيك نكهة مميزة ولوناً ذهبياً جميلاً.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1047",
@@ -8393,6 +8610,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز منتفخ، يجب أن تكون العجينة مرتاحة جيداً والزيت حار عند القلي.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -8429,6 +8647,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام قدر الضغط لتقليل وقت سلق الحمص بشكل كبير.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -8453,7 +8672,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "نصف حبة" },
       { name: "زيت أو سمن", amount: "3 ملاعق كبيرة" },
       { name: "خبز عربي", amount: "رغيف واحد مقطع" },
-      { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
+      { name: "ملح وفلفل أسود - مصري", amount: "حسب الرغبة" },
     ],
     steps: [
       "إذا كانت الباقلاء معلبة، نصفيها ونغسلها. إذا كانت مجمدة، نسلقها حتى تنضج.",
@@ -8466,6 +8685,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لإضافة نكهة حامضة، يمكن إضافة قليل من عصير الليمون أو السماق على الوجه.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -8503,7 +8723,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الصبر والتحريك المستمر هما مفتاح نجاح الحلوى البحرينية للحصول على القوام واللون الصحيح.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1051",
@@ -8543,7 +8764,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "دهن القالب بالطحينة (الراشي) بدلاً من الزبدة يعطي الكيك نكهة مميزة ولوناً ذهبياً جميلاً.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1052",
@@ -8581,6 +8803,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز منتفخ، يجب أن تكون العجينة مرتاحة جيداً والزيت حار عند القلي.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -8617,6 +8840,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام قدر الضغط لتقليل وقت سلق الحمص بشكل كبير.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -8641,7 +8865,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "نصف حبة" },
       { name: "زيت أو سمن", amount: "3 ملاعق كبيرة" },
       { name: "خبز عربي", amount: "رغيف واحد مقطع" },
-      { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
+      { name: "ملح وفلفل أسود - مصري", amount: "حسب الرغبة" },
     ],
     steps: [
       "إذا كانت الباقلاء معلبة، نصفيها ونغسلها. إذا كانت مجمدة، نسلقها حتى تنضج.",
@@ -8654,6 +8878,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لإضافة نكهة حامضة، يمكن إضافة قليل من عصير الليمون أو السماق على الوجه.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -8691,7 +8916,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الصبر والتحريك المستمر هما مفتاح نجاح الحلوى البحرينية للحصول على القوام واللون الصحيح.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1056",
@@ -8731,7 +8957,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "دهن القالب بالطحينة (الراشي) بدلاً من الزبدة يعطي الكيك نكهة مميزة ولوناً ذهبياً جميلاً.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1057",
@@ -8769,6 +8996,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز منتفخ، يجب أن تكون العجينة مرتاحة جيداً والزيت حار عند القلي.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -8805,6 +9033,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن استخدام قدر الضغط لتقليل وقت سلق الحمص بشكل كبير.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -8829,7 +9058,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "نصف حبة" },
       { name: "زيت أو سمن", amount: "3 ملاعق كبيرة" },
       { name: "خبز عربي", amount: "رغيف واحد مقطع" },
-      { name: "ملح وفلفل أسود", amount: "حسب الرغبة" },
+      { name: "ملح وفلفل أسود - مصري", amount: "حسب الرغبة" },
     ],
     steps: [
       "إذا كانت الباقلاء معلبة، نصفيها ونغسلها. إذا كانت مجمدة، نسلقها حتى تنضج.",
@@ -8842,6 +9071,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لإضافة نكهة حامضة، يمكن إضافة قليل من عصير الليمون أو السماق على الوجه.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -8879,7 +9109,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر الطبق هو كرملة البصل جيداً للحصول على نكهة حلوة ومميزة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "gb_20",
@@ -8917,6 +9148,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يجب أن تكون النار عالية والطهي سريعاً للحفاظ على الكبدة طرية وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi",
   },
   {
@@ -8941,7 +9173,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيتون أسود أو أخضر", amount: "ربع كوب" },
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "زعتر مجفف", amount: "ملعقة كبيرة" },
-      { name: "نعناع طازج مفروم", amount: "للتزيين" },
+      { name: "نعناع طازج مفروم - عراقي", amount: "للتزيين" },
     ],
     steps: [
       "ننقع جبن الحلوم في الماء لمدة 10 دقائق للتخلص من الملح الزائد ثم نصفيه جيداً.",
@@ -8953,6 +9185,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الفلفل الرومي الملون أو الفطر إلى الحمسة لزيادة القيمة الغذائية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -8976,7 +9209,7 @@ export const RECIPES: Recipe[] = [
       { name: "حليب سائل", amount: "4 أكواب" },
       { name: "سكر أو عسل", amount: "حسب الرغبة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
-      { name: "قرفة مطحونة", amount: "للتزيين" },
+      { name: "قرفة مطحونة - سعودية", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الجريش من ماء النقع.",
@@ -8988,7 +9221,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة ملعقة من ماء الورد أو الزعفران في نهاية الطهي لإعطاء نكهة إضافية.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-jareesh-V9VSyMCZWP4MsNiPGSnfW8.webp",
   },
   {
     id: "gb_23",
@@ -9027,7 +9261,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن تزيين الوجه بالبصل المقلي والكزبرة المفرومة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-machboos-7VRhZnMz2V9qSQMXaa2M2V.webp",
   },
   {
     id: "gb_24",
@@ -9053,7 +9288,7 @@ export const RECIPES: Recipe[] = [
       { name: "حبة سوداء (حبة البركة)", amount: "ملعقة كبيرة" },
       { name: "ماء دافئ", amount: "كوبان (تقريباً)" },
       { name: "بيض", amount: "بيضة واحدة لدهن الوجه" },
-      { name: "سمسم", amount: "للتزيين" },
+      { name: "سمسم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "في وعاء، نخلط المكونات الجافة: الطحين، السكر، الخميرة، حليب البودرة، والحبة السوداء.",
@@ -9066,6 +9301,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز طري، يجب أن تكون العجينة لينة وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -9088,7 +9324,7 @@ export const RECIPES: Recipe[] = [
       { name: "صلصة المهياوة الجاهزة", amount: "نصف كوب" },
       { name: "زيت زيتون", amount: "ملعقتان كبيرتان" },
       { name: "بصل أبيض مفروم ناعم (اختياري)", amount: "ملعقتان كبيرتان" },
-      { name: "خبز رقاق أو خبز تنور", amount: "للتقديم" },
+      { name: "خبز رقاق أو خبز تنور - إماراتي", amount: "للتقديم" },
     ],
     steps: [
       "يمكن تقديم المهياوة كما هي مباشرة من العلبة.",
@@ -9100,7 +9336,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "المهياوة لها طعم مالح وقوي جداً، لذا تستخدم بكميات قليلة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1060",
@@ -9137,7 +9374,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر الطبق هو كرملة البصل جيداً للحصول على نكهة حلوة ومميزة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1061",
@@ -9175,6 +9413,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يجب أن تكون النار عالية والطهي سريعاً للحفاظ على الكبدة طرية وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi",
   },
   {
@@ -9199,7 +9438,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيتون أسود أو أخضر", amount: "ربع كوب" },
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "زعتر مجفف", amount: "ملعقة كبيرة" },
-      { name: "نعناع طازج مفروم", amount: "للتزيين" },
+      { name: "نعناع طازج مفروم - عراقي", amount: "للتزيين" },
     ],
     steps: [
       "ننقع جبن الحلوم في الماء لمدة 10 دقائق للتخلص من الملح الزائد ثم نصفيه جيداً.",
@@ -9211,6 +9450,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الفلفل الرومي الملون أو الفطر إلى الحمسة لزيادة القيمة الغذائية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -9234,7 +9474,7 @@ export const RECIPES: Recipe[] = [
       { name: "حليب سائل", amount: "4 أكواب" },
       { name: "سكر أو عسل", amount: "حسب الرغبة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
-      { name: "قرفة مطحونة", amount: "للتزيين" },
+      { name: "قرفة مطحونة - سعودية", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الجريش من ماء النقع.",
@@ -9246,7 +9486,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة ملعقة من ماء الورد أو الزعفران في نهاية الطهي لإعطاء نكهة إضافية.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-jareesh-V9VSyMCZWP4MsNiPGSnfW8.webp",
   },
   {
     id: "recipe_1064",
@@ -9285,7 +9526,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن تزيين الوجه بالبصل المقلي والكزبرة المفرومة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-machboos-7VRhZnMz2V9qSQMXaa2M2V.webp",
   },
   {
     id: "recipe_1065",
@@ -9311,7 +9553,7 @@ export const RECIPES: Recipe[] = [
       { name: "حبة سوداء (حبة البركة)", amount: "ملعقة كبيرة" },
       { name: "ماء دافئ", amount: "كوبان (تقريباً)" },
       { name: "بيض", amount: "بيضة واحدة لدهن الوجه" },
-      { name: "سمسم", amount: "للتزيين" },
+      { name: "سمسم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "في وعاء، نخلط المكونات الجافة: الطحين، السكر، الخميرة، حليب البودرة، والحبة السوداء.",
@@ -9324,6 +9566,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز طري، يجب أن تكون العجينة لينة وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -9346,7 +9589,7 @@ export const RECIPES: Recipe[] = [
       { name: "صلصة المهياوة الجاهزة", amount: "نصف كوب" },
       { name: "زيت زيتون", amount: "ملعقتان كبيرتان" },
       { name: "بصل أبيض مفروم ناعم (اختياري)", amount: "ملعقتان كبيرتان" },
-      { name: "خبز رقاق أو خبز تنور", amount: "للتقديم" },
+      { name: "خبز رقاق أو خبز تنور - إماراتي", amount: "للتقديم" },
     ],
     steps: [
       "يمكن تقديم المهياوة كما هي مباشرة من العلبة.",
@@ -9358,7 +9601,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "المهياوة لها طعم مالح وقوي جداً، لذا تستخدم بكميات قليلة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1067",
@@ -9395,7 +9639,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر الطبق هو كرملة البصل جيداً للحصول على نكهة حلوة ومميزة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1068",
@@ -9433,6 +9678,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يجب أن تكون النار عالية والطهي سريعاً للحفاظ على الكبدة طرية وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi",
   },
   {
@@ -9457,7 +9703,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيتون أسود أو أخضر", amount: "ربع كوب" },
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "زعتر مجفف", amount: "ملعقة كبيرة" },
-      { name: "نعناع طازج مفروم", amount: "للتزيين" },
+      { name: "نعناع طازج مفروم - عراقي", amount: "للتزيين" },
     ],
     steps: [
       "ننقع جبن الحلوم في الماء لمدة 10 دقائق للتخلص من الملح الزائد ثم نصفيه جيداً.",
@@ -9469,6 +9715,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الفلفل الرومي الملون أو الفطر إلى الحمسة لزيادة القيمة الغذائية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -9492,7 +9739,7 @@ export const RECIPES: Recipe[] = [
       { name: "حليب سائل", amount: "4 أكواب" },
       { name: "سكر أو عسل", amount: "حسب الرغبة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
-      { name: "قرفة مطحونة", amount: "للتزيين" },
+      { name: "قرفة مطحونة - سعودية", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الجريش من ماء النقع.",
@@ -9504,7 +9751,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة ملعقة من ماء الورد أو الزعفران في نهاية الطهي لإعطاء نكهة إضافية.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-jareesh-V9VSyMCZWP4MsNiPGSnfW8.webp",
   },
   {
     id: "recipe_1071",
@@ -9543,7 +9791,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن تزيين الوجه بالبصل المقلي والكزبرة المفرومة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-machboos-7VRhZnMz2V9qSQMXaa2M2V.webp",
   },
   {
     id: "recipe_1072",
@@ -9569,7 +9818,7 @@ export const RECIPES: Recipe[] = [
       { name: "حبة سوداء (حبة البركة)", amount: "ملعقة كبيرة" },
       { name: "ماء دافئ", amount: "كوبان (تقريباً)" },
       { name: "بيض", amount: "بيضة واحدة لدهن الوجه" },
-      { name: "سمسم", amount: "للتزيين" },
+      { name: "سمسم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "في وعاء، نخلط المكونات الجافة: الطحين، السكر، الخميرة، حليب البودرة، والحبة السوداء.",
@@ -9582,6 +9831,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز طري، يجب أن تكون العجينة لينة وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -9604,7 +9854,7 @@ export const RECIPES: Recipe[] = [
       { name: "صلصة المهياوة الجاهزة", amount: "نصف كوب" },
       { name: "زيت زيتون", amount: "ملعقتان كبيرتان" },
       { name: "بصل أبيض مفروم ناعم (اختياري)", amount: "ملعقتان كبيرتان" },
-      { name: "خبز رقاق أو خبز تنور", amount: "للتقديم" },
+      { name: "خبز رقاق أو خبز تنور - إماراتي", amount: "للتقديم" },
     ],
     steps: [
       "يمكن تقديم المهياوة كما هي مباشرة من العلبة.",
@@ -9616,7 +9866,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "المهياوة لها طعم مالح وقوي جداً، لذا تستخدم بكميات قليلة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1074",
@@ -9653,7 +9904,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر الطبق هو كرملة البصل جيداً للحصول على نكهة حلوة ومميزة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1075",
@@ -9691,6 +9943,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يجب أن تكون النار عالية والطهي سريعاً للحفاظ على الكبدة طرية وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi",
   },
   {
@@ -9715,7 +9968,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيتون أسود أو أخضر", amount: "ربع كوب" },
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "زعتر مجفف", amount: "ملعقة كبيرة" },
-      { name: "نعناع طازج مفروم", amount: "للتزيين" },
+      { name: "نعناع طازج مفروم - عراقي", amount: "للتزيين" },
     ],
     steps: [
       "ننقع جبن الحلوم في الماء لمدة 10 دقائق للتخلص من الملح الزائد ثم نصفيه جيداً.",
@@ -9727,6 +9980,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الفلفل الرومي الملون أو الفطر إلى الحمسة لزيادة القيمة الغذائية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -9750,7 +10004,7 @@ export const RECIPES: Recipe[] = [
       { name: "حليب سائل", amount: "4 أكواب" },
       { name: "سكر أو عسل", amount: "حسب الرغبة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
-      { name: "قرفة مطحونة", amount: "للتزيين" },
+      { name: "قرفة مطحونة - سعودية", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الجريش من ماء النقع.",
@@ -9762,7 +10016,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة ملعقة من ماء الورد أو الزعفران في نهاية الطهي لإعطاء نكهة إضافية.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-jareesh-V9VSyMCZWP4MsNiPGSnfW8.webp",
   },
   {
     id: "recipe_1078",
@@ -9801,7 +10056,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن تزيين الوجه بالبصل المقلي والكزبرة المفرومة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-machboos-7VRhZnMz2V9qSQMXaa2M2V.webp",
   },
   {
     id: "recipe_1079",
@@ -9827,7 +10083,7 @@ export const RECIPES: Recipe[] = [
       { name: "حبة سوداء (حبة البركة)", amount: "ملعقة كبيرة" },
       { name: "ماء دافئ", amount: "كوبان (تقريباً)" },
       { name: "بيض", amount: "بيضة واحدة لدهن الوجه" },
-      { name: "سمسم", amount: "للتزيين" },
+      { name: "سمسم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "في وعاء، نخلط المكونات الجافة: الطحين، السكر، الخميرة، حليب البودرة، والحبة السوداء.",
@@ -9840,6 +10096,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز طري، يجب أن تكون العجينة لينة وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -9862,7 +10119,7 @@ export const RECIPES: Recipe[] = [
       { name: "صلصة المهياوة الجاهزة", amount: "نصف كوب" },
       { name: "زيت زيتون", amount: "ملعقتان كبيرتان" },
       { name: "بصل أبيض مفروم ناعم (اختياري)", amount: "ملعقتان كبيرتان" },
-      { name: "خبز رقاق أو خبز تنور", amount: "للتقديم" },
+      { name: "خبز رقاق أو خبز تنور - إماراتي", amount: "للتقديم" },
     ],
     steps: [
       "يمكن تقديم المهياوة كما هي مباشرة من العلبة.",
@@ -9874,7 +10131,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "المهياوة لها طعم مالح وقوي جداً، لذا تستخدم بكميات قليلة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1081",
@@ -9911,7 +10169,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر الطبق هو كرملة البصل جيداً للحصول على نكهة حلوة ومميزة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1082",
@@ -9949,6 +10208,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يجب أن تكون النار عالية والطهي سريعاً للحفاظ على الكبدة طرية وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi",
   },
   {
@@ -9973,7 +10233,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيتون أسود أو أخضر", amount: "ربع كوب" },
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "زعتر مجفف", amount: "ملعقة كبيرة" },
-      { name: "نعناع طازج مفروم", amount: "للتزيين" },
+      { name: "نعناع طازج مفروم - عراقي", amount: "للتزيين" },
     ],
     steps: [
       "ننقع جبن الحلوم في الماء لمدة 10 دقائق للتخلص من الملح الزائد ثم نصفيه جيداً.",
@@ -9985,6 +10245,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الفلفل الرومي الملون أو الفطر إلى الحمسة لزيادة القيمة الغذائية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -10008,7 +10269,7 @@ export const RECIPES: Recipe[] = [
       { name: "حليب سائل", amount: "4 أكواب" },
       { name: "سكر أو عسل", amount: "حسب الرغبة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
-      { name: "قرفة مطحونة", amount: "للتزيين" },
+      { name: "قرفة مطحونة - سعودية", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الجريش من ماء النقع.",
@@ -10020,7 +10281,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة ملعقة من ماء الورد أو الزعفران في نهاية الطهي لإعطاء نكهة إضافية.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-jareesh-V9VSyMCZWP4MsNiPGSnfW8.webp",
   },
   {
     id: "recipe_1085",
@@ -10059,7 +10321,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن تزيين الوجه بالبصل المقلي والكزبرة المفرومة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-machboos-7VRhZnMz2V9qSQMXaa2M2V.webp",
   },
   {
     id: "recipe_1086",
@@ -10085,7 +10348,7 @@ export const RECIPES: Recipe[] = [
       { name: "حبة سوداء (حبة البركة)", amount: "ملعقة كبيرة" },
       { name: "ماء دافئ", amount: "كوبان (تقريباً)" },
       { name: "بيض", amount: "بيضة واحدة لدهن الوجه" },
-      { name: "سمسم", amount: "للتزيين" },
+      { name: "سمسم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "في وعاء، نخلط المكونات الجافة: الطحين، السكر، الخميرة، حليب البودرة، والحبة السوداء.",
@@ -10098,6 +10361,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز طري، يجب أن تكون العجينة لينة وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -10120,7 +10384,7 @@ export const RECIPES: Recipe[] = [
       { name: "صلصة المهياوة الجاهزة", amount: "نصف كوب" },
       { name: "زيت زيتون", amount: "ملعقتان كبيرتان" },
       { name: "بصل أبيض مفروم ناعم (اختياري)", amount: "ملعقتان كبيرتان" },
-      { name: "خبز رقاق أو خبز تنور", amount: "للتقديم" },
+      { name: "خبز رقاق أو خبز تنور - إماراتي", amount: "للتقديم" },
     ],
     steps: [
       "يمكن تقديم المهياوة كما هي مباشرة من العلبة.",
@@ -10132,7 +10396,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "المهياوة لها طعم مالح وقوي جداً، لذا تستخدم بكميات قليلة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1088",
@@ -10169,7 +10434,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر الطبق هو كرملة البصل جيداً للحصول على نكهة حلوة ومميزة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1089",
@@ -10207,6 +10473,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يجب أن تكون النار عالية والطهي سريعاً للحفاظ على الكبدة طرية وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi",
   },
   {
@@ -10231,7 +10498,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيتون أسود أو أخضر", amount: "ربع كوب" },
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "زعتر مجفف", amount: "ملعقة كبيرة" },
-      { name: "نعناع طازج مفروم", amount: "للتزيين" },
+      { name: "نعناع طازج مفروم - عراقي", amount: "للتزيين" },
     ],
     steps: [
       "ننقع جبن الحلوم في الماء لمدة 10 دقائق للتخلص من الملح الزائد ثم نصفيه جيداً.",
@@ -10243,6 +10510,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الفلفل الرومي الملون أو الفطر إلى الحمسة لزيادة القيمة الغذائية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -10266,7 +10534,7 @@ export const RECIPES: Recipe[] = [
       { name: "حليب سائل", amount: "4 أكواب" },
       { name: "سكر أو عسل", amount: "حسب الرغبة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
-      { name: "قرفة مطحونة", amount: "للتزيين" },
+      { name: "قرفة مطحونة - سعودية", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الجريش من ماء النقع.",
@@ -10278,7 +10546,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة ملعقة من ماء الورد أو الزعفران في نهاية الطهي لإعطاء نكهة إضافية.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-jareesh-V9VSyMCZWP4MsNiPGSnfW8.webp",
   },
   {
     id: "recipe_1092",
@@ -10317,7 +10586,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن تزيين الوجه بالبصل المقلي والكزبرة المفرومة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-machboos-7VRhZnMz2V9qSQMXaa2M2V.webp",
   },
   {
     id: "recipe_1093",
@@ -10343,7 +10613,7 @@ export const RECIPES: Recipe[] = [
       { name: "حبة سوداء (حبة البركة)", amount: "ملعقة كبيرة" },
       { name: "ماء دافئ", amount: "كوبان (تقريباً)" },
       { name: "بيض", amount: "بيضة واحدة لدهن الوجه" },
-      { name: "سمسم", amount: "للتزيين" },
+      { name: "سمسم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "في وعاء، نخلط المكونات الجافة: الطحين، السكر، الخميرة، حليب البودرة، والحبة السوداء.",
@@ -10356,6 +10626,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز طري، يجب أن تكون العجينة لينة وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -10378,7 +10649,7 @@ export const RECIPES: Recipe[] = [
       { name: "صلصة المهياوة الجاهزة", amount: "نصف كوب" },
       { name: "زيت زيتون", amount: "ملعقتان كبيرتان" },
       { name: "بصل أبيض مفروم ناعم (اختياري)", amount: "ملعقتان كبيرتان" },
-      { name: "خبز رقاق أو خبز تنور", amount: "للتقديم" },
+      { name: "خبز رقاق أو خبز تنور - إماراتي", amount: "للتقديم" },
     ],
     steps: [
       "يمكن تقديم المهياوة كما هي مباشرة من العلبة.",
@@ -10390,7 +10661,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "المهياوة لها طعم مالح وقوي جداً، لذا تستخدم بكميات قليلة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "recipe_1095",
@@ -10427,7 +10699,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "سر الطبق هو كرملة البصل جيداً للحصول على نكهة حلوة ومميزة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
   },
   {
     id: "recipe_1096",
@@ -10465,6 +10738,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يجب أن تكون النار عالية والطهي سريعاً للحفاظ على الكبدة طرية وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi",
   },
   {
@@ -10489,7 +10763,7 @@ export const RECIPES: Recipe[] = [
       { name: "زيتون أسود أو أخضر", amount: "ربع كوب" },
       { name: "زيت زيتون", amount: "3 ملاعق كبيرة" },
       { name: "زعتر مجفف", amount: "ملعقة كبيرة" },
-      { name: "نعناع طازج مفروم", amount: "للتزيين" },
+      { name: "نعناع طازج مفروم - عراقي", amount: "للتزيين" },
     ],
     steps: [
       "ننقع جبن الحلوم في الماء لمدة 10 دقائق للتخلص من الملح الزائد ثم نصفيه جيداً.",
@@ -10501,6 +10775,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة الفلفل الرومي الملون أو الفطر إلى الحمسة لزيادة القيمة الغذائية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -10524,7 +10799,7 @@ export const RECIPES: Recipe[] = [
       { name: "حليب سائل", amount: "4 أكواب" },
       { name: "سكر أو عسل", amount: "حسب الرغبة" },
       { name: "هيل مطحون", amount: "نصف ملعقة صغيرة" },
-      { name: "قرفة مطحونة", amount: "للتزيين" },
+      { name: "قرفة مطحونة - سعودية", amount: "للتزيين" },
     ],
     steps: [
       "نصفي الجريش من ماء النقع.",
@@ -10536,7 +10811,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن إضافة ملعقة من ماء الورد أو الزعفران في نهاية الطهي لإعطاء نكهة إضافية.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-jareesh-V9VSyMCZWP4MsNiPGSnfW8.webp",
   },
   {
     id: "recipe_1099",
@@ -10575,7 +10851,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "يمكن تزيين الوجه بالبصل المقلي والكزبرة المفرومة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-machboos-7VRhZnMz2V9qSQMXaa2M2V.webp",
   },
   {
     id: "recipe_1100",
@@ -10601,7 +10878,7 @@ export const RECIPES: Recipe[] = [
       { name: "حبة سوداء (حبة البركة)", amount: "ملعقة كبيرة" },
       { name: "ماء دافئ", amount: "كوبان (تقريباً)" },
       { name: "بيض", amount: "بيضة واحدة لدهن الوجه" },
-      { name: "سمسم", amount: "للتزيين" },
+      { name: "سمسم - إماراتي", amount: "للتزيين" },
     ],
     steps: [
       "في وعاء، نخلط المكونات الجافة: الطحين، السكر، الخميرة، حليب البودرة، والحبة السوداء.",
@@ -10614,6 +10891,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "للحصول على خبز طري، يجب أن تكون العجينة لينة وغير قاسية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-bread",
   },
   {
@@ -10636,7 +10914,7 @@ export const RECIPES: Recipe[] = [
       { name: "صلصة المهياوة الجاهزة", amount: "نصف كوب" },
       { name: "زيت زيتون", amount: "ملعقتان كبيرتان" },
       { name: "بصل أبيض مفروم ناعم (اختياري)", amount: "ملعقتان كبيرتان" },
-      { name: "خبز رقاق أو خبز تنور", amount: "للتقديم" },
+      { name: "خبز رقاق أو خبز تنور - إماراتي", amount: "للتقديم" },
     ],
     steps: [
       "يمكن تقديم المهياوة كما هي مباشرة من العلبة.",
@@ -10648,10 +10926,11 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "المهياوة لها طعم مالح وقوي جداً، لذا تستخدم بكميات قليلة.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   // ============ Batch 7 ============
-{    "id": "gl_1",    "name": "مجبوس دجاج",    "description": "طبق المجبوس غني عن التعريف، من أشهر أطباق الخليج.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 60,    "servings": 4,    "calories": 650,    "protein": 45,    "carbs": 70,    "fat": 20,    "fiber": 5,    "ingredients": [      { "name": "دجاجة كاملة", "amount": "1" },      { "name": "أرز بسمتي", "amount": "3 أكواب" },      { "name": "بصل مفروم", "amount": "2" },      { "name": "طماطم مفرومة", "amount": "2" },      { "name": "معجون طماطم", "amount": "2 ملعقة كبيرة" },      { "name": "بهارات مشكلة", "amount": "1 ملعقة كبيرة" },      { "name": "لومي", "amount": "2" }    ],    "steps": [      "يُغسل الدجاج جيداً ويُقطع إلى أربع قطع.",      "في قدر على النار، يُحمر البصل ثم يُضاف الدجاج ويُقلب حتى يتغير لونه.",      "تُضاف الطماطم ومعجون الطماطم والبهارات واللومي ويُقلب المزيج.",      "يُضاف الماء المغلي ويُترك الدجاج لينضج.",      "يُرفع الدجاج من المرق ويُحمر في الفرن.",      "يُضاف الأرز إلى المرق ويُترك على نار هادئة حتى ينضج."    ],    "tips": "للحصول على نكهة أغنى، يمكن إضافة الحشو (بصل مقلي مع زبيب وبهارات) على وجه الأرز عند التقديم.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_2",    "name": "مجبوس لحم",    "description": "مجبوس اللحم، أكلة خليجية أصيلة وفاخرة.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 25,    "cookTime": 120,    "servings": 6,    "calories": 750,    "protein": 50,    "carbs": 80,    "fat": 25,    "fiber": 6,    "ingredients": [      { "name": "لحم غنم بالعظم", "amount": "1 كيلو" },      { "name": "أرز بسمتي", "amount": "4 أكواب" },      { "name": "بصل مفروم", "amount": "3" },      { "name": "ثوم مهروس", "amount": "4 فصوص" },      { "name": "بهارات كبسة", "amount": "2 ملعقة كبيرة" },      { "name": "زعفران", "amount": "رشة" },      { "name": "ماء ورد", "amount": "1 ملعقة كبيرة" }    ],    "steps": [      "يُسلق اللحم مع البهارات الصحيحة (هيل، قرفة، ورق غار) حتى ينضج.",      "في قدر آخر، يُحمر البصل والثوم ثم يُضاف اللحم المسلوق ويُقلب.",      "يُضاف الأرز والملح وبهارات الكبسة ويُصب فوقه مرق اللحم.",      "يُنقع الزعفران في ماء الورد ويُضاف على وجه الأرز قبل أن ينضج تماماً.",      "يُترك الأرز على نار هادئة جداً حتى يتسكر.",      "يُقدم المجبوس ويزين بالحشو والمكسرات."    ],    "tips": "يفضل استخدام لحم الخروف الصغير للحصول على أفضل طعم.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_3",    "name": "هريس",    "description": "الهريس، طبق شعبي خليجي معروف بقوامه الكريمي.",    "category": "hearty",    "mealType": ["dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 30,    "cookTime": 240,    "servings": 8,    "calories": 500,    "protein": 30,    "carbs": 60,    "fat": 15,    "fiber": 10,    "ingredients": [      { "name": "حب هريس", "amount": "2 كوب" },      { "name": "لحم غنم بدون عظم", "amount": "500 غرام" },      { "name": "ماء", "amount": "كمية كبيرة" },      { "name": "ملح", "amount": "حسب الرغبة" },      { "name": "سمن بلدي", "amount": "للتزيين" }    ],    "steps": [      "يُنقع حب الهريس ليلة كاملة.",      "في قدر كبير وعميق، يوضع حب الهريس واللحم والماء والملح.",      "يُترك على نار عالية حتى يغلي، ثم تُخفف النار ويُترك لمدة 4-5 ساعات مع التحريك من وقت لآخر.",      "بعد أن ينضج اللحم والهريس تماماً، يُضرب المزيج بمضرب الهريس الخشبي (أو الكهربائي) حتى يصبح القوام كريمياً ومتجانساً.",      "يُسكب الهريس في أطباق التقديم.",      "يُزين بالسمن البلدي المذاب ويُقدم ساخناً."    ],    "tips": "يحتاج الهريس إلى صبر ووقت طويل للطبخ، لكن النتيجة تستحق العناء.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_4",    "name": "ثريد",    "description": "الثريد أو التشريب، خبز ولحم ومرق، أكلة غنية بالنكهات.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 90,    "servings": 5,    "calories": 600,    "protein": 40,    "carbs": 50,    "fat": 25,    "fiber": 8,    "ingredients": [      { "name": "لحم غنم بالعظم", "amount": "750 غرام" },      { "name": "خبز رقاق", "amount": "5 أرغفة" },      { "name": "خضروات مشكلة (بطاطس، جزر، كوسا)", "amount": "3 أكواب" },      { "name": "بصل", "amount": "1" },      { "name": "معجون طماطم", "amount": "3 ملاعق كبيرة" },      { "name": "لومي", "amount": "2" }    ],    "steps": [      "يُسلق اللحم مع البصل والبهارات حتى يقترب من النضج.",      "تُضاف الخضروات ومعجون الطماطم واللومي ويُترك المرق ليغلي وتُنضج الخضروات.",      "يُقطع خبز الرقاق إلى قطع متوسطة ويوضع في طبق تقديم عميق.",      "يُصب المرق مع اللحم والخضروات فوق الخبز.",      "يُترك لبضع دقائق حتى يتشرب الخبز المرق.",      "يُقدم الثريد ساخناً."    ],    "tips": "يمكن إضافة أي نوع من الخضروات المفضلة لديكم.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_5",    "name": "مضروبة",    "description": "المضروبة، طبق دجاج وأرز مهروس، طعمه مميز.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 15,    "cookTime": 75,    "servings": 4,    "calories": 550,    "protein": 35,    "carbs": 65,    "fat": 15,    "fiber": 7,    "ingredients": [      { "name": "دجاجة مسلوقة ومنزوعة العظم", "amount": "1" },      { "name": "أرز مصري", "amount": "1 كوب" },      { "name": "بصل مفروم", "amount": "1" },      { "name": "طماطم مفرومة", "amount": "2" },      { "name": "كزبرة وشبت مفروم", "amount": "1 كوب" },      { "name": "سمن", "amount": "2 ملعقة كبيرة" }    ],    "steps": [      "في قدر، يُحمر البصل في السمن ثم تُضاف الطماطم.",      "يُضاف الدجاج المسلوق والأرز والكزبرة والشبت.",      "يُضاف مرق الدجاج ويُترك المزيج على نار هادئة.",      "يُحرك المزيج باستمرار ويُضرب بملعقة خشبية حتى يصبح القوام غليظاً ومهروساً.",      "تُسكب المضروبة في طبق التقديم.",      "تُزين بالبصل المقلي أو السمن."    ],    "tips": "كلما زادت مدة ضرب المضروبة، أصبح قوامها أفضل.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_6",    "name": "مرقوق",    "description": "المرقوق، عجينة رقيقة مع مرق اللحم والخضار.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 40,    "cookTime": 100,    "servings": 6,    "calories": 620,    "protein": 38,    "carbs": 70,    "fat": 20,    "fiber": 9,    "ingredients": [      { "name": "لحم غنم", "amount": "500 غرام" },      { "name": "دقيق أسمر", "amount": "3 أكواب" },      { "name": "خضروات مشكلة (قرع، باذنجان، فاصوليا خضراء)", "amount": "4 أكواب" },      { "name": "بصل", "amount": "2" },      { "name": "معجون طماطم", "amount": "1/4 كوب" },      { "name": "بهارات", "amount": "حسب الرغبة" }    ],    "steps": [      "يُعجن الدقيق مع الماء والملح لتكوين عجينة متماسكة وتُترك لترتاح.",      "يُطبخ اللحم مع البصل والبهارات ومعجون الطماطم.",      "تُضاف الخضروات وتُترك لتنضج مع اللحم.",      "تُفرد العجينة إلى دوائر رقيقة وتُضاف واحدة تلو الأخرى إلى مرق اللحم.",      "تُترك كل طبقة من العجين لتنضج قبل إضافة الطبقة التالية.",      "يُقدم المرقوق ساخناً."    ],    "tips": "يجب أن تكون العجينة رقيقة جداً للحصول على أفضل نتيجة.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_7",    "name": "جريش",    "description": "الجريش، قمح مجروش مع اللبن واللحم أو الدجاج.",    "category": "hearty",    "mealType": ["dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 180,    "servings": 8,    "calories": 480,    "protein": 25,    "carbs": 70,    "fat": 10,    "fiber": 12,    "ingredients": [      { "name": "جريش", "amount": "2 كوب" },      { "name": "صدر دجاج", "amount": "2" },      { "name": "لبن رائب", "amount": "4 أكواب" },      { "name": "بصل مفروم", "amount": "1" },      { "name": "كمون", "amount": "1 ملعقة صغيرة" },      { "name": "سمن", "amount": "للتزيين" }    ],    "steps": [      "يُنقع الجريش لمدة ساعتين على الأقل.",      "يُسلق الدجاج ثم يُفتت إلى قطع صغيرة.",      "في قدر، يُخلط الجريش المنقوع مع الدجاج المفتت واللبن والبصل والكمون والملح.",      "يُترك على نار هادئة لمدة 3 ساعات مع التحريك المستمر.",      "يُقدم الجريش ساخناً بعد تزيينه بالسمن وحمسة البصل.",      "يمكن إضافة الفلفل الحار حسب الرغبة."    ],    "tips": "استخدام اللبن كامل الدسم يعطي الجريش طعماً أغنى.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_8",    "name": "مطازيز",    "description": "المطازيز، قطع صغيرة من العجين مع مرق اللحم والخضار.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 45,    "cookTime": 120,    "servings": 6,    "calories": 590,    "protein": 35,    "carbs": 65,    "fat": 22,    "fiber": 10,    "ingredients": [      { "name": "لحم", "amount": "500 غرام" },      { "name": "دقيق أسمر", "amount": "3 أكواب" },      { "name": "خضروات مشكلة", "amount": "4 أكواب" },      { "name": "بصل", "amount": "2" },      { "name": "معجون طماطم", "amount": "3 ملاعق كبيرة" },      { "name": "بهارات", "amount": "حسب الرغبة" }    ],    "steps": [      "تُحضر عجينة المطازيز من الدقيق والماء والملح وتُشكل إلى كرات صغيرة.",      "يُطبخ اللحم مع البصل والبهارات ومعجون الطماطم.",      "تُضاف الخضروات وتُترك لتنضج.",      "تُفرد كرات العجين إلى دوائر صغيرة ورقيقة وتُضاف إلى المرق.",      "تُترك المطازيز لتنضج تماماً في المرق.",      "تُقدم ساخنة."    ],    "tips": "يمكن استخدام آلة خاصة لتشكيل المطازيز لتسهيل العملية.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_9",    "name": "صالونة دجاج",    "description": "صالونة الدجاج، مرق دجاج غني بالخضار والبهارات.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all", "all"],    "difficulty": "easy",    "prepTime": 15,    "cookTime": 45,    "servings": 4,    "calories": 450,    "protein": 30,    "carbs": 25,    "fat": 25,    "fiber": 8,    "ingredients": [      { "name": "قطع دجاج", "amount": "500 غرام" },      { "name": "بطاطس مكعبات", "amount": "2" },      { "name": "جزر مكعبات", "amount": "2" },      { "name": "بصل مفروم", "amount": "1" },      { "name": "ثوم مهروس", "amount": "3 فصوص" },      { "name": "كزبرة مفرومة", "amount": "1/2 كوب" },      { "name": "بهارات كاري", "amount": "1 ملعقة كبيرة" }    ],    "steps": [      "في قدر على النار، يُحمر البصل والثوم.",      "تُضاف قطع الدجاج وتُقلب حتى تتحمر.",      "تُضاف البطاطس والجزر والبهارات وتُقلب.",      "يُضاف الماء ومعجون الطماطم ويُترك المزيج ليغلي.",      "تُخفف النار وتُترك الصالونة لتتسبك وتنضج الخضروات.",      "تُضاف الكزبرة المفرومة في النهاية وتُقدم مع الأرز الأبيض."    ],    "tips": "لجعل الصالونة صحية أكثر، يمكن الاستغناء عن تحمير الدجاج وسلقه مباشرة.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_10",    "name": "صالونة لحم",    "description": "صالونة اللحم، طبق خليجي دسم وشهي.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 90,    "servings": 5,    "calories": 550,    "protein": 40,    "carbs": 30,    "fat": 30,    "fiber": 7,    "ingredients": [      { "name": "لحم غنم مقطع", "amount": "600 غرام" },      { "name": "بامية", "amount": "1 كوب" },      { "name": "قرع مقطع", "amount": "1 كوب" },      { "name": "بصل", "amount": "1" },      { "name": "طماطم", "amount": "3" },      { "name": "بهارات لحم", "amount": "1 ملعقة كبيرة" }    ],    "steps": [      "يُحمر البصل في قدر ثم يُضاف اللحم ويُقلب حتى يتغير لونه.",      "تُضاف الطماطم المفرومة والبهارات ومعجون الطماطم.",      "يُضاف الماء ويُترك اللحم لينضج على نار هادئة.",      "عندما يقترب اللحم من النضج، تُضاف البامية والقرع.",      "تُترك الصالونة على النار حتى تنضج الخضروات وتتسبك.",      "تُقدم مع الأرز الأبيض أو الخبز."    ],    "tips": "استخدام اللحم مع العظم يعطي نكهة أعمق للصالونة.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_11",    "name": "مندي",    "description": "المندي، طبق أرز ولحم مدخن، من أشهر أكلات اليمن والخليج.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 30,    "cookTime": 150,    "servings": 8,    "calories": 800,    "protein": 55,    "carbs": 90,    "fat": 28,    "fiber": 5,    "ingredients": [      { "name": "لحم خروف (كتف أو فخذ)", "amount": "1.5 كيلو" },      { "name": "أرز بسمتي", "amount": "5 أكواب" },      { "name": "بهارات مندي", "amount": "2 ملعقة كبيرة" },      { "name": "بصل", "amount": "2" },      { "name": "زيت", "amount": "1/2 كوب" },      { "name": "فحم", "amount": "قطعة صغيرة للتدخين" }    ],    "steps": [      "يُتبل اللحم ببهارات المندي والملح.",      "في قدر المندي (أو قدر عادي كبير)، يُحمر البصل في الزيت.",      "يُضاف الأرز والماء والملح ويُترك ليغلي.",      "يُوضع شبك فوق الأرز ويوضع فوقه اللحم المتبل.",      "يُغطى القدر بإحكام ويُترك على نار هادئة جداً لمدة ساعتين إلى ساعتين ونصف.",      "قبل التقديم، تُشعل قطعة الفحم وتوضع في طبق صغير مع زيت داخل القدر وتُغطى بسرعة لتدخين الأرز واللحم."    ],    "tips": "سر المندي في الطبخ البطيء والتدخين في النهاية.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_12",    "name": "حنيذ",    "description": "الحنيذ، لحم مطبوخ بحرارة الحجر أو في حفرة خاصة.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 20,    "cookTime": 180,    "servings": 10,    "calories": 700,    "protein": 60,    "carbs": 0,    "fat": 50,    "fiber": 0,    "ingredients": [      { "name": "خروف كامل أو قطع كبيرة", "amount": "حسب الحاجة" },      { "name": "ملح خشن", "amount": "كمية وافرة" },      { "name": "نبات المرخ أو السلع", "amount": "كمية لتغليف اللحم" }    ],    "steps": [      "تُجهز حفرة خاصة (التنور أو المحنذ) وتُشعل فيها النار حتى تصبح جمرة.",      "يُتبل اللحم بالملح الخشن فقط.",      "يُلف اللحم بأوراق المرخ أو السلع.",      "تُزال الجمرة من الحفرة وتُبطن بأوراق المرخ.",      "يُوضع اللحم الملفوف في الحفرة ويُغطى بطبقة أخرى من المرخ.",      "تُغلق الحفرة بإحكام وتُترك لمدة 3-4 ساعات حتى ينضج اللحم تماماً."    ],    "tips": "هذه الطريقة التقليدية، يمكن استخدام قدر الضغط كبديل منزلي للحصول على نتيجة قريبة.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_13",    "name": "كبسة",    "description": "الكبسة السعودية، ملكة المائدة في كل بيت.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 70,    "servings": 6,    "calories": 720,    "protein": 48,    "carbs": 85,    "fat": 22,    "fiber": 6,    "ingredients": [      { "name": "دجاجة مقطعة", "amount": "1" },      { "name": "أرز بسمتي", "amount": "4 أكواب" },      { "name": "بصل", "amount": "2" },      { "name": "صلصة طماطم", "amount": "2 ملعقة كبيرة" },      { "name": "بهارات كبسة", "amount": "2 ملعقة كبيرة" },      { "name": "زبيب ومكسرات", "amount": "للتزيين" }    ],    "steps": [      "يُحمر البصل في قدر ثم يُضاف الدجاج ويُقلب.",      "تُضاف صلصة الطماطم وبهارات الكبسة والماء ويُترك الدجاج لينضج.",      "يُرفع الدجاج ويُحمر بالفرن.",      "يُضاف الأرز إلى مرق الدجاج ويُطبخ على نار هادئة.",      "يُقدم الأرز وفوقه الدجاج.",      "يُزين بالزبيب والمكسرات المقلية."    ],    "tips": "يمكن إضافة الجزر المبشور أو الفلفل الرومي مع حمسه البصل لإضافة نكهة.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_14",    "name": "مظبي",    "description": "المظبي، دجاج مشوي على الحجر، طعم لا يقاوم.",    "category": "quick",    "mealType": ["lunch", "dinner"],    "healthTags": ["all", "all"],    "difficulty": "medium",    "prepTime": 15,    "cookTime": 40,    "servings": 3,    "calories": 500,    "protein": 50,    "carbs": 5,    "fat": 30,    "fiber": 1,    "ingredients": [      { "name": "دجاجة صغيرة مفتوحة من الظهر", "amount": "1" },      { "name": "ملح", "amount": "حسب الرغبة" },      { "name": "فلفل أسود", "amount": "حسب الرغبة" },      { "name": "كركم", "amount": "1 ملعقة صغيرة" }    ],    "steps": [      "تُسخن حجارة ملساء على النار أو في الفرن حتى تصبح ساخنة جداً.",      "تُتبل الدجاجة بالملح والفلفل والكركم.",      "توضع الدجاجة على الحجارة الساخنة وتُضغط بحجر آخر أو غطاء ثقيل.",      "تُقلب الدجاجة على الجهة الأخرى بعد حوالي 15-20 دقيقة.",      "تُترك لتنضج تماماً.",      "تُقدم مع الأرز الأبيض أو الخبز والسلطة."    ],    "tips": "يمكن استخدام الشواية الكهربائية كبديل للحجارة.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_15",    "name": "مشخول",    "description": "المشخول، أرز أبيض يُطبخ مع طبقات من الحشو.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 25,    "cookTime": 50,    "servings": 5,    "calories": 680,    "protein": 40,    "carbs": 80,    "fat": 22,    "fiber": 7,    "ingredients": [      { "name": "أرز بسمتي", "amount": "3 أكواب" },      { "name": "دجاج أو لحم مطبوخ", "amount": "400 غرام" },      { "name": "بصل مقلي", "amount": "2 كوب" },      { "name": "بطاطس مقطعة دوائر ومقلية", "amount": "2" },      { "name": "نخي (حمص) مسلوق", "amount": "1 كوب" },      { "name": "زعفران منقوع", "amount": "رشة" }    ],    "steps": [      "يُسلق الأرز نصف سلقة ويُصفى.",      "في قدر، توضع طبقة من الأرز، ثم طبقة من الدجاج أو اللحم.",      "تُضاف طبقة من البصل المقلي والبطاطس والنخي.",      "تُكرر الطبقات حتى انتهاء الكمية.",      "تُضاف رشة الزعفران المنقوع على الوجه.",      "يُترك على نار هادئة جداً (على حديدة) لمدة 25-30 دقيقة حتى يتسكر."    ],    "tips": "يمكن إضافة الباذنجان المقلي إلى طبقات الحشو.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_16",    "name": "برياني دجاج خليجي",    "description": "برياني الدجاج على الطريقة الخليجية، نكهات غنية ومتوازنة.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 30,    "cookTime": 60,    "servings": 5,    "calories": 700,    "protein": 45,    "carbs": 75,    "fat": 25,    "fiber": 6,    "ingredients": [      { "name": "دجاج مقطع", "amount": "1 كيلو" },      { "name": "أرز بسمتي", "amount": "3 أكواب" },      { "name": "زبادي", "amount": "1 كوب" },      { "name": "بصل مقلي", "amount": "1 كوب" },      { "name": "نعناع وكزبرة مفرومة", "amount": "1 كوب" },      { "name": "بهارات برياني", "amount": "2 ملعقة كبيرة" }    ],    "steps": [      "يُتبل الدجاج بالزبادي والبهارات والنعناع والكزبرة ونصف كمية البصل المقلي.",      "يُسلق الأرز نصف سلقة مع بهارات صحيحة.",      "في قدر، توضع طبقة من الأرز ثم طبقة من خلطة الدجاج.",      "تُكرر الطبقات وتُرش بقية البصل المقلي والزعفران المنقوع على الوجه.",      "يُغطى القدر ويُترك على نار هادئة لمدة 30 دقيقة.",      "يُقلب البرياني عند التقديم."    ],    "tips": "للحصول على لون جميل، يمكن إضافة قليل من صبغة الطعام البرتقالية.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_17",    "name": "مطبق سمك",    "description": "مطبق السمك، أرز وسمك مقلي، وجبة بحرية شهية.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 25,    "cookTime": 50,    "servings": 4,    "calories": 680,    "protein": 40,    "carbs": 70,    "fat": 28,    "fiber": 5,    "ingredients": [      { "name": "سمك كنعد أو هامور", "amount": "4 شرائح" },      { "name": "أرز بسمتي", "amount": "2 كوب" },      { "name": "بصل شرائح", "amount": "3" },      { "name": "بهارات سمك", "amount": "1 ملعقة كبيرة" },      { "name": "لومي مطحون", "amount": "1 ملعقة صغيرة" },      { "name": "كركم", "amount": "1 ملعقة صغيرة" }    ],    "steps": [      "يُتبل السمك بالبهارات والكركم والملح ويُقلى.",      "في قدر، يُحمر البصل حتى يصبح لونه بنياً غامقاً.",      "يُضاف الأرز والماء والملح واللومي المطحون ويُترك ليغلي.",      "يُخفض على النار ويُترك الأرز لينضج.",      "يُقدم الأرز وفوقه شرائح السمك المقلية.",      "يُزين بالبصل المقلي والكزبرة المفرومة."    ],    "tips": "سر نكهة أرز المطبق في تحمير البصل جيداً.",    "isIraqi": false,    "image": "fish-dishes"  },  {    "id": "gl_18",    "name": "عيش محمد",    "description": "عيش محمد، طبق قطري تقليدي من الأرز واللحم.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 100,    "servings": 6,    "calories": 730,    "protein": 45,    "carbs": 80,    "fat": 25,    "fiber": 6,    "ingredients": [      { "name": "لحم غنم", "amount": "1 كيلو" },      { "name": "أرز", "amount": "3 أكواب" },      { "name": "بصل", "amount": "2" },      { "name": "ثوم", "amount": "4 فصوص" },      { "name": "بهارات خليجية", "amount": "2 ملاعق كبيرة" },      { "name": "لومي", "amount": "3" }    ],    "steps": [      "يُسلق اللحم مع البصل والثوم والبهارات واللومي حتى ينضج تماماً.",      "يُرفع اللحم من المرق.",      "يُضاف الأرز إلى المرق ويُطبخ حتى ينضج.",      "يُعاد اللحم إلى القدر فوق الأرز.",      "يُترك على نار هادئة ليتسكر.",      "يُقدم ساخناً."    ],    "tips": "يمكن تحمير اللحم في الفرن قبل إعادته إلى قدر الأرز.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_19",    "name": "بلاليط",    "description": "البلاليط، شعيرية بالهيل والزعفران مع قرص بيض.",    "category": "quick",    "mealType": ["breakfast"],    "healthTags": ["all"],    "difficulty": "easy",    "prepTime": 5,    "cookTime": 15,    "servings": 3,    "calories": 450,    "protein": 15,    "carbs": 70,    "fat": 12,    "fiber": 4,    "ingredients": [      { "name": "شعيرية", "amount": "200 غرام" },      { "name": "سكر", "amount": "1/2 كوب" },      { "name": "هيل مطحون", "amount": "1 ملعقة صغيرة" },      { "name": "زعفران منقوع بماء الورد", "amount": "2 ملعقة كبيرة" },      { "name": "بيض", "amount": "3" },      { "name": "زيت أو سمن", "amount": "2 ملعقة كبيرة" }    ],    "steps": [      "تُسلق الشعيرية في ماء مغلي لمدة 3-4 دقائق ثم تُصفى.",      "في نفس القدر، يُضاف السكر والهيل والزعفران والسمن إلى الشعيرية وتُقلب على نار هادئة.",      "في مقلاة، يُخفق البيض مع رشة ملح ويُقلى على شكل قرص.",      "تُسكب البلاليط في طبق التقديم.",      "يُوضع قرص البيض فوق الشعيرية.",      "تُقدم ساخنة."    ],    "tips": "يمكن التحكم بكمية السكر حسب الذوق.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_20",    "name": "محمر",    "description": "المحمر، أرز حلو بالدبس، يُقدم عادة مع السمك المقلي.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "easy",    "prepTime": 10,    "cookTime": 40,    "servings": 4,    "calories": 550,    "protein": 10,    "carbs": 110,    "fat": 5,    "fiber": 4,    "ingredients": [      { "name": "أرز", "amount": "2 كوب" },      { "name": "دبس التمر", "amount": "1 كوب" },      { "name": "بصل شرائح مقلي", "amount": "1 كوب" },      { "name": "هيل وقرفة", "amount": "حسب الرغبة" },      { "name": "زيت", "amount": "3 ملاعق كبيرة" }    ],    "steps": [      "يُغسل الأرز ويُنقع.",      "في قدر، يُحمر البصل في الزيت ثم يُرفع نصفه للتزيين.",      "يُضاف دبس التمر والبهارات والماء إلى القدر ويُترك ليغلي.",      "يُضاف الأرز ويُترك على نار عالية حتى يتشرب الماء.",      "يُخفض على النار ويُترك لينضج تماماً.",      "يُقدم مع السمك المقلي ويزين بالبصل."    ],    "tips": "يجب موازنة حلاوة الدبس مع ملوحة السمك.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_21",    "name": "غوزي",    "description": "الغوزي، خروف كامل محشي بالأرز واللحم المفروم.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 60,    "cookTime": 240,    "servings": 20,    "calories": 900,    "protein": 60,    "carbs": 80,    "fat": 35,    "fiber": 5,    "ingredients": [      { "name": "خروف صغير كامل", "amount": "1" },      { "name": "أرز بسمتي", "amount": "10 أكواب" },      { "name": "لحم مفروم", "amount": "1 كيلو" },      { "name": "بصل", "amount": "5" },      { "name": "مكسرات وزبيب", "amount": "كمية وافرة" },      { "name": "بهارات غوزي", "amount": "حسب الرغبة" }    ],    "steps": [      "يُسلق الخروف في قدر كبير جداً حتى ينضج.",      "يُحضر الحشو بتحمير البصل واللحم المفروم والمكسرات والزبيب.",      "يُطبخ الأرز نصف طبخة.",      "يُخلط الأرز مع الحشو ويُحشى به الخروف المسلوق.",      "يُدهن الخروف بالزعفران وماء الورد ويُحمر في فرن كبير.",      "يُقدم على فراش من الأرز."    ],    "tips": "هذا الطبق خاص بالولائم والمناسبات الكبيرة.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_22",    "name": "صالونة روبيان",    "description": "صالونة الروبيان، مرق لذيذ بنكهة البحر.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all", "all"],    "difficulty": "easy",    "prepTime": 15,    "cookTime": 30,    "servings": 4,    "calories": 400,    "protein": 25,    "carbs": 20,    "fat": 25,    "fiber": 6,    "ingredients": [      { "name": "روبيان مقشر", "amount": "500 غرام" },      { "name": "طماطم مفرومة", "amount": "3" },      { "name": "بصل مفروم", "amount": "1" },      { "name": "كزبرة مفرومة", "amount": "1 كوب" },      { "name": "حليب جوز الهند", "amount": "1 كوب" },      { "name": "معجون تمر هندي", "amount": "2 ملعقة كبيرة" }    ],    "steps": [      "يُحمر البصل ثم يُضاف الروبيان ويُقلب.",      "تُضاف الطماطم والبهارات وتُترك لتتسبك.",      "يُضاف حليب جوز الهند ومعجون التمر الهندي.",      "تُترك الصالونة على نار هادئة لمدة 10 دقائق.",      "تُضاف الكزبرة قبل التقديم.",      "تُقدم مع الأرز الأبيض."    ],    "tips": "لا تطبخ الروبيان أكثر من اللازم حتى لا يصبح قاسياً.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_23",    "name": "مضروبة ربيان",    "description": "مضروبة الربيان، طبق كريمي ولذيذ.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 15,    "cookTime": 60,    "servings": 4,    "calories": 500,    "protein": 30,    "carbs": 60,    "fat": 15,    "fiber": 7,    "ingredients": [      { "name": "روبيان", "amount": "400 غرام" },      { "name": "أرز مصري", "amount": "1 كوب" },      { "name": "بصل", "amount": "1" },      { "name": "طماطم", "amount": "2" },      { "name": "خضرة مشكلة (شبت، كزبرة)", "amount": "1 كوب" },      { "name": "سمن", "amount": "2 ملعقة كبيرة" }    ],    "steps": [      "يُحمر البصل في السمن ثم يُضاف الروبيان ويُقلب.",      "تُضاف الطماطم والخضرة والأرز.",      "يُضاف الماء المغلي ويُترك المزيج على نار هادئة.",      "يُضرب المزيج بملعقة خشبية باستمرار حتى يصبح القوام غليظاً.",      "تُقدم المضروبة ساخنة.",      "يمكن تزيينها بالليمون الأسود المطحون."    ],    "tips": "استخدام الربيان الطازج يعطي أفضل نكهة.",    "isIraqi": false,    "image": "gulf-cuisine"  },  {    "id": "gl_24",    "name": "كبسة سمك",    "description": "كبسة السمك، تنويع بحري على طبق الكبسة الشهير.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 50,    "servings": 4,    "calories": 650,    "protein": 35,    "carbs": 75,    "fat": 22,    "fiber": 5,    "ingredients": [      { "name": "سمك فيليه", "amount": "600 غرام" },      { "name": "أرز بسمتي", "amount": "3 أكواب" },      { "name": "بصل", "amount": "2" },      { "name": "فلفل رومي", "amount": "1" },      { "name": "بهارات كبسة", "amount": "1.5 ملعقة كبيرة" },      { "name": "كزبرة مفرومة", "amount": "1/2 كوب" }    ],    "steps": [      "يُتبل السمك ويُقلى أو يُشوى.",      "في قدر، يُحمر البصل والفلفل الرومي.",      "يُضاف الأرز والبهارات والماء ويُطبخ حتى ينضج.",      "يُضاف السمك على وجه الأرز.",      "تُضاف الكزبرة المفرومة.",      "يُترك على نار هادئة لبضع دقائق ثم يُقدم."    ],    "tips": "استخدام سمك الهامور أو الكنعد يعطي نتائج ممتازة.",    "isIraqi": false,    "image": "fish-dishes"  },  {    "id": "gl_25",    "name": "مكبوس ربيان",    "description": "مكبوس الربيان، طبق أرز وربيان غني بالنكهات.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 45,    "servings": 4,    "calories": 620,    "protein": 30,    "carbs": 80,    "fat": 18,    "fiber": 5,    "ingredients": [      { "name": "روبيان طازج", "amount": "500 غرام" },      { "name": "أرز بسمتي", "amount": "3 أكواب" },      { "name": "بصل مفروم", "amount": "2" },      { "name": "حشو (بصل مقلي، نخي، زبيب)", "amount": "1 كوب" },      { "name": "بهارات مشكلة", "amount": "1 ملعقة كبيرة" },      { "name": "شبت مفروم", "amount": "1/2 كوب" }    ],    "steps": [      "يُسلق الأرز مع الشبت والملح نصف سلقة.",      "في قدر، يُحمر البصل ثم يُضاف الربيان والبهارات ويُقلب حتى ينضج.",      "يُصفى الأرز ويُضاف فوق خلطة الربيان.",      "يُضاف الحشو على وجه الأرز.",      "يُغطى القدر ويُترك على نار هادئة لمدة 20 دقيقة.",      "يُقلب المكبوس عند التقديم."    ],    "tips": "يمكن إضافة قليل من ماء الورد والزعفران على وجه الأرز قبل أن يتسكر.",    "isIraqi": false,    "image": "gulf-cuisine"  },
+{    "id": "gl_1",    "name": "مجبوس دجاج",    "description": "طبق المجبوس غني عن التعريف، من أشهر أطباق الخليج.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 60,    "servings": 4,    "calories": 650,    "protein": 45,    "carbs": 70,    "fat": 20,    "fiber": 5,    "ingredients": [      { "name": "دجاجة كاملة", "amount": "1" },      { "name": "أرز بسمتي", "amount": "3 أكواب" },      { "name": "بصل مفروم", "amount": "2" },      { "name": "طماطم مفرومة", "amount": "2" },      { "name": "معجون طماطم", "amount": "2 ملعقة كبيرة" },      { "name": "بهارات مشكلة", "amount": "1 ملعقة كبيرة" },      { "name": "لومي", "amount": "2" }    ],    "steps": [      "يُغسل الدجاج جيداً ويُقطع إلى أربع قطع.",      "في قدر على النار، يُحمر البصل ثم يُضاف الدجاج ويُقلب حتى يتغير لونه.",      "تُضاف الطماطم ومعجون الطماطم والبهارات واللومي ويُقلب المزيج.",      "يُضاف الماء المغلي ويُترك الدجاج لينضج.",      "يُرفع الدجاج من المرق ويُحمر في الفرن.",      "يُضاف الأرز إلى المرق ويُترك على نار هادئة حتى ينضج."    ],    "tips": "للحصول على نكهة أغنى، يمكن إضافة الحشو (بصل مقلي مع زبيب وبهارات) على وجه الأرز عند التقديم.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_2",    "name": "مجبوس لحم",    "description": "مجبوس اللحم، أكلة خليجية أصيلة وفاخرة.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 25,    "cookTime": 120,    "servings": 6,    "calories": 750,    "protein": 50,    "carbs": 80,    "fat": 25,    "fiber": 6,    "ingredients": [      { "name": "لحم غنم بالعظم", "amount": "1 كيلو" },      { "name": "أرز بسمتي", "amount": "4 أكواب" },      { "name": "بصل مفروم", "amount": "3" },      { "name": "ثوم مهروس", "amount": "4 فصوص" },      { "name": "بهارات كبسة", "amount": "2 ملعقة كبيرة" },      { "name": "زعفران", "amount": "رشة" },      { "name": "ماء ورد", "amount": "1 ملعقة كبيرة" }    ],    "steps": [      "يُسلق اللحم مع البهارات الصحيحة (هيل، قرفة، ورق غار) حتى ينضج.",      "في قدر آخر، يُحمر البصل والثوم ثم يُضاف اللحم المسلوق ويُقلب.",      "يُضاف الأرز والملح وبهارات الكبسة ويُصب فوقه مرق اللحم.",      "يُنقع الزعفران في ماء الورد ويُضاف على وجه الأرز قبل أن ينضج تماماً.",      "يُترك الأرز على نار هادئة جداً حتى يتسكر.",      "يُقدم المجبوس ويزين بالحشو والمكسرات."    ],    "tips": "يفضل استخدام لحم الخروف الصغير للحصول على أفضل طعم.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_3",    "name": "هريس",    "description": "الهريس، طبق شعبي خليجي معروف بقوامه الكريمي.",    "category": "hearty",    "mealType": ["dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 30,    "cookTime": 240,    "servings": 8,    "calories": 500,    "protein": 30,    "carbs": 60,    "fat": 15,    "fiber": 10,    "ingredients": [      { "name": "حب هريس", "amount": "2 كوب" },      { "name": "لحم غنم بدون عظم", "amount": "500 غرام" },      { "name": "ماء", "amount": "كمية كبيرة" },      { "name": "ملح", "amount": "حسب الرغبة" },      { "name": "سمن بلدي", "amount": "للتزيين" }    ],    "steps": [      "يُنقع حب الهريس ليلة كاملة.",      "في قدر كبير وعميق، يوضع حب الهريس واللحم والماء والملح.",      "يُترك على نار عالية حتى يغلي، ثم تُخفف النار ويُترك لمدة 4-5 ساعات مع التحريك من وقت لآخر.",      "بعد أن ينضج اللحم والهريس تماماً، يُضرب المزيج بمضرب الهريس الخشبي (أو الكهربائي) حتى يصبح القوام كريمياً ومتجانساً.",      "يُسكب الهريس في أطباق التقديم.",      "يُزين بالسمن البلدي المذاب ويُقدم ساخناً."    ],    "tips": "يحتاج الهريس إلى صبر ووقت طويل للطبخ، لكن النتيجة تستحق العناء.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_4",    "name": "ثريد",    "description": "الثريد أو التشريب، خبز ولحم ومرق، أكلة غنية بالنكهات.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 90,    "servings": 5,    "calories": 600,    "protein": 40,    "carbs": 50,    "fat": 25,    "fiber": 8,    "ingredients": [      { "name": "لحم غنم بالعظم", "amount": "750 غرام" },      { "name": "خبز رقاق", "amount": "5 أرغفة" },      { "name": "خضروات مشكلة (بطاطس، جزر، كوسا)", "amount": "3 أكواب" },      { "name": "بصل", "amount": "1" },      { "name": "معجون طماطم", "amount": "3 ملاعق كبيرة" },      { "name": "لومي", "amount": "2" }    ],    "steps": [      "يُسلق اللحم مع البصل والبهارات حتى يقترب من النضج.",      "تُضاف الخضروات ومعجون الطماطم واللومي ويُترك المرق ليغلي وتُنضج الخضروات.",      "يُقطع خبز الرقاق إلى قطع متوسطة ويوضع في طبق تقديم عميق.",      "يُصب المرق مع اللحم والخضروات فوق الخبز.",      "يُترك لبضع دقائق حتى يتشرب الخبز المرق.",      "يُقدم الثريد ساخناً."    ],    "tips": "يمكن إضافة أي نوع من الخضروات المفضلة لديكم.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_5",    "name": "مضروبة",    "description": "المضروبة، طبق دجاج وأرز مهروس، طعمه مميز.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 15,    "cookTime": 75,    "servings": 4,    "calories": 550,    "protein": 35,    "carbs": 65,    "fat": 15,    "fiber": 7,    "ingredients": [      { "name": "دجاجة مسلوقة ومنزوعة العظم", "amount": "1" },      { "name": "أرز مصري", "amount": "1 كوب" },      { "name": "بصل مفروم", "amount": "1" },      { "name": "طماطم مفرومة", "amount": "2" },      { "name": "كزبرة وشبت مفروم", "amount": "1 كوب" },      { "name": "سمن", "amount": "2 ملعقة كبيرة" }    ],    "steps": [      "في قدر، يُحمر البصل في السمن ثم تُضاف الطماطم.",      "يُضاف الدجاج المسلوق والأرز والكزبرة والشبت.",      "يُضاف مرق الدجاج ويُترك المزيج على نار هادئة.",      "يُحرك المزيج باستمرار ويُضرب بملعقة خشبية حتى يصبح القوام غليظاً ومهروساً.",      "تُسكب المضروبة في طبق التقديم.",      "تُزين بالبصل المقلي أو السمن."    ],    "tips": "كلما زادت مدة ضرب المضروبة، أصبح قوامها أفضل.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_6",    "name": "مرقوق",    "description": "المرقوق، عجينة رقيقة مع مرق اللحم والخضار.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 40,    "cookTime": 100,    "servings": 6,    "calories": 620,    "protein": 38,    "carbs": 70,    "fat": 20,    "fiber": 9,    "ingredients": [      { "name": "لحم غنم", "amount": "500 غرام" },      { "name": "دقيق أسمر", "amount": "3 أكواب" },      { "name": "خضروات مشكلة (قرع، باذنجان، فاصوليا خضراء)", "amount": "4 أكواب" },      { "name": "بصل", "amount": "2" },      { "name": "معجون طماطم", "amount": "1/4 كوب" },      { "name": "بهارات", "amount": "حسب الرغبة" }    ],    "steps": [      "يُعجن الدقيق مع الماء والملح لتكوين عجينة متماسكة وتُترك لترتاح.",      "يُطبخ اللحم مع البصل والبهارات ومعجون الطماطم.",      "تُضاف الخضروات وتُترك لتنضج مع اللحم.",      "تُفرد العجينة إلى دوائر رقيقة وتُضاف واحدة تلو الأخرى إلى مرق اللحم.",      "تُترك كل طبقة من العجين لتنضج قبل إضافة الطبقة التالية.",      "يُقدم المرقوق ساخناً."    ],    "tips": "يجب أن تكون العجينة رقيقة جداً للحصول على أفضل نتيجة.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_7",    "name": "جريش",    "description": "الجريش، قمح مجروش مع اللبن واللحم أو الدجاج.",    "category": "hearty",    "mealType": ["dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 180,    "servings": 8,    "calories": 480,    "protein": 25,    "carbs": 70,    "fat": 10,    "fiber": 12,    "ingredients": [      { "name": "جريش", "amount": "2 كوب" },      { "name": "صدر دجاج", "amount": "2" },      { "name": "لبن رائب", "amount": "4 أكواب" },      { "name": "بصل مفروم", "amount": "1" },      { "name": "كمون", "amount": "1 ملعقة صغيرة" },      { "name": "سمن", "amount": "للتزيين" }    ],    "steps": [      "يُنقع الجريش لمدة ساعتين على الأقل.",      "يُسلق الدجاج ثم يُفتت إلى قطع صغيرة.",      "في قدر، يُخلط الجريش المنقوع مع الدجاج المفتت واللبن والبصل والكمون والملح.",      "يُترك على نار هادئة لمدة 3 ساعات مع التحريك المستمر.",      "يُقدم الجريش ساخناً بعد تزيينه بالسمن وحمسة البصل.",      "يمكن إضافة الفلفل الحار حسب الرغبة."    ],    "tips": "استخدام اللبن كامل الدسم يعطي الجريش طعماً أغنى.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_8",    "name": "مطازيز",    "description": "المطازيز، قطع صغيرة من العجين مع مرق اللحم والخضار.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 45,    "cookTime": 120,    "servings": 6,    "calories": 590,    "protein": 35,    "carbs": 65,    "fat": 22,    "fiber": 10,    "ingredients": [      { "name": "لحم", "amount": "500 غرام" },      { "name": "دقيق أسمر", "amount": "3 أكواب" },      { "name": "خضروات مشكلة", "amount": "4 أكواب" },      { "name": "بصل", "amount": "2" },      { "name": "معجون طماطم", "amount": "3 ملاعق كبيرة" },      { "name": "بهارات", "amount": "حسب الرغبة" }    ],    "steps": [      "تُحضر عجينة المطازيز من الدقيق والماء والملح وتُشكل إلى كرات صغيرة.",      "يُطبخ اللحم مع البصل والبهارات ومعجون الطماطم.",      "تُضاف الخضروات وتُترك لتنضج.",      "تُفرد كرات العجين إلى دوائر صغيرة ورقيقة وتُضاف إلى المرق.",      "تُترك المطازيز لتنضج تماماً في المرق.",      "تُقدم ساخنة."    ],    "tips": "يمكن استخدام آلة خاصة لتشكيل المطازيز لتسهيل العملية.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_9",    "name": "صالونة دجاج",    "description": "صالونة الدجاج، مرق دجاج غني بالخضار والبهارات.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all", "all"],    "difficulty": "easy",    "prepTime": 15,    "cookTime": 45,    "servings": 4,    "calories": 450,    "protein": 30,    "carbs": 25,    "fat": 25,    "fiber": 8,    "ingredients": [      { "name": "قطع دجاج", "amount": "500 غرام" },      { "name": "بطاطس مكعبات", "amount": "2" },      { "name": "جزر مكعبات", "amount": "2" },      { "name": "بصل مفروم", "amount": "1" },      { "name": "ثوم مهروس", "amount": "3 فصوص" },      { "name": "كزبرة مفرومة", "amount": "1/2 كوب" },      { "name": "بهارات كاري", "amount": "1 ملعقة كبيرة" }    ],    "steps": [      "في قدر على النار، يُحمر البصل والثوم.",      "تُضاف قطع الدجاج وتُقلب حتى تتحمر.",      "تُضاف البطاطس والجزر والبهارات وتُقلب.",      "يُضاف الماء ومعجون الطماطم ويُترك المزيج ليغلي.",      "تُخفف النار وتُترك الصالونة لتتسبك وتنضج الخضروات.",      "تُضاف الكزبرة المفرومة في النهاية وتُقدم مع الأرز الأبيض."    ],    "tips": "لجعل الصالونة صحية أكثر، يمكن الاستغناء عن تحمير الدجاج وسلقه مباشرة.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_10",    "name": "صالونة لحم",    "description": "صالونة اللحم، طبق خليجي دسم وشهي.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 90,    "servings": 5,    "calories": 550,    "protein": 40,    "carbs": 30,    "fat": 30,    "fiber": 7,    "ingredients": [      { "name": "لحم غنم مقطع", "amount": "600 غرام" },      { "name": "بامية", "amount": "1 كوب" },      { "name": "قرع مقطع", "amount": "1 كوب" },      { "name": "بصل", "amount": "1" },      { "name": "طماطم", "amount": "3" },      { "name": "بهارات لحم", "amount": "1 ملعقة كبيرة" }    ],    "steps": [      "يُحمر البصل في قدر ثم يُضاف اللحم ويُقلب حتى يتغير لونه.",      "تُضاف الطماطم المفرومة والبهارات ومعجون الطماطم.",      "يُضاف الماء ويُترك اللحم لينضج على نار هادئة.",      "عندما يقترب اللحم من النضج، تُضاف البامية والقرع.",      "تُترك الصالونة على النار حتى تنضج الخضروات وتتسبك.",      "تُقدم مع الأرز الأبيض أو الخبز."    ],    "tips": "استخدام اللحم مع العظم يعطي نكهة أعمق للصالونة.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_11",    "name": "مندي",    "description": "المندي، طبق أرز ولحم مدخن، من أشهر أكلات اليمن والخليج.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 30,    "cookTime": 150,    "servings": 8,    "calories": 800,    "protein": 55,    "carbs": 90,    "fat": 28,    "fiber": 5,    "ingredients": [      { "name": "لحم خروف (كتف أو فخذ)", "amount": "1.5 كيلو" },      { "name": "أرز بسمتي", "amount": "5 أكواب" },      { "name": "بهارات مندي", "amount": "2 ملعقة كبيرة" },      { "name": "بصل", "amount": "2" },      { "name": "زيت", "amount": "1/2 كوب" },      { "name": "فحم", "amount": "قطعة صغيرة للتدخين" }    ],    "steps": [      "يُتبل اللحم ببهارات المندي والملح.",      "في قدر المندي (أو قدر عادي كبير)، يُحمر البصل في الزيت.",      "يُضاف الأرز والماء والملح ويُترك ليغلي.",      "يُوضع شبك فوق الأرز ويوضع فوقه اللحم المتبل.",      "يُغطى القدر بإحكام ويُترك على نار هادئة جداً لمدة ساعتين إلى ساعتين ونصف.",      "قبل التقديم، تُشعل قطعة الفحم وتوضع في طبق صغير مع زيت داخل القدر وتُغطى بسرعة لتدخين الأرز واللحم."    ],    "tips": "سر المندي في الطبخ البطيء والتدخين في النهاية.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_12",    "name": "حنيذ",    "description": "الحنيذ، لحم مطبوخ بحرارة الحجر أو في حفرة خاصة.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 20,    "cookTime": 180,    "servings": 10,    "calories": 700,    "protein": 60,    "carbs": 0,    "fat": 50,    "fiber": 0,    "ingredients": [      { "name": "خروف كامل أو قطع كبيرة", "amount": "حسب الحاجة" },      { "name": "ملح خشن", "amount": "كمية وافرة" },      { "name": "نبات المرخ أو السلع", "amount": "كمية لتغليف اللحم" }    ],    "steps": [      "تُجهز حفرة خاصة (التنور أو المحنذ) وتُشعل فيها النار حتى تصبح جمرة.",      "يُتبل اللحم بالملح الخشن فقط.",      "يُلف اللحم بأوراق المرخ أو السلع.",      "تُزال الجمرة من الحفرة وتُبطن بأوراق المرخ.",      "يُوضع اللحم الملفوف في الحفرة ويُغطى بطبقة أخرى من المرخ.",      "تُغلق الحفرة بإحكام وتُترك لمدة 3-4 ساعات حتى ينضج اللحم تماماً."    ],    "tips": "هذه الطريقة التقليدية، يمكن استخدام قدر الضغط كبديل منزلي للحصول على نتيجة قريبة.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_13",    "name": "كبسة",    "description": "الكبسة السعودية، ملكة المائدة في كل بيت.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 70,    "servings": 6,    "calories": 720,    "protein": 48,    "carbs": 85,    "fat": 22,    "fiber": 6,    "ingredients": [      { "name": "دجاجة مقطعة", "amount": "1" },      { "name": "أرز بسمتي", "amount": "4 أكواب" },      { "name": "بصل", "amount": "2" },      { "name": "صلصة طماطم", "amount": "2 ملعقة كبيرة" },      { "name": "بهارات كبسة", "amount": "2 ملعقة كبيرة" },      { "name": "زبيب ومكسرات", "amount": "للتزيين" }    ],    "steps": [      "يُحمر البصل في قدر ثم يُضاف الدجاج ويُقلب.",      "تُضاف صلصة الطماطم وبهارات الكبسة والماء ويُترك الدجاج لينضج.",      "يُرفع الدجاج ويُحمر بالفرن.",      "يُضاف الأرز إلى مرق الدجاج ويُطبخ على نار هادئة.",      "يُقدم الأرز وفوقه الدجاج.",      "يُزين بالزبيب والمكسرات المقلية."    ],    "tips": "يمكن إضافة الجزر المبشور أو الفلفل الرومي مع حمسه البصل لإضافة نكهة.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_14",    "name": "مظبي",    "description": "المظبي، دجاج مشوي على الحجر، طعم لا يقاوم.",    "category": "quick",    "mealType": ["lunch", "dinner"],    "healthTags": ["all", "all"],    "difficulty": "medium",    "prepTime": 15,    "cookTime": 40,    "servings": 3,    "calories": 500,    "protein": 50,    "carbs": 5,    "fat": 30,    "fiber": 1,    "ingredients": [      { "name": "دجاجة صغيرة مفتوحة من الظهر", "amount": "1" },      { "name": "ملح", "amount": "حسب الرغبة" },      { "name": "فلفل أسود", "amount": "حسب الرغبة" },      { "name": "كركم", "amount": "1 ملعقة صغيرة" }    ],    "steps": [      "تُسخن حجارة ملساء على النار أو في الفرن حتى تصبح ساخنة جداً.",      "تُتبل الدجاجة بالملح والفلفل والكركم.",      "توضع الدجاجة على الحجارة الساخنة وتُضغط بحجر آخر أو غطاء ثقيل.",      "تُقلب الدجاجة على الجهة الأخرى بعد حوالي 15-20 دقيقة.",      "تُترك لتنضج تماماً.",      "تُقدم مع الأرز الأبيض أو الخبز والسلطة."    ],    "tips": "يمكن استخدام الشواية الكهربائية كبديل للحجارة.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_15",    "name": "مشخول",    "description": "المشخول، أرز أبيض يُطبخ مع طبقات من الحشو.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 25,    "cookTime": 50,    "servings": 5,    "calories": 680,    "protein": 40,    "carbs": 80,    "fat": 22,    "fiber": 7,    "ingredients": [      { "name": "أرز بسمتي", "amount": "3 أكواب" },      { "name": "دجاج أو لحم مطبوخ", "amount": "400 غرام" },      { "name": "بصل مقلي", "amount": "2 كوب" },      { "name": "بطاطس مقطعة دوائر ومقلية", "amount": "2" },      { "name": "نخي (حمص) مسلوق", "amount": "1 كوب" },      { "name": "زعفران منقوع", "amount": "رشة" }    ],    "steps": [      "يُسلق الأرز نصف سلقة ويُصفى.",      "في قدر، توضع طبقة من الأرز، ثم طبقة من الدجاج أو اللحم.",      "تُضاف طبقة من البصل المقلي والبطاطس والنخي.",      "تُكرر الطبقات حتى انتهاء الكمية.",      "تُضاف رشة الزعفران المنقوع على الوجه.",      "يُترك على نار هادئة جداً (على حديدة) لمدة 25-30 دقيقة حتى يتسكر."    ],    "tips": "يمكن إضافة الباذنجان المقلي إلى طبقات الحشو.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_16",    "name": "برياني دجاج خليجي",    "description": "برياني الدجاج على الطريقة الخليجية، نكهات غنية ومتوازنة.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 30,    "cookTime": 60,    "servings": 5,    "calories": 700,    "protein": 45,    "carbs": 75,    "fat": 25,    "fiber": 6,    "ingredients": [      { "name": "دجاج مقطع", "amount": "1 كيلو" },      { "name": "أرز بسمتي", "amount": "3 أكواب" },      { "name": "زبادي", "amount": "1 كوب" },      { "name": "بصل مقلي", "amount": "1 كوب" },      { "name": "نعناع وكزبرة مفرومة", "amount": "1 كوب" },      { "name": "بهارات برياني", "amount": "2 ملعقة كبيرة" }    ],    "steps": [      "يُتبل الدجاج بالزبادي والبهارات والنعناع والكزبرة ونصف كمية البصل المقلي.",      "يُسلق الأرز نصف سلقة مع بهارات صحيحة.",      "في قدر، توضع طبقة من الأرز ثم طبقة من خلطة الدجاج.",      "تُكرر الطبقات وتُرش بقية البصل المقلي والزعفران المنقوع على الوجه.",      "يُغطى القدر ويُترك على نار هادئة لمدة 30 دقيقة.",      "يُقلب البرياني عند التقديم."    ],    "tips": "للحصول على لون جميل، يمكن إضافة قليل من صبغة الطعام البرتقالية.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_17",    "name": "مطبق سمك",    "description": "مطبق السمك، أرز وسمك مقلي، وجبة بحرية شهية.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 25,    "cookTime": 50,    "servings": 4,    "calories": 680,    "protein": 40,    "carbs": 70,    "fat": 28,    "fiber": 5,    "ingredients": [      { "name": "سمك كنعد أو هامور", "amount": "4 شرائح" },      { "name": "أرز بسمتي", "amount": "2 كوب" },      { "name": "بصل شرائح", "amount": "3" },      { "name": "بهارات سمك", "amount": "1 ملعقة كبيرة" },      { "name": "لومي مطحون", "amount": "1 ملعقة صغيرة" },      { "name": "كركم", "amount": "1 ملعقة صغيرة" }    ],    "steps": [      "يُتبل السمك بالبهارات والكركم والملح ويُقلى.",      "في قدر، يُحمر البصل حتى يصبح لونه بنياً غامقاً.",      "يُضاف الأرز والماء والملح واللومي المطحون ويُترك ليغلي.",      "يُخفض على النار ويُترك الأرز لينضج.",      "يُقدم الأرز وفوقه شرائح السمك المقلية.",      "يُزين بالبصل المقلي والكزبرة المفرومة."    ],    "tips": "سر نكهة أرز المطبق في تحمير البصل جيداً.",    "isIraqi": false,    "image": "fish-dishes"  },  {    "id": "gl_18",    "name": "عيش محمد",    "description": "عيش محمد، طبق قطري تقليدي من الأرز واللحم.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 100,    "servings": 6,    "calories": 730,    "protein": 45,    "carbs": 80,    "fat": 25,    "fiber": 6,    "ingredients": [      { "name": "لحم غنم", "amount": "1 كيلو" },      { "name": "أرز", "amount": "3 أكواب" },      { "name": "بصل", "amount": "2" },      { "name": "ثوم", "amount": "4 فصوص" },      { "name": "بهارات خليجية", "amount": "2 ملاعق كبيرة" },      { "name": "لومي", "amount": "3" }    ],    "steps": [      "يُسلق اللحم مع البصل والثوم والبهارات واللومي حتى ينضج تماماً.",      "يُرفع اللحم من المرق.",      "يُضاف الأرز إلى المرق ويُطبخ حتى ينضج.",      "يُعاد اللحم إلى القدر فوق الأرز.",      "يُترك على نار هادئة ليتسكر.",      "يُقدم ساخناً."    ],    "tips": "يمكن تحمير اللحم في الفرن قبل إعادته إلى قدر الأرز.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_19",    "name": "بلاليط",    "description": "البلاليط، شعيرية بالهيل والزعفران مع قرص بيض.",    "category": "quick",    "mealType": ["breakfast"],    "healthTags": ["all"],    "difficulty": "easy",    "prepTime": 5,    "cookTime": 15,    "servings": 3,    "calories": 450,    "protein": 15,    "carbs": 70,    "fat": 12,    "fiber": 4,    "ingredients": [      { "name": "شعيرية", "amount": "200 غرام" },      { "name": "سكر", "amount": "1/2 كوب" },      { "name": "هيل مطحون", "amount": "1 ملعقة صغيرة" },      { "name": "زعفران منقوع بماء الورد", "amount": "2 ملعقة كبيرة" },      { "name": "بيض", "amount": "3" },      { "name": "زيت أو سمن", "amount": "2 ملعقة كبيرة" }    ],    "steps": [      "تُسلق الشعيرية في ماء مغلي لمدة 3-4 دقائق ثم تُصفى.",      "في نفس القدر، يُضاف السكر والهيل والزعفران والسمن إلى الشعيرية وتُقلب على نار هادئة.",      "في مقلاة، يُخفق البيض مع رشة ملح ويُقلى على شكل قرص.",      "تُسكب البلاليط في طبق التقديم.",      "يُوضع قرص البيض فوق الشعيرية.",      "تُقدم ساخنة."    ],    "tips": "يمكن التحكم بكمية السكر حسب الذوق.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_20",    "name": "محمر",    "description": "المحمر، أرز حلو بالدبس، يُقدم عادة مع السمك المقلي.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "easy",    "prepTime": 10,    "cookTime": 40,    "servings": 4,    "calories": 550,    "protein": 10,    "carbs": 110,    "fat": 5,    "fiber": 4,    "ingredients": [      { "name": "أرز", "amount": "2 كوب" },      { "name": "دبس التمر", "amount": "1 كوب" },      { "name": "بصل شرائح مقلي", "amount": "1 كوب" },      { "name": "هيل وقرفة", "amount": "حسب الرغبة" },      { "name": "زيت", "amount": "3 ملاعق كبيرة" }    ],    "steps": [      "يُغسل الأرز ويُنقع.",      "في قدر، يُحمر البصل في الزيت ثم يُرفع نصفه للتزيين.",      "يُضاف دبس التمر والبهارات والماء إلى القدر ويُترك ليغلي.",      "يُضاف الأرز ويُترك على نار عالية حتى يتشرب الماء.",      "يُخفض على النار ويُترك لينضج تماماً.",      "يُقدم مع السمك المقلي ويزين بالبصل."    ],    "tips": "يجب موازنة حلاوة الدبس مع ملوحة السمك.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_21",    "name": "غوزي",    "description": "الغوزي، خروف كامل محشي بالأرز واللحم المفروم.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "hard",    "prepTime": 60,    "cookTime": 240,    "servings": 20,    "calories": 900,    "protein": 60,    "carbs": 80,    "fat": 35,    "fiber": 5,    "ingredients": [      { "name": "خروف صغير كامل", "amount": "1" },      { "name": "أرز بسمتي", "amount": "10 أكواب" },      { "name": "لحم مفروم", "amount": "1 كيلو" },      { "name": "بصل", "amount": "5" },      { "name": "مكسرات وزبيب", "amount": "كمية وافرة" },      { "name": "بهارات غوزي", "amount": "حسب الرغبة" }    ],    "steps": [      "يُسلق الخروف في قدر كبير جداً حتى ينضج.",      "يُحضر الحشو بتحمير البصل واللحم المفروم والمكسرات والزبيب.",      "يُطبخ الأرز نصف طبخة.",      "يُخلط الأرز مع الحشو ويُحشى به الخروف المسلوق.",      "يُدهن الخروف بالزعفران وماء الورد ويُحمر في فرن كبير.",      "يُقدم على فراش من الأرز."    ],    "tips": "هذا الطبق خاص بالولائم والمناسبات الكبيرة.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_22",    "name": "صالونة روبيان",    "description": "صالونة الروبيان، مرق لذيذ بنكهة البحر.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all", "all"],    "difficulty": "easy",    "prepTime": 15,    "cookTime": 30,    "servings": 4,    "calories": 400,    "protein": 25,    "carbs": 20,    "fat": 25,    "fiber": 6,    "ingredients": [      { "name": "روبيان مقشر", "amount": "500 غرام" },      { "name": "طماطم مفرومة", "amount": "3" },      { "name": "بصل مفروم", "amount": "1" },      { "name": "كزبرة مفرومة", "amount": "1 كوب" },      { "name": "حليب جوز الهند", "amount": "1 كوب" },      { "name": "معجون تمر هندي", "amount": "2 ملعقة كبيرة" }    ],    "steps": [      "يُحمر البصل ثم يُضاف الروبيان ويُقلب.",      "تُضاف الطماطم والبهارات وتُترك لتتسبك.",      "يُضاف حليب جوز الهند ومعجون التمر الهندي.",      "تُترك الصالونة على نار هادئة لمدة 10 دقائق.",      "تُضاف الكزبرة قبل التقديم.",      "تُقدم مع الأرز الأبيض."    ],    "tips": "لا تطبخ الروبيان أكثر من اللازم حتى لا يصبح قاسياً.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_23",    "name": "مضروبة ربيان",    "description": "مضروبة الربيان، طبق كريمي ولذيذ.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 15,    "cookTime": 60,    "servings": 4,    "calories": 500,    "protein": 30,    "carbs": 60,    "fat": 15,    "fiber": 7,    "ingredients": [      { "name": "روبيان", "amount": "400 غرام" },      { "name": "أرز مصري", "amount": "1 كوب" },      { "name": "بصل", "amount": "1" },      { "name": "طماطم", "amount": "2" },      { "name": "خضرة مشكلة (شبت، كزبرة)", "amount": "1 كوب" },      { "name": "سمن", "amount": "2 ملعقة كبيرة" }    ],    "steps": [      "يُحمر البصل في السمن ثم يُضاف الروبيان ويُقلب.",      "تُضاف الطماطم والخضرة والأرز.",      "يُضاف الماء المغلي ويُترك المزيج على نار هادئة.",      "يُضرب المزيج بملعقة خشبية باستمرار حتى يصبح القوام غليظاً.",      "تُقدم المضروبة ساخنة.",      "يمكن تزيينها بالليمون الأسود المطحون."    ],    "tips": "استخدام الربيان الطازج يعطي أفضل نكهة.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },  {    "id": "gl_24",    "name": "كبسة سمك",    "description": "كبسة السمك، تنويع بحري على طبق الكبسة الشهير.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 50,    "servings": 4,    "calories": 650,    "protein": 35,    "carbs": 75,    "fat": 22,    "fiber": 5,    "ingredients": [      { "name": "سمك فيليه", "amount": "600 غرام" },      { "name": "أرز بسمتي", "amount": "3 أكواب" },      { "name": "بصل", "amount": "2" },      { "name": "فلفل رومي", "amount": "1" },      { "name": "بهارات كبسة", "amount": "1.5 ملعقة كبيرة" },      { "name": "كزبرة مفرومة", "amount": "1/2 كوب" }    ],    "steps": [      "يُتبل السمك ويُقلى أو يُشوى.",      "في قدر، يُحمر البصل والفلفل الرومي.",      "يُضاف الأرز والبهارات والماء ويُطبخ حتى ينضج.",      "يُضاف السمك على وجه الأرز.",      "تُضاف الكزبرة المفرومة.",      "يُترك على نار هادئة لبضع دقائق ثم يُقدم."    ],    "tips": "استخدام سمك الهامور أو الكنعد يعطي نتائج ممتازة.",    "isIraqi": false,    "image": "fish-dishes"  },  {    "id": "gl_25",    "name": "مكبوس ربيان",    "description": "مكبوس الربيان، طبق أرز وربيان غني بالنكهات.",    "category": "hearty",    "mealType": ["lunch", "dinner"],    "healthTags": ["all"],    "difficulty": "medium",    "prepTime": 20,    "cookTime": 45,    "servings": 4,    "calories": 620,    "protein": 30,    "carbs": 80,    "fat": 18,    "fiber": 5,    "ingredients": [      { "name": "روبيان طازج", "amount": "500 غرام" },      { "name": "أرز بسمتي", "amount": "3 أكواب" },      { "name": "بصل مفروم", "amount": "2" },      { "name": "حشو (بصل مقلي، نخي، زبيب)", "amount": "1 كوب" },      { "name": "بهارات مشكلة", "amount": "1 ملعقة كبيرة" },      { "name": "شبت مفروم", "amount": "1/2 كوب" }    ],    "steps": [      "يُسلق الأرز مع الشبت والملح نصف سلقة.",      "في قدر، يُحمر البصل ثم يُضاف الربيان والبهارات ويُقلب حتى ينضج.",      "يُصفى الأرز ويُضاف فوق خلطة الربيان.",      "يُضاف الحشو على وجه الأرز.",      "يُغطى القدر ويُترك على نار هادئة لمدة 20 دقيقة.",      "يُقلب المكبوس عند التقديم."    ],    "tips": "يمكن إضافة قليل من ماء الورد والزعفران على وجه الأرز قبل أن يتسكر.",    "isIraqi": false,    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp"  },
   // ============ Batch 8 ============
 {
   id: "hd_1",
@@ -10687,6 +10966,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "ممكن تضيفون قطع دجاج مشوي حتى تصير وجبة متكاملة.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "fresh-salads",
 },
 {
@@ -10723,6 +11003,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لا تستخدمون هواية ملح، اعتمدوا على البهارات الطبيعية.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "chicken-dishes",
 },
 {
@@ -10758,6 +11039,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "اختاروا أنواع السمك الدهنية مثل السلمون لأن بيها أوميغا 3 المفيدة.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "fish-dishes",
 },
 {
@@ -10781,7 +11063,7 @@ export const RECIPES: Recipe[] = [
     { name: "بصل", amount: "1 حبة صغيرة، مفرومة" },
     { name: "جزر", amount: "1 حبة صغيرة، مبروشة" },
     { name: "كمون", amount: "1 ملعقة صغيرة" },
-    { name: "ماء", amount: "4 أكواب" },
+    { name: "ماء - عراقي", amount: "4 أكواب" },
   ],
   steps: [
     "اغسل العدس جيداً.",
@@ -10793,6 +11075,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "ضيفوا عصرة ليمون عند التقديم حتى تزيدون من امتصاص الحديد.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "iraqi-soups-and-stews",
 },
 {
@@ -10829,6 +11112,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "تأكدوا من غسل الفاصوليا المعلبة زين حتى تتخلصون من الملح الزايد.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "legumes-and-beans",
 },
 {
@@ -10853,7 +11137,7 @@ export const RECIPES: Recipe[] = [
     { name: "فلفل ألوان", amount: "1 حبة" },
     { name: "طماطم كرزية", amount: "1 كوب" },
     { name: "زعتر بري", amount: "1 ملعقة صغيرة" },
-    { name: "زيت زيتون", amount: "2 ملعقة كبيرة" },
+    { name: "زيت زيتون - عراقي", amount: "2 ملعقة كبيرة" },
   ],
   steps: [
     "قطع الخضروات بحجم متساوي.",
@@ -10865,6 +11149,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لا تخلون الخضروات هواية بالفرن حتى تحافظ على قرمشتها.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "vegetable-dishes",
 },
 {
@@ -10901,6 +11186,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "الكركم والزنجبيل بيهم فوائد مضادة للالتهابات، كلش مفيدة.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "chicken-dishes",
 },
 {
@@ -10925,7 +11211,7 @@ export const RECIPES: Recipe[] = [
     { name: "كزبرة وبقدونس مفروم", amount: "ربع كوب" },
     { name: "بصل أخضر مفروم", amount: "2 عود" },
     { name: "بهارات سمك", amount: "1 ملعقة صغيرة" },
-    { name: "طماطم مقطعة", amount: "1 حبة" },
+    { name: "طماطم مقطعة - إماراتية", amount: "1 حبة" },
   ],
   steps: [
     "اغسل البرغل وانقعه بمي حار لمدة 15 دقيقة.",
@@ -10937,7 +11223,8 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "البرغل بديل صحي للرز الأبيض وغني بالألياف.",
   isIraqi: false,
-  image: "gulf-cuisine",
+    origin: "uae" as CountryOrigin,
+  image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-saloona-JW3f2Jmbzywt6aY7D2MLqt.webp",
 },
 {
   id: "hd_9",
@@ -10973,6 +11260,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "الشمندر مصدر ممتاز لمضادات الأكسدة ويساعد على تنظيم ضغط الدم.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "fresh-salads",
 },
 {
@@ -11009,6 +11297,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "البطاطا تساعد الشوربة تصير كريمية بدون ما تحتاجون هواية كريمة.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-soups-and-stews",
 },
 {
@@ -11044,6 +11333,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "لا تطبخون البيض زيادة عن اللزوم حتى يبقى طري.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "dairy-and-eggs",
 },
 {
@@ -11067,7 +11357,7 @@ export const RECIPES: Recipe[] = [
     { name: "شوفان سريع التحضير", amount: "نص كوب" },
     { name: "بصل مفروم ناعم", amount: "1 حبة صغيرة" },
     { name: "بقدونس مفروم", amount: "ربع كوب" },
-    { name: "بهارات مشكلة", amount: "1 ملعقة صغيرة" },
+    { name: "بهارات مشكلة - عراقية", amount: "1 ملعقة صغيرة" },
   ],
   steps: [
     "اخلط الدجاج المفروم مع الشوفان والبصل والبقدونس والبهارات.",
@@ -11079,6 +11369,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "الشوفان يخلي الكفتة متماسكة ويزيد من محتواها من الألياف.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "grilled-meats-kebab-tikka-mashwi",
 },
 {
@@ -11115,6 +11406,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "استخدموا شمندر طازج مو معلب حتى تحصلون على أفضل طعم وفائدة.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "fresh-salads",
 },
 {
@@ -11149,6 +11441,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "بذور الشيا مصدر ممتاز للأوميغا 3 والألياف، وتساعد على الشبع.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "healthy-snacks",
 },
 {
@@ -11172,7 +11465,7 @@ export const RECIPES: Recipe[] = [
     { name: "بامية مجمدة أو طازجة", amount: "400 غرام" },
     { name: "طماطم مهروسة", amount: "2 كوب" },
     { name: "ثوم مهروس", amount: "4 فصوص" },
-    { name: "عصير ليمون", amount: "2 ملعقة كبيرة" },
+    { name: "عصير ليمون - عراقي", amount: "2 ملعقة كبيرة" },
   ],
   steps: [
     "اسلق اللحم لحد ما يستوي تقريباً وتخلص من الزفرة.",
@@ -11184,6 +11477,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "حتى تقللون الدهون، استخدموا قطع لحم حمراء وشيلوا كل الدهن الظاهر قبل الطبخ.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "meat-stews-casseroles",
 },
 {
@@ -11208,7 +11502,7 @@ export const RECIPES: Recipe[] = [
     { name: "عصير ليمون", amount: "2 ملعقة كبيرة" },
     { name: "ثوم مهروس", amount: "1 فص" },
     { name: "زبادي قليل الدسم", amount: "2 ملعقة كبيرة" },
-    { name: "رمان وبقدونس للزينة", amount: "حسب الرغبة" },
+    { name: "رمان وبقدونس للزينة - عراقية", amount: "حسب الرغبة" },
   ],
   steps: [
     "سخن الفرن على 220 درجة مئوية.",
@@ -11220,6 +11514,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "شوي الباذنجان بدل القلي يقلل السعرات الحرارية والدهون بشكل كبير.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "vegetable-dishes",
 },
 {
@@ -11256,6 +11551,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "الافوكادو مصدر ممتاز للدهون الصحية والألياف.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "fresh-salads",
 },
 {
@@ -11280,7 +11576,7 @@ export const RECIPES: Recipe[] = [
     { name: "بصل مفروم", amount: "1 حبة صغيرة" },
     { name: "بودرة كاري", amount: "1 ملعقة كبيرة" },
     { name: "زيت زيتون", amount: "1 ملعقة كبيرة" },
-    { name: "حمص مسلوق", amount: "نص كوب" },
+    { name: "حمص مسلوق - كردي", amount: "نص كوب" },
   ],
   steps: [
     "اغسل البرغل وصفيه.",
@@ -11292,6 +11588,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "هاي الأكلة طيبة وتعتبر وجبة كاملة ما تحتاج شي وياها.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "kurdish-dishes",
 },
 {
@@ -11327,6 +11624,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "كلما كان الموز ناضج أكثر، كلما صار البان كيك أحلى بالطعم.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "iraqi-breakfast",
 },
 {
@@ -11363,6 +11661,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "ممكن تضيفون أي نوع خضروات تحبوها مثل الفلفل أو الباذنجان.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "meat-stews-casseroles",
 },
 {
@@ -11399,6 +11698,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "ممكن تضيفون قطعة صغيرة بطاطا مسلوقة وية الشوربة بالخلاط حتى تصير أثخن.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "iraqi-soups-and-stews",
 },
 {
@@ -11435,6 +11735,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "الفراولة بيها سكر طبيعي، فماكو داعي تضيفون سكر للتتبيلة.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "fresh-salads",
 },
 {
@@ -11459,7 +11760,7 @@ export const RECIPES: Recipe[] = [
     { name: "بصل مقطع جوانح", amount: "2 حبة كبيرة" },
     { name: "لومي بصرة (ليمون أسود)", amount: "2 حبة" },
     { name: "بهارات سمك مشكلة", amount: "1 ملعقة كبيرة" },
-    { name: "زبيب (اختياري)", amount: "2 ملعقة كبيرة" },
+    { name: "زبيب (اختياري) - إماراتي", amount: "2 ملعقة كبيرة" },
   ],
   steps: [
     "اغسل الرز الأسمر وانقعه لمدة 30 دقيقة.",
@@ -11471,7 +11772,8 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "تحميص البصل زين هو سر نكهة المطبق، لا تستعجلون بهاي الخطوة.",
   isIraqi: false,
-  image: "gulf-cuisine",
+    origin: "uae" as CountryOrigin,
+  image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-mutabbaq-aTc6iWcTwNfZPdKGWpprAG.webp",
 },
 {
   id: "hd_19",
@@ -11506,6 +11808,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "هذا العصير يساعد على ترطيب الجسم وتنظيفه من السموم.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "healthy-smoothies-and-drinks",
 },
 {
@@ -11530,7 +11833,7 @@ export const RECIPES: Recipe[] = [
     { name: "بصل", amount: "1 حبة صغيرة" },
     { name: "ثوم", amount: "3 فصوص" },
     { name: "كمون وكزبرة يابسة", amount: "1 ملعقة صغيرة من كل نوع" },
-    { name: "بيكنج باودر", amount: "نص ملعقة صغيرة" },
+    { name: "بيكنج باودر - مصري", amount: "نص ملعقة صغيرة" },
   ],
   steps: [
     "صفي الحمص المنقوع جيداً.",
@@ -11542,6 +11845,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "البيكنج باودر يساعد الفلافل تصير هشة من الداخل.",
   isIraqi: true,
+    origin: "egyptian" as CountryOrigin,
   image: "legumes-and-beans",
 },
 {
@@ -11566,7 +11870,7 @@ export const RECIPES: Recipe[] = [
     { name: "عصير ليمون", amount: "2 ملعقة كبيرة" },
     { name: "ثوم مهروس", amount: "1 فص" },
     { name: "زبادي قليل الدسم", amount: "2 ملعقة كبيرة" },
-    { name: "رمان وبقدونس للزينة", amount: "حسب الرغبة" },
+    { name: "رمان وبقدونس للزينة - عراقية", amount: "حسب الرغبة" },
   ],
   steps: [
     "سخن الفرن على 220 درجة مئوية.",
@@ -11578,6 +11882,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "شوي الباذنجان بدل القلي يقلل السعرات الحرارية والدهون بشكل كبير.",
   isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
   image: "vegetable-dishes",
 },
 {
@@ -11614,6 +11919,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "الافوكادو مصدر ممتاز للدهون الصحية والألياف.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "fresh-salads",
 },
 {
@@ -11638,7 +11944,7 @@ export const RECIPES: Recipe[] = [
     { name: "بصل مفروم", amount: "1 حبة صغيرة" },
     { name: "بودرة كاري", amount: "1 ملعقة كبيرة" },
     { name: "زيت زيتون", amount: "1 ملعقة كبيرة" },
-    { name: "حمص مسلوق", amount: "نص كوب" },
+    { name: "حمص مسلوق - كردي", amount: "نص كوب" },
   ],
   steps: [
     "اغسل البرغل وصفيه.",
@@ -11650,6 +11956,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "هاي الأكلة طيبة وتعتبر وجبة كاملة ما تحتاج شي وياها.",
   isIraqi: true,
+    origin: "kurdish" as CountryOrigin,
   image: "kurdish-dishes",
 },
 {
@@ -11685,6 +11992,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "كلما كان الموز ناضج أكثر، كلما صار البان كيك أحلى بالطعم.",
   isIraqi: false,
+    origin: "general" as CountryOrigin,
   image: "iraqi-breakfast",
 },
 {
@@ -11721,6 +12029,7 @@ export const RECIPES: Recipe[] = [
   ],
   tips: "ممكن تضيفون أي نوع خضروات تحبوها مثل الفلفل أو الباذنجان.",
   isIraqi: true,
+    origin: "general" as CountryOrigin,
   image: "meat-stews-casseroles",
 },
   // ============ Batch 9 ============
@@ -11756,6 +12065,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "لتقليل الصوديوم، تجنب إضافة الملح واستخدم الليمون لتعزيز النكهة.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "fresh-salads",
   },
   {
@@ -11790,6 +12100,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "السلمون مصدر ممتاز للدهون الصحية التي تساعد على خفض الكوليسترول الضار.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "fish-dishes",
   },
   {
@@ -11813,7 +12124,7 @@ export const RECIPES: Recipe[] = [
       { name: "جزر مقطع مكعبات", amount: "حبة واحدة" },
       { name: "كرفس مفروم", amount: "عود واحد" },
       { name: "بصل مفروم", amount: "نصف حبة" },
-      { name: "مرق دجاج قليل الصوديوم", amount: "4 أكواب" },
+      { name: "مرق دجاج قليل الصوديوم - عراقي", amount: "4 أكواب" },
     ],
     steps: [
       "في قدر على النار، يقلب البصل حتى يصبح شفافاً.",
@@ -11824,6 +12135,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الشوفان غني بالألياف القابلة للذوبان التي تساهم في خفض مستويات الكوليسترول.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews",
   },
   {
@@ -11859,6 +12171,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الزنجبيل له خصائص مضادة للالتهابات ويساعد في تحسين الدورة الدموية.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "chicken-dishes",
   },
   {
@@ -11893,6 +12206,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الأفوكادو يساعد على رفع مستوى الكوليسترول الجيد (HDL) وخفض الكوليسترول الضار (LDL).",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "fresh-salads",
   },
   {
@@ -11926,6 +12240,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الطبخ بالبخار يحافظ على الفيتامينات والمعادن الموجودة في الخضروات، وهو أفضل من السلق.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "vegetable-dishes",
   },
   {
@@ -11949,7 +12264,7 @@ export const RECIPES: Recipe[] = [
       { name: "كركم مطحون", amount: "ملعقة صغيرة" },
       { name: "كمون مطحون", amount: "نصف ملعقة صغيرة" },
       { name: "ثوم مهروس", amount: "فصان" },
-      { name: "زيت زيتون", amount: "ملعقة كبيرة" },
+      { name: "زيت زيتون - إماراتي", amount: "ملعقة كبيرة" },
     ],
     steps: [
       "تخلط جميع البهارات مع الثوم وزيت الزيتون.",
@@ -11960,7 +12275,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الكركم يحتوي على مادة الكركمين التي تساعد في خفض ضغط الدم وتحسين وظائف الأوعية الدموية.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-saloona-JW3f2Jmbzywt6aY7D2MLqt.webp",
   },
   {
     id: "hh_8",
@@ -11983,7 +12299,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "نصف حبة" },
       { name: "شعيرية", amount: "ربع كوب" },
       { name: "مرق خضار قليل الصوديوم", amount: "3 أكواب" },
-      { name: "معجون طماطة", amount: "ملعقة كبيرة" },
+      { name: "معجون طماطة - عراقية", amount: "ملعقة كبيرة" },
     ],
     steps: [
       "في قدر، يقلب البصل بقليل من زيت الزيتون حتى يذبل.",
@@ -11994,6 +12310,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الطماطة غنية بالليكوبين والبوتاسيوم، وكلاهما مفيد لصحة القلب وضغط الدم.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "iraqi-soups-and-stews",
   },
   {
@@ -12028,6 +12345,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الجرجير غني بالنترات الغذائية التي يمكن أن تساعد في خفض ضغط الدم.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "fresh-salads",
   },
   {
@@ -12061,6 +12379,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الزبادي والتوت غنيان بمضادات الأكسدة والبروبيوتيك التي تدعم صحة القلب والجهاز الهضمي.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "fresh-fruits-and-natural-desserts",
   },
   {
@@ -12085,7 +12404,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مقطع دوائر", amount: "حبة واحدة" },
       { name: "فلفل أخضر مقطع دوائر", amount: "حبة واحدة" },
       { name: "معجون طماطة مذوب في كوب ماء", amount: "ملعقتان كبيرتان" },
-      { name: "لحم مفروم قليل الدهن (اختياري)", amount: "200 غرام" },
+      { name: "لحم مفروم قليل الدهن (اختياري) - عراقي", amount: "200 غرام" },
     ],
     steps: [
       "يسخن الفرن على 200 درجة مئوية.",
@@ -12097,6 +12416,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "شوي الباذنجان بدل قليه يقلل بشكل كبير من محتوى الدهون والسعرات الحرارية.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "vegetable-dishes",
   },
   {
@@ -12120,7 +12440,7 @@ export const RECIPES: Recipe[] = [
       { name: "برغل خشن", amount: "كوب واحد" },
       { name: "بصل مقطع جوانح", amount: "حبتان" },
       { name: "زيت زيتون", amount: "ملعقتان كبيرتان" },
-      { name: "كمون", amount: "ملعقة صغيرة" },
+      { name: "كمون - كردي", amount: "ملعقة صغيرة" },
     ],
     steps: [
       "يسلق العدس في ماء مملح قليلاً حتى ينضج نصف استواء.",
@@ -12132,6 +12452,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "العدس والبرغل مصدران ممتازان للألياف التي تساعد على خفض الكوليسترول وتنظيم سكر الدم.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "kurdish-dishes",
   },
   {
@@ -12165,6 +12486,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "البنجر غني بالنترات التي تتحول في الجسم إلى أكسيد النيتريك، مما يساعد على توسيع الأوعية الدموية وخفض ضغط الدم.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "healthy-smoothies-and-drinks",
   },
   {
@@ -12199,6 +12521,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الحمص مصدر جيد للبروتين النباتي والألياف، وهو يساعد على الشعور بالشبع وخفض الكوليسترول.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "pickles-and-appetizers",
   },
   {
@@ -12223,7 +12546,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "حبة واحدة" },
       { name: "زبادي قليل الدسم", amount: "نصف كوب" },
       { name: "بهارات برياني", amount: "ملعقتان صغيرتان" },
-      { name: "زيت نباتي", amount: "ملعقتان كبيرتان" },
+      { name: "زيت نباتي - عراقي", amount: "ملعقتان كبيرتان" },
     ],
     steps: [
       "يغسل الأرز وينقع لمدة 20 دقيقة ثم يسلق نصف سلقة.",
@@ -12235,7 +12558,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "استخدام الزبادي قليل الدسم والخضروات يجعل هذا الطبق أخف وأكثر فائدة للقلب.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-machboos-7VRhZnMz2V9qSQMXaa2M2V.webp",
   },
   {
     id: "hh_16",
@@ -12258,7 +12582,7 @@ export const RECIPES: Recipe[] = [
       { name: "شوفان سريع التحضير", amount: "نصف كوب" },
       { name: "بصل مفروم ناعم", amount: "حبة واحدة" },
       { name: "بقدونس مفروم", amount: "ربع كوب" },
-      { name: "بهارات مشكلة", amount: "ملعقة صغيرة" },
+      { name: "بهارات مشكلة - عراقية", amount: "ملعقة صغيرة" },
     ],
     steps: [
       "تخلط جميع المكونات في وعاء وتعجن جيداً.",
@@ -12270,6 +12594,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "إضافة الشوفان للكباب بدلاً من فتات الخبز يزيد من محتوى الألياف ويقلل من الدهون.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "grilled-meats-kebab-tikka-mashwi",
   },
   {
@@ -12305,6 +12630,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "الفاصوليا الحمراء من البقوليات الممتازة لصحة القلب لأنها غنية بالألياف القابلة للذوبان.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "legumes-and-beans",
   },
   {
@@ -12340,6 +12666,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "هذه الوجبة متوازنة وتجمع بين البروتين من البيض والفيتامينات من الخضار.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "dairy-and-eggs",
   },
   {
@@ -12364,7 +12691,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "حبة واحدة" },
       { name: "طماطة مفرومة", amount: "حبتان" },
       { name: "معجون طماطة", amount: "ملعقة كبيرة" },
-      { name: "لومي بصرة (ليمون أسود)", amount: "حبة واحدة" },
+      { name: "لومي بصرة (ليمون أسود) - عراقي", amount: "حبة واحدة" },
     ],
     steps: [
       "في قدر، يقلب البصل بقليل من الزيت حتى يذبل.",
@@ -12376,6 +12703,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "استخدام العدس في المرق يزيد من محتوى البروتين والألياف ويجعله مشبعاً أكثر.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "meat-stews-casseroles",
   },
   {
@@ -12409,6 +12737,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "هذا السناك غني بالألياف والبروتين، ويساعد على الشعور بالشبع ومنع الإفراط في تناول الطعام.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "healthy-snacks",
   },
   {
@@ -12432,7 +12761,7 @@ export const RECIPES: Recipe[] = [
       { name: "بصل مفروم", amount: "حبة واحدة" },
       { name: "بطاطا مقطعة مكعبات صغيرة", amount: "حبة واحدة" },
       { name: "كمون", amount: "ملعقة صغيرة" },
-      { name: "نعناع مجفف", amount: "ملعقة صغيرة" },
+      { name: "نعناع مجفف - كردي", amount: "ملعقة صغيرة" },
     ],
     steps: [
       "في قدر، يقلب البصل بقليل من الزيت حتى يذبل.",
@@ -12444,6 +12773,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "العدس من أفضل الأطعمة لصحة القلب، فهو يساعد على خفض ضغط الدم والكوليسترول.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "kurdish-dishes",
   },
   {
@@ -12468,7 +12798,7 @@ export const RECIPES: Recipe[] = [
       { name: "طماطة مفرومة", amount: "3 حبات" },
       { name: "بصل مفروم", amount: "حبة واحدة" },
       { name: "لومي بصرة مطحون", amount: "ملعقة صغيرة" },
-      { name: "خضروات ورقية (سبانخ أو سلق)", amount: "كوبان مفرومة" },
+      { name: "خضروات ورقية (سبانخ أو سلق) - إماراتي", amount: "كوبان مفرومة" },
     ],
     steps: [
       "في قدر، يقلب البصل ثم تضاف الطماطة وتترك لتتسبك.",
@@ -12480,7 +12810,8 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "استخدام الشوفان بدلاً من الأرز الأبيض يزيد من الألياف ويجعل الطبق مناسباً أكثر لمرضى السكري والكوليسترول.",
     isIraqi: false,
-    image: "gulf-cuisine",
+    origin: "general" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/gulf-kabsa-98UKfwgLpKTLM7hGWh463q.webp",
   },
   {
     id: "hh_23",
@@ -12516,6 +12847,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "تحميص الخبز بدلاً من قليه يقلل من الدهون المشبعة والسعرات الحرارية بشكل كبير.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "fresh-salads",
   },
   {
@@ -12552,6 +12884,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "نزع جلد الدجاج يقلل من الدهون المشبعة بشكل كبير. الأعشاب تضيف نكهة رائعة بدون الحاجة للملح.",
     isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
     image: "chicken-dishes",
   },
   {
@@ -12587,6 +12920,7 @@ export const RECIPES: Recipe[] = [
     ],
     tips: "استخدام حليب اللوز بدلاً من الحليب كامل الدسم يقلل من السعرات الحرارية والدهون المشبعة.",
     isIraqi: false,
+    origin: "general" as CountryOrigin,
     image: "iraqi-desserts-and-sweets",
   },
 ];
@@ -12620,7 +12954,1137 @@ export function getHealthyRecipes(): Recipe[] {
 
 export function searchRecipes(query: string): Recipe[] {
   const q = query.trim().toLowerCase();
-  if (!q) return [];
+  if (!q) return [
+  // ============ وصفات خليجية إضافية (68-100) ============
+  {
+    id: "gulf_68",
+    name: "مسخّن خليجي",
+    description: "خبز طابون مع الدجاج والبصل المكرمل والسماق",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch", "dinner"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "medium" as "easy" | "medium" | "hard",
+    prepTime: 20,
+    cookTime: 30,
+    servings: 4,
+    calories: 420,
+    protein: 25,
+    carbs: 35,
+    fat: 20,
+    fiber: 2,
+    ingredients: [
+      { name: "دجاج مسلوق ومفتّت", amount: "500 غرام" },
+      { name: "بصل مقطع", amount: "4 حبات كبيرة" },
+      { name: "سماق", amount: "3 ملاعق كبيرة" },
+      { name: "زيت زيتون", amount: "نصف كوب" },
+      { name: "خبز طابون أو عربي", amount: "4 أرغفة" },
+      { name: "صنوبر محمّص", amount: "ربع كوب" }
+    ],
+    steps: [
+      "يُقلّب البصل في الزيت حتى يصبح ذهبياً",
+      "يُضاف السماق والدجاج ويُقلّب",
+      "يُفرش الخبز ويُوزّع الخليط فوقه",
+      "يُخبز في الفرن حتى يصبح مقرمشاً",
+      "يُزيّن بالصنوبر المحمّص"
+    ],
+    tips: "البصل المكرمل هو سر النكهة",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_69",
+    name: "فتّة دجاج خليجية",
+    description: "خبز محمّص مع الدجاج واللبن والمكسرات، طبق خليجي شهي",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 15,
+    cookTime: 20,
+    servings: 4,
+    calories: 380,
+    protein: 26,
+    carbs: 32,
+    fat: 16,
+    fiber: 2,
+    ingredients: [
+      { name: "خبز عربي محمّص", amount: "3 أرغفة" },
+      { name: "دجاج مسلوق ومفتّت", amount: "400 غرام" },
+      { name: "لبن زبادي", amount: "كوبان" },
+      { name: "طحينة", amount: "ملعقتان كبيرتان" },
+      { name: "صنوبر ولوز محمّص - إماراتي", amount: "ربع كوب" }
+    ],
+    steps: [
+      "يُكسّر الخبز في طبق عميق",
+      "يُسكب مرق الدجاج الساخن",
+      "يُوزّع الدجاج واللبن والطحينة",
+      "يُزيّن بالمكسرات المحمّصة"
+    ],
+    tips: "يُقدّم فوراً قبل أن يبرد",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_70",
+    name: "محمّر إماراتي (أرز حلو)",
+    description: "أرز حلو بالسكر والزعفران والهيل، طبق إماراتي تقليدي يُقدّم مع السمك",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "medium" as "easy" | "medium" | "hard",
+    prepTime: 10,
+    cookTime: 30,
+    servings: 5,
+    calories: 350,
+    protein: 5,
+    carbs: 60,
+    fat: 10,
+    fiber: 1,
+    ingredients: [
+      { name: "أرز بسمتي", amount: "3 أكواب" },
+      { name: "سكر", amount: "نصف كوب" },
+      { name: "سمن", amount: "3 ملاعق كبيرة" },
+      { name: "زعفران وهيل وماء ورد - إماراتي", amount: "رشة لكل منها" }
+    ],
+    steps: [
+      "يُنقع الأرز ويُسلق نصف سلقة",
+      "يُذاب السكر في السمن حتى يصبح كراميل",
+      "يُضاف الأرز ويُقلّب مع الزعفران",
+      "يُطهى على نار هادئة حتى ينضج"
+    ],
+    tips: "يُقدّم تقليدياً مع السمك المشوي",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_71",
+    name: "عصيدة خليجية",
+    description: "حلوى من الطحين المطبوخ مع السمن والعسل، طبق تقليدي للمناسبات",
+    category: "dessert" as RecipeCategory,
+    mealType: ["snack"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 5,
+    cookTime: 20,
+    servings: 6,
+    calories: 300,
+    protein: 4,
+    carbs: 40,
+    fat: 14,
+    fiber: 1,
+    ingredients: [
+      { name: "طحين", amount: "كوب" },
+      { name: "ماء", amount: "كوبان" },
+      { name: "سمن بلدي", amount: "نصف كوب" },
+      { name: "عسل أو دبس تمر", amount: "نصف كوب" }
+    ],
+    steps: [
+      "يُغلى الماء ويُضاف الطحين تدريجياً مع التحريك",
+      "يُطهى حتى يتماسك ويترك القدر",
+      "يُوضع في طبق ويُعمل حفرة في الوسط",
+      "يُسكب السمن والعسل في الحفرة"
+    ],
+    tips: "التحريك المستمر يمنع التكتّل",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_72",
+    name: "مرق دجاج بالخضروات خليجي",
+    description: "يخنة دجاج بالخضروات المشكلة والبهارات الخليجية",
+    category: "healthy" as RecipeCategory,
+    mealType: ["lunch", "dinner"] as MealType[],
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 15,
+    cookTime: 40,
+    servings: 5,
+    calories: 280,
+    protein: 22,
+    carbs: 20,
+    fat: 12,
+    fiber: 4,
+    ingredients: [
+      { name: "دجاج مقطع", amount: "نصف كيلو" },
+      { name: "بطاطس وجزر وكوسا", amount: "حبتان من كل نوع" },
+      { name: "طماطم", amount: "حبتان" },
+      { name: "بصل وثوم", amount: "حبة + 3 فصوص" },
+      { name: "بزار ولومي - إماراتي", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُحمّر البصل ويُضاف الدجاج",
+      "تُضاف الطماطم والبهارات والماء",
+      "تُضاف الخضروات وتُطهى حتى تنضج",
+      "تُقدّم مع الأرز الأبيض"
+    ],
+    tips: "يمكن إضافة الليمون عند التقديم",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_73",
+    name: "كشري خليجي",
+    description: "أرز وعدس ومعكرونة مع صلصة الطماطم الحارة والبصل المقلي",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "medium" as "easy" | "medium" | "hard",
+    prepTime: 15,
+    cookTime: 30,
+    servings: 5,
+    calories: 380,
+    protein: 14,
+    carbs: 58,
+    fat: 10,
+    fiber: 6,
+    ingredients: [
+      { name: "أرز", amount: "كوب" },
+      { name: "عدس بني", amount: "كوب" },
+      { name: "معكرونة صغيرة", amount: "كوب" },
+      { name: "بصل مقطع حلقات", amount: "3 حبات" },
+      { name: "صلصة طماطم حارة", amount: "كوب" },
+      { name: "زيت للقلي", amount: "كمية كافية" }
+    ],
+    steps: [
+      "يُطهى العدس والأرز والمعكرونة كلٌّ على حدة",
+      "يُقلى البصل حتى يصبح مقرمشاً",
+      "تُحضّر صلصة الطماطم الحارة",
+      "تُرتّب الطبقات وتُسكب الصلصة والبصل"
+    ],
+    tips: "البصل المقلي المقرمش هو سر الطعم",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_74",
+    name: "شوربة الفطر الخليجية",
+    description: "شوربة فطر كريمية بالثوم والأعشاب",
+    category: "healthy" as RecipeCategory,
+    mealType: ["dinner"] as MealType[],
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 10,
+    cookTime: 20,
+    servings: 4,
+    calories: 150,
+    protein: 5,
+    carbs: 12,
+    fat: 10,
+    fiber: 2,
+    ingredients: [
+      { name: "فطر طازج مقطع", amount: "400 غرام" },
+      { name: "بصل وثوم", amount: "حبة + 3 فصوص" },
+      { name: "كريمة طبخ", amount: "نصف كوب" },
+      { name: "مرق دجاج", amount: "كوبان" },
+      { name: "زبدة", amount: "ملعقتان كبيرتان" }
+    ],
+    steps: [
+      "يُقلّب البصل والثوم في الزبدة",
+      "يُضاف الفطر ويُقلّب",
+      "يُضاف المرق ويُطهى 15 دقيقة",
+      "تُضاف الكريمة ويُقدّم"
+    ],
+    tips: "يمكن خلط نصف الكمية بالخلاط لقوام كريمي",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_75",
+    name: "صيادية سمك خليجية",
+    description: "أرز بالسمك والبصل المكرمل، طبق ساحلي خليجي تقليدي",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch"] as MealType[],
+    healthTags: ["all", "cholesterol"] as HealthTag[],
+    difficulty: "medium" as "easy" | "medium" | "hard",
+    prepTime: 20,
+    cookTime: 45,
+    servings: 5,
+    calories: 420,
+    protein: 28,
+    carbs: 48,
+    fat: 12,
+    fiber: 2,
+    ingredients: [
+      { name: "سمك فيليه", amount: "500 غرام" },
+      { name: "أرز بسمتي", amount: "كوبان" },
+      { name: "بصل مقطع", amount: "3 حبات كبيرة" },
+      { name: "كمون وكركم", amount: "ملعقة لكل منهما" },
+      { name: "صنوبر محمّص - إماراتي", amount: "ربع كوب" }
+    ],
+    steps: [
+      "يُحمّر البصل حتى يصبح بنياً غامقاً",
+      "يُقلى السمك ويُرفع",
+      "يُطهى الأرز في مرق البصل",
+      "يُقدّم الأرز مع السمك فوقه والصنوبر"
+    ],
+    tips: "البصل المكرمل يعطي اللون والنكهة المميزة",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_76",
+    name: "مكرونة بالبشاميل خليجية",
+    description: "معكرونة مخبوزة بصلصة البشاميل واللحم المفروم",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch", "dinner"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "medium" as "easy" | "medium" | "hard",
+    prepTime: 20,
+    cookTime: 40,
+    servings: 6,
+    calories: 420,
+    protein: 20,
+    carbs: 45,
+    fat: 18,
+    fiber: 2,
+    ingredients: [
+      { name: "معكرونة بيني", amount: "500 غرام" },
+      { name: "لحم مفروم", amount: "300 غرام" },
+      { name: "حليب", amount: "3 أكواب" },
+      { name: "طحين وزبدة", amount: "3 ملاعق كبيرة لكل منهما" },
+      { name: "جبن مبشور", amount: "كوب" },
+      { name: "بهارات", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "تُسلق المعكرونة وتُصفّى",
+      "يُحمّر اللحم مع البهارات",
+      "تُحضّر صلصة البشاميل",
+      "تُرتّب الطبقات في صينية",
+      "تُخبز حتى يصبح الوجه ذهبياً"
+    ],
+    tips: "يمكن إضافة الفطر أو الخضروات",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_77",
+    name: "دجاج بالكاري خليجي",
+    description: "دجاج مطبوخ بصلصة الكاري الكريمية على الطريقة الخليجية",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "medium" as "easy" | "medium" | "hard",
+    prepTime: 15,
+    cookTime: 35,
+    servings: 4,
+    calories: 380,
+    protein: 28,
+    carbs: 15,
+    fat: 24,
+    fiber: 2,
+    ingredients: [
+      { name: "دجاج مقطع", amount: "كيلو واحد" },
+      { name: "بصل وثوم وزنجبيل", amount: "حبة + 3 فصوص + ملعقة" },
+      { name: "كاري وكركم", amount: "ملعقتان كبيرتان" },
+      { name: "حليب جوز الهند", amount: "علبة واحدة" },
+      { name: "طماطم - إماراتي", amount: "حبتان" }
+    ],
+    steps: [
+      "يُحمّر البصل والثوم والزنجبيل",
+      "يُضاف الدجاج والكاري",
+      "تُضاف الطماطم وحليب جوز الهند",
+      "يُطهى حتى ينضج الدجاج",
+      "يُقدّم مع الأرز البسمتي"
+    ],
+    tips: "حليب جوز الهند يعطي القوام الكريمي",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_78",
+    name: "سمك مقلي بالبهارات الخليجية",
+    description: "سمك مقلي مقرمش متبّل بالبهارات الخليجية",
+    category: "quick" as RecipeCategory,
+    mealType: ["lunch", "dinner"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 10,
+    cookTime: 15,
+    servings: 4,
+    calories: 320,
+    protein: 30,
+    carbs: 15,
+    fat: 16,
+    fiber: 1,
+    ingredients: [
+      { name: "سمك فيليه", amount: "500 غرام" },
+      { name: "طحين", amount: "نصف كوب" },
+      { name: "بزار سمك", amount: "ملعقة كبيرة" },
+      { name: "كركم وملح", amount: "حسب الرغبة" },
+      { name: "زيت للقلي - إماراتي", amount: "كمية كافية" }
+    ],
+    steps: [
+      "يُتبّل السمك بالبهارات",
+      "يُغطّى بالطحين",
+      "يُقلى في زيت ساخن حتى يصبح ذهبياً",
+      "يُقدّم مع الليمون والسلطة"
+    ],
+    tips: "يُقدّم ساخناً مع الدقوس",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_79",
+    name: "محشي فلفل خليجي",
+    description: "فلفل حلو محشو بالأرز واللحم والبهارات",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "medium" as "easy" | "medium" | "hard",
+    prepTime: 25,
+    cookTime: 40,
+    servings: 5,
+    calories: 300,
+    protein: 16,
+    carbs: 30,
+    fat: 12,
+    fiber: 3,
+    ingredients: [
+      { name: "فلفل حلو كبير", amount: "6 حبات" },
+      { name: "أرز مصري", amount: "كوب" },
+      { name: "لحم مفروم", amount: "250 غرام" },
+      { name: "طماطم مفرومة", amount: "حبتان" },
+      { name: "بقدونس وبهارات", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "تُحضّر الحشوة من الأرز واللحم والطماطم",
+      "يُحفر الفلفل ويُحشى",
+      "يُرتّب في قدر مع صلصة الطماطم",
+      "يُطهى على نار هادئة حتى ينضج"
+    ],
+    tips: "لا تملأ الفلفل بالكامل لأن الأرز يتمدد",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_80",
+    name: "شوربة طماطم خليجية",
+    description: "شوربة طماطم كريمية بالريحان والثوم",
+    category: "healthy" as RecipeCategory,
+    mealType: ["dinner"] as MealType[],
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 10,
+    cookTime: 25,
+    servings: 4,
+    calories: 120,
+    protein: 3,
+    carbs: 15,
+    fat: 6,
+    fiber: 3,
+    ingredients: [
+      { name: "طماطم ناضجة", amount: "6 حبات" },
+      { name: "بصل وثوم", amount: "حبة + 3 فصوص" },
+      { name: "ريحان طازج", amount: "نصف كوب" },
+      { name: "كريمة طبخ", amount: "ربع كوب" },
+      { name: "زيت زيتون", amount: "ملعقتان كبيرتان" }
+    ],
+    steps: [
+      "يُحمّر البصل والثوم",
+      "تُضاف الطماطم وتُطهى",
+      "تُخلط بالخلاط حتى تصبح ناعمة",
+      "تُضاف الكريمة والريحان"
+    ],
+    tips: "تُقدّم مع الخبز المحمّص",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_81",
+    name: "رز مبهّر بالدجاج خليجي",
+    description: "أرز بسمتي معطّر بالبهارات مع قطع الدجاج المتبّلة",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 15,
+    cookTime: 35,
+    servings: 4,
+    calories: 420,
+    protein: 26,
+    carbs: 48,
+    fat: 14,
+    fiber: 1,
+    ingredients: [
+      { name: "أرز بسمتي", amount: "كوبان" },
+      { name: "دجاج مقطع", amount: "500 غرام" },
+      { name: "بهارات مشكلة", amount: "ملعقتان كبيرتان" },
+      { name: "بصل وثوم", amount: "حبة + فصان" },
+      { name: "سمن", amount: "ملعقتان كبيرتان" }
+    ],
+    steps: [
+      "يُحمّر الدجاج مع البصل",
+      "تُضاف البهارات والماء",
+      "يُضاف الأرز ويُطهى",
+      "يُقدّم ساخناً"
+    ],
+    tips: "يُزيّن بالمكسرات والبقدونس",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_82",
+    name: "سلطة زبادي بالخيار خليجية",
+    description: "سلطة لبن زبادي منعشة بالخيار والنعناع والثوم",
+    category: "healthy" as RecipeCategory,
+    mealType: ["lunch", "dinner"] as MealType[],
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 10,
+    cookTime: 0,
+    servings: 4,
+    calories: 80,
+    protein: 4,
+    carbs: 8,
+    fat: 3,
+    fiber: 1,
+    ingredients: [
+      { name: "لبن زبادي", amount: "كوبان" },
+      { name: "خيار مبشور", amount: "حبتان" },
+      { name: "نعناع مفروم", amount: "ملعقتان كبيرتان" },
+      { name: "ثوم مهروس", amount: "فص واحد" },
+      { name: "ملح", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُبشر الخيار ويُصفّى",
+      "يُخلط مع اللبن والنعناع والثوم",
+      "يُتبّل بالملح",
+      "يُقدّم بارداً"
+    ],
+    tips: "تُقدّم كمقبّلة مع الأطباق الرئيسية",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_83",
+    name: "كبسة لحم بالزبيب خليجية",
+    description: "كبسة لحم فاخرة مع الزبيب والمكسرات المحمّصة",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "medium" as "easy" | "medium" | "hard",
+    prepTime: 25,
+    cookTime: 90,
+    servings: 6,
+    calories: 530,
+    protein: 28,
+    carbs: 55,
+    fat: 22,
+    fiber: 3,
+    ingredients: [
+      { name: "لحم غنم", amount: "كيلو واحد" },
+      { name: "أرز بسمتي", amount: "3 أكواب" },
+      { name: "زبيب ولوز وكاجو", amount: "نصف كوب مشكل" },
+      { name: "بهارات كبسة", amount: "ملعقتان كبيرتان" },
+      { name: "زعفران ولومي - سعودي", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُطهى اللحم مع البهارات حتى ينضج",
+      "يُطهى الأرز في المرق",
+      "تُحمّص المكسرات والزبيب",
+      "يُقدّم مزيّناً بالمكسرات"
+    ],
+    tips: "طبق المناسبات والعزائم",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_84",
+    name: "شوربة الشوفان الخليجية",
+    description: "شوربة شوفان صحية بالدجاج والخضروات",
+    category: "healthy" as RecipeCategory,
+    mealType: ["dinner"] as MealType[],
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 10,
+    cookTime: 20,
+    servings: 4,
+    calories: 180,
+    protein: 12,
+    carbs: 22,
+    fat: 5,
+    fiber: 4,
+    ingredients: [
+      { name: "شوفان", amount: "كوب" },
+      { name: "صدر دجاج مفتّت", amount: "كوب" },
+      { name: "جزر وكرفس", amount: "حبة من كل نوع" },
+      { name: "مرق دجاج", amount: "3 أكواب" },
+      { name: "ملح وفلفل", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُحمّر الخضروات",
+      "يُضاف المرق والشوفان",
+      "يُطهى 15 دقيقة",
+      "يُضاف الدجاج ويُقدّم"
+    ],
+    tips: "وجبة مثالية لمرضى السكري والكوليسترول",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_85",
+    name: "دجاج محشي بالأرز خليجي",
+    description: "دجاجة كاملة محشوة بالأرز المبهّر واللحم المفروم",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "hard" as "easy" | "medium" | "hard",
+    prepTime: 30,
+    cookTime: 90,
+    servings: 6,
+    calories: 480,
+    protein: 32,
+    carbs: 40,
+    fat: 20,
+    fiber: 2,
+    ingredients: [
+      { name: "دجاجة كاملة", amount: "واحدة كبيرة" },
+      { name: "أرز بسمتي", amount: "كوب" },
+      { name: "لحم مفروم", amount: "200 غرام" },
+      { name: "مكسرات مشكلة", amount: "ربع كوب" },
+      { name: "بهارات مشكلة", amount: "ملعقتان كبيرتان" }
+    ],
+    steps: [
+      "تُحضّر حشوة الأرز واللحم والمكسرات",
+      "تُحشى الدجاجة وتُخاط",
+      "تُتبّل من الخارج وتُخبز في الفرن",
+      "تُقدّم كاملة في طبق التقديم"
+    ],
+    tips: "يُغطّى الدجاج بالألمنيوم أول ساعة ثم يُكشف للتحمير",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_86",
+    name: "سلطة الجرجير بالرمان خليجية",
+    description: "سلطة جرجير منعشة مع حبوب الرمان وجبن الحلوم",
+    category: "healthy" as RecipeCategory,
+    mealType: ["lunch", "dinner"] as MealType[],
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 10,
+    cookTime: 5,
+    servings: 4,
+    calories: 160,
+    protein: 8,
+    carbs: 12,
+    fat: 10,
+    fiber: 2,
+    ingredients: [
+      { name: "جرجير", amount: "حزمتان" },
+      { name: "رمان", amount: "حبة واحدة" },
+      { name: "جبن حلوم مشوي", amount: "200 غرام" },
+      { name: "جوز", amount: "ربع كوب" },
+      { name: "زيت زيتون وليمون", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُغسل الجرجير ويُقطّع",
+      "يُشوى الحلوم ويُقطّع",
+      "تُخلط المكونات مع الرمان والجوز",
+      "تُتبّل بالزيت والليمون"
+    ],
+    tips: "يمكن إضافة دبس الرمان للصلصة",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_87",
+    name: "كنافة بالجبن خليجية",
+    description: "كنافة مقرمشة محشوة بالجبن العكاوي مع القطر",
+    category: "dessert" as RecipeCategory,
+    mealType: ["snack"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "medium" as "easy" | "medium" | "hard",
+    prepTime: 15,
+    cookTime: 30,
+    servings: 8,
+    calories: 340,
+    protein: 8,
+    carbs: 45,
+    fat: 14,
+    fiber: 0,
+    ingredients: [
+      { name: "شعيرية كنافة", amount: "500 غرام" },
+      { name: "جبن عكاوي منقوع", amount: "400 غرام" },
+      { name: "سمن", amount: "نصف كوب" },
+      { name: "قطر (شيرة)", amount: "كوب" },
+      { name: "فستق مطحون - مصري", amount: "ربع كوب" }
+    ],
+    steps: [
+      "تُخلط الكنافة مع السمن",
+      "تُفرد نصف الكمية في صينية",
+      "يُوزّع الجبن",
+      "تُغطّى بباقي الكنافة وتُخبز",
+      "تُسكب الشيرة وتُزيّن بالفستق"
+    ],
+    tips: "يجب نقع الجبن لتقليل الملوحة",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_88",
+    name: "فتوش بالحلوم خليجي",
+    description: "سلطة فتوش منعشة مع جبن الحلوم المشوي",
+    category: "healthy" as RecipeCategory,
+    mealType: ["lunch", "dinner"] as MealType[],
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 15,
+    cookTime: 5,
+    servings: 4,
+    calories: 200,
+    protein: 10,
+    carbs: 20,
+    fat: 10,
+    fiber: 3,
+    ingredients: [
+      { name: "خضروات مشكلة", amount: "3 أكواب" },
+      { name: "خبز محمّص", amount: "رغيف واحد" },
+      { name: "جبن حلوم", amount: "200 غرام" },
+      { name: "دبس رمان وزيت زيتون", amount: "حسب الرغبة" },
+      { name: "سماق ونعناع - عراقي", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "تُقطّع الخضروات وتُخلط",
+      "يُشوى الحلوم ويُقطّع",
+      "يُحمّص الخبز ويُكسّر",
+      "تُخلط المكونات مع الصلصة"
+    ],
+    tips: "يُضاف الخبز قبل التقديم مباشرة",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_89",
+    name: "رز بالتمر خليجي",
+    description: "أرز حلو بالتمر والمكسرات، طبق إماراتي للمناسبات",
+    category: "dessert" as RecipeCategory,
+    mealType: ["lunch", "snack"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 10,
+    cookTime: 25,
+    servings: 5,
+    calories: 320,
+    protein: 5,
+    carbs: 55,
+    fat: 10,
+    fiber: 3,
+    ingredients: [
+      { name: "أرز بسمتي", amount: "كوبان" },
+      { name: "تمر منزوع النوى", amount: "كوب" },
+      { name: "سمن", amount: "3 ملاعق كبيرة" },
+      { name: "هيل وقرفة", amount: "رشة لكل منهما" },
+      { name: "لوز وجوز - إماراتي", amount: "ربع كوب" }
+    ],
+    steps: [
+      "يُطهى الأرز مع البهارات",
+      "يُقطّع التمر ويُضاف",
+      "يُضاف السمن والمكسرات",
+      "يُقدّم دافئاً"
+    ],
+    tips: "يُقدّم في المناسبات والأعياد",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_90",
+    name: "شوربة الدجاج بالذرة خليجية",
+    description: "شوربة دجاج خفيفة بالذرة الحلوة",
+    category: "healthy" as RecipeCategory,
+    mealType: ["dinner"] as MealType[],
+    healthTags: ["all", "diabetes"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 10,
+    cookTime: 20,
+    servings: 4,
+    calories: 170,
+    protein: 14,
+    carbs: 20,
+    fat: 4,
+    fiber: 2,
+    ingredients: [
+      { name: "صدر دجاج مفتّت", amount: "كوب" },
+      { name: "ذرة حلوة", amount: "كوب" },
+      { name: "مرق دجاج", amount: "3 أكواب" },
+      { name: "بصل وثوم", amount: "حبة + فصان" },
+      { name: "ملح وفلفل", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُحمّر البصل والثوم",
+      "يُضاف المرق والذرة",
+      "يُضاف الدجاج ويُطهى",
+      "يُقدّم ساخناً"
+    ],
+    tips: "يمكن إضافة الكريمة لقوام أغنى",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_91",
+    name: "كبة مشوية خليجية",
+    description: "كبة برغل مشوية محشوة باللحم والمكسرات",
+    category: "appetizer" as RecipeCategory,
+    mealType: ["lunch", "dinner"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "hard" as "easy" | "medium" | "hard",
+    prepTime: 30,
+    cookTime: 20,
+    servings: 15,
+    calories: 120,
+    protein: 8,
+    carbs: 12,
+    fat: 5,
+    fiber: 2,
+    ingredients: [
+      { name: "برغل ناعم", amount: "كوبان" },
+      { name: "لحم مفروم ناعم", amount: "300 غرام" },
+      { name: "لحم مفروم للحشوة", amount: "200 غرام" },
+      { name: "بصل مفروم", amount: "حبة واحدة" },
+      { name: "صنوبر", amount: "ربع كوب" },
+      { name: "بهارات كبة - عراقية", amount: "ملعقة كبيرة" }
+    ],
+    steps: [
+      "يُنقع البرغل ويُعجن مع اللحم",
+      "تُحضّر الحشوة من اللحم والبصل والصنوبر",
+      "تُشكّل الكبة وتُحشى",
+      "تُشوى في الفرن حتى تصبح ذهبية"
+    ],
+    tips: "يمكن قليها بدلاً من شويها",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_92",
+    name: "فول مدمس خليجي",
+    description: "فول مدمس بالطحينة والليمون وزيت الزيتون",
+    category: "quick" as RecipeCategory,
+    mealType: ["breakfast"] as MealType[],
+    healthTags: ["all", "cholesterol"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 5,
+    cookTime: 10,
+    servings: 3,
+    calories: 230,
+    protein: 13,
+    carbs: 30,
+    fat: 7,
+    fiber: 7,
+    ingredients: [
+      { name: "فول مدمس", amount: "علبتان" },
+      { name: "طحينة", amount: "ملعقتان كبيرتان" },
+      { name: "ليمون", amount: "حبة واحدة" },
+      { name: "ثوم", amount: "فص واحد" },
+      { name: "زيت زيتون - مصري", amount: "ملعقتان كبيرتان" }
+    ],
+    steps: [
+      "يُسخّن الفول مع قليل من الماء",
+      "يُضاف الثوم والكمون",
+      "يُقدّم مع الطحينة والليمون وزيت الزيتون"
+    ],
+    tips: "يُقدّم مع الخبز الطازج والخضروات",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_93",
+    name: "مفطح لحم خليجي",
+    description: "لحم غنم كامل مطبوخ ببطء مع الأرز البسمتي، طبق ولائم سعودي",
+    category: "hearty" as RecipeCategory,
+    mealType: ["lunch"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "hard" as "easy" | "medium" | "hard",
+    prepTime: 30,
+    cookTime: 180,
+    servings: 10,
+    calories: 550,
+    protein: 35,
+    carbs: 48,
+    fat: 24,
+    fiber: 1,
+    ingredients: [
+      { name: "لحم غنم كامل", amount: "3 كيلو" },
+      { name: "أرز بسمتي", amount: "5 أكواب" },
+      { name: "بهارات مشكلة", amount: "4 ملاعق كبيرة" },
+      { name: "سمن", amount: "نصف كوب" },
+      { name: "مكسرات - سعودي", amount: "كوب" }
+    ],
+    steps: [
+      "يُسلق اللحم ببطء حتى يصبح طرياً جداً",
+      "يُطهى الأرز في المرق",
+      "يُقدّم اللحم فوق الأرز",
+      "يُزيّن بالمكسرات والسمن"
+    ],
+    tips: "يحتاج صبراً في الطهي لكن النتيجة تستحق",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_94",
+    name: "مهلبية خليجية بالزعفران",
+    description: "حلوى حليب كريمية بالزعفران وماء الورد",
+    category: "dessert" as RecipeCategory,
+    mealType: ["snack"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 5,
+    cookTime: 15,
+    servings: 5,
+    calories: 180,
+    protein: 4,
+    carbs: 28,
+    fat: 6,
+    fiber: 0,
+    ingredients: [
+      { name: "حليب", amount: "3 أكواب" },
+      { name: "نشا", amount: "3 ملاعق كبيرة" },
+      { name: "سكر", amount: "ربع كوب" },
+      { name: "زعفران وماء ورد", amount: "رشة لكل منهما" },
+      { name: "فستق للتزيين", amount: "ملعقتان كبيرتان" }
+    ],
+    steps: [
+      "يُذاب النشا في قليل من الحليب البارد",
+      "يُسخّن باقي الحليب مع السكر والزعفران",
+      "يُضاف النشا ويُحرّك حتى يتكثّف",
+      "يُسكب في أكواب ويُبرّد",
+      "يُزيّن بالفستق وماء الورد"
+    ],
+    tips: "يُقدّم بارداً وهو ألذ",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_95",
+    name: "سلطة البطاطس الخليجية",
+    description: "سلطة بطاطس بالمايونيز والخضروات",
+    category: "appetizer" as RecipeCategory,
+    mealType: ["lunch", "dinner"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 15,
+    cookTime: 15,
+    servings: 5,
+    calories: 200,
+    protein: 4,
+    carbs: 25,
+    fat: 10,
+    fiber: 2,
+    ingredients: [
+      { name: "بطاطس مسلوقة", amount: "4 حبات" },
+      { name: "بيض مسلوق", amount: "3 حبات" },
+      { name: "مايونيز", amount: "نصف كوب" },
+      { name: "خيار ومخلل", amount: "حسب الرغبة" },
+      { name: "ملح وفلفل", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "تُقطّع البطاطس والبيض مكعبات",
+      "تُضاف الخضروات المفرومة",
+      "يُخلط المايونيز مع الملح والفلفل",
+      "تُقلّب المكونات وتُقدّم باردة"
+    ],
+    tips: "تُقدّم كمقبّلة مع الأطباق الرئيسية",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_96",
+    name: "بابا غنوج خليجي",
+    description: "باذنجان مشوي مهروس بالطحينة والثوم والليمون",
+    category: "appetizer" as RecipeCategory,
+    mealType: ["dinner", "snack"] as MealType[],
+    healthTags: ["all", "diabetes", "cholesterol"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 10,
+    cookTime: 20,
+    servings: 4,
+    calories: 130,
+    protein: 3,
+    carbs: 12,
+    fat: 9,
+    fiber: 4,
+    ingredients: [
+      { name: "باذنجان كبير", amount: "حبتان" },
+      { name: "طحينة", amount: "ملعقتان كبيرتان" },
+      { name: "ليمون", amount: "حبة واحدة" },
+      { name: "ثوم", amount: "فصان" },
+      { name: "رمان للتزيين - عراقي", amount: "ربع كوب" }
+    ],
+    steps: [
+      "يُشوى الباذنجان على النار المباشرة",
+      "يُقشّر ويُهرس",
+      "يُخلط مع الطحينة والليمون والثوم",
+      "يُزيّن بالرمان وزيت الزيتون"
+    ],
+    tips: "الشوي على النار المباشرة يعطي نكهة مدخّنة",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_97",
+    name: "شوربة العدس الأحمر الخليجية",
+    description: "شوربة عدس أحمر كريمية بالكمون والليمون",
+    category: "healthy" as RecipeCategory,
+    mealType: ["dinner"] as MealType[],
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 5,
+    cookTime: 25,
+    servings: 5,
+    calories: 160,
+    protein: 10,
+    carbs: 25,
+    fat: 3,
+    fiber: 7,
+    ingredients: [
+      { name: "عدس أحمر", amount: "كوبان" },
+      { name: "جزر وبصل", amount: "حبة من كل نوع" },
+      { name: "كمون وكركم", amount: "ملعقة لكل منهما" },
+      { name: "ليمون", amount: "حبة واحدة" },
+      { name: "زيت زيتون - عراقي", amount: "ملعقتان كبيرتان" }
+    ],
+    steps: [
+      "يُحمّر البصل والجزر",
+      "يُضاف العدس والماء والبهارات",
+      "يُطهى حتى ينضج",
+      "يُخلط بالخلاط ويُقدّم مع الليمون"
+    ],
+    tips: "مثالية لوجبة عشاء خفيفة وصحية",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_98",
+    name: "أم علي خليجية",
+    description: "حلوى من الخبز المقرمش مع الحليب والمكسرات والزبيب",
+    category: "dessert" as RecipeCategory,
+    mealType: ["snack"] as MealType[],
+    healthTags: ["all"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 10,
+    cookTime: 20,
+    servings: 6,
+    calories: 320,
+    protein: 8,
+    carbs: 42,
+    fat: 14,
+    fiber: 1,
+    ingredients: [
+      { name: "عجينة بف باستري", amount: "عبوة واحدة" },
+      { name: "حليب", amount: "3 أكواب" },
+      { name: "سكر", amount: "ربع كوب" },
+      { name: "مكسرات مشكلة", amount: "نصف كوب" },
+      { name: "زبيب وجوز هند", amount: "ربع كوب لكل منهما" }
+    ],
+    steps: [
+      "تُخبز العجينة حتى تصبح ذهبية وتُكسّر",
+      "تُوزّع في صينية مع المكسرات والزبيب",
+      "يُسخّن الحليب مع السكر ويُسكب",
+      "تُخبز حتى يصبح الوجه ذهبياً"
+    ],
+    tips: "تُقدّم ساخنة وهي ألذ بكثير",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+  {
+    id: "gulf_99",
+    name: "تمرية خليجية",
+    description: "كرات تمر بالمكسرات والسمسم، حلوى صحية وسريعة",
+    category: "dessert" as RecipeCategory,
+    mealType: ["snack"] as MealType[],
+    healthTags: ["all", "diabetes"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 15,
+    cookTime: 0,
+    servings: 15,
+    calories: 80,
+    protein: 2,
+    carbs: 14,
+    fat: 3,
+    fiber: 2,
+    ingredients: [
+      { name: "تمر منزوع النوى", amount: "كوبان" },
+      { name: "لوز أو جوز", amount: "نصف كوب" },
+      { name: "سمسم", amount: "ربع كوب" },
+      { name: "جوز هند مبشور", amount: "ربع كوب" },
+      { name: "قرفة", amount: "رشة" }
+    ],
+    steps: [
+      "يُعجن التمر حتى يصبح ناعماً",
+      "تُضاف المكسرات المفرومة والقرفة",
+      "تُشكّل كرات صغيرة",
+      "تُغطّى بالسمسم أو جوز الهند"
+    ],
+    tips: "تُحفظ في الثلاجة وتُقدّم كوجبة خفيفة صحية",
+    isIraqi: false,
+    origin: "uae",
+    image: undefined,
+  },
+  {
+    id: "gulf_100",
+    name: "قهوة عربية سعودية",
+    description: "قهوة عربية أصيلة بالهيل والزعفران، رمز الضيافة الخليجية",
+    category: "quick" as RecipeCategory,
+    mealType: ["snack"] as MealType[],
+    healthTags: ["all", "diabetes"] as HealthTag[],
+    difficulty: "easy" as "easy" | "medium" | "hard",
+    prepTime: 5,
+    cookTime: 15,
+    servings: 6,
+    calories: 5,
+    protein: 0,
+    carbs: 1,
+    fat: 0,
+    fiber: 0,
+    ingredients: [
+      { name: "بن عربي مطحون خشن", amount: "3 ملاعق كبيرة" },
+      { name: "ماء", amount: "3 أكواب" },
+      { name: "هيل مطحون", amount: "ملعقة صغيرة" },
+      { name: "زعفران", amount: "رشة" },
+      { name: "قرنفل (اختياري) - إماراتي", amount: "حبتان" }
+    ],
+    steps: [
+      "يُغلى الماء ويُضاف البن",
+      "يُترك يغلي على نار هادئة 15 دقيقة",
+      "يُضاف الهيل والزعفران",
+      "يُصفّى ويُقدّم في فناجين صغيرة"
+    ],
+    tips: "تُقدّم مع التمر كتقليد خليجي أصيل",
+    isIraqi: false,
+    origin: "saudi",
+    image: undefined,
+  },
+];
   return RECIPES.filter(
     (r) =>
       r.name.includes(q) ||
@@ -12631,4 +14095,32 @@ export function searchRecipes(query: string): Recipe[] {
 
 export function getRecipeById(id: string): Recipe | undefined {
   return RECIPES.find((r) => r.id === id);
+}
+
+export function getRecipesByOrigin(origin: CountryOrigin): Recipe[] {
+  return RECIPES.filter((r) => r.origin === origin);
+}
+
+export function getRecipesByCountry(country: string): Recipe[] {
+  const originMap: Record<string, CountryOrigin[]> = {
+    "iraq": ["iraqi", "kurdish"],
+    "saudi": ["saudi"],
+    "uae": ["uae"],
+    "egypt": ["egyptian"],
+  };
+  const origins = originMap[country] || [];
+  return RECIPES.filter((r) => r.origin && origins.includes(r.origin));
+}
+
+export function getRecipesSortedByCountry(country: string): Recipe[] {
+  const originMap: Record<string, CountryOrigin[]> = {
+    "iraq": ["iraqi", "kurdish"],
+    "saudi": ["saudi"],
+    "uae": ["uae"],
+    "egypt": ["egyptian"],
+  };
+  const origins = originMap[country] || [];
+  const countryRecipes = RECIPES.filter((r) => r.origin && origins.includes(r.origin));
+  const otherRecipes = RECIPES.filter((r) => !r.origin || !origins.includes(r.origin));
+  return [...countryRecipes, ...otherRecipes];
 }

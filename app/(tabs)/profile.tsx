@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ScrollView,
   Text,
@@ -14,6 +14,13 @@ import { useColors } from "@/hooks/use-colors";
 import { useUser, type HealthCondition } from "@/lib/user-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useThemeContext } from "@/lib/theme-provider";
+import {
+  requestNotificationPermissions,
+  scheduleMealReminder,
+  cancelMealReminder,
+  scheduleDailyMotivation,
+  cancelAllNotifications,
+} from "@/lib/notifications";
 
 const HEALTH_LABELS: Record<HealthCondition, string> = {
   diabetes: "السكري",
@@ -23,12 +30,32 @@ const HEALTH_LABELS: Record<HealthCondition, string> = {
   none: "لا أعاني من شيء",
 };
 
+const COUNTRY_OPTIONS: { key: string; label: string; flag: string }[] = [
+  { key: "iraq", label: "العراق", flag: "🇮🇶" },
+  { key: "saudi", label: "السعودية", flag: "🇸🇦" },
+  { key: "uae", label: "الإمارات", flag: "🇦🇪" },
+  { key: "egypt", label: "مصر", flag: "🇪🇬" },
+];
+
+// Default meal times
+const MEAL_TIMES = {
+  breakfast: { hour: 7, minute: 30 },
+  lunch: { hour: 12, minute: 30 },
+  dinner: { hour: 19, minute: 0 },
+};
+
 export default function ProfileScreen() {
   const colors = useColors();
   const { profile, updateProfile, resetProfile } = useUser();
   const { colorScheme, setColorScheme } = useThemeContext();
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState("");
+  const [permissionGranted, setPermissionGranted] = useState(false);
+
+  // Request notification permissions on mount
+  useEffect(() => {
+    requestNotificationPermissions().then(setPermissionGranted);
+  }, []);
 
   const startEdit = (field: string, currentValue: string) => {
     setEditingField(field);
@@ -50,6 +77,7 @@ export default function ProfileScreen() {
           text: "تسجيل الخروج",
           style: "destructive",
           onPress: async () => {
+            await cancelAllNotifications();
             await resetProfile();
             router.replace("/onboarding" as any);
           },
@@ -59,12 +87,50 @@ export default function ProfileScreen() {
   };
 
   const toggleNotification = async (key: string, value: boolean) => {
+    // Request permissions first if not granted
+    if (value && !permissionGranted) {
+      const granted = await requestNotificationPermissions();
+      setPermissionGranted(granted);
+      if (!granted) {
+        Alert.alert(
+          "الإشعارات معطلة",
+          "يرجى تفعيل الإشعارات من إعدادات الجهاز للاستفادة من هذه الميزة."
+        );
+        return;
+      }
+    }
+
+    // Update profile
     await updateProfile({
       notifications: { ...profile.notifications, [key]: value },
     });
+
+    // Schedule or cancel the actual notification
+    if (key === "breakfast" || key === "lunch" || key === "dinner") {
+      if (value) {
+        const time = MEAL_TIMES[key as keyof typeof MEAL_TIMES];
+        await scheduleMealReminder(key as "breakfast" | "lunch" | "dinner", time.hour, time.minute);
+      } else {
+        await cancelMealReminder(key);
+      }
+    } else if (key === "promotions") {
+      if (value) {
+        await scheduleDailyMotivation();
+      } else {
+        // Cancel motivation notifications
+        const Notifications = require("expo-notifications");
+        const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+        for (const n of scheduled) {
+          if (n.content.data?.type === "motivation") {
+            await Notifications.cancelScheduledNotificationAsync(n.identifier);
+          }
+        }
+      }
+    }
   };
 
   const disableAllNotifications = async () => {
+    await cancelAllNotifications();
     await updateProfile({
       notifications: {
         breakfast: false,
@@ -137,7 +203,7 @@ export default function ProfileScreen() {
 
         {/* Personal Info */}
         <View className="mx-5 bg-surface rounded-2xl px-5 py-2 mb-4 border" style={{ borderColor: colors.border }}>
-          <Text className="text-base font-bold text-foreground py-3">معلوماتي الأساسية</Text>
+          <Text className="text-base font-bold text-foreground py-3">المعلومات الشخصية</Text>
           {renderEditableField("الاسم", "name", profile.name, "أدخل اسمك")}
           {renderEditableField("رقم الهاتف", "phone", profile.phone, "أدخل رقمك", "phone-pad")}
           {renderEditableField("العمر", "age", profile.age, "أدخل عمرك", "numeric")}
@@ -170,14 +236,44 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {/* Country Selection */}
+        <View className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border" style={{ borderColor: colors.border }}>
+          <View className="flex-row items-center mb-3">
+            <Text className="text-lg ml-2">🌍</Text>
+            <Text className="text-base font-bold text-foreground">الدولة</Text>
+          </View>
+          <View className="flex-row flex-wrap gap-2">
+            {COUNTRY_OPTIONS.map((c) => (
+              <TouchableOpacity
+                key={c.key}
+                onPress={() => updateProfile({ country: c.key as any })}
+                className="px-4 py-2.5 rounded-xl flex-row items-center gap-2"
+                style={{
+                  backgroundColor: profile.country === c.key ? `${colors.primary}20` : colors.background,
+                  borderWidth: 1.5,
+                  borderColor: profile.country === c.key ? colors.primary : colors.border,
+                }}
+              >
+                <Text style={{ fontSize: 18 }}>{c.flag}</Text>
+                <Text
+                  className="text-sm font-medium"
+                  style={{ color: profile.country === c.key ? colors.primary : colors.foreground }}
+                >
+                  {c.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
         {/* Health Condition */}
         <View className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border" style={{ borderColor: colors.border }}>
           <View className="flex-row items-center mb-2">
             <Text className="text-lg ml-2">🩺</Text>
-            <Text className="text-base font-bold text-foreground">حالتي الصحية</Text>
+            <Text className="text-base font-bold text-foreground">الحالة الصحية</Text>
           </View>
           <Text className="text-base text-muted mb-3">
-            أعاني من: {HEALTH_LABELS[profile.healthCondition]}
+            الحالة الحالية: {HEALTH_LABELS[profile.healthCondition]}
           </Text>
           <TouchableOpacity
             onPress={() => router.push("/onboarding" as any)}
@@ -215,20 +311,30 @@ export default function ProfileScreen() {
             <Text className="text-lg ml-2">🔔</Text>
             <Text className="text-base font-bold text-foreground">إعدادات الإشعارات</Text>
           </View>
+          {!permissionGranted && (
+            <View className="mb-3 p-3 rounded-lg" style={{ backgroundColor: `${colors.warning}15` }}>
+              <Text className="text-sm" style={{ color: colors.warning }}>
+                الإشعارات غير مفعّلة. فعّل أي إشعار لطلب الإذن.
+              </Text>
+            </View>
+          )}
           {[
-            { key: "breakfast", label: "تذكير الفطور" },
-            { key: "lunch", label: "تذكير الغداء" },
-            { key: "dinner", label: "تذكير العشاء" },
-            { key: "fridge", label: "تذكير الثلاجة" },
-            { key: "shopping", label: "تذكير التسوق" },
-            { key: "promotions", label: "عروض واشتراك" },
+            { key: "breakfast", label: "تذكير الفطور", desc: "يومياً الساعة 7:30 صباحاً" },
+            { key: "lunch", label: "تذكير الغداء", desc: "يومياً الساعة 12:30 ظهراً" },
+            { key: "dinner", label: "تذكير العشاء", desc: "يومياً الساعة 7:00 مساءً" },
+            { key: "fridge", label: "تذكير الثلاجة", desc: "تنبيه بمحتويات الثلاجة" },
+            { key: "shopping", label: "تذكير التسوق", desc: "تنبيه بقائمة المشتريات" },
+            { key: "promotions", label: "نصائح وتحفيز", desc: "نصائح صحية يومية" },
           ].map((item) => (
             <View
               key={item.key}
               className="flex-row items-center justify-between py-3 border-b"
               style={{ borderBottomColor: colors.border }}
             >
-              <Text className="text-base text-foreground">{item.label}</Text>
+              <View className="flex-1 mr-3">
+                <Text className="text-base text-foreground">{item.label}</Text>
+                <Text className="text-xs text-muted mt-0.5">{item.desc}</Text>
+              </View>
               <Switch
                 value={profile.notifications[item.key as keyof typeof profile.notifications]}
                 onValueChange={(v) => toggleNotification(item.key, v)}
@@ -242,7 +348,7 @@ export default function ProfileScreen() {
             </View>
           ))}
           <TouchableOpacity onPress={disableAllNotifications} className="py-3 items-center">
-            <Text className="text-sm text-muted">تعطيل الكل</Text>
+            <Text className="text-sm" style={{ color: colors.error }}>إيقاف جميع الإشعارات</Text>
           </TouchableOpacity>
         </View>
 
@@ -255,7 +361,7 @@ export default function ProfileScreen() {
         >
           <View className="flex-row items-center">
             <Text className="text-lg ml-2">📋</Text>
-            <Text className="text-base font-bold text-foreground">وصفاتي المجربة</Text>
+            <Text className="text-base font-bold text-foreground">الوصفات المجرّبة</Text>
           </View>
           <View className="flex-row items-center">
             <Text className="text-sm text-muted ml-1">{profile.triedRecipes.length} وصفة</Text>
@@ -268,7 +374,7 @@ export default function ProfileScreen() {
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center">
               <Text className="text-lg ml-2">🌙</Text>
-              <Text className="text-base font-bold text-foreground">المظهر الداكن</Text>
+              <Text className="text-base font-bold text-foreground">الوضع الداكن</Text>
             </View>
             <Switch
               value={colorScheme === "dark"}
@@ -292,7 +398,7 @@ export default function ProfileScreen() {
         >
           <View className="flex-row items-center">
             <Text className="text-lg ml-2">ℹ️</Text>
-            <Text className="text-base font-bold text-foreground">معلومات التطبيق</Text>
+            <Text className="text-base font-bold text-foreground">عن التطبيق</Text>
           </View>
           <MaterialIcons name="chevron-left" size={20} color={colors.muted} />
         </TouchableOpacity>
@@ -305,7 +411,7 @@ export default function ProfileScreen() {
           activeOpacity={0.7}
         >
           <Text className="text-base font-bold" style={{ color: colors.error }}>
-            🚪 تسجيل الخروج
+            تسجيل الخروج
           </Text>
         </TouchableOpacity>
       </ScrollView>

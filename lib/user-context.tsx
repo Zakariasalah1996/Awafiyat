@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type HealthCondition = "diabetes" | "hypertension" | "obesity" | "cholesterol" | "none";
+export type Country = "iraq" | "saudi" | "uae" | "egypt" | "";
 
 export interface FamilyMember {
   id: string;
@@ -30,6 +31,7 @@ export interface UserProfile {
   phone: string;
   age: string;
   gender: "male" | "female" | "";
+  country: Country;
   healthCondition: HealthCondition;
   familyMembers: FamilyMember[];
   mealTimes: MealTimes;
@@ -50,6 +52,7 @@ const defaultProfile: UserProfile = {
   phone: "",
   age: "",
   gender: "",
+  country: "",
   healthCondition: "none",
   familyMembers: [],
   mealTimes: { breakfast: null, lunch: null, dinner: null },

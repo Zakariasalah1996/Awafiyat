@@ -18,12 +18,19 @@ interface SectionCard {
 }
 
 const DAILY_TIPS = [
-  "شرب كوب ماء دافئ على الريق يساعد على تنشيط الجهاز الهضمي وتحسين عملية الأيض. جرّبها كل صباح وشوف الفرق!",
-  "التمر العراقي من أفضل مصادر الطاقة الطبيعية. 3 حبات تمر بالفطور تعطيج طاقة لنص اليوم!",
-  "الخضروات الملونة بالأكل مو بس شكلها حلو، كل لون فيه فيتامينات مختلفة. نوّعي بالألوان!",
-  "المشي 15 دقيقة بعد الغداء يساعد على الهضم ويقلل ارتفاع السكر بالدم.",
-  "اللبن العراقي (الروب) غني بالبروبيوتيك اللي يقوي المناعة ويحسن الهضم.",
+  "شرب كوب ماء دافئ على الريق يساعد على تنشيط الجهاز الهضمي وتحسين عملية الأيض. جرّبها كل صباح ولاحظ الفرق!",
+  "التمر من أفضل مصادر الطاقة الطبيعية. ثلاث حبات تمر في الفطور تمنحك طاقة لنصف اليوم!",
+  "الخضروات الملونة ليست جميلة المظهر فحسب، بل كل لون يحتوي على فيتامينات مختلفة. نوّع في ألوان طعامك!",
+  "المشي 15 دقيقة بعد الغداء يساعد على الهضم ويقلل ارتفاع السكر في الدم.",
+  "اللبن (الروب) غني بالبروبيوتيك الذي يقوي المناعة ويحسن الهضم.",
 ];
+
+const COUNTRY_LABELS: Record<string, string> = {
+  iraq: "العراق",
+  saudi: "السعودية",
+  uae: "الإمارات",
+  egypt: "مصر",
+};
 
 export default function HomeScreen() {
   const colors = useColors();
@@ -33,13 +40,15 @@ export default function HomeScreen() {
     ? `أهلاً ${profile.name}`
     : "أهلاً وسهلاً";
 
+  const countryLabel = profile.country ? COUNTRY_LABELS[profile.country] : "";
+
   const todayTip = DAILY_TIPS[new Date().getDay() % DAILY_TIPS.length];
 
   const sections: SectionCard[] = [
     {
       id: "meal-planner",
-      title: "شنو أطبخ اليوم؟",
-      subtitle: "نظّمي جدول طبخج اليومي مع تنبيهات",
+      title: "ماذا نطبخ اليوم؟",
+      subtitle: "نظّم جدول وجباتك اليومية مع التنبيهات",
       icon: "schedule",
       iconColor: "#E8A359",
       bgColor: "#FFF8F0",
@@ -48,8 +57,8 @@ export default function HomeScreen() {
     },
     {
       id: "fridge",
-      title: "شنو في ثلاجتي؟",
-      subtitle: "اكتبي المكونات ونقترح عليج وصفات بالذكاء الاصطناعي",
+      title: "ماذا في ثلاجتي؟",
+      subtitle: "أدخل المكونات المتوفرة ونقترح لك وصفات بالذكاء الاصطناعي",
       icon: "kitchen",
       iconColor: "#5D8A3C",
       bgColor: "#F0F7EC",
@@ -59,7 +68,7 @@ export default function HomeScreen() {
     {
       id: "shopping-list",
       title: "قائمة التسوق",
-      subtitle: "نظّمي مشترياتج بسهولة",
+      subtitle: "نظّم مشترياتك بسهولة",
       icon: "shopping-cart",
       iconColor: "#7B68EE",
       bgColor: "#F3F0FF",
@@ -78,8 +87,8 @@ export default function HomeScreen() {
     },
     {
       id: "calorie-calculator",
-      title: "حسبة السعرات الحرارية",
-      subtitle: "احسبي سعراتج بسهولة",
+      title: "حاسبة السعرات الحرارية",
+      subtitle: "احسب سعراتك بسهولة",
       icon: "bar-chart",
       iconColor: "#4ECDC4",
       bgColor: "#EEFBFA",
@@ -89,7 +98,7 @@ export default function HomeScreen() {
     {
       id: "health-tips",
       title: "نصائح ورعاية صحية",
-      subtitle: "نصائح غذائية مخصصة لحالتج الصحية",
+      subtitle: "نصائح غذائية مخصصة لحالتك الصحية",
       icon: "favorite",
       iconColor: "#FF6B9D",
       bgColor: "#FFF0F5",
@@ -131,7 +140,7 @@ export default function HomeScreen() {
                 className="text-base text-muted mt-1"
                 style={{ textAlign: "right", writingDirection: "rtl" }}
               >
-                شنو نطبخ اليوم؟ ألف عافية مقدماً
+                ماذا نطبخ اليوم؟ عافية مقدماً
               </Text>
             </View>
             <Image
@@ -140,10 +149,22 @@ export default function HomeScreen() {
             />
           </View>
 
+          {/* Country badge */}
+          {countryLabel ? (
+            <View
+              className="mt-2 px-3 py-1.5 rounded-lg self-end flex-row items-center"
+              style={{ backgroundColor: `${colors.primary}10`, flexDirection: "row-reverse" }}
+            >
+              <Text className="text-sm font-medium" style={{ color: colors.primary }}>
+                {countryLabel === "العراق" ? "🇮🇶" : countryLabel === "السعودية" ? "🇸🇦" : countryLabel === "الإمارات" ? "🇦🇪" : "🇪🇬"} {countryLabel}
+              </Text>
+            </View>
+          ) : null}
+
           {/* Health badge */}
           {profile.healthCondition !== "none" && (
             <View
-              className="mt-4 px-4 py-3 rounded-xl flex-row items-center"
+              className="mt-3 px-4 py-3 rounded-xl flex-row items-center"
               style={{
                 backgroundColor: `${colors.primary}15`,
                 flexDirection: "row-reverse",
@@ -158,7 +179,7 @@ export default function HomeScreen() {
                   writingDirection: "rtl",
                 }}
               >
-                الوصفات مخصصة لحالتج الصحية (
+                الوصفات مخصصة لحالتك الصحية (
                 {profile.healthCondition === "diabetes"
                   ? "السكري"
                   : profile.healthCondition === "hypertension"
@@ -291,7 +312,7 @@ export default function HomeScreen() {
                 className="text-foreground font-bold mt-2"
                 style={{ fontSize: 16, textAlign: "center" }}
               >
-                اشتركي بالنسخة الكاملة
+                اشترك في النسخة الكاملة
               </Text>
               <Text
                 className="text-muted mt-1"
@@ -301,7 +322,7 @@ export default function HomeScreen() {
                   writingDirection: "rtl",
                 }}
               >
-                جدول أسبوعي كامل + وصفات لا محدودة + ذكاء اصطناعي بلا حدود
+                جدول أسبوعي كامل + وصفات غير محدودة + ذكاء اصطناعي بلا حدود
               </Text>
             </TouchableOpacity>
           </Animated.View>

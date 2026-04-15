@@ -204,7 +204,7 @@ export default function CalorieCalculatorScreen() {
             style={{ fontSize: 12, textAlign: "center" }}
           >
             {caloriePercentage > 90
-              ? "عيني انتبهي! وصلتي للحد الأقصى"
+              ? "تنبيه! وصلت إلى الحد الأقصى"
               : caloriePercentage > 70
               ? "قربتي من الحد اليومي، خففي شوية"
               : "ماشاء الله، مستمرة بشكل صحي"}
@@ -300,7 +300,7 @@ export default function CalorieCalculatorScreen() {
                 writingDirection: "rtl",
                 height: 42,
               }}
-              placeholder="ابحثي عن طعام..."
+              placeholder="ابحث عن طعام..."
               placeholderTextColor={colors.muted}
               value={searchQuery}
               onChangeText={setSearchQuery}

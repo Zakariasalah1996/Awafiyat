@@ -1,0 +1,1061 @@
+  {
+    id: "bev_1",
+    name: "شاي الزنجبيل بالعسل",
+    description: "مشروب دافئ من الزنجبيل الطازج والعسل الطبيعي، يُعزّز المناعة ويُهدّئ الحلق",
+    type: "hot" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 40,
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "زنجبيل طازج مبشور", amount: "ملعقة كبيرة" },
+      { name: "عسل طبيعي", amount: "ملعقة كبيرة" },
+      { name: "ماء مغلي", amount: "كوب" },
+      { name: "ليمون", amount: "شريحة" }
+    ],
+    steps: [
+      "يُبشر الزنجبيل ويُوضع في كوب",
+      "يُسكب الماء المغلي ويُغطّى 5 دقائق",
+      "يُصفّى ويُضاف العسل والليمون"
+    ],
+    tips: "يُشرب دافئاً صباحاً لتعزيز المناعة",
+  },
+  {
+    id: "bev_2",
+    name: "شاي أخضر بالنعناع",
+    description: "شاي أخضر منعش بالنعناع الطازج، غني بمضادات الأكسدة",
+    type: "hot" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 5,
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "شاي أخضر", amount: "ملعقة صغيرة" },
+      { name: "نعناع طازج", amount: "أوراق عدة" },
+      { name: "ماء مغلي", amount: "كوب" }
+    ],
+    steps: [
+      "يُوضع الشاي والنعناع في إبريق",
+      "يُسكب الماء المغلي ويُنقع 3 دقائق",
+      "يُصفّى ويُقدّم"
+    ],
+    tips: "لا تُنقعه أكثر من 3 دقائق حتى لا يصبح مرّاً",
+  },
+  {
+    id: "bev_3",
+    name: "مشروب الكركم الذهبي",
+    description: "حليب ذهبي بالكركم والقرفة، مضاد للالتهابات ومعزّز للمناعة",
+    type: "hot" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 80,
+    healthTags: ["all", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "حليب", amount: "كوب" },
+      { name: "كركم مطحون", amount: "ملعقة صغيرة" },
+      { name: "قرفة", amount: "نصف ملعقة صغيرة" },
+      { name: "عسل", amount: "ملعقة صغيرة" },
+      { name: "فلفل أسود", amount: "رشة" }
+    ],
+    steps: [
+      "يُسخّن الحليب مع الكركم والقرفة",
+      "يُضاف الفلفل الأسود (يُعزّز امتصاص الكركم)",
+      "يُحلّى بالعسل ويُقدّم دافئاً"
+    ],
+    tips: "الفلفل الأسود يزيد امتصاص الكركم بنسبة 2000%",
+  },
+  {
+    id: "bev_4",
+    name: "شاي البابونج بالعسل",
+    description: "مشروب مهدّئ من زهور البابونج، يُساعد على الاسترخاء والنوم",
+    type: "hot" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 25,
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    ingredients: [
+      { name: "بابونج مجفف", amount: "ملعقة كبيرة" },
+      { name: "ماء مغلي", amount: "كوب" },
+      { name: "عسل", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "يُوضع البابونج في كوب",
+      "يُسكب الماء المغلي ويُغطّى 5 دقائق",
+      "يُصفّى ويُحلّى بالعسل"
+    ],
+    tips: "يُشرب قبل النوم بنصف ساعة",
+  },
+  {
+    id: "bev_5",
+    name: "قهوة عربية بالهيل",
+    description: "قهوة عربية تقليدية بالهيل والزعفران، رمز الضيافة العربية",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 5,
+    healthTags: ["all", "diabetes"] as HealthTag[],
+    ingredients: [
+      { name: "بن عربي", amount: "3 ملاعق كبيرة" },
+      { name: "ماء", amount: "3 أكواب" },
+      { name: "هيل", amount: "ملعقة صغيرة" },
+      { name: "زعفران", amount: "رشة" }
+    ],
+    steps: [
+      "يُغلى الماء ويُضاف البن",
+      "يُترك على نار هادئة 15 دقيقة",
+      "يُضاف الهيل والزعفران",
+      "يُصفّى ويُقدّم"
+    ],
+    tips: "تُقدّم مع التمر",
+  },
+  {
+    id: "bev_6",
+    name: "شاي القرفة بالتفاح",
+    description: "مشروب دافئ من القرفة والتفاح، يُنظّم السكر في الدم",
+    type: "hot" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 45,
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "تفاحة مقطعة", amount: "حبة واحدة" },
+      { name: "عود قرفة", amount: "واحد" },
+      { name: "ماء", amount: "كوبان" },
+      { name: "عسل", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "يُغلى التفاح مع القرفة في الماء",
+      "يُترك على نار هادئة 10 دقائق",
+      "يُصفّى ويُحلّى بالعسل"
+    ],
+    tips: "مثالي لمرضى السكري",
+  },
+  {
+    id: "bev_7",
+    name: "حليب بالزعفران والهيل",
+    description: "حليب ساخن معطّر بالزعفران والهيل، مشروب خليجي كلاسيكي",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 120,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "حليب كامل الدسم", amount: "كوب" },
+      { name: "زعفران", amount: "رشة" },
+      { name: "هيل مطحون", amount: "رشة" },
+      { name: "سكر", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "يُسخّن الحليب مع الزعفران والهيل",
+      "يُحلّى بالسكر",
+      "يُقدّم ساخناً"
+    ],
+    tips: "مشروب مثالي قبل النوم",
+  },
+  {
+    id: "bev_8",
+    name: "شاي الأعشاب المغربي",
+    description: "مزيج من الأعشاب المغربية مع النعناع والشيح",
+    type: "hot" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 10,
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    ingredients: [
+      { name: "نعناع طازج", amount: "حزمة صغيرة" },
+      { name: "شيح", amount: "ملعقة صغيرة" },
+      { name: "شاي أخضر", amount: "ملعقة صغيرة" },
+      { name: "ماء مغلي", amount: "كوبان" }
+    ],
+    steps: [
+      "تُوضع الأعشاب في إبريق",
+      "يُسكب الماء المغلي",
+      "يُنقع 5 دقائق ويُقدّم"
+    ],
+    tips: "يُساعد على الهضم بعد الوجبات",
+  },
+  {
+    id: "bev_9",
+    name: "سحلب خليجي",
+    description: "مشروب حليب كريمي بالسحلب والقرفة والمكسرات، مشروب شتوي دافئ",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 180,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "حليب", amount: "كوبان" },
+      { name: "سحلب", amount: "ملعقتان كبيرتان" },
+      { name: "سكر", amount: "ملعقتان كبيرتان" },
+      { name: "قرفة ومكسرات", amount: "للتزيين" }
+    ],
+    steps: [
+      "يُذاب السحلب في قليل من الحليب البارد",
+      "يُسخّن باقي الحليب مع السكر",
+      "يُضاف السحلب ويُحرّك حتى يتكثّف",
+      "يُزيّن بالقرفة والمكسرات"
+    ],
+    tips: "يُقدّم ساخناً في الشتاء",
+  },
+  {
+    id: "bev_10",
+    name: "شاي الميرمية",
+    description: "شاي أعشاب من الميرمية، يُساعد على الهضم وتهدئة الأعصاب",
+    type: "hot" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 5,
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    ingredients: [
+      { name: "أوراق ميرمية", amount: "ملعقة كبيرة" },
+      { name: "ماء مغلي", amount: "كوب" },
+      { name: "عسل (اختياري)", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "تُوضع الميرمية في كوب",
+      "يُسكب الماء المغلي ويُغطّى 5 دقائق",
+      "يُصفّى ويُقدّم"
+    ],
+    tips: "يُشرب بعد الوجبات لتحسين الهضم",
+  },
+  {
+    id: "bev_11",
+    name: "شاي كرك خليجي",
+    description: "شاي حليب مبهّر بالهيل والزعفران والقرفة، مشروب خليجي شعبي",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 100,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "شاي أسود", amount: "ملعقتان كبيرتان" },
+      { name: "حليب مبخّر", amount: "نصف كوب" },
+      { name: "ماء", amount: "كوب" },
+      { name: "هيل وزعفران وقرفة", amount: "رشة لكل منها" },
+      { name: "سكر", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُغلى الماء مع الشاي والبهارات",
+      "يُضاف الحليب والسكر",
+      "يُترك يغلي دقيقتين",
+      "يُصفّى ويُقدّم"
+    ],
+    tips: "المشروب الأكثر شعبية في الخليج",
+  },
+  {
+    id: "bev_12",
+    name: "مشروب اليانسون الدافئ",
+    description: "مشروب يانسون مهدّئ للمعدة والأعصاب",
+    type: "hot" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 15,
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    ingredients: [
+      { name: "يانسون", amount: "ملعقة كبيرة" },
+      { name: "ماء مغلي", amount: "كوب" },
+      { name: "عسل", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "يُوضع اليانسون في كوب",
+      "يُسكب الماء المغلي ويُنقع 5 دقائق",
+      "يُصفّى ويُحلّى بالعسل"
+    ],
+    tips: "مفيد لتهدئة المغص والانتفاخ",
+  },
+  {
+    id: "bev_13",
+    name: "شاي الحبق (الريحان)",
+    description: "شاي أعشاب من الريحان الطازج، منعش ومهدّئ",
+    type: "hot" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 5,
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    ingredients: [
+      { name: "أوراق ريحان طازجة", amount: "حفنة" },
+      { name: "ماء مغلي", amount: "كوب" },
+      { name: "عسل", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "تُوضع أوراق الريحان في كوب",
+      "يُسكب الماء المغلي",
+      "يُنقع 5 دقائق ويُحلّى"
+    ],
+    tips: "يُساعد على تخفيف التوتر",
+  },
+  {
+    id: "bev_14",
+    name: "عصير الليمون بالنعناع",
+    description: "عصير ليمون منعش بالنعناع الطازج، مثالي للصيف",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 30,
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "ليمون", amount: "3 حبات" },
+      { name: "نعناع طازج", amount: "حزمة صغيرة" },
+      { name: "ماء بارد", amount: "لتر" },
+      { name: "عسل", amount: "ملعقتان كبيرتان" },
+      { name: "ثلج", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُعصر الليمون",
+      "يُخلط مع الماء والعسل والنعناع",
+      "يُضاف الثلج ويُقدّم"
+    ],
+    tips: "يمكن إضافة شرائح الخيار للمزيد من الانتعاش",
+  },
+  {
+    id: "bev_15",
+    name: "سموذي الموز والتوت",
+    description: "عصير سميك من الموز والتوت المشكل واللبن، غني بالفيتامينات",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 150,
+    healthTags: ["all", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "موز", amount: "حبة واحدة" },
+      { name: "توت مشكل مجمد", amount: "كوب" },
+      { name: "لبن زبادي", amount: "نصف كوب" },
+      { name: "عسل", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "تُخلط جميع المكونات في الخلاط",
+      "يُخلط حتى يصبح ناعماً",
+      "يُقدّم بارداً"
+    ],
+    tips: "يمكن إضافة بذور الشيا لقيمة غذائية أعلى",
+  },
+  {
+    id: "bev_16",
+    name: "ماء الديتوكس بالخيار والليمون",
+    description: "ماء منكّه بالخيار والليمون والنعناع، يُنظّف الجسم",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 10,
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "خيار مقطع شرائح", amount: "نصف حبة" },
+      { name: "ليمون مقطع", amount: "نصف حبة" },
+      { name: "نعناع طازج", amount: "أوراق عدة" },
+      { name: "ماء بارد", amount: "لتر" }
+    ],
+    steps: [
+      "تُوضع الشرائح والنعناع في إبريق",
+      "يُضاف الماء البارد",
+      "يُترك في الثلاجة ساعتين",
+      "يُقدّم بارداً"
+    ],
+    tips: "يُشرب طوال اليوم لترطيب الجسم",
+  },
+  {
+    id: "bev_17",
+    name: "عصير البرتقال والجزر",
+    description: "عصير طازج من البرتقال والجزر، غني بفيتامين C وبيتا كاروتين",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 90,
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "برتقال", amount: "3 حبات" },
+      { name: "جزر", amount: "حبتان" },
+      { name: "زنجبيل طازج", amount: "شريحة صغيرة" }
+    ],
+    steps: [
+      "يُعصر البرتقال",
+      "يُعصر الجزر في العصارة",
+      "يُخلط مع الزنجبيل ويُقدّم"
+    ],
+    tips: "يُشرب طازجاً للاستفادة القصوى من الفيتامينات",
+  },
+  {
+    id: "bev_18",
+    name: "سموذي السبانخ الأخضر",
+    description: "عصير أخضر صحي من السبانخ والموز والتفاح",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 120,
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "سبانخ طازجة", amount: "كوبان" },
+      { name: "موز", amount: "حبة واحدة" },
+      { name: "تفاح أخضر", amount: "حبة واحدة" },
+      { name: "ماء أو حليب لوز", amount: "كوب" }
+    ],
+    steps: [
+      "تُخلط جميع المكونات في الخلاط",
+      "يُخلط حتى يصبح ناعماً",
+      "يُقدّم بارداً"
+    ],
+    tips: "يمكن إضافة بذور الكتان لقيمة غذائية أعلى",
+  },
+  {
+    id: "bev_19",
+    name: "عصير الرمان الطازج",
+    description: "عصير رمان طبيعي غني بمضادات الأكسدة",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 70,
+    healthTags: ["all", "diabetes", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "رمان", amount: "3 حبات كبيرة" },
+      { name: "ماء بارد", amount: "نصف كوب" },
+      { name: "عسل (اختياري)", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "تُستخرج حبوب الرمان",
+      "تُخلط في الخلاط مع الماء",
+      "تُصفّى وتُقدّم باردة"
+    ],
+    tips: "من أقوى مضادات الأكسدة الطبيعية",
+  },
+  {
+    id: "bev_20",
+    name: "لبن عيران خليجي",
+    description: "لبن مخفوق بالملح والنعناع، مشروب منعش ومفيد للهضم",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 60,
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    ingredients: [
+      { name: "لبن زبادي", amount: "كوب" },
+      { name: "ماء بارد", amount: "كوب" },
+      { name: "ملح", amount: "رشة" },
+      { name: "نعناع مجفف", amount: "رشة" }
+    ],
+    steps: [
+      "يُخلط اللبن مع الماء والملح",
+      "يُخفق جيداً",
+      "يُضاف النعناع ويُقدّم بارداً"
+    ],
+    tips: "مشروب مثالي مع الوجبات الدسمة",
+  },
+  {
+    id: "bev_21",
+    name: "عصير الأناناس والزنجبيل",
+    description: "عصير أناناس منعش مع الزنجبيل، مضاد للالتهابات",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 80,
+    healthTags: ["all", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "أناناس مقطع", amount: "كوبان" },
+      { name: "زنجبيل طازج", amount: "ملعقة صغيرة مبشورة" },
+      { name: "ماء بارد", amount: "نصف كوب" },
+      { name: "نعناع", amount: "أوراق عدة" }
+    ],
+    steps: [
+      "تُخلط جميع المكونات في الخلاط",
+      "يُصفّى ويُقدّم بارداً مع الثلج"
+    ],
+    tips: "يُساعد على الهضم ومضاد للالتهابات",
+  },
+  {
+    id: "bev_22",
+    name: "سموذي الأفوكادو",
+    description: "عصير أفوكادو كريمي بالحليب والعسل، غني بالدهون الصحية",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 200,
+    healthTags: ["all", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "أفوكادو ناضج", amount: "حبة واحدة" },
+      { name: "حليب", amount: "كوب" },
+      { name: "عسل", amount: "ملعقة كبيرة" },
+      { name: "ثلج", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُقطّع الأفوكادو",
+      "يُخلط مع الحليب والعسل والثلج",
+      "يُقدّم بارداً"
+    ],
+    tips: "غني بالدهون الصحية المفيدة للقلب",
+  },
+  {
+    id: "bev_23",
+    name: "عصير البطيخ المنعش",
+    description: "عصير بطيخ طبيعي بارد، مرطّب ومنعش في الصيف",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 50,
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    ingredients: [
+      { name: "بطيخ مقطع", amount: "3 أكواب" },
+      { name: "نعناع", amount: "أوراق عدة" },
+      { name: "ليمون", amount: "نصف حبة" },
+      { name: "ثلج", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُخلط البطيخ في الخلاط",
+      "يُضاف الليمون والنعناع",
+      "يُقدّم بارداً مع الثلج"
+    ],
+    tips: "مشروب مثالي لترطيب الجسم في الصيف",
+  },
+  {
+    id: "bev_24",
+    name: "عصير التفاح والكرفس",
+    description: "عصير أخضر من التفاح والكرفس والليمون، يُنظّف الجسم",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 60,
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "تفاح أخضر", amount: "حبتان" },
+      { name: "كرفس", amount: "عودان" },
+      { name: "ليمون", amount: "نصف حبة" },
+      { name: "زنجبيل", amount: "شريحة صغيرة" }
+    ],
+    steps: [
+      "تُعصر جميع المكونات في العصارة",
+      "تُخلط وتُقدّم باردة"
+    ],
+    tips: "يُشرب صباحاً على معدة فارغة",
+  },
+  {
+    id: "bev_25",
+    name: "ماء جوز الهند الطبيعي",
+    description: "ماء جوز هند طبيعي غني بالمعادن والإلكتروليتات",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 45,
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    ingredients: [
+      { name: "ماء جوز هند طبيعي", amount: "كوب" },
+      { name: "ليمون", amount: "شريحة" },
+      { name: "ثلج", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُسكب ماء جوز الهند في كوب",
+      "يُضاف الليمون والثلج",
+      "يُقدّم بارداً"
+    ],
+    tips: "بديل طبيعي ممتاز لمشروبات الطاقة",
+  },
+  {
+    id: "bev_26",
+    name: "شاي تركي",
+    description: "شاي أسود تركي قوي يُقدّم في أكواب زجاجية صغيرة",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 5,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "شاي أسود تركي", amount: "ملعقتان كبيرتان" },
+      { name: "ماء مغلي", amount: "كوبان" },
+      { name: "سكر", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُوضع الشاي في إبريق صغير",
+      "يُسكب الماء المغلي",
+      "يُترك على نار هادئة 5 دقائق",
+      "يُقدّم في أكواب صغيرة"
+    ],
+    tips: "يُقدّم مع حلويات تركية",
+  },
+  {
+    id: "bev_27",
+    name: "قهوة تركية",
+    description: "قهوة تركية مطبوخة على النار مع الهيل",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 10,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "بن تركي ناعم", amount: "ملعقتان صغيرتان" },
+      { name: "ماء بارد", amount: "فنجان" },
+      { name: "سكر", amount: "حسب الرغبة" },
+      { name: "هيل", amount: "رشة" }
+    ],
+    steps: [
+      "يُخلط البن والسكر والماء في الركوة",
+      "يُسخّن على نار هادئة",
+      "يُرفع عند بدء الغليان",
+      "يُسكب في الفنجان"
+    ],
+    tips: "لا تُحرّكها بعد وضعها على النار",
+  },
+  {
+    id: "bev_28",
+    name: "شوكولاتة ساخنة",
+    description: "مشروب شوكولاتة كريمي ساخن مع الكريمة المخفوقة",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 250,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "حليب", amount: "كوب" },
+      { name: "شوكولاتة داكنة", amount: "50 غرام" },
+      { name: "سكر", amount: "ملعقة كبيرة" },
+      { name: "كريمة مخفوقة", amount: "للتزيين" }
+    ],
+    steps: [
+      "يُسخّن الحليب",
+      "تُذاب الشوكولاتة فيه مع التحريك",
+      "يُحلّى بالسكر",
+      "يُزيّن بالكريمة المخفوقة"
+    ],
+    tips: "استخدم شوكولاتة بنسبة كاكاو عالية لنكهة أغنى",
+  },
+  {
+    id: "bev_29",
+    name: "لاتيه بالفانيلا",
+    description: "قهوة إسبريسو مع الحليب المبخّر ونكهة الفانيلا",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 150,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "إسبريسو", amount: "جرعة واحدة" },
+      { name: "حليب مبخّر", amount: "كوب" },
+      { name: "فانيلا", amount: "ملعقة صغيرة" },
+      { name: "سكر", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُحضّر الإسبريسو",
+      "يُسخّن الحليب ويُرغّى",
+      "يُضاف الفانيلا",
+      "يُسكب الحليب فوق القهوة"
+    ],
+    tips: "يمكن استخدام حليب اللوز لنسخة صحية",
+  },
+  {
+    id: "bev_30",
+    name: "شاي الحليب الهندي (ماسالا)",
+    description: "شاي حليب مبهّر بالبهارات الهندية، دافئ وعطري",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 110,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "شاي أسود", amount: "ملعقتان صغيرتان" },
+      { name: "حليب", amount: "كوب" },
+      { name: "ماء", amount: "نصف كوب" },
+      { name: "هيل وقرفة وزنجبيل وقرنفل", amount: "رشة لكل منها" },
+      { name: "سكر", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُغلى الماء مع البهارات",
+      "يُضاف الشاي ويُترك دقيقتين",
+      "يُضاف الحليب والسكر",
+      "يُغلى مرة أخرى ويُصفّى"
+    ],
+    tips: "البهارات تعطي النكهة المميزة",
+  },
+  {
+    id: "bev_31",
+    name: "موكا ساخنة",
+    description: "مزيج من القهوة والشوكولاتة والحليب المبخّر",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 220,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "إسبريسو", amount: "جرعة واحدة" },
+      { name: "شوكولاتة", amount: "ملعقتان كبيرتان" },
+      { name: "حليب مبخّر", amount: "كوب" },
+      { name: "كريمة مخفوقة", amount: "للتزيين" }
+    ],
+    steps: [
+      "يُحضّر الإسبريسو",
+      "تُذاب الشوكولاتة في الحليب الساخن",
+      "يُخلط مع القهوة",
+      "يُزيّن بالكريمة"
+    ],
+    tips: "يمكن استخدام كاكاو بودرة بدلاً من الشوكولاتة",
+  },
+  {
+    id: "bev_32",
+    name: "شاي إيرل غراي بالحليب",
+    description: "شاي إيرل غراي العطري مع الحليب والسكر",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 80,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "شاي إيرل غراي", amount: "كيس واحد" },
+      { name: "حليب", amount: "ربع كوب" },
+      { name: "ماء مغلي", amount: "كوب" },
+      { name: "سكر", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُنقع الشاي في الماء المغلي 3 دقائق",
+      "يُضاف الحليب والسكر",
+      "يُقدّم ساخناً"
+    ],
+    tips: "لا تُنقعه أكثر من 3 دقائق",
+  },
+  {
+    id: "bev_33",
+    name: "قهوة بالبندق",
+    description: "قهوة بنكهة البندق الغنية والكريمية",
+    type: "hot" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 120,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "قهوة مطحونة", amount: "ملعقتان كبيرتان" },
+      { name: "حليب", amount: "نصف كوب" },
+      { name: "شراب البندق", amount: "ملعقة كبيرة" },
+      { name: "كريمة", amount: "للتزيين" }
+    ],
+    steps: [
+      "تُحضّر القهوة",
+      "يُسخّن الحليب",
+      "يُضاف شراب البندق",
+      "يُزيّن بالكريمة"
+    ],
+    tips: "يمكن استخدام شراب الكراميل بدلاً من البندق",
+  },
+  {
+    id: "bev_34",
+    name: "عصير مانجو بالحليب",
+    description: "عصير مانجو كريمي بالحليب، مشروب صيفي منعش ولذيذ",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 180,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "مانجو ناضجة", amount: "حبتان" },
+      { name: "حليب بارد", amount: "كوب" },
+      { name: "سكر", amount: "ملعقتان كبيرتان" },
+      { name: "ثلج", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُقطّع المانجو",
+      "يُخلط مع الحليب والسكر والثلج",
+      "يُقدّم بارداً"
+    ],
+    tips: "استخدم مانجو ناضجة جداً لأفضل نكهة",
+  },
+  {
+    id: "bev_35",
+    name: "ميلك شيك فراولة",
+    description: "ميلك شيك فراولة كريمي مع الآيس كريم",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 280,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "فراولة طازجة", amount: "كوب" },
+      { name: "حليب بارد", amount: "كوب" },
+      { name: "آيس كريم فانيلا", amount: "كرتان" },
+      { name: "سكر", amount: "ملعقة كبيرة" }
+    ],
+    steps: [
+      "تُخلط جميع المكونات في الخلاط",
+      "يُخلط حتى يصبح كريمياً",
+      "يُقدّم بارداً"
+    ],
+    tips: "يمكن استبدال الفراولة بأي فاكهة",
+  },
+  {
+    id: "bev_36",
+    name: "عصير كوكتيل الفواكه",
+    description: "مزيج من الفواكه الاستوائية المنعشة",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 130,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "مانجو", amount: "نصف حبة" },
+      { name: "فراولة", amount: "5 حبات" },
+      { name: "موز", amount: "نصف حبة" },
+      { name: "عصير برتقال", amount: "كوب" },
+      { name: "ثلج", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "تُقطّع الفواكه",
+      "تُخلط مع عصير البرتقال والثلج",
+      "يُقدّم بارداً"
+    ],
+    tips: "يمكن إضافة أي فاكهة متوفرة",
+  },
+  {
+    id: "bev_37",
+    name: "عصير فيمتو خليجي",
+    description: "مشروب فيمتو المنعش، المشروب الرمضاني الخليجي الأشهر",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 120,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "شراب فيمتو مركز", amount: "3 ملاعق كبيرة" },
+      { name: "ماء بارد", amount: "كوب" },
+      { name: "ثلج", amount: "حسب الرغبة" },
+      { name: "نعناع وليمون", amount: "للتزيين" }
+    ],
+    steps: [
+      "يُخلط الفيمتو مع الماء البارد",
+      "يُضاف الثلج",
+      "يُزيّن بالنعناع والليمون"
+    ],
+    tips: "المشروب الرسمي لرمضان في الخليج",
+  },
+  {
+    id: "bev_38",
+    name: "عصير التمر بالحليب",
+    description: "مشروب تمر بالحليب، مغذٍّ وغني بالطاقة",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 220,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "تمر منزوع النوى", amount: "5 حبات" },
+      { name: "حليب بارد", amount: "كوب" },
+      { name: "هيل", amount: "رشة" },
+      { name: "ثلج", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُنقع التمر في الحليب 30 دقيقة",
+      "يُخلط في الخلاط مع الهيل",
+      "يُضاف الثلج ويُقدّم"
+    ],
+    tips: "مشروب مثالي للإفطار في رمضان",
+  },
+  {
+    id: "bev_39",
+    name: "لبن بالفراولة",
+    description: "لبن زبادي مخفوق بالفراولة الطازجة",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 140,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "لبن زبادي", amount: "كوب" },
+      { name: "فراولة", amount: "كوب" },
+      { name: "سكر", amount: "ملعقتان كبيرتان" },
+      { name: "ثلج", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "تُخلط جميع المكونات في الخلاط",
+      "يُقدّم بارداً"
+    ],
+    tips: "يمكن استبدال الفراولة بالمانجو أو الموز",
+  },
+  {
+    id: "bev_40",
+    name: "عصير قمر الدين",
+    description: "عصير مشمش مجفف، مشروب رمضاني تقليدي",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 100,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "قمر الدين (مشمش مجفف)", amount: "200 غرام" },
+      { name: "ماء دافئ", amount: "3 أكواب" },
+      { name: "سكر", amount: "ربع كوب" },
+      { name: "ماء ورد", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "يُنقع قمر الدين في الماء الدافئ طوال الليل",
+      "يُخلط في الخلاط",
+      "يُحلّى بالسكر وماء الورد",
+      "يُقدّم بارداً"
+    ],
+    tips: "من أشهر مشروبات رمضان",
+  },
+  {
+    id: "bev_41",
+    name: "موهيتو بدون كحول",
+    description: "موهيتو منعش بالليمون والنعناع والصودا",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 50,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "ليمون أخضر", amount: "حبة واحدة" },
+      { name: "نعناع طازج", amount: "حزمة صغيرة" },
+      { name: "سكر", amount: "ملعقتان كبيرتان" },
+      { name: "صودا", amount: "كوب" },
+      { name: "ثلج مجروش", amount: "كوب" }
+    ],
+    steps: [
+      "يُهرس النعناع مع الليمون والسكر",
+      "يُضاف الثلج المجروش",
+      "تُسكب الصودا ويُقدّم"
+    ],
+    tips: "يمكن إضافة فراولة أو توت للنكهة",
+  },
+  {
+    id: "bev_42",
+    name: "عصير الجلاب",
+    description: "مشروب الجلاب التقليدي بدبس العنب وماء الورد والصنوبر",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 110,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "شراب الجلاب", amount: "3 ملاعق كبيرة" },
+      { name: "ماء بارد", amount: "كوب" },
+      { name: "صنوبر", amount: "ملعقة كبيرة" },
+      { name: "زبيب", amount: "ملعقة كبيرة" },
+      { name: "ثلج", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُخلط الجلاب مع الماء البارد",
+      "يُضاف الثلج",
+      "يُزيّن بالصنوبر والزبيب"
+    ],
+    tips: "مشروب رمضاني شامي أصيل",
+  },
+  {
+    id: "bev_43",
+    name: "سموذي المانجو والموز",
+    description: "عصير سميك من المانجو والموز واللبن",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 200,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "مانجو", amount: "حبة واحدة" },
+      { name: "موز", amount: "حبة واحدة" },
+      { name: "لبن زبادي", amount: "نصف كوب" },
+      { name: "عسل", amount: "ملعقة كبيرة" },
+      { name: "ثلج", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "تُقطّع الفواكه",
+      "تُخلط مع اللبن والعسل والثلج",
+      "يُقدّم بارداً"
+    ],
+    tips: "يمكن إضافة بذور الشيا",
+  },
+  {
+    id: "bev_44",
+    name: "عصير الخوخ بالنعناع",
+    description: "عصير خوخ منعش بالنعناع الطازج",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 90,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "خوخ ناضج", amount: "3 حبات" },
+      { name: "نعناع طازج", amount: "أوراق عدة" },
+      { name: "ماء بارد", amount: "نصف كوب" },
+      { name: "عسل", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "يُقطّع الخوخ",
+      "يُخلط مع النعناع والماء والعسل",
+      "يُقدّم بارداً"
+    ],
+    tips: "يُفضّل استخدام خوخ ناضج جداً",
+  },
+  {
+    id: "bev_45",
+    name: "آيس تي بالليمون",
+    description: "شاي مثلج بالليمون، مشروب منعش لأيام الصيف",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 60,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "شاي أسود", amount: "ملعقتان كبيرتان" },
+      { name: "ماء مغلي", amount: "كوبان" },
+      { name: "ليمون", amount: "حبتان" },
+      { name: "سكر", amount: "3 ملاعق كبيرة" },
+      { name: "ثلج", amount: "كمية كبيرة" }
+    ],
+    steps: [
+      "يُنقع الشاي في الماء المغلي 5 دقائق",
+      "يُصفّى ويُحلّى بالسكر",
+      "يُبرّد ويُضاف عصير الليمون والثلج"
+    ],
+    tips: "يمكن إضافة نكهات مثل الخوخ أو التوت",
+  },
+  {
+    id: "bev_46",
+    name: "عصير الليمون بالعسل والزنجبيل",
+    description: "مشروب ليمون بارد مع العسل والزنجبيل، منعش ومعزّز للمناعة",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 50,
+    healthTags: ["all", "diabetes", "obesity", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "ليمون", amount: "حبتان" },
+      { name: "عسل", amount: "ملعقتان كبيرتان" },
+      { name: "زنجبيل مبشور", amount: "ملعقة صغيرة" },
+      { name: "ماء بارد", amount: "لتر" },
+      { name: "ثلج", amount: "حسب الرغبة" }
+    ],
+    steps: [
+      "يُعصر الليمون",
+      "يُخلط مع العسل والزنجبيل والماء",
+      "يُضاف الثلج ويُقدّم"
+    ],
+    tips: "مشروب مثالي لتعزيز المناعة",
+  },
+  {
+    id: "bev_47",
+    name: "عصير الكيوي والليمون",
+    description: "عصير كيوي منعش بالليمون، غني بفيتامين C",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 70,
+    healthTags: ["all", "diabetes", "obesity"] as HealthTag[],
+    ingredients: [
+      { name: "كيوي", amount: "3 حبات" },
+      { name: "ليمون", amount: "نصف حبة" },
+      { name: "ماء بارد", amount: "كوب" },
+      { name: "عسل", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "يُقشّر الكيوي ويُقطّع",
+      "يُخلط مع الليمون والماء والعسل",
+      "يُقدّم بارداً"
+    ],
+    tips: "غني جداً بفيتامين C",
+  },
+  {
+    id: "bev_48",
+    name: "آيس لاتيه",
+    description: "قهوة لاتيه مثلجة كريمية ومنعشة",
+    type: "cold" as "hot" | "cold",
+    subtype: "regular" as "healthy" | "regular",
+    calories: 130,
+    healthTags: ["all"] as HealthTag[],
+    ingredients: [
+      { name: "إسبريسو مبرّد", amount: "جرعة مزدوجة" },
+      { name: "حليب بارد", amount: "كوب" },
+      { name: "سكر أو شراب فانيلا", amount: "حسب الرغبة" },
+      { name: "ثلج", amount: "كوب" }
+    ],
+    steps: [
+      "يُحضّر الإسبريسو ويُبرّد",
+      "يُوضع الثلج في كوب طويل",
+      "يُسكب الحليب ثم القهوة",
+      "يُحلّى حسب الرغبة"
+    ],
+    tips: "يمكن استخدام حليب اللوز أو الشوفان",
+  },
+  {
+    id: "bev_49",
+    name: "عصير التوت المشكل",
+    description: "عصير توت مشكل غني بمضادات الأكسدة",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 80,
+    healthTags: ["all", "diabetes", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "توت أزرق", amount: "نصف كوب" },
+      { name: "توت أحمر", amount: "نصف كوب" },
+      { name: "فراولة", amount: "نصف كوب" },
+      { name: "ماء بارد", amount: "كوب" },
+      { name: "عسل", amount: "ملعقة صغيرة" }
+    ],
+    steps: [
+      "تُخلط جميع أنواع التوت في الخلاط",
+      "يُضاف الماء والعسل",
+      "يُصفّى ويُقدّم بارداً"
+    ],
+    tips: "من أغنى المشروبات بمضادات الأكسدة",
+  },
+  {
+    id: "bev_50",
+    name: "عصير الشمندر والبرتقال",
+    description: "عصير شمندر بالبرتقال والجزر، يُعزّز الدورة الدموية",
+    type: "cold" as "hot" | "cold",
+    subtype: "healthy" as "healthy" | "regular",
+    calories: 85,
+    healthTags: ["all", "cholesterol"] as HealthTag[],
+    ingredients: [
+      { name: "شمندر (بنجر)", amount: "حبة واحدة" },
+      { name: "برتقال", amount: "حبتان" },
+      { name: "جزر", amount: "حبة واحدة" },
+      { name: "زنجبيل", amount: "شريحة صغيرة" }
+    ],
+    steps: [
+      "تُعصر جميع المكونات في العصارة",
+      "تُخلط وتُقدّم باردة"
+    ],
+    tips: "يُحسّن ضغط الدم ويُعزّز الدورة الدموية",
+  },
