@@ -8,6 +8,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import { savePushToken } from "../db";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -409,6 +410,29 @@ async function startServer() {
       res.setHeader('Content-Disposition', 'attachment; filename=recipes.csv');
       res.send('\uFEFF' + csv.join('\n'));
     } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==================== USER API ====================
+  // Register push token
+  app.post('/api/user/push-token', async (req, res) => {
+    try {
+      const { token, userId } = req.body;
+      if (!token) {
+        return res.status(400).json({ error: 'Token is required' });
+      }
+
+      // Register push token in database
+      await savePushToken({
+        token,
+        userId: userId,
+        platform: 'android',
+      });
+
+      res.json({ success: true, message: 'Push token registered' });
+    } catch (e: any) {
+      console.error('Failed to register push token:', e);
       res.status(500).json({ error: e.message });
     }
   });

@@ -65,8 +65,21 @@ export async function getExpoPushToken(): Promise<string | null> {
 // Register push token with backend
 export async function registerPushToken(token: string, userId?: string): Promise<void> {
   try {
-    // Store locally for now - backend integration can be added later
-    console.log("Push token registered:", token.substring(0, 20) + "...");
+    // Send token to backend
+    const response = await fetch("http://localhost:3000/api/user/push-token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token, userId }),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to register push token:", response.statusText);
+      return;
+    }
+
+    console.log("Push token registered successfully:", token.substring(0, 20) + "...");
   } catch (e) {
     console.error("Failed to register push token:", e);
   }

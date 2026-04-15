@@ -1,0 +1,22 @@
+{
+  "build": {
+    "preview": {
+      "android": "internal"
+    },
+    "preview2": {
+      "android": "internal"
+    },
+    "preview3": {
+      "android": "internal"
+    },
+    "production": {
+      "android": "production"
+    },
+    "apk": {
+      "android": "apk"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
