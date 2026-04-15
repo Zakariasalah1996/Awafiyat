@@ -4,6 +4,57 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
+import {
+  getAllUsers, getUserCount, updateUserStatus, updateUserRole, getUsersByCountry,
+  savePushToken, getActivePushTokens, getPushTokensByCountry,
+  createSubscription, getAllSubscriptions, getActiveSubscriptionCount, getUserSubscription,
+  createPromoCode, getAllPromoCodes, getPromoCodeByCode, incrementPromoCodeUse, togglePromoCode,
+  createFeedback, getAllFeedback, getFeedbackCount, updateFeedbackStatus,
+  createNotification, getAllNotifications, updateNotificationCounts,
+  getDailyStats, getDashboardStats,
+} from "./db";
+
+// Helper: send push notification via Expo Push API
+async function sendExpoPushNotifications(tokens: string[], title: string, body: string) {
+  const messages = tokens.map((token) => ({
+    to: token,
+    sound: "default",
+    title,
+    body,
+    data: { type: "admin_notification" },
+  }));
+
+  // Batch into chunks of 100
+  const chunks: typeof messages[] = [];
+  for (let i = 0; i < messages.length; i += 100) {
+    chunks.push(messages.slice(i, i + 100));
+  }
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (const chunk of chunks) {
+    try {
+      const response = await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(chunk),
+      });
+      const data = await response.json();
+      if (data.data) {
+        for (const ticket of data.data) {
+          if (ticket.status === "ok") successCount++;
+          else failCount++;
+        }
+      }
+    } catch (error) {
+      failCount += chunk.length;
+      console.error("[Push] Failed to send batch:", error);
+    }
+  }
+
+  return { successCount, failCount, sentCount: tokens.length };
+}
 
 export const appRouter = router({
   system: systemRouter,
@@ -87,6 +138,233 @@ export const appRouter = router({
             "عذراً، لم أستطع اقتراح وصفة. حاول مرة أخرى!",
         };
       }),
+  }),
+
+  // ==================== PUSH TOKEN REGISTRATION ====================
+  pushToken: router({
+    register: publicProcedure
+      .input(z.object({
+        token: z.string().min(1),
+        platform: z.enum(["ios", "android", "web"]),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const userId = ctx.user?.id;
+        if (!userId) return { success: false, error: "Not authenticated" };
+        await savePushToken({ userId, token: input.token, platform: input.platform });
+        return { success: true };
+      }),
+  }),
+
+  // ==================== FEEDBACK ====================
+  feedback: router({
+    submit: publicProcedure
+      .input(z.object({
+        type: z.enum(["bug", "suggestion", "complaint", "praise", "other"]).default("suggestion"),
+        message: z.string().min(1),
+        rating: z.number().min(1).max(5).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await createFeedback({
+          userId: ctx.user?.id,
+          userName: ctx.user?.name ?? "مجهول",
+          type: input.type,
+          message: input.message,
+          rating: input.rating,
+        });
+        return { success: true };
+      }),
+  }),
+
+  // ==================== PROMO CODE REDEMPTION ====================
+  promo: router({
+    redeem: publicProcedure
+      .input(z.object({ code: z.string().min(1) }))
+      .mutation(async ({ input, ctx }) => {
+        const userId = ctx.user?.id;
+        if (!userId) return { success: false, error: "يجب تسجيل الدخول أولاً" };
+
+        const promo = await getPromoCodeByCode(input.code.toUpperCase());
+        if (!promo) return { success: false, error: "الكود غير صحيح" };
+        if (!promo.isActive) return { success: false, error: "الكود منتهي الصلاحية" };
+        if (promo.currentUses >= promo.maxUses) return { success: false, error: "تم استخدام الكود بالكامل" };
+        if (promo.expiresAt && new Date(promo.expiresAt) < new Date()) return { success: false, error: "الكود منتهي الصلاحية" };
+
+        // Check if user already has active subscription
+        const existingSub = await getUserSubscription(userId);
+        if (existingSub) return { success: false, error: "لديك اشتراك فعال بالفعل" };
+
+        // Create subscription
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + promo.durationDays);
+        await createSubscription({
+          userId,
+          plan: "promo",
+          status: "active",
+          promoCode: promo.code,
+          endDate,
+        });
+
+        // Increment promo usage
+        await incrementPromoCodeUse(promo.id);
+
+        return { success: true, endDate: endDate.toISOString(), durationDays: promo.durationDays };
+      }),
+  }),
+
+  // ==================== ADMIN PANEL ====================
+  admin: router({
+    // Dashboard stats
+    dashboard: publicProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+      const stats = await getDashboardStats();
+      const countryStats = await getUsersByCountry();
+      const dailyStatsData = await getDailyStats(30);
+      return { ...stats, countryStats, dailyStats: dailyStatsData };
+    }),
+
+    // Users management
+    users: router({
+      list: publicProcedure
+        .input(z.object({ limit: z.number().default(100), offset: z.number().default(0) }).optional())
+        .query(async ({ ctx, input }) => {
+          if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+          const usersList = await getAllUsers(input?.limit ?? 100, input?.offset ?? 0);
+          const total = await getUserCount();
+          return { users: usersList, total };
+        }),
+      toggleStatus: publicProcedure
+        .input(z.object({ userId: z.number(), isActive: z.boolean() }))
+        .mutation(async ({ ctx, input }) => {
+          if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+          await updateUserStatus(input.userId, input.isActive);
+          return { success: true };
+        }),
+      changeRole: publicProcedure
+        .input(z.object({ userId: z.number(), role: z.enum(["user", "admin"]) }))
+        .mutation(async ({ ctx, input }) => {
+          if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+          await updateUserRole(input.userId, input.role);
+          return { success: true };
+        }),
+    }),
+
+    // Subscriptions management
+    subscriptions: router({
+      list: publicProcedure
+        .input(z.object({ limit: z.number().default(100), offset: z.number().default(0) }).optional())
+        .query(async ({ ctx, input }) => {
+          if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+          const subs = await getAllSubscriptions(input?.limit ?? 100, input?.offset ?? 0);
+          const activeCount = await getActiveSubscriptionCount();
+          return { subscriptions: subs, activeCount };
+        }),
+    }),
+
+    // Promo codes management
+    promoCodes: router({
+      list: publicProcedure.query(async ({ ctx }) => {
+        if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+        return getAllPromoCodes();
+      }),
+      create: publicProcedure
+        .input(z.object({
+          code: z.string().min(3).max(64),
+          maxUses: z.number().min(1).default(1),
+          durationDays: z.number().min(1).default(30),
+          expiresAt: z.string().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+          if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+          await createPromoCode({
+            code: input.code.toUpperCase(),
+            maxUses: input.maxUses,
+            durationDays: input.durationDays,
+            expiresAt: input.expiresAt ? new Date(input.expiresAt) : undefined,
+          });
+          return { success: true };
+        }),
+      toggle: publicProcedure
+        .input(z.object({ id: z.number(), isActive: z.boolean() }))
+        .mutation(async ({ ctx, input }) => {
+          if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+          await togglePromoCode(input.id, input.isActive);
+          return { success: true };
+        }),
+    }),
+
+    // Feedback management
+    feedback: router({
+      list: publicProcedure
+        .input(z.object({ limit: z.number().default(100), offset: z.number().default(0) }).optional())
+        .query(async ({ ctx, input }) => {
+          if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+          const feedbackList = await getAllFeedback(input?.limit ?? 100, input?.offset ?? 0);
+          const total = await getFeedbackCount();
+          return { feedback: feedbackList, total };
+        }),
+      updateStatus: publicProcedure
+        .input(z.object({
+          id: z.number(),
+          status: z.enum(["new", "read", "resolved", "archived"]),
+          adminNote: z.string().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+          if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+          await updateFeedbackStatus(input.id, input.status, input.adminNote);
+          return { success: true };
+        }),
+    }),
+
+    // Notifications management - SEND TO USERS
+    notifications: router({
+      list: publicProcedure
+        .input(z.object({ limit: z.number().default(50), offset: z.number().default(0) }).optional())
+        .query(async ({ ctx, input }) => {
+          if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+          return getAllNotifications(input?.limit ?? 50, input?.offset ?? 0);
+        }),
+      send: publicProcedure
+        .input(z.object({
+          title: z.string().min(1),
+          body: z.string().min(1),
+          targetType: z.enum(["all", "country", "user"]).default("all"),
+          targetValue: z.string().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+          if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+
+          // Get target tokens
+          let tokens: string[] = [];
+          if (input.targetType === "all") {
+            const allTokens = await getActivePushTokens();
+            tokens = allTokens.map((t) => t.token);
+          } else if (input.targetType === "country" && input.targetValue) {
+            const countryTokens = await getPushTokensByCountry(input.targetValue);
+            tokens = countryTokens.map((t) => t.token);
+          }
+
+          // Save notification record
+          const notifId = await createNotification({
+            title: input.title,
+            body: input.body,
+            targetType: input.targetType,
+            targetValue: input.targetValue,
+            sentBy: ctx.user?.id,
+            sentCount: tokens.length,
+          });
+
+          // Send push notifications
+          if (tokens.length > 0) {
+            const result = await sendExpoPushNotifications(tokens, input.title, input.body);
+            if (notifId) {
+              await updateNotificationCounts(notifId, result.sentCount, result.successCount, result.failCount);
+            }
+            return { success: true, ...result };
+          }
+
+          return { success: true, sentCount: 0, successCount: 0, failCount: 0 };
+        }),
+    }),
   }),
 });
 

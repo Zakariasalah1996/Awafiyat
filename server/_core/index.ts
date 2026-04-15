@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import path from "path";
+import { fileURLToPath } from "url";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -58,6 +60,217 @@ async function startServer() {
 
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true, timestamp: Date.now() });
+  });
+
+  // Serve admin panel static files
+  const adminDir = path.resolve(process.cwd(), "server/admin");
+  app.use("/admin", express.static(adminDir));
+  app.get("/admin", (_req, res) => {
+    res.sendFile(path.join(adminDir, "index.html"));
+  });
+
+  // ==================== ADMIN REST API ====================
+  const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
+  const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'awafiyat2025';
+
+  // Admin auth middleware
+  function adminAuth(req: any, res: any, next: any) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
+    try {
+      const token = authHeader.replace('Basic ', '').replace('Bearer ', '');
+      const decoded = Buffer.from(token, 'base64').toString();
+      const [user, pass] = decoded.split(':');
+      if (user === ADMIN_USER && pass === ADMIN_PASS) return next();
+      return res.status(401).json({ error: 'Invalid credentials' });
+    } catch {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+  }
+
+  // Admin login
+  app.post('/api/admin/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+      const token = Buffer.from(`${username}:${password}`).toString('base64');
+      res.json({ success: true, token, name: 'زكريا صلاح' });
+    } else {
+      res.status(401).json({ success: false, error: 'بيانات الدخول غير صحيحة' });
+    }
+  });
+
+  // Import admin db functions
+  const adminDb = await import('../db');
+
+  // Dashboard stats
+  app.get('/api/admin/dashboard', adminAuth, async (_req, res) => {
+    try {
+      const stats = await adminDb.getDashboardStats();
+      const countryStats = await adminDb.getUsersByCountry();
+      const dailyStats = await adminDb.getDailyStats(30);
+      res.json({ ...stats, countryStats, dailyStats });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Users
+  app.get('/api/admin/users', adminAuth, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const users = await adminDb.getAllUsers(limit, offset);
+      const total = await adminDb.getUserCount();
+      res.json({ users, total });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.patch('/api/admin/users/:id/status', adminAuth, async (req, res) => {
+    try {
+      await adminDb.updateUserStatus(parseInt(req.params.id), req.body.isActive);
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.patch('/api/admin/users/:id/role', adminAuth, async (req, res) => {
+    try {
+      await adminDb.updateUserRole(parseInt(req.params.id), req.body.role);
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Subscriptions
+  app.get('/api/admin/subscriptions', adminAuth, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const subs = await adminDb.getAllSubscriptions(limit, offset);
+      const activeCount = await adminDb.getActiveSubscriptionCount();
+      res.json({ subscriptions: subs, activeCount });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Promo codes
+  app.get('/api/admin/promo-codes', adminAuth, async (_req, res) => {
+    try {
+      const codes = await adminDb.getAllPromoCodes();
+      res.json(codes);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post('/api/admin/promo-codes', adminAuth, async (req, res) => {
+    try {
+      await adminDb.createPromoCode({
+        code: req.body.code.toUpperCase(),
+        maxUses: req.body.maxUses || 100,
+        durationDays: req.body.durationDays || 30,
+        expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
+      });
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.patch('/api/admin/promo-codes/:id/toggle', adminAuth, async (req, res) => {
+    try {
+      await adminDb.togglePromoCode(parseInt(req.params.id), req.body.isActive);
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Feedback
+  app.get('/api/admin/feedback', adminAuth, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const feedbackList = await adminDb.getAllFeedback(limit, offset);
+      const total = await adminDb.getFeedbackCount();
+      res.json({ feedback: feedbackList, total });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.patch('/api/admin/feedback/:id', adminAuth, async (req, res) => {
+    try {
+      await adminDb.updateFeedbackStatus(parseInt(req.params.id), req.body.status, req.body.adminNote);
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Notifications
+  app.get('/api/admin/notifications', adminAuth, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const notifs = await adminDb.getAllNotifications(limit, offset);
+      res.json(notifs);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post('/api/admin/notifications/send', adminAuth, async (req, res) => {
+    try {
+      const { title, body, targetType, targetValue } = req.body;
+      let tokens: string[] = [];
+
+      if (targetType === 'all') {
+        const allTokens = await adminDb.getActivePushTokens();
+        tokens = allTokens.map((t: any) => t.token);
+      } else if (targetType === 'country' && targetValue) {
+        const countryTokens = await adminDb.getPushTokensByCountry(targetValue);
+        tokens = countryTokens.map((t: any) => t.token);
+      }
+
+      const notifId = await adminDb.createNotification({
+        title, body, targetType: targetType || 'all', targetValue, sentCount: tokens.length,
+      });
+
+      // Send via Expo Push API
+      let successCount = 0, failCount = 0;
+      if (tokens.length > 0) {
+        const messages = tokens.map((token: string) => ({
+          to: token, sound: 'default', title, body, data: { type: 'admin_notification' },
+        }));
+        try {
+          const pushRes = await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(messages),
+          });
+          const pushData = await pushRes.json();
+          if (pushData.data) {
+            for (const ticket of pushData.data) {
+              if (ticket.status === 'ok') successCount++; else failCount++;
+            }
+          }
+        } catch (err) {
+          failCount = tokens.length;
+        }
+        if (notifId) {
+          await adminDb.updateNotificationCounts(notifId, tokens.length, successCount, failCount);
+        }
+      }
+
+      res.json({ success: true, sentCount: tokens.length, successCount, failCount });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
   });
 
   app.use(
