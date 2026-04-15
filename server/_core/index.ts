@@ -273,6 +273,146 @@ async function startServer() {
     }
   });
 
+  // ==================== RECIPES API ====================
+  const recipesApi = await import('../admin/recipes-api');
+
+  app.get('/api/admin/recipes', adminAuth, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const search = (req.query.search as string) || '';
+      const category = (req.query.category as string) || '';
+      const origin = (req.query.origin as string) || '';
+      let recipes = recipesApi.getAllRecipes();
+      if (search) recipes = recipes.filter(r => r.name.includes(search) || r.description.includes(search));
+      if (category) recipes = recipes.filter(r => r.category === category);
+      if (origin) recipes = recipes.filter(r => (r.origin || 'general') === origin);
+      const total = recipes.length;
+      const offset = (page - 1) * limit;
+      const paginated = recipes.slice(offset, offset + limit);
+      res.json({ recipes: paginated, total, page, totalPages: Math.ceil(total / limit) });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get('/api/admin/recipes/stats', adminAuth, async (_req, res) => {
+    try {
+      const stats = recipesApi.getRecipeStats();
+      res.json(stats);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get('/api/admin/recipes/:id', adminAuth, async (req, res) => {
+    try {
+      const recipes = recipesApi.getAllRecipes();
+      const recipe = recipes.find(r => r.id === req.params.id);
+      if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
+      res.json(recipe);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post('/api/admin/recipes', adminAuth, async (req, res) => {
+    try {
+      const success = recipesApi.addRecipe(req.body);
+      if (success) res.json({ success: true });
+      else res.status(500).json({ error: 'Failed to add recipe' });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.put('/api/admin/recipes/:id', adminAuth, async (req, res) => {
+    try {
+      const success = recipesApi.updateRecipe(req.params.id, req.body);
+      if (success) res.json({ success: true });
+      else res.status(404).json({ error: 'Recipe not found' });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.delete('/api/admin/recipes/:id', adminAuth, async (req, res) => {
+    try {
+      const success = recipesApi.deleteRecipe(req.params.id);
+      if (success) res.json({ success: true });
+      else res.status(404).json({ error: 'Recipe not found' });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==================== CONTENT MANAGEMENT ====================
+  app.get('/api/admin/content', adminAuth, async (_req, res) => {
+    try {
+      const content = recipesApi.getContent();
+      res.json(content);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.put('/api/admin/content', adminAuth, async (req, res) => {
+    try {
+      const { key, value } = req.body;
+      const success = recipesApi.updateContent(key, value);
+      if (success) res.json({ success: true });
+      else res.status(500).json({ error: 'Failed to update content' });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==================== EXPORT DATA ====================
+  app.get('/api/admin/export/users', adminAuth, async (_req, res) => {
+    try {
+      const allUsers = await adminDb.getAllUsers(10000, 0);
+      const csv = ['الاسم,البريد,الدولة,الدور,الحالة,تاريخ التسجيل,آخر دخول'];
+      for (const u of allUsers) {
+        csv.push(`"${u.name||''}","${u.email||''}","${u.country||''}","${u.role}","${u.isActive?'فعال':'معطل'}","${u.createdAt}","${u.lastSignedIn}"`);
+      }
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename=users.csv');
+      res.send('\uFEFF' + csv.join('\n'));
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get('/api/admin/export/subscriptions', adminAuth, async (_req, res) => {
+    try {
+      const allSubs = await adminDb.getAllSubscriptions(10000, 0);
+      const csv = ['المعرف,المستخدم,الخطة,الحالة,كود الترويج,تاريخ البدء,تاريخ الانتهاء'];
+      for (const s of allSubs) {
+        csv.push(`"${s.id}","${s.userId||''}","${s.plan}","${s.status}","${s.promoCode||''}","${s.startDate}","${s.endDate||""}"`);
+      }
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename=subscriptions.csv');
+      res.send('\uFEFF' + csv.join('\n'));
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get('/api/admin/export/recipes', adminAuth, async (_req, res) => {
+    try {
+      const recipes = recipesApi.getAllRecipes();
+      const csv = ['المعرف,الاسم,التصنيف,الأصل,الصعوبة,وقت التحضير,وقت الطبخ,السعرات,الحصص'];
+      for (const r of recipes) {
+        csv.push(`"${r.id}","${r.name}","${r.category}","${r.origin||'general'}","${r.difficulty}","${r.prepTime}","${r.cookTime}","${r.calories}","${r.servings}"`);
+      }
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename=recipes.csv');
+      res.send('\uFEFF' + csv.join('\n'));
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.use(
     "/api/trpc",
     createExpressMiddleware({

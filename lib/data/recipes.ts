@@ -14122,5 +14122,6 @@ export function getRecipesSortedByCountry(country: string): Recipe[] {
   const origins = originMap[country] || [];
   const countryRecipes = RECIPES.filter((r) => r.origin && origins.includes(r.origin));
   const otherRecipes = RECIPES.filter((r) => !r.origin || !origins.includes(r.origin));
-  return [...countryRecipes, ...otherRecipes];
+  return [...countryRecipes, ...otherRecipes
+];
 }

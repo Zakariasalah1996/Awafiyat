@@ -294,6 +294,15 @@
     <div class="nav-item" data-page="recipes" onclick="navigateTo('recipes')">
       <span class="icon">📖</span> الوصفات
     </div>
+    <div class="nav-item" data-page="content" onclick="navigateTo('content')">
+      <span class="icon">📝</span> إدارة المحتوى
+    </div>
+    <div class="nav-item" data-page="reports" onclick="navigateTo('reports')">
+      <span class="icon">📊</span> التقارير
+    </div>
+    <div class="nav-item" data-page="export" onclick="navigateTo('export')">
+      <span class="icon">📥</span> تصدير البيانات
+    </div>
   </nav>
   <div class="sidebar-footer">
     عافيات للتطبيقات &copy; 2025<br>
@@ -422,23 +431,128 @@
 
     <!-- RECIPES -->
     <div class="page" id="page-recipes">
+      <div class="stats-grid" id="recipeStatsGrid">
+        <div class="stat-card"><div class="stat-icon users">📖</div><div class="stat-info"><h3 id="statRecipeTotal">0</h3><p>إجمالي الوصفات</p></div></div>
+        <div class="stat-card"><div class="stat-icon subs">🔥</div><div class="stat-info"><h3 id="statRecipeAvgCal">0</h3><p>متوسط السعرات</p></div></div>
+        <div class="stat-card"><div class="stat-icon feedback">⏱️</div><div class="stat-info"><h3 id="statRecipeAvgPrep">0 د</h3><p>متوسط التحضير</p></div></div>
+        <div class="stat-card"><div class="stat-icon notifs">🇮🇶</div><div class="stat-info"><h3 id="statRecipeIraqi">0</h3><p>وصفات عراقية</p></div></div>
+      </div>
+
+      <!-- Search & Filter -->
+      <div class="notif-form-card" style="padding:20px">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+          <div class="form-group" style="flex:2;margin-bottom:0"><label>🔍 بحث</label><input type="text" class="form-control" id="recipeSearch" placeholder="ابحث عن وصفة..." oninput="searchRecipesDebounced()"></div>
+          <div class="form-group" style="flex:1;margin-bottom:0"><label>التصنيف</label><select class="form-control" id="recipeFilterCat" onchange="loadRecipes()"><option value="">الكل</option><option value="quick">سريع</option><option value="hearty">دسم</option><option value="healthy">صحي</option><option value="dessert">حلويات</option><option value="appetizer">مقبلات</option></select></div>
+          <div class="form-group" style="flex:1;margin-bottom:0"><label>الأصل</label><select class="form-control" id="recipeFilterOrigin" onchange="loadRecipes()"><option value="">الكل</option><option value="iraqi">عراقي</option><option value="saudi">سعودي</option><option value="uae">إماراتي</option><option value="kurdish">كردي</option><option value="general">عام</option></select></div>
+          <button class="btn btn-primary" onclick="openAddRecipeModal()" style="height:42px">➕ إضافة وصفة</button>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <h3>📖 إدارة الوصفات</h3>
+          <div style="display:flex;gap:8px"><span id="recipePagination" style="font-size:13px;color:var(--text-muted);padding:6px"></span><button class="btn btn-outline btn-sm" onclick="loadRecipes()">🔄 تحديث</button></div>
+        </div>
+        <table>
+          <thead><tr><th>الاسم</th><th>التصنيف</th><th>الأصل</th><th>الصعوبة</th><th>السعرات</th><th>الوقت</th><th>إجراءات</th></tr></thead>
+          <tbody id="recipesTableBody"><tr><td colspan="7" class="loading"><div class="spinner"></div>جاري التحميل...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CONTENT MANAGEMENT -->
+    <div class="page" id="page-content">
+      <div class="notif-form-card">
+        <h3>📝 إدارة محتوى التطبيق</h3>
+        <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px">يمكنك تعديل النصوص المعروضة في التطبيق من هنا</p>
+        <div class="form-group"><label>📱 عن التطبيق</label><textarea class="form-control" id="contentAbout" rows="4" placeholder="وصف التطبيق..."></textarea></div>
+        <div class="form-group"><label>🔒 سياسة الخصوصية</label><textarea class="form-control" id="contentPrivacy" rows="4" placeholder="سياسة الخصوصية..."></textarea></div>
+        <div class="form-group"><label>📋 الشروط والأحكام</label><textarea class="form-control" id="contentTerms" rows="4" placeholder="الشروط والأحكام..."></textarea></div>
+        <div class="form-group"><label>📧 بريد التواصل</label><input type="email" class="form-control" id="contentEmail" placeholder="support@awafiyat.app"></div>
+        <button class="btn btn-primary" onclick="saveContent()">💾 حفظ التغييرات</button>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="page" id="page-reports">
+      <div class="stats-grid" id="reportStatsGrid">
+        <div class="stat-card"><div class="stat-icon users">📖</div><div class="stat-info"><h3 id="reportTotal">0</h3><p>إجمالي الوصفات</p></div></div>
+        <div class="stat-card"><div class="stat-icon subs">🔥</div><div class="stat-info"><h3 id="reportAvgCal">0</h3><p>متوسط السعرات</p></div></div>
+        <div class="stat-card"><div class="stat-icon feedback">⏱️</div><div class="stat-info"><h3 id="reportAvgPrep">0 د</h3><p>متوسط التحضير</p></div></div>
+        <div class="stat-card"><div class="stat-icon notifs">🍳</div><div class="stat-info"><h3 id="reportAvgCook">0 د</h3><p>متوسط الطبخ</p></div></div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card"><h3>📊 توزيع الوصفات حسب التصنيف</h3><div class="chart-container"><canvas id="categoryChart"></canvas></div></div>
+        <div class="chart-card"><h3>🌍 توزيع الوصفات حسب الأصل</h3><div class="chart-container"><canvas id="originChart"></canvas></div></div>
+        <div class="chart-card"><h3>🍜 توزيع الوصفات حسب الوجبة</h3><div class="chart-container"><canvas id="mealChart"></canvas></div></div>
+        <div class="chart-card"><h3>💪 توزيع الوصفات حسب الصعوبة</h3><div class="chart-container"><canvas id="difficultyChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="page" id="page-export">
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-icon users">📖</div><div class="stat-info"><h3>416</h3><p>إجمالي الوصفات</p></div></div>
-        <div class="stat-card"><div class="stat-icon subs">🥤</div><div class="stat-info"><h3>50</h3><p>المشروبات</p></div></div>
-        <div class="stat-card"><div class="stat-icon feedback">🇮🇶</div><div class="stat-info"><h3>~200</h3><p>وصفات عراقية</p></div></div>
-        <div class="stat-card"><div class="stat-icon notifs">🇸🇦</div><div class="stat-info"><h3>~100</h3><p>وصفات خليجية</p></div></div>
+        <div class="stat-card" style="cursor:pointer" onclick="exportData('users')">
+          <div class="stat-icon users">📥</div>
+          <div class="stat-info"><h3>👥</h3><p>تصدير المستخدمين (CSV)</p></div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="exportData('subscriptions')">
+          <div class="stat-icon subs">📥</div>
+          <div class="stat-info"><h3>💎</h3><p>تصدير الاشتراكات (CSV)</p></div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="exportData('recipes')">
+          <div class="stat-icon feedback">📥</div>
+          <div class="stat-info"><h3>📖</h3><p>تصدير الوصفات (CSV)</p></div>
+        </div>
       </div>
       <div class="table-card">
-        <div class="table-header"><h3>📖 معلومات الوصفات</h3></div>
-        <div style="padding: 24px;">
-          <p style="font-size: 15px; line-height: 2; color: var(--text-muted);">
-            الوصفات مخزنة محلياً في التطبيق ولا تحتاج إلى اتصال بالإنترنت.<br>
-            لإضافة أو تعديل الوصفات، يتم تحديث ملف <code style="background:#f0f0f0;padding:2px 6px;border-radius:4px;">src/data/recipes.ts</code> في كود التطبيق ثم نشر تحديث جديد.<br><br>
-            <strong>التصنيفات:</strong> أطباق رئيسية، شوربات، مقبلات، حلويات، سلطات، معجنات، أرز ومكبوس، مشويات، مشروبات باردة، مشروبات حارة، أكلات شعبية، أكلات صحية، أكلات سريعة، أكلات رمضانية، أكلات عيد، أكلات أطفال، أكلات كردية<br><br>
-            <strong>الدول المدعومة:</strong> العراق 🇮🇶 | السعودية 🇸🇦 | الإمارات 🇦🇪 | مصر 🇪🇬
+        <div class="table-header"><h3>📥 تصدير البيانات</h3></div>
+        <div style="padding:24px">
+          <p style="font-size:15px;line-height:2;color:var(--text-muted)">
+            اضغط على أي بطاقة أعلاه لتحميل البيانات بصيغة CSV.<br>
+            يمكنك فتح الملفات في Excel أو Google Sheets للتحليل.<br><br>
+            <strong>الملفات المتاحة:</strong><br>
+            • <strong>المستخدمون:</strong> الاسم، البريد، الدولة، الدور، الحالة، تاريخ التسجيل<br>
+            • <strong>الاشتراكات:</strong> الخطة، الحالة، كود الترويج، التواريخ<br>
+            • <strong>الوصفات:</strong> الاسم، التصنيف، الأصل، السعرات، الوقت
           </p>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- RECIPE MODAL -->
+<div class="modal-overlay" id="recipeModal">
+  <div class="modal" style="width:700px;max-width:95vw">
+    <h3 id="recipeModalTitle">➕ إضافة وصفة جديدة</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>اسم الوصفة *</label><input type="text" class="form-control" id="rmName" placeholder="مثال: برياني عراقي"></div>
+      <div class="form-group"><label>المعرف (ID) *</label><input type="text" class="form-control" id="rmId" placeholder="مثال: lunch_100"></div>
+      <div class="form-group" style="grid-column:span 2"><label>الوصف</label><textarea class="form-control" id="rmDesc" rows="2" placeholder="وصف مختصر..."></textarea></div>
+      <div class="form-group"><label>التصنيف</label><select class="form-control" id="rmCategory"><option value="quick">سريع</option><option value="hearty">دسم</option><option value="healthy">صحي</option><option value="dessert">حلويات</option><option value="appetizer">مقبلات</option><option value="snack">سناك</option></select></div>
+      <div class="form-group"><label>الأصل</label><select class="form-control" id="rmOrigin"><option value="iraqi">عراقي</option><option value="saudi">سعودي</option><option value="uae">إماراتي</option><option value="kurdish">كردي</option><option value="egyptian">مصري</option><option value="general" selected>عام</option></select></div>
+      <div class="form-group"><label>الصعوبة</label><select class="form-control" id="rmDifficulty"><option value="easy">سهل</option><option value="medium">متوسط</option><option value="hard">صعب</option></select></div>
+      <div class="form-group"><label>نوع الوجبة</label><select class="form-control" id="rmMealType" multiple style="height:80px"><option value="breakfast">فطور</option><option value="lunch">غداء</option><option value="dinner">عشاء</option><option value="snack">سناك</option></select></div>
+      <div class="form-group"><label>وقت التحضير (دقيقة)</label><input type="number" class="form-control" id="rmPrepTime" value="15" min="0"></div>
+      <div class="form-group"><label>وقت الطبخ (دقيقة)</label><input type="number" class="form-control" id="rmCookTime" value="30" min="0"></div>
+      <div class="form-group"><label>الحصص</label><input type="number" class="form-control" id="rmServings" value="4" min="1"></div>
+      <div class="form-group"><label>السعرات</label><input type="number" class="form-control" id="rmCalories" value="300" min="0"></div>
+      <div class="form-group"><label>بروتين (غ)</label><input type="number" class="form-control" id="rmProtein" value="15" min="0"></div>
+      <div class="form-group"><label>كارب (غ)</label><input type="number" class="form-control" id="rmCarbs" value="40" min="0"></div>
+      <div class="form-group"><label>دهون (غ)</label><input type="number" class="form-control" id="rmFat" value="10" min="0"></div>
+      <div class="form-group"><label>ألياف (غ)</label><input type="number" class="form-control" id="rmFiber" value="3" min="0"></div>
+      <div class="form-group" style="grid-column:span 2"><label>المكونات (سطر لكل مكون: الاسم | الكمية)</label><textarea class="form-control" id="rmIngredients" rows="4" placeholder="طحين | 2 كوب
+ماء | نصف كوب
+ملح | ملعقة صغيرة"></textarea></div>
+      <div class="form-group" style="grid-column:span 2"><label>الخطوات (سطر لكل خطوة)</label><textarea class="form-control" id="rmSteps" rows="4" placeholder="اعجني الطحين مع الماء
+أضيفي الملح
+اطبخي 15 دقيقة"></textarea></div>
+      <div class="form-group" style="grid-column:span 2"><label>نصائح</label><input type="text" class="form-control" id="rmTips" placeholder="نصيحة للطبخ..."></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveRecipe()" id="saveRecipeBtn">💾 حفظ الوصفة</button>
+      <button class="btn btn-outline" onclick="closeRecipeModal()">إغلاق</button>
     </div>
   </div>
 </div>
@@ -521,7 +635,7 @@ function navigateTo(page) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
-  const titles = { dashboard:'الرئيسية', users:'المستخدمون', subscriptions:'الاشتراكات', promo:'أكواد الترويج', notifications:'الإشعارات', feedback:'الملاحظات', recipes:'الوصفات' };
+  const titles = { dashboard:'الرئيسية', users:'المستخدمون', subscriptions:'الاشتراكات', promo:'أكواد الترويج', notifications:'الإشعارات', feedback:'الملاحظات', recipes:'الوصفات', content:'إدارة المحتوى', reports:'التقارير', export:'تصدير البيانات' };
   document.getElementById('pageTitle').textContent = titles[page] || page;
   switch(page) {
     case 'dashboard': loadDashboard(); break;
@@ -530,6 +644,9 @@ function navigateTo(page) {
     case 'promo': loadPromoCodes(); break;
     case 'notifications': loadNotifications(); break;
     case 'feedback': loadFeedback(); break;
+    case 'recipes': loadRecipes(); loadRecipeStats(); break;
+    case 'content': loadContent(); break;
+    case 'reports': loadReports(); break;
   }
 }
 
@@ -799,6 +916,280 @@ async function saveFeedbackUpdate() {
   showToast('تم تحديث حالة الملاحظة');
   closeFeedbackModal();
   loadFeedback();
+}
+
+// ==================== RECIPES ====================
+let recipeCurrentPage = 1;
+let editingRecipeId = null;
+let searchTimeout = null;
+
+function searchRecipesDebounced() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => loadRecipes(), 300);
+}
+
+async function loadRecipeStats() {
+  const stats = await api('recipes/stats');
+  if (stats) {
+    document.getElementById('statRecipeTotal').textContent = stats.total || 0;
+    document.getElementById('statRecipeAvgCal').textContent = stats.avgCalories || 0;
+    document.getElementById('statRecipeAvgPrep').textContent = (stats.avgPrepTime || 0) + ' د';
+    document.getElementById('statRecipeIraqi').textContent = stats.byOrigin?.iraqi || 0;
+  }
+}
+
+async function loadRecipes() {
+  const search = document.getElementById('recipeSearch').value.trim();
+  const category = document.getElementById('recipeFilterCat').value;
+  const origin = document.getElementById('recipeFilterOrigin').value;
+  const params = new URLSearchParams({ page: recipeCurrentPage, limit: 30 });
+  if (search) params.set('search', search);
+  if (category) params.set('category', category);
+  if (origin) params.set('origin', origin);
+  const data = await api('recipes?' + params.toString());
+  const tbody = document.getElementById('recipesTableBody');
+  if (data && data.recipes && data.recipes.length > 0) {
+    const catLabels = {quick:'سريع',hearty:'دسم',healthy:'صحي',dessert:'حلويات',appetizer:'مقبلات',snack:'سناك'};
+    const originLabels = {iraqi:'🇮🇶 عراقي',saudi:'🇸🇦 سعودي',uae:'🇦🇪 إماراتي',kurdish:'كردي',egyptian:'🇪🇬 مصري',general:'عام'};
+    const diffLabels = {easy:'🟢 سهل',medium:'🟡 متوسط',hard:'🔴 صعب'};
+    tbody.innerHTML = data.recipes.map(r => `<tr>
+      <td><strong>${r.name}</strong><br><small style="color:var(--text-muted)">${trunc(r.description,50)}</small></td>
+      <td>${catLabels[r.category]||r.category}</td>
+      <td>${originLabels[r.origin]||r.origin||'عام'}</td>
+      <td>${diffLabels[r.difficulty]||r.difficulty}</td>
+      <td>${r.calories} سعرة</td>
+      <td>${r.prepTime+r.cookTime} د</td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="editRecipe('${r.id}')">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteRecipe('${r.id}')" style="margin-right:4px">🗑️</button>
+      </td>
+    </tr>`).join('');
+    document.getElementById('recipePagination').textContent = `صفحة ${data.page} من ${data.totalPages} (إجمالي: ${data.total})`;
+  } else {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="icon">📖</div><p>لا توجد وصفات مطابقة</p></td></tr>';
+    document.getElementById('recipePagination').textContent = '';
+  }
+}
+
+function openAddRecipeModal() {
+  editingRecipeId = null;
+  document.getElementById('recipeModalTitle').textContent = '➕ إضافة وصفة جديدة';
+  document.getElementById('rmId').value = '';
+  document.getElementById('rmId').disabled = false;
+  document.getElementById('rmName').value = '';
+  document.getElementById('rmDesc').value = '';
+  document.getElementById('rmCategory').value = 'quick';
+  document.getElementById('rmOrigin').value = 'general';
+  document.getElementById('rmDifficulty').value = 'easy';
+  document.getElementById('rmPrepTime').value = '15';
+  document.getElementById('rmCookTime').value = '30';
+  document.getElementById('rmServings').value = '4';
+  document.getElementById('rmCalories').value = '300';
+  document.getElementById('rmProtein').value = '15';
+  document.getElementById('rmCarbs').value = '40';
+  document.getElementById('rmFat').value = '10';
+  document.getElementById('rmFiber').value = '3';
+  document.getElementById('rmIngredients').value = '';
+  document.getElementById('rmSteps').value = '';
+  document.getElementById('rmTips').value = '';
+  document.getElementById('recipeModal').classList.add('show');
+}
+
+async function editRecipe(id) {
+  const recipe = await api('recipes/' + id);
+  if (!recipe) return;
+  editingRecipeId = id;
+  document.getElementById('recipeModalTitle').textContent = '✏️ تعديل الوصفة';
+  document.getElementById('rmId').value = recipe.id;
+  document.getElementById('rmId').disabled = true;
+  document.getElementById('rmName').value = recipe.name;
+  document.getElementById('rmDesc').value = recipe.description;
+  document.getElementById('rmCategory').value = recipe.category;
+  document.getElementById('rmOrigin').value = recipe.origin || 'general';
+  document.getElementById('rmDifficulty').value = recipe.difficulty;
+  document.getElementById('rmPrepTime').value = recipe.prepTime;
+  document.getElementById('rmCookTime').value = recipe.cookTime;
+  document.getElementById('rmServings').value = recipe.servings;
+  document.getElementById('rmCalories').value = recipe.calories;
+  document.getElementById('rmProtein').value = recipe.protein;
+  document.getElementById('rmCarbs').value = recipe.carbs;
+  document.getElementById('rmFat').value = recipe.fat;
+  document.getElementById('rmFiber').value = recipe.fiber;
+  document.getElementById('rmIngredients').value = recipe.ingredients.map(i => i.name + ' | ' + i.amount).join('\n');
+  document.getElementById('rmSteps').value = recipe.steps.join('\n');
+  document.getElementById('rmTips').value = recipe.tips || '';
+  // Set mealType multi-select
+  const mealSel = document.getElementById('rmMealType');
+  Array.from(mealSel.options).forEach(o => o.selected = recipe.mealType.includes(o.value));
+  document.getElementById('recipeModal').classList.add('show');
+}
+
+function closeRecipeModal() {
+  document.getElementById('recipeModal').classList.remove('show');
+  editingRecipeId = null;
+}
+
+async function saveRecipe() {
+  const id = document.getElementById('rmId').value.trim();
+  const name = document.getElementById('rmName').value.trim();
+  if (!id || !name) { showToast('يرجى إدخال المعرف والاسم', 'error'); return; }
+  const mealSel = document.getElementById('rmMealType');
+  const mealType = Array.from(mealSel.selectedOptions).map(o => o.value);
+  if (mealType.length === 0) mealType.push('lunch');
+  const ingredientsText = document.getElementById('rmIngredients').value.trim();
+  const ingredients = ingredientsText ? ingredientsText.split('\n').filter(l=>l.trim()).map(l => {
+    const parts = l.split('|').map(p=>p.trim());
+    return { name: parts[0] || '', amount: parts[1] || '' };
+  }) : [];
+  const stepsText = document.getElementById('rmSteps').value.trim();
+  const steps = stepsText ? stepsText.split('\n').filter(l=>l.trim()) : [];
+  const origin = document.getElementById('rmOrigin').value;
+  const recipe = {
+    id, name,
+    description: document.getElementById('rmDesc').value.trim(),
+    category: document.getElementById('rmCategory').value,
+    mealType, healthTags: ['all'],
+    difficulty: document.getElementById('rmDifficulty').value,
+    prepTime: parseInt(document.getElementById('rmPrepTime').value) || 0,
+    cookTime: parseInt(document.getElementById('rmCookTime').value) || 0,
+    servings: parseInt(document.getElementById('rmServings').value) || 4,
+    calories: parseInt(document.getElementById('rmCalories').value) || 0,
+    protein: parseInt(document.getElementById('rmProtein').value) || 0,
+    carbs: parseInt(document.getElementById('rmCarbs').value) || 0,
+    fat: parseInt(document.getElementById('rmFat').value) || 0,
+    fiber: parseInt(document.getElementById('rmFiber').value) || 0,
+    ingredients, steps,
+    tips: document.getElementById('rmTips').value.trim(),
+    isIraqi: origin === 'iraqi',
+    origin,
+  };
+  let result;
+  if (editingRecipeId) {
+    result = await api('recipes/' + editingRecipeId, 'PUT', recipe);
+  } else {
+    result = await api('recipes', 'POST', recipe);
+  }
+  if (result && result.success) {
+    showToast(editingRecipeId ? 'تم تعديل الوصفة بنجاح' : 'تم إضافة الوصفة بنجاح');
+    closeRecipeModal();
+    loadRecipes();
+    loadRecipeStats();
+  } else {
+    showToast(result?.error || 'فشل حفظ الوصفة', 'error');
+  }
+}
+
+async function deleteRecipe(id) {
+  if (!confirm('هل أنت متأكد من حذف هذه الوصفة؟')) return;
+  const result = await api('recipes/' + id, 'DELETE');
+  if (result && result.success) {
+    showToast('تم حذف الوصفة');
+    loadRecipes();
+    loadRecipeStats();
+  } else {
+    showToast('فشل حذف الوصفة', 'error');
+  }
+}
+
+// ==================== CONTENT MANAGEMENT ====================
+async function loadContent() {
+  const data = await api('content');
+  if (data) {
+    document.getElementById('contentAbout').value = data.aboutApp || '';
+    document.getElementById('contentPrivacy').value = data.privacyPolicy || '';
+    document.getElementById('contentTerms').value = data.termsOfService || '';
+    document.getElementById('contentEmail').value = data.contactEmail || '';
+  }
+}
+
+async function saveContent() {
+  const fields = [
+    { key: 'aboutApp', el: 'contentAbout' },
+    { key: 'privacyPolicy', el: 'contentPrivacy' },
+    { key: 'termsOfService', el: 'contentTerms' },
+    { key: 'contactEmail', el: 'contentEmail' },
+  ];
+  let success = true;
+  for (const f of fields) {
+    const value = document.getElementById(f.el).value.trim();
+    const result = await api('content', 'PUT', { key: f.key, value });
+    if (!result || !result.success) success = false;
+  }
+  if (success) showToast('تم حفظ المحتوى بنجاح');
+  else showToast('فشل حفظ بعض المحتوى', 'error');
+}
+
+// ==================== REPORTS ====================
+let categoryChartObj = null, originChartObj = null, mealChartObj = null, difficultyChartObj = null;
+
+async function loadReports() {
+  const stats = await api('recipes/stats');
+  if (!stats) return;
+  document.getElementById('reportTotal').textContent = stats.total || 0;
+  document.getElementById('reportAvgCal').textContent = stats.avgCalories || 0;
+  document.getElementById('reportAvgPrep').textContent = (stats.avgPrepTime || 0) + ' د';
+  document.getElementById('reportAvgCook').textContent = (stats.avgCookTime || 0) + ' د';
+
+  const catLabels = {quick:'سريع',hearty:'دسم',healthy:'صحي',dessert:'حلويات',appetizer:'مقبلات',snack:'سناك'};
+  const originLabels = {iraqi:'عراقي',saudi:'سعودي',uae:'إماراتي',kurdish:'كردي',egyptian:'مصري',general:'عام'};
+  const mealLabels = {breakfast:'فطور',lunch:'غداء',dinner:'عشاء',snack:'سناك'};
+  const diffLabels = {easy:'سهل',medium:'متوسط',hard:'صعب'};
+  const chartColors = ['#2D6A4F','#D4A373','#3B82F6','#EF4444','#9CA3AF','#F59E0B','#8B5CF6'];
+
+  // Category chart
+  if (categoryChartObj) categoryChartObj.destroy();
+  const catData = stats.byCategory || {};
+  categoryChartObj = new Chart(document.getElementById('categoryChart').getContext('2d'), {
+    type: 'bar',
+    data: { labels: Object.keys(catData).map(k=>catLabels[k]||k), datasets: [{ data: Object.values(catData), backgroundColor: chartColors }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+
+  // Origin chart
+  if (originChartObj) originChartObj.destroy();
+  const oriData = stats.byOrigin || {};
+  originChartObj = new Chart(document.getElementById('originChart').getContext('2d'), {
+    type: 'doughnut',
+    data: { labels: Object.keys(oriData).map(k=>originLabels[k]||k), datasets: [{ data: Object.values(oriData), backgroundColor: chartColors }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Tajawal', size: 13 } } } } }
+  });
+
+  // Meal chart
+  if (mealChartObj) mealChartObj.destroy();
+  const mealData = stats.byMealType || {};
+  mealChartObj = new Chart(document.getElementById('mealChart').getContext('2d'), {
+    type: 'pie',
+    data: { labels: Object.keys(mealData).map(k=>mealLabels[k]||k), datasets: [{ data: Object.values(mealData), backgroundColor: chartColors }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Tajawal', size: 13 } } } } }
+  });
+
+  // Difficulty chart
+  if (difficultyChartObj) difficultyChartObj.destroy();
+  const diffData = stats.byDifficulty || {};
+  difficultyChartObj = new Chart(document.getElementById('difficultyChart').getContext('2d'), {
+    type: 'bar',
+    data: { labels: Object.keys(diffData).map(k=>diffLabels[k]||k), datasets: [{ data: Object.values(diffData), backgroundColor: ['#22C55E','#F59E0B','#EF4444'] }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+}
+
+// ==================== EXPORT ====================
+function exportData(type) {
+  const url = `${API_BASE}/api/admin/export/${type}`;
+  const a = document.createElement('a');
+  a.href = url;
+  a.setAttribute('download', type + '.csv');
+  // Add auth header via fetch
+  fetch(url, { headers: { 'Authorization': `Bearer ${authToken}` } })
+    .then(res => res.blob())
+    .then(blob => {
+      const blobUrl = URL.createObjectURL(blob);
+      a.href = blobUrl;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+      showToast(`تم تحميل ملف ${type}.csv`);
+    })
+    .catch(() => showToast('فشل التحميل', 'error'));
 }
 
 // ==================== HELPERS ====================
