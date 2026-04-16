@@ -95,3 +95,7 @@
 
 - [x] إضافة extra.eas.projectId في app.config.ts
 - [x] إضافة cli.appVersionSource في eas.json
+
+## إصلاح إشعارات Push:
+
+- [ ] إصلاح عدم وصول إشعارات Push من لوحة التحكم إلى التطبيق

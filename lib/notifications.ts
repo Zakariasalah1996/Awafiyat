@@ -1,6 +1,7 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
+import { getApiBaseUrl } from "@/constants/oauth";
 
 // Configure notification handler for foreground
 // Note: This only works in development builds and native apps, not in Expo Go
@@ -66,8 +67,11 @@ export async function getExpoPushToken(): Promise<string | null> {
 // Register push token with backend
 export async function registerPushToken(token: string, userId?: string): Promise<void> {
   try {
-    // Send token to backend
-    const response = await fetch("http://localhost:3000/api/user/push-token", {
+    // Send token to backend - use dynamic API URL (not localhost!)
+    const apiBase = getApiBaseUrl();
+    const url = apiBase ? `${apiBase}/api/user/push-token` : "/api/user/push-token";
+    console.log("[Push] Registering token at:", url);
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
