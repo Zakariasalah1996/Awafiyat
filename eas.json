@@ -1,19 +1,18 @@
 {
+  "cli": {
+    "version": ">= 18.0.0"
+  },
   "build": {
     "preview": {
-      "android": "internal"
-    },
-    "preview2": {
-      "android": "internal"
-    },
-    "preview3": {
-      "android": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
-      "android": "production"
-    },
-    "apk": {
-      "android": "apk"
+      "android": {
+        "buildType": "app-bundle"
+      }
     }
   },
   "submit": {

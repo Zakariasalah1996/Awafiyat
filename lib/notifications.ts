@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 import Constants from "expo-constants";
 
 // Configure notification handler for foreground
+// Note: This only works in development builds and native apps, not in Expo Go
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -86,61 +87,72 @@ export async function registerPushToken(token: string, userId?: string): Promise
 }
 
 // Setup notification listeners
+// Note: This only works in development builds and native apps, not in Expo Go
 export function setupNotificationListeners(
   onNotificationReceived?: (notification: Notifications.Notification) => void,
   onNotificationResponse?: (response: Notifications.NotificationResponse) => void
 ) {
-  const receivedSub = Notifications.addNotificationReceivedListener((notification) => {
-    onNotificationReceived?.(notification);
-  });
+  try {
+    const receivedSub = Notifications.addNotificationReceivedListener((notification) => {
+      onNotificationReceived?.(notification);
+    });
 
-  const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
-    onNotificationResponse?.(response);
-  });
+    const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
+      onNotificationResponse?.(response);
+    });
 
-  return () => {
-    receivedSub.remove();
-    responseSub.remove();
-  };
+    return () => {
+      receivedSub.remove();
+      responseSub.remove();
+    };
+  } catch (e) {
+    console.warn("Notification listeners not available in Expo Go. This is normal.", e);
+    return () => {};
+  }
 }
 
 export async function requestNotificationPermissions(): Promise<boolean> {
   if (Platform.OS === "web") return false;
 
-  if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("meals", {
-      name: "تذكير الوجبات",
-      importance: Notifications.AndroidImportance.HIGH,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#4A7C59",
-    });
-    await Notifications.setNotificationChannelAsync("shopping", {
-      name: "تذكير التسوق",
-      importance: Notifications.AndroidImportance.DEFAULT,
-    });
-    await Notifications.setNotificationChannelAsync("motivation", {
-      name: "تحفيز وتشجيع",
-      importance: Notifications.AndroidImportance.DEFAULT,
-    });
-  }
-
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-
-  if (existingStatus !== "granted") {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-
-  if (finalStatus === "granted") {
-    // Get and register push token
-    const token = await getExpoPushToken();
-    if (token) {
-      await registerPushToken(token);
+  try {
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("meals", {
+        name: "تذكير الوجبات",
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#4A7C59",
+      });
+      await Notifications.setNotificationChannelAsync("shopping", {
+        name: "تذكير التسوق",
+        importance: Notifications.AndroidImportance.DEFAULT,
+      });
+      await Notifications.setNotificationChannelAsync("motivation", {
+        name: "تحفيز وتشجيع",
+        importance: Notifications.AndroidImportance.DEFAULT,
+      });
     }
-  }
 
-  return finalStatus === "granted";
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus === "granted") {
+      // Get and register push token
+      const token = await getExpoPushToken();
+      if (token) {
+        await registerPushToken(token);
+      }
+    }
+
+    return finalStatus === "granted";
+  } catch (e) {
+    console.warn("Notification permissions not available in Expo Go. This is normal.", e);
+    return false;
+  }
 }
 
 export async function scheduleMealReminder(
@@ -177,7 +189,7 @@ export async function scheduleMealReminder(
 
     return id;
   } catch (e) {
-    console.error("Failed to schedule meal reminder:", e);
+    console.warn("Meal reminders not available in Expo Go. This is normal.", e);
     return null;
   }
 }
@@ -191,7 +203,7 @@ export async function cancelMealReminder(mealType: string): Promise<void> {
       }
     }
   } catch (e) {
-    console.error("Failed to cancel meal reminder:", e);
+    console.warn("Cancel meal reminder not available in Expo Go. This is normal.", e);
   }
 }
 
@@ -217,7 +229,7 @@ export async function scheduleShoppingReminder(
     });
     return id;
   } catch (e) {
-    console.error("Failed to schedule shopping reminder:", e);
+    console.warn("Shopping reminders not available in Expo Go. This is normal.", e);
     return null;
   }
 }
@@ -240,11 +252,15 @@ export async function scheduleDailyMotivation(): Promise<string | null> {
     });
     return id;
   } catch (e) {
-    console.error("Failed to schedule daily motivation:", e);
+    console.warn("Daily motivation not available in Expo Go. This is normal.", e);
     return null;
   }
 }
 
 export async function cancelAllNotifications(): Promise<void> {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  try {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  } catch (e) {
+    console.warn("Cancel all notifications not available in Expo Go. This is normal.", e);
+  }
 }
