@@ -99,3 +99,5 @@
 ## إصلاح إشعارات Push:
 
 - [x] إصلاح عدم وصول إشعارات Push من لوحة التحكم إلى التطبيق (تم تغيير localhost إلى getApiBaseUrl)
+- [x] إضافة استدعاء تلقائي لـ requestNotificationPermissions في _layout.tsx عند بدء التطبيق (كان يُستدعى فقط يدوياً في profile.tsx)
+- [x] إضافة setupNotificationListeners في _layout.tsx لاستقبال الإشعارات في الواجهة

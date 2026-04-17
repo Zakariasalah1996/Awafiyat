@@ -8,6 +8,7 @@ import "react-native-reanimated";
 import { Platform, I18nManager } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
+import { requestNotificationPermissions, setupNotificationListeners } from "@/lib/notifications";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -40,6 +41,32 @@ export default function RootLayout() {
 
   useEffect(() => {
     initManusRuntime();
+  }, []);
+
+  // Auto-register push notifications on app start (native only)
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+
+    // Request permissions and register push token automatically
+    requestNotificationPermissions()
+      .then((granted) => {
+        console.log("[Push] Auto-registration result:", granted ? "granted" : "denied");
+      })
+      .catch((err) => {
+        console.warn("[Push] Auto-registration error:", err);
+      });
+
+    // Setup notification listeners for foreground handling
+    const cleanup = setupNotificationListeners(
+      (notification) => {
+        console.log("[Push] Notification received:", notification.request.content.title);
+      },
+      (response) => {
+        console.log("[Push] Notification tapped:", response.notification.request.content.title);
+      }
+    );
+
+    return cleanup;
   }, []);
 
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {

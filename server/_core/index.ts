@@ -423,6 +423,7 @@ async function startServer() {
   app.post('/api/user/push-token', async (req, res) => {
     try {
       const { token, userId } = req.body;
+      console.log('[Push] Received push-token registration request:', { token: token?.substring(0, 30) + '...', userId });
       if (!token) {
         return res.status(400).json({ error: 'Token is required' });
       }
@@ -434,9 +435,36 @@ async function startServer() {
         platform: 'android',
       });
 
+      console.log('[Push] Token registered successfully:', token.substring(0, 30) + '...');
       res.json({ success: true, message: 'Push token registered' });
     } catch (e: any) {
-      console.error('Failed to register push token:', e);
+      console.error('[Push] Failed to register push token:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Admin: List all push tokens (for debugging)
+  app.get('/api/admin/push-tokens-list', adminAuth, async (_req, res) => {
+    try {
+      const tokens = await adminDb.getActivePushTokens();
+      res.json({ tokens, count: tokens.length });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Admin: Delete invalid/test push tokens
+  app.delete('/api/admin/push-tokens-cleanup', adminAuth, async (_req, res) => {
+    try {
+      const db = (await import('../db')).getDb;
+      const dbInstance = await db();
+      if (!dbInstance) return res.status(500).json({ error: 'DB not available' });
+      // Delete test/invalid tokens
+      const { sql } = await import('drizzle-orm');
+      await dbInstance.execute(sql`DELETE FROM push_tokens WHERE token = 'test_token_123' OR token NOT LIKE 'ExponentPushToken%'`);
+      const remaining = await adminDb.getActivePushTokens();
+      res.json({ success: true, message: 'Cleaned up invalid tokens', remaining: remaining.length });
+    } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
   });
