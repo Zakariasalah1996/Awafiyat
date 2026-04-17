@@ -127,13 +127,18 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 
   try {
     if (Platform.OS === "android") {
-      // قناة الوجبات بصوت المنبه
+      // قناة الوجبات بأولوية قصوى + صوت منبه طويل (30 ثانية)
       await Notifications.setNotificationChannelAsync("meals", {
-        name: "تذكير الوجبات",
+        name: "منبه الوجبات",
+        description: "منبه بصوت عالٍ لتذكيرك بأوقات الوجبات",
         importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 500, 250, 500, 250, 500],
+        vibrationPattern: [0, 1000, 500, 1000, 500, 1000, 500, 1000],
         lightColor: "#4A7C59",
         sound: "alarm.wav",
+        enableVibrate: true,
+        enableLights: true,
+        bypassDnd: true,
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
       });
       await Notifications.setNotificationChannelAsync("shopping", {
         name: "تذكير التسوق",
@@ -207,6 +212,9 @@ export async function scheduleMealReminder(
         title,
         body,
         sound: "alarm.wav",
+        priority: Notifications.AndroidNotificationPriority.MAX,
+        sticky: true, // لا يختفي حتى يضغط المستخدم
+        vibrate: [0, 1000, 500, 1000, 500, 1000, 500, 1000],
         data: {
           type: "meal",
           mealType,
