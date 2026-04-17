@@ -16,8 +16,83 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
 import * as Haptics from "expo-haptics";
+import type { HealthCondition } from "@/lib/user-context";
 
 I18nManager.forceRTL(true);
+
+// تحذيرات صحية حسب الحالة المرضية
+const HEALTH_WARNINGS: Record<string, { keywords: string[]; warning: string }[]> = {
+  diabetes: [
+    { keywords: ["سكر", "شيرة", "عسل", "دبس", "مربى"], warning: "تحتوي على سكريات عالية - خطر على مرضى السكري" },
+    { keywords: ["رز أبيض", "خبز أبيض", "طحين"], warning: "كربوهيدرات مكررة ترفع السكر بسرعة - قلل الكمية" },
+    { keywords: ["تمر", "رطب"], warning: "التمر يرفع السكر - لا تتناول أكثر من حبة واحدة" },
+  ],
+  hypertension: [
+    { keywords: ["ملح", "مخلل", "مملح"], warning: "محتوى ملح عالي - خطر على مرضى الضغط" },
+    { keywords: ["صلصة صويا", "مرقة"], warning: "يحتوي على صوديوم عالي - استبدل بالأعشاب" },
+    { keywords: ["كافيين", "قهوة", "شاي أسود"], warning: "الكافيين يرفع الضغط مؤقتاً - قلل الكمية" },
+  ],
+  obesity: [
+    { keywords: ["سمن", "زبدة", "كريمة", "دهن"], warning: "دهون عالية - استبدل بزيت الزيتون" },
+    { keywords: ["قلي", "مقلي"], warning: "القلي يضيف سعرات كثيرة - جرب الشوي بدلاً" },
+    { keywords: ["سكر", "شيرة", "حلويات"], warning: "سعرات فارغة - تجنب السكريات" },
+  ],
+  cholesterol: [
+    { keywords: ["كبدة", "كلاوي", "مخ"], warning: "أحشاء ترفع الكوليسترول بشدة - تجنبها" },
+    { keywords: ["زبدة", "سمن", "دهن حر"], warning: "دهون مشبعة ترفع الكوليسترول - استخدم زيت الزيتون" },
+    { keywords: ["صفار البيض", "بيض"], warning: "صفار البيض غني بالكوليسترول - استخدم البياض فقط" },
+    { keywords: ["جلد الدجاج"], warning: "جلد الدجاج غني بالدهون المشبعة - أزله" },
+  ],
+};
+
+function getRecipeHealthWarnings(
+  ingredients: { name: string; amount: string }[],
+  steps: string[],
+  category: string,
+  calories: number,
+  carbs: number,
+  fat: number,
+  healthCondition: HealthCondition
+): string[] {
+  if (healthCondition === "none") return [];
+  const warnings: string[] = [];
+  const seen = new Set<string>();
+  const allText = [
+    ...ingredients.map((i) => i.name.toLowerCase()),
+    ...steps.map((s) => s.toLowerCase()),
+  ].join(" ");
+
+  const conditionWarnings = HEALTH_WARNINGS[healthCondition] || [];
+  for (const w of conditionWarnings) {
+    for (const kw of w.keywords) {
+      if (allText.includes(kw) && !seen.has(w.warning)) {
+        seen.add(w.warning);
+        warnings.push(w.warning);
+        break;
+      }
+    }
+  }
+
+  // تحذيرات بناءً على القيم الغذائية
+  if (healthCondition === "diabetes" && carbs > 50) {
+    const msg = `كربوهيدرات عالية (${carbs}g) - قلل حجم الحصة`;
+    if (!seen.has(msg)) warnings.push(msg);
+  }
+  if (healthCondition === "obesity" && calories > 500) {
+    const msg = `سعرات عالية (${calories} سعرة) - قلل الكمية`;
+    if (!seen.has(msg)) warnings.push(msg);
+  }
+  if (healthCondition === "cholesterol" && fat > 20) {
+    const msg = `دهون عالية (${fat}g) - قلل الكمية`;
+    if (!seen.has(msg)) warnings.push(msg);
+  }
+  if (category === "dessert" && (healthCondition === "diabetes" || healthCondition === "obesity")) {
+    const msg = "هذه حلويات - غير مناسبة لحالتك الصحية";
+    if (!seen.has(msg)) warnings.push(msg);
+  }
+
+  return warnings;
+}
 
 export default function RecipeDetailScreen() {
   const router = useRouter();
@@ -348,6 +423,63 @@ export default function RecipeDetailScreen() {
             </View>
           ))}
         </View>
+
+        {/* تحذيرات صحية */}
+        {(() => {
+          const healthWarnings = getRecipeHealthWarnings(
+            recipe.ingredients,
+            recipe.steps,
+            recipe.category,
+            recipe.calories,
+            recipe.carbs,
+            recipe.fat,
+            profile.healthCondition
+          );
+          if (healthWarnings.length === 0) return null;
+          const condLabel =
+            profile.healthCondition === "diabetes" ? "السكري" :
+            profile.healthCondition === "hypertension" ? "ضغط الدم" :
+            profile.healthCondition === "obesity" ? "السمنة" :
+            profile.healthCondition === "cholesterol" ? "الكوليسترول" : "";
+          return (
+            <View
+              className="mx-5 mt-4 rounded-xl p-4"
+              style={{ backgroundColor: colors.error + "15", borderWidth: 1.5, borderColor: colors.error }}
+            >
+              <Text
+                style={{ fontSize: 16, fontWeight: "700", color: colors.error, textAlign: "right", writingDirection: "rtl", marginBottom: 8 }}
+              >
+                ⚠️ تحذير صحي - مريض {condLabel}
+              </Text>
+              {healthWarnings.map((w, i) => (
+                <Text
+                  key={i}
+                  style={{
+                    fontSize: 14,
+                    lineHeight: 22,
+                    color: colors.error,
+                    textAlign: "right",
+                    writingDirection: "rtl",
+                    marginBottom: 4,
+                  }}
+                >
+                  • {w}
+                </Text>
+              ))}
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.muted,
+                  textAlign: "right",
+                  writingDirection: "rtl",
+                  marginTop: 8,
+                }}
+              >
+                استشر طبيبك قبل تناول هذه الوصفة
+              </Text>
+            </View>
+          );
+        })()}
 
         {/* Tips */}
         {recipe.tips && (

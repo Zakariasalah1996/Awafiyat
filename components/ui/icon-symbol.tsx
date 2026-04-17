@@ -44,6 +44,8 @@ const MAPPING = {
   "exclamationmark.triangle": "warning",
   "trash.fill": "delete",
   "pencil": "edit",
+  "plus.circle.fill": "add-circle",
+  "xmark.circle.fill": "cancel",
   "camera.fill": "camera-alt",
   "photo.fill": "photo",
 } as IconMapping;

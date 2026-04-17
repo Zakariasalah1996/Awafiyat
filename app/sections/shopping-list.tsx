@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,8 +13,11 @@ import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import * as Haptics from "expo-haptics";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 I18nManager.forceRTL(true);
+
+const SHOPPING_LIST_KEY = "@awafiyat_shopping_list";
 
 interface ShoppingItem {
   id: string;
@@ -104,6 +107,37 @@ export default function ShoppingListScreen() {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [newItemText, setNewItemText] = useState("");
   const [showCategories, setShowCategories] = useState(true);
+  const [loaded, setLoaded] = useState(false);
+
+  // تحميل القائمة المحفوظة عند فتح الشاشة
+  useEffect(() => {
+    const loadItems = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(SHOPPING_LIST_KEY);
+        if (saved) {
+          setItems(JSON.parse(saved));
+        }
+      } catch (e) {
+        console.error("Failed to load shopping list:", e);
+      } finally {
+        setLoaded(true);
+      }
+    };
+    loadItems();
+  }, []);
+
+  // حفظ القائمة تلقائياً عند أي تغيير
+  useEffect(() => {
+    if (!loaded) return; // لا نحفظ قبل التحميل الأولي
+    const saveItems = async () => {
+      try {
+        await AsyncStorage.setItem(SHOPPING_LIST_KEY, JSON.stringify(items));
+      } catch (e) {
+        console.error("Failed to save shopping list:", e);
+      }
+    };
+    saveItems();
+  }, [items, loaded]);
 
   const addItem = useCallback(
     (name: string, category: string, emoji: string) => {
@@ -155,6 +189,16 @@ export default function ShoppingListScreen() {
 
   const uncheckedCount = items.filter((i) => !i.checked).length;
   const checkedCount = items.filter((i) => i.checked).length;
+
+  if (!loaded) {
+    return (
+      <ScreenContainer edges={["top", "left", "right"]}>
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-muted" style={{ fontSize: 16 }}>جاري التحميل...</Text>
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   return (
     <ScreenContainer edges={["top", "left", "right"]}>

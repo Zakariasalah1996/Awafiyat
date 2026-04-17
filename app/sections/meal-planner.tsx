@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   Platform,
   Modal,
   FlatList,
+  Vibration,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -18,10 +20,15 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
 import * as Haptics from "expo-haptics";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 I18nManager.forceRTL(true);
 
 const DAYS = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+
+const MEAL_PLAN_STORAGE_KEY = "@awafiyat_meal_plan";
+const MEAL_TIMES_STORAGE_KEY = "@awafiyat_meal_times";
+const TIMES_SET_KEY = "@awafiyat_times_set";
 
 // تحويل الفترة إلى عربي
 const getPeriodLabel = (hour: number): string => {
@@ -80,7 +87,7 @@ interface MealTimes {
 export default function MealPlannerScreen() {
   const router = useRouter();
   const colors = useColors();
-  const { profile } = useUser();
+  const { profile, updateProfile } = useUser();
   const isSubscribed = profile.isSubscribed;
 
   const [step, setStep] = useState<"times" | "plan" | "done">("times");
@@ -101,18 +108,90 @@ export default function MealPlannerScreen() {
     day: string;
     meal: "breakfast" | "lunch" | "dinner";
   } | null>(null);
-
-  // حالة القائمة المنسدلة لاختيار الوقت
   const [showTimePicker, setShowTimePicker] = useState<"breakfast" | "lunch" | "dinner" | null>(null);
+  const [timesAlreadySet, setTimesAlreadySet] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // الأيام المتاحة (يومين مجاني، أسبوع كامل للمشتركين)
+  // منبه الطبخ
+  const [alarmActive, setAlarmActive] = useState(false);
+  const [alarmRecipeName, setAlarmRecipeName] = useState("");
+  const alarmInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // تحميل البيانات المحفوظة
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [savedTimes, savedPlan, savedTimesSet] = await Promise.all([
+          AsyncStorage.getItem(MEAL_TIMES_STORAGE_KEY),
+          AsyncStorage.getItem(MEAL_PLAN_STORAGE_KEY),
+          AsyncStorage.getItem(TIMES_SET_KEY),
+        ]);
+        if (savedTimes) {
+          setMealTimes(JSON.parse(savedTimes));
+        }
+        if (savedPlan) {
+          setMealPlan(JSON.parse(savedPlan));
+        }
+        if (savedTimesSet === "true") {
+          setTimesAlreadySet(true);
+          setStep("plan"); // تخطي شاشة الأوقات إذا سبق تحديدها
+        }
+      } catch (e) {
+        console.error("Failed to load meal data:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  // حفظ الأوقات عند التغيير
+  const saveMealTimes = async (times: MealTimes) => {
+    try {
+      await AsyncStorage.setItem(MEAL_TIMES_STORAGE_KEY, JSON.stringify(times));
+    } catch (e) {
+      console.error("Failed to save meal times:", e);
+    }
+  };
+
+  // حفظ الجدول عند التغيير
+  const saveMealPlan = async (plan: MealPlan) => {
+    try {
+      await AsyncStorage.setItem(MEAL_PLAN_STORAGE_KEY, JSON.stringify(plan));
+    } catch (e) {
+      console.error("Failed to save meal plan:", e);
+    }
+  };
+
+  // إيقاف المنبه
+  const stopAlarm = useCallback(() => {
+    setAlarmActive(false);
+    setAlarmRecipeName("");
+    if (alarmInterval.current) {
+      clearInterval(alarmInterval.current);
+      alarmInterval.current = null;
+    }
+    Vibration.cancel();
+  }, []);
+
+  // تشغيل المنبه
+  const startAlarm = useCallback((recipeName: string) => {
+    setAlarmRecipeName(recipeName);
+    setAlarmActive(true);
+    // اهتزاز متكرر كل ثانية
+    const pattern = [500, 500, 500, 500, 500, 500];
+    Vibration.vibrate(pattern, true);
+    if (Platform.OS !== "web") {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    }
+  }, []);
+
   const availableDays = isSubscribed ? DAYS : DAYS.slice(0, 2);
 
   const suggestedRecipes = useMemo(() => {
     if (!showRecipePicker) return [];
     const mealType = showRecipePicker.meal;
     let recipes = getRecipesByMealType(mealType);
-    // ترتيب حسب الحالة الصحية
     if (profile.healthCondition !== "none") {
       recipes.sort((a, b) => {
         const aMatch =
@@ -138,46 +217,69 @@ export default function MealPlannerScreen() {
     const lunchRecipes = getRecipesByMealType("lunch");
     const dinnerRecipes = getRecipesByMealType("dinner");
 
+    // خلط الوصفات عشوائياً لمنع التكرار
+    const shuffled = <T,>(arr: T[]): T[] => {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    };
+
+    const shuffledBreakfast = shuffled(breakfastRecipes);
+    const shuffledLunch = shuffled(lunchRecipes);
+    const shuffledDinner = shuffled(dinnerRecipes);
+
+    // تتبع الوصفات المستخدمة لمنع التكرار
+    const usedBreakfast = new Set<string>();
+    const usedLunch = new Set<string>();
+    const usedDinner = new Set<string>();
+
     availableDays.forEach((day, index) => {
+      // اختيار وصفة غير مكررة
+      const pickUnique = (recipes: typeof breakfastRecipes, used: Set<string>) => {
+        for (const r of recipes) {
+          if (!used.has(r.id)) {
+            used.add(r.id);
+            return { recipeId: r.id, recipeName: r.name };
+          }
+        }
+        // إذا نفذت الوصفات، نبدأ من جديد
+        if (recipes.length > 0) {
+          const r = recipes[index % recipes.length];
+          return { recipeId: r.id, recipeName: r.name };
+        }
+        return null;
+      };
+
       newPlan[day] = {
-        breakfast: breakfastRecipes[index % breakfastRecipes.length]
-          ? {
-              recipeId: breakfastRecipes[index % breakfastRecipes.length].id,
-              recipeName: breakfastRecipes[index % breakfastRecipes.length].name,
-            }
-          : null,
-        lunch: lunchRecipes[index % lunchRecipes.length]
-          ? {
-              recipeId: lunchRecipes[index % lunchRecipes.length].id,
-              recipeName: lunchRecipes[index % lunchRecipes.length].name,
-            }
-          : null,
-        dinner: dinnerRecipes[index % dinnerRecipes.length]
-          ? {
-              recipeId: dinnerRecipes[index % dinnerRecipes.length].id,
-              recipeName: dinnerRecipes[index % dinnerRecipes.length].name,
-            }
-          : null,
+        breakfast: pickUnique(shuffledBreakfast, usedBreakfast),
+        lunch: pickUnique(shuffledLunch, usedLunch),
+        dinner: pickUnique(shuffledDinner, usedDinner),
       };
     });
-    // أيام غير متاحة
+
     DAYS.forEach((day) => {
       if (!newPlan[day]) {
         newPlan[day] = { breakfast: null, lunch: null, dinner: null };
       }
     });
     setMealPlan(newPlan);
+    saveMealPlan(newPlan);
   }, [availableDays, profile.healthCondition]);
 
   const selectRecipe = (recipeId: string, recipeName: string) => {
     if (!showRecipePicker) return;
-    setMealPlan((prev) => ({
-      ...prev,
+    const updated = {
+      ...mealPlan,
       [showRecipePicker.day]: {
-        ...prev[showRecipePicker.day],
+        ...mealPlan[showRecipePicker.day],
         [showRecipePicker.meal]: { recipeId, recipeName },
       },
-    }));
+    };
+    setMealPlan(updated);
+    saveMealPlan(updated);
     setShowRecipePicker(null);
   };
 
@@ -185,11 +287,12 @@ export default function MealPlannerScreen() {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    setMealTimes((prev) => ({ ...prev, [mealKey]: timeValue }));
+    const updated = { ...mealTimes, [mealKey]: timeValue };
+    setMealTimes(updated);
+    saveMealTimes(updated);
     setShowTimePicker(null);
   };
 
-  // فلتر الأوقات المناسبة لكل وجبة
   const getFilteredTimeOptions = (mealKey: "breakfast" | "lunch" | "dinner") => {
     switch (mealKey) {
       case "breakfast":
@@ -202,6 +305,50 @@ export default function MealPlannerScreen() {
         return TIME_OPTIONS;
     }
   };
+
+  if (loading) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-muted" style={{ fontSize: 16 }}>جاري التحميل...</Text>
+        </View>
+      </ScreenContainer>
+    );
+  }
+
+  // مودال المنبه
+  if (alarmActive) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+        <View className="flex-1 items-center justify-center px-8">
+          <Text style={{ fontSize: 80 }}>🔔</Text>
+          <Text
+            className="text-foreground font-bold mt-6"
+            style={{ fontSize: 28, textAlign: "center" }}
+          >
+            وقت الطبخ!
+          </Text>
+          <Text
+            className="text-muted mt-3"
+            style={{ fontSize: 18, textAlign: "center", lineHeight: 28, writingDirection: "rtl" }}
+          >
+            حان وقت تحضير:{"\n"}
+            <Text className="text-primary font-bold">{alarmRecipeName}</Text>
+          </Text>
+          <TouchableOpacity
+            onPress={stopAlarm}
+            className="rounded-2xl py-4 px-12 mt-8"
+            style={{ backgroundColor: colors.error }}
+            activeOpacity={0.8}
+          >
+            <Text className="text-white font-bold" style={{ fontSize: 20 }}>
+              إيقاف المنبه
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   // شاشة ضبط أوقات الوجبات
   if (step === "times") {
@@ -245,7 +392,7 @@ export default function MealPlannerScreen() {
               className="text-muted mb-6"
               style={{ fontSize: 14, textAlign: "right", writingDirection: "rtl" }}
             >
-              حدد أوقات وجباتك لنذكّرك في الوقت المناسب
+              حددي أوقات الطبخ لنذكّرك في الوقت المناسب
             </Text>
 
             {MEALS.map((meal) => (
@@ -263,11 +410,11 @@ export default function MealPlannerScreen() {
                     className="text-foreground font-bold"
                     style={{ fontSize: 17 }}
                   >
-                    متى تاكلين {meal.label === "فطور" ? "الفطور" : meal.label === "غداء" ? "الغداء" : "العشاء"}؟
+                    متى تعدّين {meal.label === "فطور" ? "الفطور" : meal.label === "غداء" ? "الغداء" : "العشاء"}؟
                   </Text>
                 </View>
 
-                {/* زر اختيار الوقت - قائمة منسدلة */}
+                {/* زر اختيار الوقت */}
                 <TouchableOpacity
                   onPress={() => setShowTimePicker(meal.key)}
                   style={{
@@ -294,13 +441,17 @@ export default function MealPlannerScreen() {
                   >
                     {formatTimeArabic(mealTimes[meal.key])}
                   </Text>
-                  <Text style={{ fontSize: 14, color: colors.muted }}>▼</Text>
                 </TouchableOpacity>
               </View>
             ))}
 
             <TouchableOpacity
-              onPress={() => setStep("plan")}
+              onPress={async () => {
+                await saveMealTimes(mealTimes);
+                await AsyncStorage.setItem(TIMES_SET_KEY, "true");
+                setTimesAlreadySet(true);
+                setStep("plan");
+              }}
               className="rounded-2xl py-4 items-center mt-2"
               style={{ backgroundColor: colors.primary }}
               activeOpacity={0.8}
@@ -329,7 +480,6 @@ export default function MealPlannerScreen() {
                 paddingBottom: 30,
               }}
             >
-              {/* Modal Header */}
               <View
                 style={{
                   flexDirection: "row-reverse",
@@ -362,7 +512,6 @@ export default function MealPlannerScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* Time Options List */}
               <FlatList
                 data={showTimePicker ? getFilteredTimeOptions(showTimePicker) : []}
                 keyExtractor={(item) => item.value}
@@ -525,20 +674,42 @@ export default function MealPlannerScreen() {
           >
             شنو نطبخ؟
           </Text>
+          <View className="flex-row items-center gap-2" style={{ flexDirection: "row" }}>
+            <TouchableOpacity
+              onPress={() => setStep("times")}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: colors.surface,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <IconSymbol name="chevron.right" size={18} color={colors.foreground} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* تعديل الأوقات */}
+        {timesAlreadySet && (
           <TouchableOpacity
             onPress={() => setStep("times")}
+            className="mx-5 mb-2 rounded-xl py-2 flex-row items-center justify-center gap-2"
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
               backgroundColor: colors.surface,
-              alignItems: "center",
-              justifyContent: "center",
+              flexDirection: "row-reverse",
+              borderWidth: 1,
+              borderColor: colors.border,
             }}
+            activeOpacity={0.7}
           >
-            <IconSymbol name="chevron.right" size={18} color={colors.foreground} />
+            <Text style={{ fontSize: 14 }}>🕐</Text>
+            <Text className="text-muted" style={{ fontSize: 13 }}>
+              تعديل أوقات الوجبات
+            </Text>
           </TouchableOpacity>
-        </View>
+        )}
 
         {/* Auto Fill Button */}
         <View className="px-5 mt-2 mb-4">
@@ -556,7 +727,7 @@ export default function MealPlannerScreen() {
               className="text-primary font-bold"
               style={{ fontSize: 15 }}
             >
-              عبّي الجدول تلقائياً
+              تعبئة الجدول تلقائياً
             </Text>
           </TouchableOpacity>
         </View>
@@ -679,6 +850,32 @@ export default function MealPlannerScreen() {
                           {planned.recipeName}
                         </Text>
                       </View>
+                      {/* زر المنبه */}
+                      <TouchableOpacity
+                        onPress={() => {
+                          Alert.alert(
+                            "تشغيل المنبه",
+                            `هل تريدين تشغيل منبه الطبخ لـ "${planned.recipeName}"؟`,
+                            [
+                              { text: "إلغاء", style: "cancel" },
+                              {
+                                text: "تشغيل",
+                                onPress: () => startAlarm(planned.recipeName),
+                              },
+                            ]
+                          );
+                        }}
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 14,
+                          backgroundColor: colors.warning + "20",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Text style={{ fontSize: 14 }}>🔔</Text>
+                      </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() =>
                           setShowRecipePicker({ day: dayName, meal: meal.key })
@@ -713,10 +910,11 @@ export default function MealPlannerScreen() {
         {/* Save Button */}
         <View className="px-5 mt-6">
           <TouchableOpacity
-            onPress={() => {
+            onPress={async () => {
               if (Platform.OS !== "web") {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               }
+              await saveMealPlan(mealPlan);
               setStep("done");
             }}
             className="rounded-2xl py-4 items-center"

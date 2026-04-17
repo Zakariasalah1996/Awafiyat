@@ -180,9 +180,6 @@ export default function RecipesLibraryScreen() {
     ({ item }: { item: Recipe }) => {
       const isSaved = profile.savedRecipes.includes(item.id);
       const totalTime = item.prepTime + item.cookTime;
-      const isHealthMatch =
-        item.healthTags.includes(profile.healthCondition as any) ||
-        item.healthTags.includes("all");
       const originFlag = item.origin ? ORIGIN_FLAG[item.origin] || "" : "";
       const originLabel = item.origin ? ORIGIN_LABEL[item.origin] || "" : "";
 
@@ -228,16 +225,7 @@ export default function RecipesLibraryScreen() {
                 </Text>
               </View>
             ) : null}
-            {isHealthMatch && profile.healthCondition !== "none" && (
-              <View
-                className="absolute top-2 right-2 rounded-full px-2 py-1"
-                style={{ backgroundColor: "rgba(34,197,94,0.8)" }}
-              >
-                <Text style={{ fontSize: 10, color: "#fff" }}>
-                  مناسبة لصحتك
-                </Text>
-              </View>
-            )}
+
           </View>
 
           {/* Recipe Info */}

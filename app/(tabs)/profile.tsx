@@ -51,6 +51,7 @@ export default function ProfileScreen() {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState("");
   const [permissionGranted, setPermissionGranted] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
 
   // Request notification permissions on mount
   useEffect(() => {
@@ -65,6 +66,8 @@ export default function ProfileScreen() {
   const saveEdit = async (field: string) => {
     await updateProfile({ [field]: tempValue });
     setEditingField(null);
+    setSaveMessage("تم الحفظ");
+    setTimeout(() => setSaveMessage(""), 2000);
   };
 
   const handleLogout = () => {
@@ -203,7 +206,15 @@ export default function ProfileScreen() {
 
         {/* Personal Info */}
         <View className="mx-5 bg-surface rounded-2xl px-5 py-2 mb-4 border" style={{ borderColor: colors.border }}>
-          <Text className="text-base font-bold text-foreground py-3">المعلومات الشخصية</Text>
+          <View className="flex-row items-center justify-between py-3">
+            <Text className="text-base font-bold text-foreground">المعلومات الشخصية</Text>
+            {saveMessage ? (
+              <View className="flex-row items-center gap-1 px-3 py-1 rounded-full" style={{ backgroundColor: `${colors.success}20` }}>
+                <MaterialIcons name="check-circle" size={14} color={colors.success} />
+                <Text className="text-xs font-medium" style={{ color: colors.success }}>{saveMessage}</Text>
+              </View>
+            ) : null}
+          </View>
           {renderEditableField("الاسم", "name", profile.name, "أدخل اسمك")}
           {renderEditableField("رقم الهاتف", "phone", profile.phone, "أدخل رقمك", "phone-pad")}
           {renderEditableField("العمر", "age", profile.age, "أدخل عمرك", "numeric")}
