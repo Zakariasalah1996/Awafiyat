@@ -28,6 +28,9 @@ export const API_BASE_URL = env.apiBaseUrl;
  * Get the API base URL, deriving from current hostname if not set.
  * Metro runs on 8081, API server runs on 3000.
  * URL pattern: https://PORT-sandboxid.region.domain
+ * 
+ * For native (iOS/Android): uses the published domain
+ * For web: derives from current hostname
  */
 export function getApiBaseUrl(): string {
   // If API_BASE_URL is set, use it
@@ -43,6 +46,11 @@ export function getApiBaseUrl(): string {
     if (apiHostname !== hostname) {
       return `${protocol}//${apiHostname}`;
     }
+  }
+
+  // On native (iOS/Android), use the published production domain
+  if (ReactNative.Platform.OS !== "web") {
+    return "https://awafiyatapp-mmvdqjeh.manus.space";
   }
 
   // Fallback to empty (will use relative URL)
