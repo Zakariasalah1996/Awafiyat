@@ -250,17 +250,21 @@ async function startServer() {
           to: token, sound: 'default', title, body, data: { type: 'admin_notification' },
         }));
         try {
+          console.log('[Push] Sending to tokens:', tokens);
+          console.log('[Push] Messages:', JSON.stringify(messages, null, 2));
           const pushRes = await fetch('https://exp.host/--/api/v2/push/send', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Accept-Encoding': 'gzip, deflate' },
             body: JSON.stringify(messages),
           });
           const pushData = await pushRes.json();
+          console.log('[Push] Response:', JSON.stringify(pushData, null, 2));
           if (pushData.data) {
             for (const ticket of pushData.data) {
-              if (ticket.status === 'ok') successCount++; else failCount++;
+              if (ticket.status === 'ok') successCount++; else { failCount++; console.error('[Push] Ticket error:', ticket); }
             }
           }
         } catch (err) {
+          console.error('[Push] Fetch error:', err);
           failCount = tokens.length;
         }
         if (notifId) {
