@@ -4,7 +4,6 @@ import Constants from "expo-constants";
 import { getApiBaseUrl } from "@/constants/oauth";
 
 // Configure notification handler for foreground
-// Note: This only works in development builds and native apps, not in Expo Go
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -17,32 +16,44 @@ Notifications.setNotificationHandler({
 
 // Fusha motivational messages
 const BREAKFAST_MESSAGES = [
-  { title: "صباح الخير! 🌅", body: "حان وقت الفطور، لا تنسَ أن تبدأ يومك بوجبة صحية" },
-  { title: "أسعد الله صباحك! ☀️", body: "هل أعددت فطورك؟ تعال نختر وصفة مميزة لهذا الصباح" },
-  { title: "صباح العافية! 🍳", body: "لا تخرج من المنزل دون فطور، صحتك أولاً" },
+  "حان وقت الفطور، لا تنسي أن تبدئي يومك بوجبة صحية",
+  "هل أعددتِ فطورك؟ صحتك أولاً",
+  "لا تخرجي من المنزل دون فطور",
 ];
 
 const LUNCH_MESSAGES = [
-  { title: "حان وقت الغداء! 🍲", body: "لا تنسَ وجبة الغداء، جسمك يحتاج إلى الطاقة" },
-  { title: "وقت الغداء! 🥘", body: "هيا نختر وصفة لذيذة وصحية، عافية مقدماً" },
-  { title: "موعد الوجبة! 🍛", body: "غداء صحي يعني يوماً سعيداً، اختر وصفتك الآن" },
+  "لا تنسي وجبة الغداء، جسمك يحتاج إلى الطاقة",
+  "هيا نختر وصفة لذيذة وصحية، عافية مقدماً",
+  "غداء صحي يعني يوماً سعيداً",
 ];
 
 const DINNER_MESSAGES = [
-  { title: "حان وقت العشاء! 🌙", body: "عشاء خفيف وصحي هو الأفضل قبل النوم" },
-  { title: "مساء الخير! 🍽️", body: "لا تنسَ عشاءك، واحرص أن يكون خفيفاً" },
-  { title: "وقت العشاء! ✨", body: "وجبة خفيفة ولذيذة تجعل نومك هادئاً" },
+  "عشاء خفيف وصحي هو الأفضل قبل النوم",
+  "لا تنسي عشاءك، واحرصي أن يكون خفيفاً",
+  "وجبة خفيفة ولذيذة تجعل نومك هادئاً",
 ];
 
 const MOTIVATION_MESSAGES = [
-  { title: "عافيات تهتم بك! 💚", body: "تذكّر: صحتك أمانة، حافظ عليها بالغذاء الصحي" },
-  { title: "نصيحة اليوم 🌿", body: "اشرب كمية كافية من الماء اليوم، جسمك يحتاج 8 أكواب على الأقل" },
-  { title: "كيف حالك اليوم؟ 😊", body: "لا تنسَ تصفح الوصفات الجديدة، لدينا أطباق رائعة!" },
+  { title: "عافيات تهتم بك! 💚", body: "تذكّري: صحتك أمانة، حافظي عليها بالغذاء الصحي" },
+  { title: "نصيحة اليوم 🌿", body: "اشربي كمية كافية من الماء اليوم، جسمك يحتاج 8 أكواب على الأقل" },
+  { title: "كيف حالك اليوم؟ 😊", body: "لا تنسي تصفح الوصفات الجديدة، لدينا أطباق رائعة!" },
 ];
 
-function getRandomMessage(messages: typeof BREAKFAST_MESSAGES) {
-  return messages[Math.floor(Math.random() * messages.length)];
+function getRandomItem<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
+
+const MEAL_EMOJI: Record<string, string> = {
+  breakfast: "🌅",
+  lunch: "☀️",
+  dinner: "🌙",
+};
+
+const MEAL_LABEL: Record<string, string> = {
+  breakfast: "الفطور",
+  lunch: "الغداء",
+  dinner: "العشاء",
+};
 
 // Get Expo push token for backend notifications
 export async function getExpoPushToken(): Promise<string | null> {
@@ -67,15 +78,12 @@ export async function getExpoPushToken(): Promise<string | null> {
 // Register push token with backend
 export async function registerPushToken(token: string, userId?: string): Promise<void> {
   try {
-    // Send token to backend - use dynamic API URL (not localhost!)
     const apiBase = getApiBaseUrl();
     const url = apiBase ? `${apiBase}/api/user/push-token` : "/api/user/push-token";
     console.log("[Push] Registering token at:", url);
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, userId }),
     });
 
@@ -91,7 +99,6 @@ export async function registerPushToken(token: string, userId?: string): Promise
 }
 
 // Setup notification listeners
-// Note: This only works in development builds and native apps, not in Expo Go
 export function setupNotificationListeners(
   onNotificationReceived?: (notification: Notifications.Notification) => void,
   onNotificationResponse?: (response: Notifications.NotificationResponse) => void
@@ -120,11 +127,13 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 
   try {
     if (Platform.OS === "android") {
+      // قناة الوجبات بصوت المنبه
       await Notifications.setNotificationChannelAsync("meals", {
         name: "تذكير الوجبات",
-        importance: Notifications.AndroidImportance.HIGH,
-        vibrationPattern: [0, 250, 250, 250],
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 500, 250, 500, 250, 500],
         lightColor: "#4A7C59",
+        sound: "alarm.wav",
       });
       await Notifications.setNotificationChannelAsync("shopping", {
         name: "تذكير التسوق",
@@ -145,7 +154,6 @@ export async function requestNotificationPermissions(): Promise<boolean> {
     }
 
     if (finalStatus === "granted") {
-      // Get and register push token
       const token = await getExpoPushToken();
       if (token) {
         await registerPushToken(token);
@@ -159,15 +167,23 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   }
 }
 
+/**
+ * جدولة إشعار وجبة مع اسم الوصفة + صوت المنبه
+ * يُستدعى عند حفظ جدول الطبخ
+ */
 export async function scheduleMealReminder(
   mealType: "breakfast" | "lunch" | "dinner",
   hour: number,
-  minute: number
+  minute: number,
+  recipeId?: string,
+  recipeName?: string
 ): Promise<string | null> {
   try {
-    // Cancel existing reminders for this meal type
+    // إلغاء الإشعارات السابقة لهذا النوع
     await cancelMealReminder(mealType);
 
+    const emoji = MEAL_EMOJI[mealType];
+    const label = MEAL_LABEL[mealType];
     const messages =
       mealType === "breakfast"
         ? BREAKFAST_MESSAGES
@@ -175,13 +191,28 @@ export async function scheduleMealReminder(
         ? LUNCH_MESSAGES
         : DINNER_MESSAGES;
 
-    const msg = getRandomMessage(messages);
+    // إذا كانت هناك وصفة مخططة، نضيف اسمها
+    let title: string;
+    let body: string;
+    if (recipeName) {
+      title = `${emoji} حان وقت ${label}!`;
+      body = `الوصفة المخططة: ${recipeName}\nاضغطي لعرض التفاصيل`;
+    } else {
+      title = `${emoji} حان وقت ${label}!`;
+      body = getRandomItem(messages);
+    }
 
     const id = await Notifications.scheduleNotificationAsync({
       content: {
-        title: msg.title,
-        body: msg.body,
-        data: { type: "meal", mealType },
+        title,
+        body,
+        sound: "alarm.wav",
+        data: {
+          type: "meal",
+          mealType,
+          ...(recipeId && { recipeId }),
+          ...(recipeName && { recipeName }),
+        },
         ...(Platform.OS === "android" && { channelId: "meals" }),
       },
       trigger: {
@@ -191,10 +222,48 @@ export async function scheduleMealReminder(
       },
     });
 
+    console.log(`[Notifications] Scheduled ${mealType} at ${hour}:${minute} → ${recipeName || "no recipe"} (id: ${id})`);
     return id;
   } catch (e) {
     console.warn("Meal reminders not available in Expo Go. This is normal.", e);
     return null;
+  }
+}
+
+/**
+ * جدولة جميع إشعارات الوجبات بناءً على الجدول المحفوظ
+ * يُستدعى عند حفظ الجدول أو عند بدء التطبيق
+ */
+export async function scheduleAllMealReminders(
+  mealTimes: { breakfast: string; lunch: string; dinner: string },
+  todayMeals?: {
+    breakfast?: { recipeId: string; recipeName: string } | null;
+    lunch?: { recipeId: string; recipeName: string } | null;
+    dinner?: { recipeId: string; recipeName: string } | null;
+  }
+): Promise<void> {
+  try {
+    const mealTypes = ["breakfast", "lunch", "dinner"] as const;
+
+    for (const mealType of mealTypes) {
+      const timeStr = mealTimes[mealType];
+      const [hourStr, minuteStr] = timeStr.split(":");
+      const hour = parseInt(hourStr);
+      const minute = parseInt(minuteStr);
+
+      const meal = todayMeals?.[mealType];
+      await scheduleMealReminder(
+        mealType,
+        hour,
+        minute,
+        meal?.recipeId,
+        meal?.recipeName
+      );
+    }
+
+    console.log("[Notifications] All meal reminders scheduled successfully");
+  } catch (e) {
+    console.warn("Failed to schedule all meal reminders:", e);
   }
 }
 
@@ -221,7 +290,7 @@ export async function scheduleShoppingReminder(
     const id = await Notifications.scheduleNotificationAsync({
       content: {
         title: "حان وقت التسوق! 🛒",
-        body: `لا تنسَ شراء: ${itemsList}${items.length > 5 ? " وغيرها..." : ""}`,
+        body: `لا تنسي شراء: ${itemsList}${items.length > 5 ? " وغيرها..." : ""}`,
         data: { type: "shopping" },
         ...(Platform.OS === "android" && { channelId: "shopping" }),
       },
@@ -240,7 +309,7 @@ export async function scheduleShoppingReminder(
 
 export async function scheduleDailyMotivation(): Promise<string | null> {
   try {
-    const msg = getRandomMessage(MOTIVATION_MESSAGES);
+    const msg = getRandomItem(MOTIVATION_MESSAGES);
     const id = await Notifications.scheduleNotificationAsync({
       content: {
         title: msg.title,

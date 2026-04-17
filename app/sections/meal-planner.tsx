@@ -21,6 +21,11 @@ import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
+import { scheduleAllMealReminders } from "@/lib/notifications";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const alarmSound = require("@/assets/alarm.wav");
 
 I18nManager.forceRTL(true);
 
@@ -115,7 +120,21 @@ export default function MealPlannerScreen() {
   // منبه الطبخ
   const [alarmActive, setAlarmActive] = useState(false);
   const [alarmRecipeName, setAlarmRecipeName] = useState("");
+  const [alarmRecipeId, setAlarmRecipeId] = useState("");
   const alarmInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // مشغل صوت المنبه
+  const alarmPlayer = useAudioPlayer(alarmSound);
+
+  // تفعيل الصوت في وضع الصامت على iOS
+  useEffect(() => {
+    if (Platform.OS !== "web") {
+      setAudioModeAsync({ playsInSilentMode: true });
+    }
+    return () => {
+      alarmPlayer.release();
+    };
+  }, []);
 
   // تحميل البيانات المحفوظة
   useEffect(() => {
@@ -167,24 +186,41 @@ export default function MealPlannerScreen() {
   const stopAlarm = useCallback(() => {
     setAlarmActive(false);
     setAlarmRecipeName("");
+    setAlarmRecipeId("");
     if (alarmInterval.current) {
       clearInterval(alarmInterval.current);
       alarmInterval.current = null;
     }
     Vibration.cancel();
-  }, []);
+    try {
+      alarmPlayer.pause();
+      alarmPlayer.seekTo(0);
+    } catch (e) {
+      // ignore
+    }
+  }, [alarmPlayer]);
 
-  // تشغيل المنبه
-  const startAlarm = useCallback((recipeName: string) => {
+  // تشغيل المنبه مع صوت
+  const startAlarm = useCallback((recipeName: string, recipeId?: string) => {
     setAlarmRecipeName(recipeName);
+    setAlarmRecipeId(recipeId || "");
     setAlarmActive(true);
-    // اهتزاز متكرر كل ثانية
+    // اهتزاز متكرر
     const pattern = [500, 500, 500, 500, 500, 500];
     Vibration.vibrate(pattern, true);
     if (Platform.OS !== "web") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     }
-  }, []);
+    // تشغيل صوت المنبه
+    try {
+      alarmPlayer.loop = true;
+      alarmPlayer.volume = 1.0;
+      alarmPlayer.seekTo(0);
+      alarmPlayer.play();
+    } catch (e) {
+      console.warn("Failed to play alarm sound:", e);
+    }
+  }, [alarmPlayer]);
 
   const availableDays = isSubscribed ? DAYS : DAYS.slice(0, 2);
 
@@ -345,6 +381,21 @@ export default function MealPlannerScreen() {
               إيقاف المنبه
             </Text>
           </TouchableOpacity>
+          {alarmRecipeId ? (
+            <TouchableOpacity
+              onPress={() => {
+                stopAlarm();
+                router.push({ pathname: "/sections/recipe-detail" as any, params: { id: alarmRecipeId } });
+              }}
+              className="rounded-2xl py-3 px-8 mt-4"
+              style={{ backgroundColor: colors.primary }}
+              activeOpacity={0.8}
+            >
+              <Text className="text-white font-bold" style={{ fontSize: 16 }}>
+                عرض الوصفة
+              </Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       </ScreenContainer>
     );
@@ -860,7 +911,7 @@ export default function MealPlannerScreen() {
                               { text: "إلغاء", style: "cancel" },
                               {
                                 text: "تشغيل",
-                                onPress: () => startAlarm(planned.recipeName),
+                                onPress: () => startAlarm(planned.recipeName, planned.recipeId),
                               },
                             ]
                           );
@@ -915,6 +966,18 @@ export default function MealPlannerScreen() {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               }
               await saveMealPlan(mealPlan);
+              // جدولة الإشعارات التلقائية مع أسماء الوصفات
+              try {
+                const todayIndex = new Date().getDay();
+                // تحويل getDay (0=أحد) إلى ترتيب DAYS (0=سبت)
+                const dayMap = [1, 2, 3, 4, 5, 6, 0]; // Sun=1, Mon=2, ..., Sat=0
+                const todayDayIndex = dayMap[todayIndex];
+                const todayName = DAYS[todayDayIndex];
+                const todayMeals = mealPlan[todayName];
+                await scheduleAllMealReminders(mealTimes, todayMeals || undefined);
+              } catch (e) {
+                console.warn("Failed to schedule meal reminders:", e);
+              }
               setStep("done");
             }}
             className="rounded-2xl py-4 items-center"

@@ -9,6 +9,7 @@ import { Platform, I18nManager } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { requestNotificationPermissions, setupNotificationListeners } from "@/lib/notifications";
+import { useRouter } from "expo-router";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -33,6 +34,7 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+  const router = useRouter();
   const initialInsets = initialWindowMetrics?.insets ?? DEFAULT_WEB_INSETS;
   const initialFrame = initialWindowMetrics?.frame ?? DEFAULT_WEB_FRAME;
 
@@ -63,6 +65,17 @@ export default function RootLayout() {
       },
       (response) => {
         console.log("[Push] Notification tapped:", response.notification.request.content.title);
+        // فتح صفحة الوصفة عند الضغط على إشعار الوجبة
+        const data = response.notification.request.content.data;
+        if (data?.type === "meal" && data?.recipeId) {
+          setTimeout(() => {
+            router.push({ pathname: "/sections/recipe-detail" as any, params: { id: data.recipeId as string } });
+          }, 500);
+        } else if (data?.type === "shopping") {
+          setTimeout(() => {
+            router.push("/sections/shopping-list" as any);
+          }, 500);
+        }
       }
     );
 
