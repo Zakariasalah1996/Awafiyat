@@ -247,7 +247,13 @@ async function startServer() {
       let successCount = 0, failCount = 0;
       if (tokens.length > 0) {
         const messages = tokens.map((token: string) => ({
-          to: token, sound: 'default', title, body, data: { type: 'admin_notification' },
+          to: token,
+          sound: 'alarm.wav',
+          title,
+          body,
+          priority: 'high',
+          channelId: 'meals',
+          data: { type: 'admin_notification' },
         }));
         try {
           console.log('[Push] Sending to tokens:', tokens);
@@ -422,20 +428,26 @@ async function startServer() {
   // Register push token
   app.post('/api/user/push-token', async (req, res) => {
     try {
-      const { token, userId } = req.body;
-      console.log('[Push] Received push-token registration request:', { token: token?.substring(0, 30) + '...', userId });
+      const { token, userId, platform: clientPlatform } = req.body;
+      console.log('[Push] Received push-token registration request:', { token: token?.substring(0, 30) + '...', userId, platform: clientPlatform });
       if (!token) {
         return res.status(400).json({ error: 'Token is required' });
       }
 
-      // Register push token in database
+      // Detect platform from user-agent or client param
+      const ua = req.headers['user-agent'] || '';
+      let detectedPlatform: 'ios' | 'android' | 'web' = 'android';
+      if (clientPlatform === 'ios' || ua.includes('iPhone') || ua.includes('iPad')) detectedPlatform = 'ios';
+      else if (clientPlatform === 'web') detectedPlatform = 'web';
+
+      // Register push token in database (userId is now optional)
       await savePushToken({
         token,
-        userId: userId,
-        platform: 'android',
+        userId: userId || null,
+        platform: detectedPlatform,
       });
 
-      console.log('[Push] Token registered successfully:', token.substring(0, 30) + '...');
+      console.log('[Push] Token registered successfully:', token.substring(0, 30) + '...', 'platform:', detectedPlatform);
       res.json({ success: true, message: 'Push token registered' });
     } catch (e: any) {
       console.error('[Push] Failed to register push token:', e);

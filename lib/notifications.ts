@@ -100,11 +100,12 @@ export async function registerPushToken(token: string, userId?: string): Promise
   try {
     const apiBase = getApiBaseUrl();
     const url = apiBase ? `${apiBase}/api/user/push-token` : "/api/user/push-token";
-    console.log("[Push] Registering token at:", url);
+    const platform = Platform.OS === "ios" ? "ios" : Platform.OS === "android" ? "android" : "web";
+    console.log("[Push] Registering token at:", url, "platform:", platform);
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, userId }),
+      body: JSON.stringify({ token, userId: userId || null, platform }),
     });
 
     if (!response.ok) {

@@ -32,7 +32,7 @@ export type InsertUser = typeof users.$inferInsert;
  */
 export const pushTokens = mysqlTable("push_tokens", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId"),
   token: varchar("token", { length: 512 }).notNull(),
   platform: mysqlEnum("platform", ["ios", "android", "web"]).notNull(),
   isActive: boolean("isActive").default(true).notNull(),

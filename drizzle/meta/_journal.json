@@ -15,6 +15,13 @@
       "when": 1776240946095,
       "tag": "0001_broken_terrax",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1776593665829,
+      "tag": "0002_dashing_lorna_dane",
+      "breakpoints": true
     }
   ]
 }

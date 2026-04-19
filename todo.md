@@ -140,3 +140,10 @@
 
 - [x] expo-alarm-module (AlarmManager + MediaPlayer + Foreground Service) لمنبه يرن على مستوى النظام
 - [x] ربط المنبه الأصلي بجدولة الوجبات (scheduleMealReminder + cancelMealReminder + AlarmContext)
+
+## الدفعة 12 - إصلاح الإشعارات بالكامل:
+
+- [x] تقوية صوت الإشعار (alarm.wav 15 ثانية بأقصى amplitude + harmonics)
+- [x] جعل userId اختياري في جدول push_tokens (nullable) + migration مطبق
+- [x] إصلاح تسجيل Push Token بدون تسجيل دخول OAuth + إرسال platform
+- [x] إشعارات لوحة التحكم بصوت alarm.wav + priority high + channelId meals
