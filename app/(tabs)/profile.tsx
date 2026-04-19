@@ -62,14 +62,22 @@ export default function ProfileScreen() {
   }, []);
 
   const startEdit = (field: string, currentValue: string) => {
+    // Save the previous field's value before switching to a new field
+    if (editingField && tempValue) {
+      updateProfile({ [editingField]: tempValue }).then(() => {
+        setHasUnsavedChanges(true);
+      });
+    }
     setEditingField(field);
     setTempValue(currentValue);
   };
 
   const saveEdit = async (field: string) => {
-    await updateProfile({ [field]: tempValue });
+    if (tempValue) {
+      await updateProfile({ [field]: tempValue });
+      setHasUnsavedChanges(true);
+    }
     setEditingField(null);
-    setHasUnsavedChanges(true);
   };
 
   const handleSaveAll = async () => {
