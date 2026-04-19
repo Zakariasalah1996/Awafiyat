@@ -7,6 +7,9 @@ import {
   TextInput,
   I18nManager,
   Platform,
+  Modal,
+  FlatList,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -14,10 +17,14 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { scheduleShoppingReminder } from "@/lib/notifications";
+import * as Notifications from "expo-notifications";
 
 I18nManager.forceRTL(true);
 
 const SHOPPING_LIST_KEY = "@awafiyat_shopping_list";
+const SHOPPING_REMINDER_KEY = "@awafiyat_shopping_reminder";
 
 interface ShoppingItem {
   id: string;
@@ -25,6 +32,13 @@ interface ShoppingItem {
   category: string;
   checked: boolean;
   emoji: string;
+}
+
+interface ShoppingReminderData {
+  enabled: boolean;
+  hour: number;
+  minute: number;
+  notificationId: string | null;
 }
 
 const CATEGORIES: { name: string; emoji: string; items: string[] }[] = [
@@ -101,6 +115,23 @@ const CATEGORIES: { name: string; emoji: string; items: string[] }[] = [
   },
 ];
 
+// أوقات التذكير المتاحة
+const REMINDER_TIMES: { hour: number; minute: number; label: string }[] = [
+  { hour: 8, minute: 0, label: "8:00 صباحاً" },
+  { hour: 9, minute: 0, label: "9:00 صباحاً" },
+  { hour: 10, minute: 0, label: "10:00 صباحاً" },
+  { hour: 11, minute: 0, label: "11:00 صباحاً" },
+  { hour: 12, minute: 0, label: "12:00 ظهراً" },
+  { hour: 13, minute: 0, label: "1:00 ظهراً" },
+  { hour: 14, minute: 0, label: "2:00 عصراً" },
+  { hour: 15, minute: 0, label: "3:00 عصراً" },
+  { hour: 16, minute: 0, label: "4:00 عصراً" },
+  { hour: 17, minute: 0, label: "5:00 مساءً" },
+  { hour: 18, minute: 0, label: "6:00 مساءً" },
+  { hour: 19, minute: 0, label: "7:00 مساءً" },
+  { hour: 20, minute: 0, label: "8:00 مساءً" },
+];
+
 export default function ShoppingListScreen() {
   const router = useRouter();
   const colors = useColors();
@@ -108,36 +139,37 @@ export default function ShoppingListScreen() {
   const [newItemText, setNewItemText] = useState("");
   const [showCategories, setShowCategories] = useState(true);
   const [loaded, setLoaded] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [reminder, setReminder] = useState<ShoppingReminderData>({
+    enabled: false,
+    hour: 10,
+    minute: 0,
+    notificationId: null,
+  });
 
-  // تحميل القائمة المحفوظة عند فتح الشاشة
+  // تحميل القائمة والتذكير المحفوظين
   useEffect(() => {
-    const loadItems = async () => {
+    const loadData = async () => {
       try {
-        const saved = await AsyncStorage.getItem(SHOPPING_LIST_KEY);
-        if (saved) {
-          setItems(JSON.parse(saved));
+        const [savedItems, savedReminder] = await Promise.all([
+          AsyncStorage.getItem(SHOPPING_LIST_KEY),
+          AsyncStorage.getItem(SHOPPING_REMINDER_KEY),
+        ]);
+        if (savedItems) {
+          setItems(JSON.parse(savedItems));
+        }
+        if (savedReminder) {
+          setReminder(JSON.parse(savedReminder));
         }
       } catch (e) {
-        console.error("Failed to load shopping list:", e);
+        console.error("Failed to load shopping data:", e);
       } finally {
         setLoaded(true);
       }
     };
-    loadItems();
+    loadData();
   }, []);
-
-  // حفظ القائمة تلقائياً عند أي تغيير
-  useEffect(() => {
-    if (!loaded) return; // لا نحفظ قبل التحميل الأولي
-    const saveItems = async () => {
-      try {
-        await AsyncStorage.setItem(SHOPPING_LIST_KEY, JSON.stringify(items));
-      } catch (e) {
-        console.error("Failed to save shopping list:", e);
-      }
-    };
-    saveItems();
-  }, [items, loaded]);
 
   const addItem = useCallback(
     (name: string, category: string, emoji: string) => {
@@ -187,6 +219,111 @@ export default function ShoppingListScreen() {
     setItems((prev) => prev.filter((item) => !item.checked));
   };
 
+  // حفظ القائمة يدوياً
+  const handleSaveList = async () => {
+    try {
+      await AsyncStorage.setItem(SHOPPING_LIST_KEY, JSON.stringify(items));
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+      setSaveMessage("تم حفظ قائمة التسوق بنجاح");
+      setTimeout(() => setSaveMessage(""), 3000);
+    } catch (e) {
+      console.error("Failed to save shopping list:", e);
+      setSaveMessage("فشل الحفظ، حاول مرة أخرى");
+      setTimeout(() => setSaveMessage(""), 3000);
+    }
+  };
+
+  // حفظ تلقائي عند التغيير
+  useEffect(() => {
+    if (!loaded) return;
+    const saveItems = async () => {
+      try {
+        await AsyncStorage.setItem(SHOPPING_LIST_KEY, JSON.stringify(items));
+      } catch (e) {
+        console.error("Failed to auto-save shopping list:", e);
+      }
+    };
+    saveItems();
+  }, [items, loaded]);
+
+  // ضبط تذكير التسوق
+  const setShoppingReminder = async (hour: number, minute: number, label: string) => {
+    try {
+      // إلغاء التذكير السابق
+      if (reminder.notificationId) {
+        try {
+          await Notifications.cancelScheduledNotificationAsync(reminder.notificationId);
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      // جدولة إشعار جديد
+      const uncheckedItems = items.filter((i) => !i.checked).map((i) => i.name);
+      const notificationId = await scheduleShoppingReminder(
+        uncheckedItems.length > 0 ? uncheckedItems : ["قائمة التسوق"],
+        hour,
+        minute
+      );
+
+      const newReminder: ShoppingReminderData = {
+        enabled: true,
+        hour,
+        minute,
+        notificationId,
+      };
+      setReminder(newReminder);
+      await AsyncStorage.setItem(SHOPPING_REMINDER_KEY, JSON.stringify(newReminder));
+
+      setShowReminderModal(false);
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+      setSaveMessage(`تم ضبط التذكير يومياً الساعة ${label}`);
+      setTimeout(() => setSaveMessage(""), 4000);
+    } catch (e) {
+      console.error("Failed to set shopping reminder:", e);
+      Alert.alert("خطأ", "لم نتمكن من ضبط التذكير، تأكد من تفعيل الإشعارات");
+    }
+  };
+
+  // إلغاء تذكير التسوق
+  const cancelShoppingReminder = async () => {
+    try {
+      if (reminder.notificationId) {
+        await Notifications.cancelScheduledNotificationAsync(reminder.notificationId);
+      }
+      // إلغاء أي إشعارات تسوق أخرى
+      const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+      for (const n of scheduled) {
+        if (n.content.data?.type === "shopping") {
+          await Notifications.cancelScheduledNotificationAsync(n.identifier);
+        }
+      }
+      const newReminder: ShoppingReminderData = {
+        enabled: false,
+        hour: 10,
+        minute: 0,
+        notificationId: null,
+      };
+      setReminder(newReminder);
+      await AsyncStorage.setItem(SHOPPING_REMINDER_KEY, JSON.stringify(newReminder));
+      setSaveMessage("تم إلغاء تذكير التسوق");
+      setTimeout(() => setSaveMessage(""), 3000);
+    } catch (e) {
+      console.error("Failed to cancel shopping reminder:", e);
+    }
+  };
+
+  const getReminderLabel = () => {
+    const found = REMINDER_TIMES.find(
+      (t) => t.hour === reminder.hour && t.minute === reminder.minute
+    );
+    return found?.label || `${reminder.hour}:${String(reminder.minute).padStart(2, "0")}`;
+  };
+
   const uncheckedCount = items.filter((i) => !i.checked).length;
   const checkedCount = items.filter((i) => i.checked).length;
 
@@ -232,8 +369,114 @@ export default function ShoppingListScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* رسالة تأكيد */}
+        {saveMessage !== "" && (
+          <View
+            style={{
+              marginHorizontal: 20,
+              marginTop: 8,
+              marginBottom: 4,
+              paddingVertical: 10,
+              paddingHorizontal: 14,
+              borderRadius: 12,
+              backgroundColor: `${colors.success}20`,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+            }}
+          >
+            <MaterialIcons name="check-circle" size={18} color={colors.success} />
+            <Text style={{ color: colors.success, fontSize: 14, fontWeight: "600" }}>
+              {saveMessage}
+            </Text>
+          </View>
+        )}
+
+        {/* تذكير التسوق */}
+        <View
+          className="mx-5 mt-3 mb-3 rounded-xl p-4"
+          style={{
+            backgroundColor: reminder.enabled ? `${colors.primary}10` : colors.surface,
+            borderWidth: 1,
+            borderColor: reminder.enabled ? colors.primary : colors.border,
+          }}
+        >
+          <View style={{ flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between" }}>
+            <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 8 }}>
+              <Text style={{ fontSize: 20 }}>⏰</Text>
+              <View>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    fontWeight: "700",
+                    color: colors.foreground,
+                    textAlign: "right",
+                    writingDirection: "rtl",
+                  }}
+                >
+                  تذكير التسوق
+                </Text>
+                {reminder.enabled ? (
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: colors.primary,
+                      textAlign: "right",
+                      writingDirection: "rtl",
+                      marginTop: 2,
+                    }}
+                  >
+                    يومياً الساعة {getReminderLabel()}
+                  </Text>
+                ) : (
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: colors.muted,
+                      textAlign: "right",
+                      writingDirection: "rtl",
+                      marginTop: 2,
+                    }}
+                  >
+                    متى تحب نذكرك بقائمة التسوق؟
+                  </Text>
+                )}
+              </View>
+            </View>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              {reminder.enabled && (
+                <TouchableOpacity
+                  onPress={cancelShoppingReminder}
+                  style={{
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                    borderRadius: 10,
+                    backgroundColor: `${colors.error}15`,
+                  }}
+                >
+                  <Text style={{ fontSize: 13, color: colors.error, fontWeight: "600" }}>إلغاء</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                onPress={() => setShowReminderModal(true)}
+                style={{
+                  paddingHorizontal: 14,
+                  paddingVertical: 8,
+                  borderRadius: 10,
+                  backgroundColor: colors.primary,
+                }}
+              >
+                <Text style={{ fontSize: 13, color: "#fff", fontWeight: "700" }}>
+                  {reminder.enabled ? "تغيير" : "ضبط الوقت"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
         {/* Add Custom Item */}
-        <View className="px-5 mt-3 mb-4">
+        <View className="px-5 mt-1 mb-4">
           <View
             className="flex-row items-center rounded-xl overflow-hidden"
             style={{
@@ -465,7 +708,145 @@ export default function ShoppingListScreen() {
             </Text>
           </View>
         )}
+
+        {/* زر حفظ القائمة */}
+        {items.length > 0 && (
+          <TouchableOpacity
+            onPress={handleSaveList}
+            style={{
+              marginHorizontal: 20,
+              marginTop: 20,
+              paddingVertical: 16,
+              borderRadius: 16,
+              backgroundColor: colors.primary,
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "row",
+              gap: 8,
+              shadowColor: colors.primary,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 6,
+            }}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="save" size={22} color="#fff" />
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>
+              حفظ القائمة
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
+
+      {/* مودال اختيار وقت التذكير */}
+      <Modal
+        visible={showReminderModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowReminderModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "flex-end",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: colors.background,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              paddingTop: 20,
+              paddingBottom: 40,
+              maxHeight: "70%",
+            }}
+          >
+            {/* عنوان المودال */}
+            <View
+              style={{
+                paddingHorizontal: 20,
+                paddingBottom: 16,
+                borderBottomWidth: 1,
+                borderBottomColor: colors.border,
+              }}
+            >
+              <View style={{ flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between" }}>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "700",
+                    color: colors.foreground,
+                    textAlign: "right",
+                  }}
+                >
+                  ⏰ متى تحب نذكرك؟
+                </Text>
+                <TouchableOpacity onPress={() => setShowReminderModal(false)}>
+                  <MaterialIcons name="close" size={24} color={colors.muted} />
+                </TouchableOpacity>
+              </View>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.muted,
+                  textAlign: "right",
+                  writingDirection: "rtl",
+                  marginTop: 6,
+                }}
+              >
+                اختر الوقت المناسب وسنذكرك يومياً بقائمة التسوق
+              </Text>
+            </View>
+
+            {/* قائمة الأوقات */}
+            <FlatList
+              data={REMINDER_TIMES}
+              keyExtractor={(item) => `${item.hour}:${item.minute}`}
+              contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12 }}
+              renderItem={({ item: timeOption }) => {
+                const isSelected =
+                  reminder.enabled &&
+                  reminder.hour === timeOption.hour &&
+                  reminder.minute === timeOption.minute;
+                return (
+                  <TouchableOpacity
+                    onPress={() => setShoppingReminder(timeOption.hour, timeOption.minute, timeOption.label)}
+                    style={{
+                      flexDirection: "row-reverse",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      paddingVertical: 14,
+                      paddingHorizontal: 16,
+                      marginBottom: 8,
+                      borderRadius: 14,
+                      backgroundColor: isSelected ? `${colors.primary}15` : colors.surface,
+                      borderWidth: 1.5,
+                      borderColor: isSelected ? colors.primary : colors.border,
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: isSelected ? "700" : "500",
+                        color: isSelected ? colors.primary : colors.foreground,
+                        textAlign: "right",
+                      }}
+                    >
+                      {timeOption.label}
+                    </Text>
+                    {isSelected && (
+                      <MaterialIcons name="check-circle" size={22} color={colors.primary} />
+                    )}
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }

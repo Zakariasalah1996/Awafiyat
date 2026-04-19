@@ -394,7 +394,6 @@ export default function ProfileScreen() {
             { key: "breakfast", label: "تذكير الفطور", desc: "يومياً الساعة 7:30 صباحاً" },
             { key: "lunch", label: "تذكير الغداء", desc: "يومياً الساعة 12:30 ظهراً" },
             { key: "dinner", label: "تذكير العشاء", desc: "يومياً الساعة 7:00 مساءً" },
-            { key: "fridge", label: "تذكير الثلاجة", desc: "تنبيه بمحتويات الثلاجة" },
             { key: "shopping", label: "تذكير التسوق", desc: "تنبيه بقائمة المشتريات" },
             { key: "promotions", label: "نصائح وتحفيز", desc: "نصائح صحية يومية" },
           ].map((item) => (
