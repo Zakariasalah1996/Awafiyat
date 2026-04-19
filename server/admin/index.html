@@ -799,7 +799,7 @@ async function loadSubscriptions() {
       <td><span class="badge-status ${s.status==='active'?'badge-active':'badge-inactive'}">${statusLabel(s.status)}</span></td>
       <td>${s.promoCode||'-'}</td><td>${fmtDate(s.startDate)}</td><td>${s.endDate?fmtDate(s.endDate):'-'}</td>
     </tr>`).join('');
-  } else {    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">';<div class="icon">💎</div><p>لا توجد اشتراكات بعد</p></td></tr>';
+  } else {    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><div class="icon">💎</div><p>لا توجد اشتراكات بعد</p></td></tr>';
   }
 }
 

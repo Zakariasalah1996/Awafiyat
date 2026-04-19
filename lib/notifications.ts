@@ -2,6 +2,7 @@ import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 import { getApiBaseUrl } from "@/constants/oauth";
+import { getGuestUserId } from "@/lib/guest-auth";
 
 // expo-alarm-module - منبه أصلي على مستوى النظام
 let NativeAlarm: {
@@ -101,11 +102,19 @@ export async function registerPushToken(token: string, userId?: string): Promise
     const apiBase = getApiBaseUrl();
     const url = apiBase ? `${apiBase}/api/user/push-token` : "/api/user/push-token";
     const platform = Platform.OS === "ios" ? "ios" : Platform.OS === "android" ? "android" : "web";
-    console.log("[Push] Registering token at:", url, "platform:", platform);
+    
+    // Try to get guest user ID if no userId provided
+    let finalUserId = userId || null;
+    if (!finalUserId) {
+      const guestId = await getGuestUserId();
+      if (guestId) finalUserId = guestId.toString();
+    }
+    
+    console.log("[Push] Registering token at:", url, "platform:", platform, "userId:", finalUserId);
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, userId: userId || null, platform }),
+      body: JSON.stringify({ token, userId: finalUserId, platform }),
     });
 
     if (!response.ok) {

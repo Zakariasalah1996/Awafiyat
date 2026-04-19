@@ -9,6 +9,8 @@ import { Platform, I18nManager } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { requestNotificationPermissions, setupNotificationListeners } from "@/lib/notifications";
+import { syncRecipeImages } from "@/lib/recipe-image-sync";
+import { registerGuest } from "@/lib/guest-auth";
 import { useRouter } from "expo-router";
 import { AlarmProvider, useAlarm } from "@/lib/alarm-context";
 import { AlarmScreen } from "@/components/alarm-screen";
@@ -46,6 +48,10 @@ function RootLayoutInner() {
 
   useEffect(() => {
     initManusRuntime();
+    // Sync recipe images from server on app start
+    syncRecipeImages().catch((e) => console.warn("[RecipeImageSync] Error:", e));
+    // Auto-register as guest user
+    registerGuest().catch((e) => console.warn("[Guest] Error:", e));
   }, []);
 
   // Auto-register push notifications on app start (native only)

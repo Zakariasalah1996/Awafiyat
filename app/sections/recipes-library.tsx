@@ -26,6 +26,7 @@ import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
+import { getRecipeCustomImage } from "@/lib/recipe-image-sync";
 import * as Haptics from "expo-haptics";
 
 I18nManager.forceRTL(true);
@@ -209,7 +210,7 @@ export default function RecipesLibraryScreen() {
             }}
           >
             <Image
-              source={item.image ? getFoodCategoryImage(item.image) : getFoodCategoryImage("iraqi-rice")}
+              source={getRecipeCustomImage(item.id) ? { uri: getRecipeCustomImage(item.id)! } : (item.image ? getFoodCategoryImage(item.image) : getFoodCategoryImage("iraqi-rice"))}
               style={{ width: "100%", height: "100%" }}
               contentFit="cover"
               transition={200}

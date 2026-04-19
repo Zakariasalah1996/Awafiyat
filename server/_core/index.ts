@@ -377,6 +377,23 @@ async function startServer() {
     }
   });
 
+  // ==================== PUBLIC RECIPE IMAGES API ====================
+  // Public endpoint - no auth needed - returns recipe image URLs for the app
+  app.get('/api/recipes/images', async (_req, res) => {
+    try {
+      const recipes = recipesApi.getAllRecipes();
+      const imageMap: Record<string, string> = {};
+      for (const r of recipes) {
+        if (r.image && (r.image.startsWith('http://') || r.image.startsWith('https://'))) {
+          imageMap[r.id] = r.image;
+        }
+      }
+      res.json(imageMap);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ==================== CONTENT MANAGEMENT ====================
   app.get('/api/admin/content', adminAuth, async (_req, res) => {
     try {
@@ -445,6 +462,48 @@ async function startServer() {
   });
 
   // ==================== USER API ====================
+  // Auto-register guest user (no OAuth needed)
+  app.post('/api/user/register-guest', async (req, res) => {
+    try {
+      const { deviceId, name, country, platform: clientPlatform } = req.body;
+      if (!deviceId) {
+        return res.status(400).json({ error: 'deviceId is required' });
+      }
+
+      const db = (await import('../db')).getDb;
+      const dbInstance = await db();
+      if (!dbInstance) return res.status(500).json({ error: 'DB not available' });
+
+      const { users } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
+
+      // Check if guest already exists
+      const existing = await dbInstance.select().from(users).where(eq(users.openId, `guest_${deviceId}`)).limit(1);
+      if (existing.length > 0) {
+        // Update last signed in
+        await dbInstance.update(users).set({ lastSignedIn: new Date(), name: name || existing[0].name, country: country || existing[0].country }).where(eq(users.openId, `guest_${deviceId}`));
+        return res.json({ success: true, userId: existing[0].id, isNew: false });
+      }
+
+      // Create new guest user
+      const result = await dbInstance.insert(users).values({
+        openId: `guest_${deviceId}`,
+        name: name || 'مستخدم عافيات',
+        loginMethod: 'guest',
+        role: 'user',
+        country: country || 'iraq',
+        isActive: true,
+      });
+
+      const newUserId = result[0].insertId;
+      console.log('[Guest] New guest registered:', { deviceId, userId: newUserId });
+      res.json({ success: true, userId: newUserId, isNew: true });
+    } catch (e: any) {
+      console.error('[Guest] Failed to register guest:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // Register push token
   app.post('/api/user/push-token', async (req, res) => {
     try {

@@ -18,6 +18,7 @@ import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
+import { getRecipeCustomImage } from "@/lib/recipe-image-sync";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { scheduleAllMealReminders } from "@/lib/notifications";
@@ -579,7 +580,7 @@ export default function MealPlannerScreen() {
             >
               <View style={{ width: 60, height: 60 }}>
                 <Image
-                  source={recipe.image ? getFoodCategoryImage(recipe.image) : getFoodCategoryImage("iraqi-rice")}
+                  source={getRecipeCustomImage(recipe.id) ? { uri: getRecipeCustomImage(recipe.id)! } : (recipe.image ? getFoodCategoryImage(recipe.image) : getFoodCategoryImage("iraqi-rice"))}
                   style={{ width: 60, height: 60 }}
                   contentFit="cover"
                 />

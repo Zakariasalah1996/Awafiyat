@@ -15,6 +15,7 @@ import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
+import { getRecipeCustomImage } from "@/lib/recipe-image-sync";
 import * as Haptics from "expo-haptics";
 import type { HealthCondition } from "@/lib/user-context";
 
@@ -197,7 +198,7 @@ export default function RecipeDetailScreen() {
           style={{ height: 220 }}
         >
           <Image
-            source={recipe.image ? getFoodCategoryImage(recipe.image) : getFoodCategoryImage("iraqi-rice")}
+            source={getRecipeCustomImage(recipe.id) ? { uri: getRecipeCustomImage(recipe.id)! } : (recipe.image ? getFoodCategoryImage(recipe.image) : getFoodCategoryImage("iraqi-rice"))}
             style={{ width: "100%", height: "100%" }}
             contentFit="cover"
             transition={300}
