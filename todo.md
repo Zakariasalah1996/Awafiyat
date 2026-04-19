@@ -200,3 +200,9 @@
 - [x] إصلاح أخطاء recipes.ts
 - [x] ربط صور الوصفات المرفوعة من لوحة التحكم بالتطبيق (جلب الصور من السيرفر)
 - [x] تسجيل تلقائي كضيف في قاعدة البيانات بدون OAuth
+
+## الدفعة 22 - إصلاح Push Token لـ APK غير EAS:
+
+- [x] إضافة getDevicePushTokenAsync كـ fallback للحصول على FCM Token مباشرة (يعمل بدون EAS Build)
+- [x] السيرفر يدعم الآن كلا النوعين: ExponentPushToken و fcm: tokens
+- [x] إصلاح cleanup endpoint لعدم حذف FCM tokens

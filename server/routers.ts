@@ -14,45 +14,88 @@ import {
   getDailyStats, getDashboardStats,
 } from "./db";
 
-// Helper: send push notification via Expo Push API
+// Helper: send push notification via Expo Push API (supports both ExponentPushToken and fcm: tokens)
 async function sendExpoPushNotifications(tokens: string[], title: string, body: string) {
-  const messages = tokens.map((token) => ({
-    to: token,
-    sound: "default",
-    title,
-    body,
-    data: { type: "admin_notification" },
-  }));
-
-  // Batch into chunks of 100
-  const chunks: typeof messages[] = [];
-  for (let i = 0; i < messages.length; i += 100) {
-    chunks.push(messages.slice(i, i + 100));
-  }
+  // Separate Expo tokens from FCM tokens
+  const expoTokens = tokens.filter(t => t.startsWith('ExponentPushToken'));
+  const fcmTokens = tokens.filter(t => t.startsWith('fcm:'));
 
   let successCount = 0;
   let failCount = 0;
 
-  for (const chunk of chunks) {
-    try {
-      const response = await fetch("https://exp.host/--/api/v2/push/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(chunk),
-      });
-      const data = await response.json();
-      if (data.data) {
-        for (const ticket of data.data) {
-          if (ticket.status === "ok") successCount++;
-          else failCount++;
+  // Send via Expo Push API for ExponentPushToken
+  if (expoTokens.length > 0) {
+    const messages = expoTokens.map((token) => ({
+      to: token,
+      sound: "default",
+      title,
+      body,
+      data: { type: "admin_notification" },
+    }));
+
+    const chunks: typeof messages[] = [];
+    for (let i = 0; i < messages.length; i += 100) {
+      chunks.push(messages.slice(i, i + 100));
+    }
+
+    for (const chunk of chunks) {
+      try {
+        const response = await fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(chunk),
+        });
+        const data = await response.json();
+        if (data.data) {
+          for (const ticket of data.data) {
+            if (ticket.status === "ok") successCount++;
+            else { failCount++; console.warn("[Push] Expo ticket error:", ticket); }
+          }
         }
+      } catch (error) {
+        failCount += chunk.length;
+        console.error("[Push] Failed to send Expo batch:", error);
       }
-    } catch (error) {
-      failCount += chunk.length;
-      console.error("[Push] Failed to send batch:", error);
     }
   }
 
+  // Send via Expo Push API using FCM token format
+  if (fcmTokens.length > 0) {
+    const messages = fcmTokens.map((token) => ({
+      to: token.replace('fcm:', ''), // Remove fcm: prefix, send raw FCM token
+      sound: "default",
+      title,
+      body,
+      data: { type: "admin_notification" },
+    }));
+
+    const chunks: typeof messages[] = [];
+    for (let i = 0; i < messages.length; i += 100) {
+      chunks.push(messages.slice(i, i + 100));
+    }
+
+    for (const chunk of chunks) {
+      try {
+        const response = await fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(chunk),
+        });
+        const data = await response.json();
+        if (data.data) {
+          for (const ticket of data.data) {
+            if (ticket.status === "ok") successCount++;
+            else { failCount++; console.warn("[Push] FCM ticket error:", ticket); }
+          }
+        }
+      } catch (error) {
+        failCount += chunk.length;
+        console.error("[Push] Failed to send FCM batch:", error);
+      }
+    }
+  }
+
+  console.log(`[Push] Sent: ${tokens.length} total (${expoTokens.length} Expo + ${fcmTokens.length} FCM), success: ${successCount}, fail: ${failCount}`);
   return { successCount, failCount, sentCount: tokens.length };
 }
 

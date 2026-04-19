@@ -552,7 +552,8 @@ async function startServer() {
       if (!dbInstance) return res.status(500).json({ error: 'DB not available' });
       // Delete test/invalid tokens
       const { sql } = await import('drizzle-orm');
-      await dbInstance.execute(sql`DELETE FROM push_tokens WHERE token = 'test_token_123' OR token NOT LIKE 'ExponentPushToken%'`);
+      // Only delete test tokens, keep both ExponentPushToken and fcm: tokens
+      await dbInstance.execute(sql`DELETE FROM push_tokens WHERE token = 'test_token_123'`);
       const remaining = await adminDb.getActivePushTokens();
       res.json({ success: true, message: 'Cleaned up invalid tokens', remaining: remaining.length });
     } catch (e: any) {
