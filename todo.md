@@ -135,3 +135,8 @@
 - [x] عند وصول إشعار الوجبة: تشغيل صوت جرس مستمر عبر expo-audio (loop) + AlarmContext عالمي
 - [x] شاشة منبه كاملة (AlarmScreen) تظهر فوق كل شيء مع أنيميشن نبض + زر إيقاف كبير + زر عرض الوصفة
 - [x] الصوت يعمل حتى في الوضع الصامت (playsInSilentMode) + اهتزاز متكرر مستمر
+
+## الدفعة 11 - منبه ساعة حقيقي (Native Alarm):
+
+- [x] expo-alarm-module (AlarmManager + MediaPlayer + Foreground Service) لمنبه يرن على مستوى النظام
+- [x] ربط المنبه الأصلي بجدولة الوجبات (scheduleMealReminder + cancelMealReminder + AlarmContext)

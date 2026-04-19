@@ -3,6 +3,26 @@ import { Platform } from "react-native";
 import Constants from "expo-constants";
 import { getApiBaseUrl } from "@/constants/oauth";
 
+// expo-alarm-module - منبه أصلي على مستوى النظام
+let NativeAlarm: {
+  scheduleAlarm: (params: any) => void;
+  stopAlarm: () => void;
+  removeAlarm: (uid: string) => void;
+} | null = null;
+
+try {
+  if (Platform.OS === "android") {
+    const mod = require("expo-alarm-module");
+    NativeAlarm = {
+      scheduleAlarm: mod.scheduleAlarm || mod.default?.scheduleAlarm,
+      stopAlarm: mod.stopAlarm || mod.default?.stopAlarm,
+      removeAlarm: mod.removeAlarm || mod.default?.removeAlarm,
+    };
+  }
+} catch (e) {
+  console.warn("[Alarm] expo-alarm-module not available:", e);
+}
+
 // Configure notification handler for foreground
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -231,6 +251,36 @@ export async function scheduleMealReminder(
     });
 
     console.log(`[Notifications] Scheduled ${mealType} at ${hour}:${minute} → ${recipeName || "no recipe"} (id: ${id})`);
+
+    // جدولة منبه أصلي عبر expo-alarm-module (يرن حتى لو التطبيق مغلق)
+    if (NativeAlarm?.scheduleAlarm) {
+      try {
+        const alarmDate = new Date();
+        alarmDate.setHours(hour, minute, 0, 0);
+        // إذا الوقت فات اليوم، جدوله للغد
+        if (alarmDate.getTime() <= Date.now()) {
+          alarmDate.setDate(alarmDate.getDate() + 1);
+        }
+        const alarmTitle = recipeName
+          ? `حان وقت ${label} - ${recipeName}`
+          : `حان وقت ${label}`;
+        NativeAlarm.scheduleAlarm({
+          uid: `meal_${mealType}`,
+          day: alarmDate,
+          title: alarmTitle,
+          description: recipeName ? `الوصفة: ${recipeName}` : `لا تنسي ${label}`,
+          showDismiss: true,
+          showSnooze: true,
+          snoozeInterval: 5,
+          repeating: true,
+          active: true,
+        } as any);
+        console.log(`[Alarm] Native alarm scheduled: meal_${mealType} at ${hour}:${minute}`);
+      } catch (alarmErr) {
+        console.warn("[Alarm] Failed to schedule native alarm:", alarmErr);
+      }
+    }
+
     return id;
   } catch (e) {
     console.warn("Meal reminders not available in Expo Go. This is normal.", e);
@@ -281,6 +331,14 @@ export async function cancelMealReminder(mealType: string): Promise<void> {
     for (const notification of scheduled) {
       if (notification.content.data?.mealType === mealType) {
         await Notifications.cancelScheduledNotificationAsync(notification.identifier);
+      }
+    }
+    // إلغاء المنبه الأصلي أيضاً
+    if (NativeAlarm?.removeAlarm) {
+      try {
+        NativeAlarm.removeAlarm(`meal_${mealType}`);
+      } catch (e) {
+        // ignore
       }
     }
   } catch (e) {
