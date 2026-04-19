@@ -454,8 +454,8 @@
           <div style="display:flex;gap:8px"><span id="recipePagination" style="font-size:13px;color:var(--text-muted);padding:6px"></span><button class="btn btn-outline btn-sm" onclick="loadRecipes()">🔄 تحديث</button></div>
         </div>
         <table>
-          <thead><tr><th>الاسم</th><th>التصنيف</th><th>الأصل</th><th>الصعوبة</th><th>السعرات</th><th>الوقت</th><th>إجراءات</th></tr></thead>
-          <tbody id="recipesTableBody"><tr><td colspan="7" class="loading"><div class="spinner"></div>جاري التحميل...</td></tr></tbody>
+          <thead><tr><th style="width:60px">الصورة</th><th>الاسم</th><th>التصنيف</th><th>الأصل</th><th>الصعوبة</th><th>السعرات</th><th>الوقت</th><th>إجراءات</th></tr></thead>
+          <tbody id="recipesTableBody"><tr><td colspan="8" class="loading"><div class="spinner"></div>جاري التحميل...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -799,8 +799,7 @@ async function loadSubscriptions() {
       <td><span class="badge-status ${s.status==='active'?'badge-active':'badge-inactive'}">${statusLabel(s.status)}</span></td>
       <td>${s.promoCode||'-'}</td><td>${fmtDate(s.startDate)}</td><td>${s.endDate?fmtDate(s.endDate):'-'}</td>
     </tr>`).join('');
-  } else {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="icon">💎</div><p>لا توجد اشتراكات بعد</p></td></tr>';
+  } else {    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">';<div class="icon">💎</div><p>لا توجد اشتراكات بعد</p></td></tr>';
   }
 }
 
@@ -972,6 +971,7 @@ async function loadRecipes() {
     const originLabels = {iraqi:'🇮🇶 عراقي',saudi:'🇸🇦 سعودي',uae:'🇦🇪 إماراتي',kurdish:'كردي',egyptian:'🇪🇬 مصري',general:'عام'};
     const diffLabels = {easy:'🟢 سهل',medium:'🟡 متوسط',hard:'🔴 صعب'};
     tbody.innerHTML = data.recipes.map(r => `<tr>
+      <td style="padding:4px;text-align:center">${r.image && r.image.startsWith('http') ? `<img src="${r.image}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb">` : `<div style="width:50px;height:50px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid #e5e7eb;margin:0 auto"><span style="font-size:20px">🍽️</span></div>`}</td>
       <td><strong>${r.name}</strong><br><small style="color:var(--text-muted)">${trunc(r.description,50)}</small></td>
       <td>${catLabels[r.category]||r.category}</td>
       <td>${originLabels[r.origin]||r.origin||'عام'}</td>
@@ -985,7 +985,7 @@ async function loadRecipes() {
     </tr>`).join('');
     document.getElementById('recipePagination').textContent = `صفحة ${data.page} من ${data.totalPages} (إجمالي: ${data.total})`;
   } else {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="icon">📖</div><p>لا توجد وصفات مطابقة</p></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><div class="icon">📖</div><p>لا توجد وصفات مطابقة</p></td></tr>';
     document.getElementById('recipePagination').textContent = '';
   }
 }
