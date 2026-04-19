@@ -8,7 +8,7 @@ import "react-native-reanimated";
 import { Platform, I18nManager } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
-import { requestNotificationPermissions, setupNotificationListeners } from "@/lib/notifications";
+import { requestNotificationPermissions, setupNotificationListeners, getSavedPushToken, registerPushToken } from "@/lib/notifications";
 import { syncRecipeImages } from "@/lib/recipe-image-sync";
 import { registerGuest } from "@/lib/guest-auth";
 import { useRouter } from "expo-router";
@@ -60,8 +60,16 @@ function RootLayoutInner() {
 
     // Request permissions and register push token automatically
     requestNotificationPermissions()
-      .then((granted) => {
+      .then(async (granted) => {
         console.log("[Push] Auto-registration result:", granted ? "granted" : "denied");
+        // Also try to re-register saved token in case previous registration failed
+        if (granted) {
+          const savedToken = await getSavedPushToken();
+          if (savedToken) {
+            console.log("[Push] Re-registering saved token on startup...");
+            await registerPushToken(savedToken);
+          }
+        }
       })
       .catch((err) => {
         console.warn("[Push] Auto-registration error:", err);

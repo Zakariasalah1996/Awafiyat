@@ -82,16 +82,30 @@ export async function getExpoPushToken(): Promise<string | null> {
     if (Platform.OS === "web") return null;
 
     const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-    if (!projectId) {
-      console.warn("No EAS project ID found, push notifications won't work in production");
+    console.log("[Push] Using projectId:", projectId);
+
+    // Try with projectId first
+    if (projectId) {
+      try {
+        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+        console.log("[Push] Got token with projectId:", tokenData.data?.substring(0, 30) + "...");
+        return tokenData.data;
+      } catch (e1) {
+        console.warn("[Push] Failed with projectId, trying without:", e1);
+      }
     }
 
-    const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: projectId || undefined,
-    });
-    return tokenData.data;
+    // Fallback: try without projectId
+    try {
+      const tokenData = await Notifications.getExpoPushTokenAsync({});
+      console.log("[Push] Got token without projectId:", tokenData.data?.substring(0, 30) + "...");
+      return tokenData.data;
+    } catch (e2) {
+      console.error("[Push] Failed to get push token (both methods):", e2);
+      return null;
+    }
   } catch (e) {
-    console.error("Failed to get push token:", e);
+    console.error("[Push] Failed to get push token:", e);
     return null;
   }
 }
@@ -152,6 +166,18 @@ export function setupNotificationListeners(
   }
 }
 
+// Store token in AsyncStorage to avoid re-fetching every time
+const PUSH_TOKEN_KEY = "expo_push_token";
+
+export async function getSavedPushToken(): Promise<string | null> {
+  try {
+    const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+    return await AsyncStorage.getItem(PUSH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export async function requestNotificationPermissions(): Promise<boolean> {
   if (Platform.OS === "web") return false;
 
@@ -189,9 +215,26 @@ export async function requestNotificationPermissions(): Promise<boolean> {
     }
 
     if (finalStatus === "granted") {
-      const token = await getExpoPushToken();
+      // Try to get token with retries
+      let token: string | null = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        console.log(`[Push] Getting push token, attempt ${attempt}/3...`);
+        token = await getExpoPushToken();
+        if (token) break;
+        // Wait before retry
+        await new Promise((r) => setTimeout(r, 2000 * attempt));
+      }
+
       if (token) {
+        // Save token locally
+        try {
+          const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+          await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
+        } catch {}
         await registerPushToken(token);
+        console.log("[Push] Token registered successfully after permissions granted");
+      } else {
+        console.warn("[Push] Could not get push token after 3 attempts");
       }
     }
 

@@ -20,6 +20,9 @@ import {
   cancelMealReminder,
   scheduleDailyMotivation,
   cancelAllNotifications,
+  getExpoPushToken,
+  registerPushToken,
+  getSavedPushToken,
 } from "@/lib/notifications";
 import { useAlarm, ALARM_TONE_LABELS, type AlarmTone } from "@/lib/alarm-context";
 
@@ -54,12 +57,50 @@ export default function ProfileScreen() {
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [pushTokenStatus, setPushTokenStatus] = useState<"checking" | "registered" | "not_registered" | "error">("checking");
+  const [isRegisteringToken, setIsRegisteringToken] = useState(false);
   const { settings: alarmSettings, updateSettings: updateAlarmSettings, previewTone } = useAlarm();
 
   // Request notification permissions on mount
   useEffect(() => {
     requestNotificationPermissions().then(setPermissionGranted);
+    // Check if push token is registered
+    checkPushTokenStatus();
   }, []);
+
+  const checkPushTokenStatus = async () => {
+    try {
+      setPushTokenStatus("checking");
+      const savedToken = await getSavedPushToken();
+      if (savedToken) {
+        setPushTokenStatus("registered");
+      } else {
+        setPushTokenStatus("not_registered");
+      }
+    } catch {
+      setPushTokenStatus("error");
+    }
+  };
+
+  const handleReRegisterToken = async () => {
+    setIsRegisteringToken(true);
+    try {
+      const token = await getExpoPushToken();
+      if (token) {
+        await registerPushToken(token);
+        setPushTokenStatus("registered");
+        Alert.alert("تم بنجاح", "تم تسجيل الجهاز للإشعارات بنجاح");
+      } else {
+        setPushTokenStatus("error");
+        Alert.alert("خطأ", "تعذر الحصول على رمز الإشعارات. تأكد من اتصال الإنترنت وحاول مجدداً.");
+      }
+    } catch (e) {
+      setPushTokenStatus("error");
+      Alert.alert("خطأ", "حدث خطأ أثناء التسجيل. حاول مجدداً.");
+    } finally {
+      setIsRegisteringToken(false);
+    }
+  };
 
   const startEdit = (field: string, currentValue: string) => {
     // Save the previous field's value before switching to a new field
@@ -391,6 +432,63 @@ export default function ProfileScreen() {
             <Text className="text-lg ml-2">🔔</Text>
             <Text className="text-base font-bold text-foreground">إعدادات الإشعارات</Text>
           </View>
+
+          {/* Push Token Status */}
+          <View
+            className="mb-3 p-3 rounded-xl flex-row items-center justify-between"
+            style={{
+              backgroundColor:
+                pushTokenStatus === "registered" ? `${colors.success}15` :
+                pushTokenStatus === "checking" ? `${colors.border}40` :
+                `${colors.warning}15`,
+            }}
+          >
+            <View className="flex-row items-center flex-1">
+              <MaterialIcons
+                name={
+                  pushTokenStatus === "registered" ? "notifications-active" :
+                  pushTokenStatus === "checking" ? "hourglass-empty" :
+                  "notifications-off"
+                }
+                size={18}
+                color={
+                  pushTokenStatus === "registered" ? colors.success :
+                  pushTokenStatus === "checking" ? colors.muted :
+                  colors.warning
+                }
+              />
+              <Text
+                className="text-sm mr-2 flex-1"
+                style={{
+                  color:
+                    pushTokenStatus === "registered" ? colors.success :
+                    pushTokenStatus === "checking" ? colors.muted :
+                    colors.warning,
+                }}
+              >
+                {pushTokenStatus === "registered" ? "الجهاز مسجل لاستقبال الإشعارات" :
+                 pushTokenStatus === "checking" ? "جاري التحقق..." :
+                 "الجهاز غير مسجل للإشعارات"}
+              </Text>
+            </View>
+            {pushTokenStatus !== "registered" && pushTokenStatus !== "checking" && (
+              <TouchableOpacity
+                onPress={handleReRegisterToken}
+                disabled={isRegisteringToken}
+                style={{
+                  backgroundColor: colors.primary,
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  borderRadius: 8,
+                }}
+              >
+                <Text style={{ color: "#fff", fontSize: 12, fontWeight: "600" }}>
+                  {isRegisteringToken ? "جاري..." : "تسجيل"}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
           {!permissionGranted && (
             <View className="mb-3 p-3 rounded-lg" style={{ backgroundColor: `${colors.warning}15` }}>
               <Text className="text-sm" style={{ color: colors.warning }}>

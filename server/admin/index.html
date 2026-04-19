@@ -393,6 +393,22 @@
 
     <!-- NOTIFICATIONS -->
     <div class="page" id="page-notifications">
+      <!-- Push Token Stats -->
+      <div class="notif-form-card" id="pushTokenStats" style="margin-bottom:16px;padding:16px 20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:28px;">📱</span>
+            <div>
+              <div style="font-size:14px;color:var(--text-muted);margin-bottom:2px;">الأجهزة المسجلة للإشعارات</div>
+              <div style="font-size:24px;font-weight:800;color:var(--primary);" id="pushTokenCount">جاري التحميل...</div>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="loadPushTokenStats()">🔄 تحديث</button>
+        </div>
+        <div id="pushTokenWarning" style="display:none;margin-top:12px;padding:10px 14px;background:#FFF3CD;border-radius:8px;color:#856404;font-size:13px;">
+          ⚠️ لا توجد أجهزة مسجلة. يجب على المستخدمين فتح التطبيق وتفعيل الإشعارات من صفحة الحساب.
+        </div>
+      </div>
       <div class="notif-form-card">
         <h3>📤 إرسال إشعار جديد</h3>
         <div class="form-group">
@@ -661,7 +677,7 @@ function navigateTo(page) {
     case 'users': loadUsers(); break;
     case 'subscriptions': loadSubscriptions(); break;
     case 'promo': loadPromoCodes(); break;
-    case 'notifications': loadNotifications(); break;
+    case 'notifications': loadNotifications(); loadPushTokenStats(); break;
     case 'feedback': loadFeedback(); break;
     case 'recipes': loadRecipes(); loadRecipeStats(); break;
     case 'content': loadContent(); break;
@@ -868,6 +884,25 @@ async function sendNotification() {
     loadNotifications();
   } else {
     showToast('فشل إرسال الإشعار', 'error');
+  }
+}
+
+async function loadPushTokenStats() {
+  const data = await api('push-tokens-list');
+  const el = document.getElementById('pushTokenCount');
+  const warn = document.getElementById('pushTokenWarning');
+  if (data) {
+    const count = data.count || 0;
+    el.textContent = count + ' جهاز';
+    el.style.color = count > 0 ? 'var(--success)' : 'var(--error)';
+    if (count === 0) {
+      warn.style.display = 'block';
+    } else {
+      warn.style.display = 'none';
+    }
+  } else {
+    el.textContent = 'خطأ في التحميل';
+    el.style.color = 'var(--error)';
   }
 }
 
