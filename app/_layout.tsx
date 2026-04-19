@@ -10,6 +10,8 @@ import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { requestNotificationPermissions, setupNotificationListeners } from "@/lib/notifications";
 import { useRouter } from "expo-router";
+import { AlarmProvider, useAlarm } from "@/lib/alarm-context";
+import { AlarmScreen } from "@/components/alarm-screen";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -33,8 +35,9 @@ export const unstable_settings = {
   anchor: "(tabs)",
 };
 
-export default function RootLayout() {
+function RootLayoutInner() {
   const router = useRouter();
+  const { startAlarm } = useAlarm();
   const initialInsets = initialWindowMetrics?.insets ?? DEFAULT_WEB_INSETS;
   const initialFrame = initialWindowMetrics?.frame ?? DEFAULT_WEB_FRAME;
 
@@ -58,19 +61,30 @@ export default function RootLayout() {
         console.warn("[Push] Auto-registration error:", err);
       });
 
-    // Setup notification listeners for foreground handling
+    // Setup notification listeners
     const cleanup = setupNotificationListeners(
       (notification) => {
         console.log("[Push] Notification received:", notification.request.content.title);
+        // عند استقبال إشعار وجبة والتطبيق مفتوح → تشغيل المنبه فوراً
+        const data = notification.request.content.data;
+        if (data?.type === "meal") {
+          startAlarm(
+            (data.recipeName as string) || "وجبتك",
+            data.recipeId as string,
+            data.mealType as string
+          );
+        }
       },
       (response) => {
         console.log("[Push] Notification tapped:", response.notification.request.content.title);
-        // فتح صفحة الوصفة عند الضغط على إشعار الوجبة
         const data = response.notification.request.content.data;
-        if (data?.type === "meal" && data?.recipeId) {
-          setTimeout(() => {
-            router.push({ pathname: "/sections/recipe-detail" as any, params: { id: data.recipeId as string } });
-          }, 500);
+        // عند الضغط على إشعار الوجبة → تشغيل المنبه بصوت
+        if (data?.type === "meal") {
+          startAlarm(
+            (data.recipeName as string) || "وجبتك",
+            data.recipeId as string,
+            data.mealType as string
+          );
         } else if (data?.type === "shopping") {
           setTimeout(() => {
             router.push("/sections/shopping-list" as any);
@@ -121,6 +135,8 @@ export default function RootLayout() {
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <UserProvider>
+        {/* شاشة المنبه - تظهر فوق كل شيء عند الرنين */}
+        <AlarmScreen />
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
             <Stack screenOptions={{ headerShown: false }}>
@@ -167,5 +183,14 @@ export default function RootLayout() {
     <ThemeProvider>
       <SafeAreaProvider initialMetrics={providerInitialMetrics}>{content}</SafeAreaProvider>
     </ThemeProvider>
+  );
+}
+
+// المكون الرئيسي يلف كل شيء بـ AlarmProvider
+export default function RootLayout() {
+  return (
+    <AlarmProvider>
+      <RootLayoutInner />
+    </AlarmProvider>
   );
 }

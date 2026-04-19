@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,6 @@ import {
   Platform,
   Modal,
   FlatList,
-  Vibration,
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -21,11 +20,8 @@ import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
 import { scheduleAllMealReminders } from "@/lib/notifications";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const alarmSound = require("@/assets/alarm.wav");
+import { useAlarm } from "@/lib/alarm-context";
 
 I18nManager.forceRTL(true);
 
@@ -117,24 +113,8 @@ export default function MealPlannerScreen() {
   const [timesAlreadySet, setTimesAlreadySet] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // منبه الطبخ
-  const [alarmActive, setAlarmActive] = useState(false);
-  const [alarmRecipeName, setAlarmRecipeName] = useState("");
-  const [alarmRecipeId, setAlarmRecipeId] = useState("");
-  const alarmInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // مشغل صوت المنبه
-  const alarmPlayer = useAudioPlayer(alarmSound);
-
-  // تفعيل الصوت في وضع الصامت على iOS
-  useEffect(() => {
-    if (Platform.OS !== "web") {
-      setAudioModeAsync({ playsInSilentMode: true });
-    }
-    return () => {
-      alarmPlayer.release();
-    };
-  }, []);
+  // منبه الطبخ - يستخدم AlarmContext العالمي
+  const { alarm, startAlarm: globalStartAlarm, stopAlarm: globalStopAlarm } = useAlarm();
 
   // تحميل البيانات المحفوظة
   useEffect(() => {
@@ -182,45 +162,10 @@ export default function MealPlannerScreen() {
     }
   };
 
-  // إيقاف المنبه
-  const stopAlarm = useCallback(() => {
-    setAlarmActive(false);
-    setAlarmRecipeName("");
-    setAlarmRecipeId("");
-    if (alarmInterval.current) {
-      clearInterval(alarmInterval.current);
-      alarmInterval.current = null;
-    }
-    Vibration.cancel();
-    try {
-      alarmPlayer.pause();
-      alarmPlayer.seekTo(0);
-    } catch (e) {
-      // ignore
-    }
-  }, [alarmPlayer]);
-
-  // تشغيل المنبه مع صوت
-  const startAlarm = useCallback((recipeName: string, recipeId?: string) => {
-    setAlarmRecipeName(recipeName);
-    setAlarmRecipeId(recipeId || "");
-    setAlarmActive(true);
-    // اهتزاز متكرر
-    const pattern = [500, 500, 500, 500, 500, 500];
-    Vibration.vibrate(pattern, true);
-    if (Platform.OS !== "web") {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    }
-    // تشغيل صوت المنبه
-    try {
-      alarmPlayer.loop = true;
-      alarmPlayer.volume = 1.0;
-      alarmPlayer.seekTo(0);
-      alarmPlayer.play();
-    } catch (e) {
-      console.warn("Failed to play alarm sound:", e);
-    }
-  }, [alarmPlayer]);
+  // تشغيل المنبه عبر AlarmContext العالمي
+  const handleStartAlarm = useCallback((recipeName: string, recipeId?: string) => {
+    globalStartAlarm(recipeName, recipeId);
+  }, [globalStartAlarm]);
 
   const availableDays = isSubscribed ? DAYS : DAYS.slice(0, 2);
 
@@ -352,54 +297,7 @@ export default function MealPlannerScreen() {
     );
   }
 
-  // مودال المنبه
-  if (alarmActive) {
-    return (
-      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
-        <View className="flex-1 items-center justify-center px-8">
-          <Text style={{ fontSize: 80 }}>🔔</Text>
-          <Text
-            className="text-foreground font-bold mt-6"
-            style={{ fontSize: 28, textAlign: "center" }}
-          >
-            وقت الطبخ!
-          </Text>
-          <Text
-            className="text-muted mt-3"
-            style={{ fontSize: 18, textAlign: "center", lineHeight: 28, writingDirection: "rtl" }}
-          >
-            حان وقت تحضير:{"\n"}
-            <Text className="text-primary font-bold">{alarmRecipeName}</Text>
-          </Text>
-          <TouchableOpacity
-            onPress={stopAlarm}
-            className="rounded-2xl py-4 px-12 mt-8"
-            style={{ backgroundColor: colors.error }}
-            activeOpacity={0.8}
-          >
-            <Text className="text-white font-bold" style={{ fontSize: 20 }}>
-              إيقاف المنبه
-            </Text>
-          </TouchableOpacity>
-          {alarmRecipeId ? (
-            <TouchableOpacity
-              onPress={() => {
-                stopAlarm();
-                router.push({ pathname: "/sections/recipe-detail" as any, params: { id: alarmRecipeId } });
-              }}
-              className="rounded-2xl py-3 px-8 mt-4"
-              style={{ backgroundColor: colors.primary }}
-              activeOpacity={0.8}
-            >
-              <Text className="text-white font-bold" style={{ fontSize: 16 }}>
-                عرض الوصفة
-              </Text>
-            </TouchableOpacity>
-          ) : null}
-        </View>
-      </ScreenContainer>
-    );
-  }
+  // شاشة المنبه الآن تُعرض عبر AlarmScreen في _layout.tsx (فوق كل شيء)
 
   // شاشة ضبط أوقات الوجبات
   if (step === "times") {
@@ -911,7 +809,7 @@ export default function MealPlannerScreen() {
                               { text: "إلغاء", style: "cancel" },
                               {
                                 text: "تشغيل",
-                                onPress: () => startAlarm(planned.recipeName, planned.recipeId),
+                                onPress: () => handleStartAlarm(planned.recipeName, planned.recipeId),
                               },
                             ]
                           );
