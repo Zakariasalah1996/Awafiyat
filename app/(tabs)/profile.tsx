@@ -53,6 +53,7 @@ export default function ProfileScreen() {
   const [tempValue, setTempValue] = useState("");
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { settings: alarmSettings, updateSettings: updateAlarmSettings, previewTone } = useAlarm();
 
   // Request notification permissions on mount
@@ -68,8 +69,22 @@ export default function ProfileScreen() {
   const saveEdit = async (field: string) => {
     await updateProfile({ [field]: tempValue });
     setEditingField(null);
-    setSaveMessage("تم الحفظ");
-    setTimeout(() => setSaveMessage(""), 2000);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSaveAll = async () => {
+    // إعادة حفظ جميع البيانات الحالية في AsyncStorage
+    await updateProfile({
+      name: profile.name,
+      phone: profile.phone,
+      age: profile.age,
+      gender: profile.gender,
+      country: profile.country,
+      healthCondition: profile.healthCondition,
+    });
+    setHasUnsavedChanges(false);
+    setSaveMessage("تم حفظ جميع المعلومات بنجاح");
+    setTimeout(() => setSaveMessage(""), 3000);
   };
 
   const handleLogout = () => {
@@ -210,12 +225,6 @@ export default function ProfileScreen() {
         <View className="mx-5 bg-surface rounded-2xl px-5 py-2 mb-4 border" style={{ borderColor: colors.border }}>
           <View className="flex-row items-center justify-between py-3">
             <Text className="text-base font-bold text-foreground">المعلومات الشخصية</Text>
-            {saveMessage ? (
-              <View className="flex-row items-center gap-1 px-3 py-1 rounded-full" style={{ backgroundColor: `${colors.success}20` }}>
-                <MaterialIcons name="check-circle" size={14} color={colors.success} />
-                <Text className="text-xs font-medium" style={{ color: colors.success }}>{saveMessage}</Text>
-              </View>
-            ) : null}
           </View>
           {renderEditableField("الاسم", "name", profile.name, "أدخل اسمك")}
           {renderEditableField("رقم الهاتف", "phone", profile.phone, "أدخل رقمك", "phone-pad")}
@@ -224,7 +233,7 @@ export default function ProfileScreen() {
             <Text className="text-base text-foreground flex-1 font-medium">الجنس</Text>
             <View className="flex-row gap-2">
               <TouchableOpacity
-                onPress={() => updateProfile({ gender: "male" })}
+                onPress={() => { updateProfile({ gender: "male" }); setHasUnsavedChanges(true); }}
                 className="px-4 py-2 rounded-lg"
                 style={{
                   backgroundColor: profile.gender === "male" ? `${colors.primary}20` : colors.background,
@@ -235,7 +244,7 @@ export default function ProfileScreen() {
                 <Text style={{ color: profile.gender === "male" ? colors.primary : colors.muted }}>ذكر</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => updateProfile({ gender: "female" })}
+                onPress={() => { updateProfile({ gender: "female" }); setHasUnsavedChanges(true); }}
                 className="px-4 py-2 rounded-lg"
                 style={{
                   backgroundColor: profile.gender === "female" ? `${colors.primary}20` : colors.background,
@@ -259,7 +268,7 @@ export default function ProfileScreen() {
             {COUNTRY_OPTIONS.map((c) => (
               <TouchableOpacity
                 key={c.key}
-                onPress={() => updateProfile({ country: c.key as any })}
+                onPress={() => { updateProfile({ country: c.key as any }); setHasUnsavedChanges(true); }}
                 className="px-4 py-2.5 rounded-xl flex-row items-center gap-2"
                 style={{
                   backgroundColor: profile.country === c.key ? `${colors.primary}20` : colors.background,
@@ -295,6 +304,56 @@ export default function ProfileScreen() {
             <Text className="text-sm font-medium" style={{ color: colors.primary }}>تعديل الحالة الصحية</Text>
           </TouchableOpacity>
         </View>
+
+        {/* زر حفظ المعلومات الشخصية */}
+        <TouchableOpacity
+          onPress={handleSaveAll}
+          style={{
+            marginHorizontal: 20,
+            marginBottom: 16,
+            paddingVertical: 16,
+            borderRadius: 16,
+            backgroundColor: colors.primary,
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "row",
+            gap: 8,
+            shadowColor: colors.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 6,
+          }}
+          activeOpacity={0.8}
+        >
+          <MaterialIcons name="save" size={22} color="#fff" />
+          <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>
+            حفظ المعلومات
+          </Text>
+        </TouchableOpacity>
+
+        {/* رسالة تأكيد الحفظ */}
+        {saveMessage !== "" && (
+          <View
+            style={{
+              marginHorizontal: 20,
+              marginBottom: 16,
+              paddingVertical: 12,
+              paddingHorizontal: 16,
+              borderRadius: 12,
+              backgroundColor: `${colors.success}20`,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+            }}
+          >
+            <MaterialIcons name="check-circle" size={20} color={colors.success} />
+            <Text style={{ color: colors.success, fontSize: 15, fontWeight: "600" }}>
+              {saveMessage}
+            </Text>
+          </View>
+        )}
 
         {/* Family Members */}
         <TouchableOpacity
