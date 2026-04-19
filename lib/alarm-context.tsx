@@ -2,8 +2,42 @@ import React, { createContext, useContext, useCallback, useRef, useEffect, useSt
 import { Vibration, Platform } from "react-native";
 import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
 import * as Haptics from "expo-haptics";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const alarmSound = require("@/assets/alarm.wav");
+// أصوات المنبه المتاحة
+const ALARM_SOUNDS = {
+  kitchen: require("@/assets/alarm_kitchen.wav"),
+  classic: require("@/assets/alarm_classic.wav"),
+  digital: require("@/assets/alarm_digital.wav"),
+  chime: require("@/assets/alarm_chime.wav"),
+  urgent: require("@/assets/alarm_urgent.wav"),
+};
+
+export type AlarmTone = keyof typeof ALARM_SOUNDS;
+
+export const ALARM_TONE_LABELS: Record<AlarmTone, string> = {
+  kitchen: "جرس مطبخ 🍳",
+  classic: "نغمة كلاسيكية 📞",
+  digital: "تنبيه رقمي 🔊",
+  chime: "جرس هادئ 🔔",
+  urgent: "صفارة عاجلة 🚨",
+};
+
+export interface AlarmSettings {
+  enabled: boolean;
+  volume: number; // 0.0 - 1.0
+  tone: AlarmTone;
+  vibration: boolean;
+}
+
+const DEFAULT_SETTINGS: AlarmSettings = {
+  enabled: true,
+  volume: 1.0,
+  tone: "kitchen",
+  vibration: true,
+};
+
+const STORAGE_KEY = "@alarm_settings";
 
 // expo-alarm-module - منبه أصلي على مستوى النظام
 let AlarmModule: {
@@ -13,7 +47,6 @@ let AlarmModule: {
 } | null = null;
 
 try {
-  // Dynamic import to avoid crash on web/iOS
   if (Platform.OS === "android") {
     const mod = require("expo-alarm-module");
     AlarmModule = {
@@ -23,7 +56,7 @@ try {
     };
   }
 } catch (e) {
-  console.warn("[Alarm] expo-alarm-module not available, using fallback:", e);
+  console.warn("[Alarm] expo-alarm-module not available:", e);
 }
 
 interface AlarmState {
@@ -35,15 +68,14 @@ interface AlarmState {
 
 interface AlarmContextType {
   alarm: AlarmState;
+  settings: AlarmSettings;
   startAlarm: (recipeName: string, recipeId?: string, mealType?: string) => void;
   stopAlarm: () => void;
-  scheduleNativeAlarm: (
-    uid: string,
-    date: Date,
-    title: string,
-    description: string
-  ) => void;
+  scheduleNativeAlarm: (uid: string, date: Date, title: string, description: string) => void;
   cancelNativeAlarm: (uid: string) => void;
+  updateSettings: (newSettings: Partial<AlarmSettings>) => void;
+  previewTone: (tone: AlarmTone) => void;
+  stopPreview: () => void;
 }
 
 const AlarmContext = createContext<AlarmContextType | null>(null);
@@ -56,35 +88,121 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
     mealType: "",
   });
 
-  // مشغل صوت المنبه (fallback للويب و iOS)
-  const alarmPlayer = useAudioPlayer(alarmSound);
-  const vibrationRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [settings, setSettings] = useState<AlarmSettings>(DEFAULT_SETTINGS);
+  const settingsRef = useRef<AlarmSettings>(DEFAULT_SETTINGS);
 
-  // تفعيل الصوت في الوضع الصامت
+  // مشغلات الصوت لكل نغمة
+  const kitchenPlayer = useAudioPlayer(ALARM_SOUNDS.kitchen);
+  const classicPlayer = useAudioPlayer(ALARM_SOUNDS.classic);
+  const digitalPlayer = useAudioPlayer(ALARM_SOUNDS.digital);
+  const chimePlayer = useAudioPlayer(ALARM_SOUNDS.chime);
+  const urgentPlayer = useAudioPlayer(ALARM_SOUNDS.urgent);
+
+  const players: Record<AlarmTone, ReturnType<typeof useAudioPlayer>> = {
+    kitchen: kitchenPlayer,
+    classic: classicPlayer,
+    digital: digitalPlayer,
+    chime: chimePlayer,
+    urgent: urgentPlayer,
+  };
+
+  const vibrationRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const previewPlayerRef = useRef<AlarmTone | null>(null);
+
+  // تحميل الإعدادات من AsyncStorage
   useEffect(() => {
+    AsyncStorage.getItem(STORAGE_KEY).then((data) => {
+      if (data) {
+        try {
+          const saved = JSON.parse(data) as AlarmSettings;
+          setSettings(saved);
+          settingsRef.current = saved;
+        } catch {}
+      }
+    });
+
     if (Platform.OS !== "web") {
       setAudioModeAsync({ playsInSilentMode: true });
     }
+
     return () => {
-      alarmPlayer.release();
-      if (vibrationRef.current) {
-        clearInterval(vibrationRef.current);
-      }
+      Object.values(players).forEach((p) => {
+        try { p.release(); } catch {}
+      });
+      if (vibrationRef.current) clearInterval(vibrationRef.current);
       Vibration.cancel();
     };
   }, []);
 
-  /**
-   * جدولة منبه أصلي عبر expo-alarm-module
-   * يرن على مستوى النظام حتى لو التطبيق مغلق
-   */
-  const scheduleNativeAlarm = useCallback(
-    (uid: string, date: Date, title: string, description: string) => {
-      if (Platform.OS !== "android" || !AlarmModule?.scheduleAlarm) {
-        console.warn("[Alarm] Native alarm not available on this platform");
-        return;
+  // حفظ الإعدادات
+  const saveSettings = useCallback(async (s: AlarmSettings) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+    } catch {}
+  }, []);
+
+  // تحديث الإعدادات
+  const updateSettings = useCallback(
+    (newSettings: Partial<AlarmSettings>) => {
+      setSettings((prev) => {
+        const updated = { ...prev, ...newSettings };
+        settingsRef.current = updated;
+        saveSettings(updated);
+        return updated;
+      });
+    },
+    [saveSettings]
+  );
+
+  // معاينة نغمة
+  const previewTone = useCallback(
+    (tone: AlarmTone) => {
+      // إيقاف أي معاينة سابقة
+      if (previewPlayerRef.current) {
+        try {
+          players[previewPlayerRef.current].pause();
+          players[previewPlayerRef.current].seekTo(0);
+        } catch {}
       }
 
+      const player = players[tone];
+      try {
+        player.loop = false;
+        player.volume = settingsRef.current.volume;
+        player.seekTo(0);
+        player.play();
+        previewPlayerRef.current = tone;
+
+        // إيقاف بعد 3 ثوانٍ
+        setTimeout(() => {
+          try {
+            player.pause();
+            player.seekTo(0);
+          } catch {}
+          previewPlayerRef.current = null;
+        }, 3000);
+      } catch (e) {
+        console.warn("Preview failed:", e);
+      }
+    },
+    [players]
+  );
+
+  // إيقاف المعاينة
+  const stopPreview = useCallback(() => {
+    if (previewPlayerRef.current) {
+      try {
+        players[previewPlayerRef.current].pause();
+        players[previewPlayerRef.current].seekTo(0);
+      } catch {}
+      previewPlayerRef.current = null;
+    }
+  }, [players]);
+
+  // جدولة منبه أصلي
+  const scheduleNativeAlarm = useCallback(
+    (uid: string, date: Date, title: string, description: string) => {
+      if (Platform.OS !== "android" || !AlarmModule?.scheduleAlarm) return;
       try {
         AlarmModule.scheduleAlarm({
           uid,
@@ -97,33 +215,27 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
           repeating: true,
           active: true,
         } as any);
-        console.log(`[Alarm] Native alarm scheduled: ${uid} at ${date.toLocaleTimeString()}`);
+        console.log(`[Alarm] Native scheduled: ${uid} at ${date.toLocaleTimeString()}`);
       } catch (e) {
-        console.error("[Alarm] Failed to schedule native alarm:", e);
+        console.error("[Alarm] Schedule failed:", e);
       }
     },
     []
   );
 
-  /**
-   * إلغاء منبه أصلي
-   */
+  // إلغاء منبه أصلي
   const cancelNativeAlarm = useCallback((uid: string) => {
     if (Platform.OS !== "android" || !AlarmModule?.removeAlarm) return;
     try {
       AlarmModule.removeAlarm(uid);
-      console.log(`[Alarm] Native alarm cancelled: ${uid}`);
-    } catch (e) {
-      console.warn("[Alarm] Failed to cancel native alarm:", e);
-    }
+    } catch {}
   }, []);
 
-  /**
-   * تشغيل المنبه فوراً (داخل التطبيق)
-   * يُستخدم عند الضغط على زر المنبه أو عند استقبال إشعار
-   */
+  // تشغيل المنبه
   const startAlarm = useCallback(
     (recipeName: string, recipeId?: string, mealType?: string) => {
+      const s = settingsRef.current;
+
       setAlarm({
         isRinging: true,
         recipeName: recipeName || "وجبتك",
@@ -131,72 +243,69 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
         mealType: mealType || "",
       });
 
-      // تشغيل صوت المنبه بصوت عالي ومتكرر (loop)
-      try {
-        alarmPlayer.loop = true;
-        alarmPlayer.volume = 1.0;
-        alarmPlayer.seekTo(0);
-        alarmPlayer.play();
-      } catch (e) {
-        console.warn("Failed to play alarm sound:", e);
+      // تشغيل الصوت إذا مفعّل
+      if (s.enabled && s.volume > 0) {
+        try {
+          const player = players[s.tone];
+          player.loop = true;
+          player.volume = s.volume;
+          player.seekTo(0);
+          player.play();
+        } catch (e) {
+          console.warn("Alarm play failed:", e);
+        }
       }
 
-      // اهتزاز متكرر مستمر
-      if (Platform.OS !== "web") {
+      // اهتزاز إذا مفعّل
+      if (s.vibration && Platform.OS !== "web") {
         Vibration.vibrate([0, 1000, 500, 1000, 500, 1000], true);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      }
 
-      // اهتزاز إضافي كل 5 ثوانٍ
-      vibrationRef.current = setInterval(() => {
-        if (Platform.OS !== "web") {
-          Vibration.vibrate([0, 1000, 500, 1000, 500, 1000], false);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-        }
-      }, 5000);
+        vibrationRef.current = setInterval(() => {
+          if (Platform.OS !== "web") {
+            Vibration.vibrate([0, 1000, 500, 1000, 500, 1000], false);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          }
+        }, 5000);
+      }
     },
-    [alarmPlayer]
+    [players]
   );
 
-  /**
-   * إيقاف المنبه (الصوت + الاهتزاز + المنبه الأصلي)
-   */
+  // إيقاف المنبه
   const stopAlarm = useCallback(() => {
-    setAlarm({
-      isRinging: false,
-      recipeName: "",
-      recipeId: "",
-      mealType: "",
-    });
+    setAlarm({ isRinging: false, recipeName: "", recipeId: "", mealType: "" });
 
-    // إيقاف صوت expo-audio
-    try {
-      alarmPlayer.pause();
-      alarmPlayer.seekTo(0);
-    } catch (e) {
-      // ignore
-    }
+    // إيقاف كل المشغلات
+    Object.values(players).forEach((p) => {
+      try { p.pause(); p.seekTo(0); } catch {}
+    });
 
     // إيقاف المنبه الأصلي
     if (AlarmModule?.stopAlarm) {
-      try {
-        AlarmModule.stopAlarm();
-      } catch (e) {
-        // ignore
-      }
+      try { AlarmModule.stopAlarm(); } catch {}
     }
 
-    // إيقاف الاهتزاز
     Vibration.cancel();
     if (vibrationRef.current) {
       clearInterval(vibrationRef.current);
       vibrationRef.current = null;
     }
-  }, [alarmPlayer]);
+  }, [players]);
 
   return (
     <AlarmContext.Provider
-      value={{ alarm, startAlarm, stopAlarm, scheduleNativeAlarm, cancelNativeAlarm }}
+      value={{
+        alarm,
+        settings,
+        startAlarm,
+        stopAlarm,
+        scheduleNativeAlarm,
+        cancelNativeAlarm,
+        updateSettings,
+        previewTone,
+        stopPreview,
+      }}
     >
       {children}
     </AlarmContext.Provider>

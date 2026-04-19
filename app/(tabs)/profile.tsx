@@ -21,6 +21,7 @@ import {
   scheduleDailyMotivation,
   cancelAllNotifications,
 } from "@/lib/notifications";
+import { useAlarm, ALARM_TONE_LABELS, type AlarmTone } from "@/lib/alarm-context";
 
 const HEALTH_LABELS: Record<HealthCondition, string> = {
   diabetes: "السكري",
@@ -52,6 +53,7 @@ export default function ProfileScreen() {
   const [tempValue, setTempValue] = useState("");
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const { settings: alarmSettings, updateSettings: updateAlarmSettings, previewTone } = useAlarm();
 
   // Request notification permissions on mount
   useEffect(() => {
@@ -361,6 +363,122 @@ export default function ProfileScreen() {
           <TouchableOpacity onPress={disableAllNotifications} className="py-3 items-center">
             <Text className="text-sm" style={{ color: colors.error }}>إيقاف جميع الإشعارات</Text>
           </TouchableOpacity>
+        </View>
+
+        {/* Alarm Settings */}
+        <View className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border" style={{ borderColor: colors.border }}>
+          <View className="flex-row items-center mb-3">
+            <Text className="text-lg ml-2">⏰</Text>
+            <Text className="text-base font-bold text-foreground">إعدادات المنبه</Text>
+          </View>
+
+          {/* تفعيل/إيقاف الصوت */}
+          <View className="flex-row items-center justify-between py-3 border-b" style={{ borderBottomColor: colors.border }}>
+            <View className="flex-1 mr-3">
+              <Text className="text-base text-foreground">صوت المنبه</Text>
+              <Text className="text-xs text-muted mt-0.5">تفعيل أو إيقاف صوت المنبه</Text>
+            </View>
+            <Switch
+              value={alarmSettings.enabled}
+              onValueChange={(v) => updateAlarmSettings({ enabled: v })}
+              trackColor={{ false: colors.border, true: `${colors.primary}60` }}
+              thumbColor={alarmSettings.enabled ? colors.primary : "#f4f3f4"}
+            />
+          </View>
+
+          {/* تفعيل/إيقاف الاهتزاز */}
+          <View className="flex-row items-center justify-between py-3 border-b" style={{ borderBottomColor: colors.border }}>
+            <View className="flex-1 mr-3">
+              <Text className="text-base text-foreground">الاهتزاز</Text>
+              <Text className="text-xs text-muted mt-0.5">اهتزاز مع صوت المنبه</Text>
+            </View>
+            <Switch
+              value={alarmSettings.vibration}
+              onValueChange={(v) => updateAlarmSettings({ vibration: v })}
+              trackColor={{ false: colors.border, true: `${colors.primary}60` }}
+              thumbColor={alarmSettings.vibration ? colors.primary : "#f4f3f4"}
+            />
+          </View>
+
+          {/* مستوى الصوت */}
+          {alarmSettings.enabled && (
+            <View className="py-3 border-b" style={{ borderBottomColor: colors.border }}>
+              <View className="flex-row items-center justify-between mb-2">
+                <Text className="text-base text-foreground">مستوى الصوت</Text>
+                <Text className="text-sm text-muted">{Math.round(alarmSettings.volume * 100)}%</Text>
+              </View>
+              <View className="flex-row items-center gap-3">
+                <Text className="text-sm text-muted">🔈</Text>
+                <View className="flex-1 h-8 justify-center">
+                  <View className="h-2 rounded-full" style={{ backgroundColor: colors.border }}>
+                    <View
+                      className="h-2 rounded-full"
+                      style={{
+                        backgroundColor: colors.primary,
+                        width: `${alarmSettings.volume * 100}%`,
+                      }}
+                    />
+                  </View>
+                  <View className="flex-row justify-between mt-2">
+                    {[0.25, 0.5, 0.75, 1.0].map((v) => (
+                      <TouchableOpacity
+                        key={v}
+                        onPress={() => updateAlarmSettings({ volume: v })}
+                        style={{
+                          paddingHorizontal: 10,
+                          paddingVertical: 4,
+                          borderRadius: 12,
+                          backgroundColor: alarmSettings.volume === v ? colors.primary : `${colors.border}50`,
+                        }}
+                      >
+                        <Text
+                          className="text-xs font-medium"
+                          style={{ color: alarmSettings.volume === v ? "#fff" : colors.muted }}
+                        >
+                          {Math.round(v * 100)}%
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+                <Text className="text-sm text-muted">🔊</Text>
+              </View>
+            </View>
+          )}
+
+          {/* اختيار النغمة */}
+          {alarmSettings.enabled && (
+            <View className="py-3">
+              <Text className="text-base text-foreground mb-3">نغمة المنبه</Text>
+              {(Object.keys(ALARM_TONE_LABELS) as AlarmTone[]).map((tone) => (
+                <TouchableOpacity
+                  key={tone}
+                  onPress={() => {
+                    updateAlarmSettings({ tone });
+                    previewTone(tone);
+                  }}
+                  className="flex-row items-center justify-between py-3 px-3 rounded-xl mb-1"
+                  style={{
+                    backgroundColor: alarmSettings.tone === tone ? `${colors.primary}15` : "transparent",
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    className="text-base"
+                    style={{
+                      color: alarmSettings.tone === tone ? colors.primary : colors.foreground,
+                      fontWeight: alarmSettings.tone === tone ? "700" : "400",
+                    }}
+                  >
+                    {ALARM_TONE_LABELS[tone]}
+                  </Text>
+                  {alarmSettings.tone === tone && (
+                    <Text style={{ color: colors.primary, fontSize: 18 }}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
 
         {/* Tried Recipes */}
