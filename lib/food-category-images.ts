@@ -28,5 +28,9 @@ export const FOOD_CATEGORY_IMAGES: Record<string, any> = {
 export type FoodCategory = keyof typeof FOOD_CATEGORY_IMAGES;
 
 export function getFoodCategoryImage(category: string): any {
+  // If it's a URL (uploaded image from admin), return as URI object for expo-image
+  if (category && (category.startsWith('http://') || category.startsWith('https://'))) {
+    return { uri: category };
+  }
   return FOOD_CATEGORY_IMAGES[category] || FOOD_CATEGORY_IMAGES['iraqi-rice'];
 }

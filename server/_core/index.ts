@@ -357,6 +357,26 @@ async function startServer() {
     }
   });
 
+  // ==================== IMAGE UPLOAD ====================
+  app.post('/api/admin/upload-image', adminAuth, async (req, res) => {
+    try {
+      const { imageData, fileName, contentType } = req.body;
+      if (!imageData || !fileName) {
+        return res.status(400).json({ error: 'imageData and fileName are required' });
+      }
+      // imageData is base64 encoded
+      const buffer = Buffer.from(imageData, 'base64');
+      const { storagePut } = await import('../storage');
+      const fileKey = `recipe-images/${fileName}`;
+      const { url } = await storagePut(fileKey, buffer, contentType || 'image/jpeg');
+      console.log('[Upload] Image uploaded successfully:', url);
+      res.json({ success: true, url });
+    } catch (e: any) {
+      console.error('[Upload] Failed to upload image:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ==================== CONTENT MANAGEMENT ====================
   app.get('/api/admin/content', adminAuth, async (_req, res) => {
     try {
