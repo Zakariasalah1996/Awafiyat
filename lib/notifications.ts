@@ -296,6 +296,7 @@ export async function scheduleMealReminder(
     const notificationSound =
       mealType === "breakfast" ? "alarm_morning.mp3" :
       mealType === "lunch" ? "alarm_lunch.mp3" :
+      mealType === "dinner" ? "alarm_dinner.mp3" :
       "alarm.wav";
 
     const id = await Notifications.scheduleNotificationAsync({

@@ -8,6 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const ALARM_SOUNDS = {
   morning: require("@/assets/alarm_morning.mp3"),
   lunch: require("@/assets/alarm_lunch.mp3"),
+  dinner: require("@/assets/alarm_dinner.mp3"),
   kitchen: require("@/assets/alarm_kitchen.wav"),
   classic: require("@/assets/alarm_classic.wav"),
   digital: require("@/assets/alarm_digital.wav"),
@@ -20,6 +21,7 @@ export type AlarmTone = keyof typeof ALARM_SOUNDS;
 export const ALARM_TONE_LABELS: Record<AlarmTone, string> = {
   morning: "منبه الفطور الصباحي 🌅",
   lunch: "منبه الغداء 🍽️",
+  dinner: "منبه العشاء المسائي 🌙",
   kitchen: "جرس مطبخ 🍳",
   classic: "نغمة كلاسيكية 📞",
   digital: "تنبيه رقمي 🔊",
@@ -31,7 +33,7 @@ export const ALARM_TONE_LABELS: Record<AlarmTone, string> = {
 export const MEAL_DEFAULT_TONE: Record<"breakfast" | "lunch" | "dinner", AlarmTone> = {
   breakfast: "morning",
   lunch: "lunch",
-  dinner: "kitchen",
+  dinner: "dinner",
 };
 
 export interface AlarmSettings {
@@ -105,6 +107,7 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
   // مشغلات الصوت لكل نغمة
   const morningPlayer = useAudioPlayer(ALARM_SOUNDS.morning);
   const lunchPlayer = useAudioPlayer(ALARM_SOUNDS.lunch);
+  const dinnerPlayer = useAudioPlayer(ALARM_SOUNDS.dinner);
   const kitchenPlayer = useAudioPlayer(ALARM_SOUNDS.kitchen);
   const classicPlayer = useAudioPlayer(ALARM_SOUNDS.classic);
   const digitalPlayer = useAudioPlayer(ALARM_SOUNDS.digital);
@@ -114,6 +117,7 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
   const players: Record<AlarmTone, ReturnType<typeof useAudioPlayer>> = {
     morning: morningPlayer,
     lunch: lunchPlayer,
+    dinner: dinnerPlayer,
     kitchen: kitchenPlayer,
     classic: classicPlayer,
     digital: digitalPlayer,
@@ -267,6 +271,8 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
               ? "morning"
               : mealType === "lunch"
               ? "lunch"
+              : mealType === "dinner"
+              ? "dinner"
               : s.tone;
 
           const player = players[toneToPlay];
