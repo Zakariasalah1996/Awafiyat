@@ -206,3 +206,9 @@
 - [x] إضافة getDevicePushTokenAsync كـ fallback للحصول على FCM Token مباشرة (يعمل بدون EAS Build)
 - [x] السيرفر يدعم الآن كلا النوعين: ExponentPushToken و fcm: tokens
 - [x] إصلاح cleanup endpoint لعدم حذف FCM tokens
+
+## الدفعة 23 - إصلاح عدم ظهور الصور المرفوعة للوصفات:
+
+- [x] تشخيص المشكلة: الـ endpoint `/api/recipes/images` كان يرفض الصور التي لا تبدأ بـ `http://` أو `https://`
+- [x] إصلاح الـ endpoint ليقبل جميع الصور (بما فيها URLs من التخزين)
+- [x] التحقق من عدم وجود أخطاء TypeScript
