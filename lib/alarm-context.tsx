@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // أصوات المنبه المتاحة
 const ALARM_SOUNDS = {
+  morning: require("@/assets/alarm_morning.mp3"),
   kitchen: require("@/assets/alarm_kitchen.wav"),
   classic: require("@/assets/alarm_classic.wav"),
   digital: require("@/assets/alarm_digital.wav"),
@@ -16,11 +17,19 @@ const ALARM_SOUNDS = {
 export type AlarmTone = keyof typeof ALARM_SOUNDS;
 
 export const ALARM_TONE_LABELS: Record<AlarmTone, string> = {
+  morning: "منبه الفطور الصباحي 🌅",
   kitchen: "جرس مطبخ 🍳",
   classic: "نغمة كلاسيكية 📞",
   digital: "تنبيه رقمي 🔊",
   chime: "جرس هادئ 🔔",
   urgent: "صفارة عاجلة 🚨",
+};
+
+// نغمة الوجبة حسب النوع
+export const MEAL_DEFAULT_TONE: Record<"breakfast" | "lunch" | "dinner", AlarmTone> = {
+  breakfast: "morning",
+  lunch: "kitchen",
+  dinner: "kitchen",
 };
 
 export interface AlarmSettings {
@@ -33,7 +42,7 @@ export interface AlarmSettings {
 const DEFAULT_SETTINGS: AlarmSettings = {
   enabled: true,
   volume: 1.0,
-  tone: "kitchen",
+  tone: "morning",
   vibration: true,
 };
 
@@ -92,6 +101,7 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
   const settingsRef = useRef<AlarmSettings>(DEFAULT_SETTINGS);
 
   // مشغلات الصوت لكل نغمة
+  const morningPlayer = useAudioPlayer(ALARM_SOUNDS.morning);
   const kitchenPlayer = useAudioPlayer(ALARM_SOUNDS.kitchen);
   const classicPlayer = useAudioPlayer(ALARM_SOUNDS.classic);
   const digitalPlayer = useAudioPlayer(ALARM_SOUNDS.digital);
@@ -99,6 +109,7 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
   const urgentPlayer = useAudioPlayer(ALARM_SOUNDS.urgent);
 
   const players: Record<AlarmTone, ReturnType<typeof useAudioPlayer>> = {
+    morning: morningPlayer,
     kitchen: kitchenPlayer,
     classic: classicPlayer,
     digital: digitalPlayer,
@@ -173,14 +184,14 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
         player.play();
         previewPlayerRef.current = tone;
 
-        // إيقاف بعد 3 ثوانٍ
+        // إيقاف بعد 4 ثوانٍ
         setTimeout(() => {
           try {
             player.pause();
             player.seekTo(0);
           } catch {}
           previewPlayerRef.current = null;
-        }, 3000);
+        }, 4000);
       } catch (e) {
         console.warn("Preview failed:", e);
       }
@@ -231,7 +242,7 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
-  // تشغيل المنبه
+  // تشغيل المنبه - يختار الصوت حسب نوع الوجبة تلقائياً
   const startAlarm = useCallback(
     (recipeName: string, recipeId?: string, mealType?: string) => {
       const s = settingsRef.current;
@@ -246,7 +257,13 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
       // تشغيل الصوت إذا مفعّل
       if (s.enabled && s.volume > 0) {
         try {
-          const player = players[s.tone];
+          // إذا كانت وجبة فطور → استخدم صوت الفطور الصباحي دائماً
+          const toneToPlay: AlarmTone =
+            mealType === "breakfast"
+              ? "morning"
+              : s.tone;
+
+          const player = players[toneToPlay];
           player.loop = true;
           player.volume = s.volume;
           player.seekTo(0);

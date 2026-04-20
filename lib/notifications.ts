@@ -292,11 +292,14 @@ export async function scheduleMealReminder(
       body = getRandomItem(messages);
     }
 
+    // اختيار الصوت حسب نوع الوجبة: الفطور له صوت صباحي خاص
+    const notificationSound = mealType === "breakfast" ? "alarm_morning.mp3" : "alarm.wav";
+
     const id = await Notifications.scheduleNotificationAsync({
       content: {
         title,
         body,
-        sound: "alarm.wav",
+        sound: notificationSound,
         priority: Notifications.AndroidNotificationPriority.MAX,
         sticky: true, // لا يختفي حتى يضغط المستخدم
         vibrate: [0, 1000, 500, 1000, 500, 1000, 500, 1000],
