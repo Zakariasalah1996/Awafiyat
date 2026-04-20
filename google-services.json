@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "335068197929",
+    "project_id": "awafiyat",
+    "storage_bucket": "awafiyat.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335068197929:android:3ada68eb8089a034e9d838",
+        "android_client_info": {
+          "package_name": "space.manus.awafiyat.t20260413170437"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT8eEVtrte0g3ZBIOwkcsslYcF07kIwGI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
