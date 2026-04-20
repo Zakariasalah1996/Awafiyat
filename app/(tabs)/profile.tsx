@@ -175,14 +175,7 @@ export default function ProfileScreen() {
     });
 
     // Schedule or cancel the actual notification
-    if (key === "breakfast" || key === "lunch" || key === "dinner") {
-      if (value) {
-        const time = MEAL_TIMES[key as keyof typeof MEAL_TIMES];
-        await scheduleMealReminder(key as "breakfast" | "lunch" | "dinner", time.hour, time.minute);
-      } else {
-        await cancelMealReminder(key);
-      }
-    } else if (key === "promotions") {
+    if (key === "promotions") {
       if (value) {
         await scheduleDailyMotivation();
       } else {
@@ -210,6 +203,10 @@ export default function ProfileScreen() {
         promotions: false,
       },
     });
+    // إلغاء إشعارات الوجبات المجدولة إن وجدت
+    await cancelMealReminder("breakfast");
+    await cancelMealReminder("lunch");
+    await cancelMealReminder("dinner");
   };
 
   const renderEditableField = (
@@ -497,9 +494,6 @@ export default function ProfileScreen() {
             </View>
           )}
           {[
-            { key: "breakfast", label: "تذكير الفطور", desc: "يومياً الساعة 7:30 صباحاً" },
-            { key: "lunch", label: "تذكير الغداء", desc: "يومياً الساعة 12:30 ظهراً" },
-            { key: "dinner", label: "تذكير العشاء", desc: "يومياً الساعة 7:00 مساءً" },
             { key: "shopping", label: "تذكير التسوق", desc: "تنبيه بقائمة المشتريات" },
             { key: "promotions", label: "نصائح وتحفيز", desc: "نصائح صحية يومية" },
           ].map((item) => (
