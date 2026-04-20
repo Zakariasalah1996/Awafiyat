@@ -7,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // أصوات المنبه المتاحة
 const ALARM_SOUNDS = {
   morning: require("@/assets/alarm_morning.mp3"),
+  lunch: require("@/assets/alarm_lunch.mp3"),
   kitchen: require("@/assets/alarm_kitchen.wav"),
   classic: require("@/assets/alarm_classic.wav"),
   digital: require("@/assets/alarm_digital.wav"),
@@ -18,6 +19,7 @@ export type AlarmTone = keyof typeof ALARM_SOUNDS;
 
 export const ALARM_TONE_LABELS: Record<AlarmTone, string> = {
   morning: "منبه الفطور الصباحي 🌅",
+  lunch: "منبه الغداء 🍽️",
   kitchen: "جرس مطبخ 🍳",
   classic: "نغمة كلاسيكية 📞",
   digital: "تنبيه رقمي 🔊",
@@ -28,7 +30,7 @@ export const ALARM_TONE_LABELS: Record<AlarmTone, string> = {
 // نغمة الوجبة حسب النوع
 export const MEAL_DEFAULT_TONE: Record<"breakfast" | "lunch" | "dinner", AlarmTone> = {
   breakfast: "morning",
-  lunch: "kitchen",
+  lunch: "lunch",
   dinner: "kitchen",
 };
 
@@ -102,6 +104,7 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
 
   // مشغلات الصوت لكل نغمة
   const morningPlayer = useAudioPlayer(ALARM_SOUNDS.morning);
+  const lunchPlayer = useAudioPlayer(ALARM_SOUNDS.lunch);
   const kitchenPlayer = useAudioPlayer(ALARM_SOUNDS.kitchen);
   const classicPlayer = useAudioPlayer(ALARM_SOUNDS.classic);
   const digitalPlayer = useAudioPlayer(ALARM_SOUNDS.digital);
@@ -110,6 +113,7 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
 
   const players: Record<AlarmTone, ReturnType<typeof useAudioPlayer>> = {
     morning: morningPlayer,
+    lunch: lunchPlayer,
     kitchen: kitchenPlayer,
     classic: classicPlayer,
     digital: digitalPlayer,
@@ -257,10 +261,12 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
       // تشغيل الصوت إذا مفعّل
       if (s.enabled && s.volume > 0) {
         try {
-          // إذا كانت وجبة فطور → استخدم صوت الفطور الصباحي دائماً
+          // اختيار الصوت حسب نوع الوجبة تلقائياً
           const toneToPlay: AlarmTone =
             mealType === "breakfast"
               ? "morning"
+              : mealType === "lunch"
+              ? "lunch"
               : s.tone;
 
           const player = players[toneToPlay];
