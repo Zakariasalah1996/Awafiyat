@@ -181,8 +181,11 @@ async function startServer() {
     res.json({ ok: true, timestamp: Date.now() });
   });
 
-  // Serve admin panel static files
-  const adminDir = path.resolve(process.cwd(), "server/admin");
+  // Serve admin panel static files (works in both dev and production)
+  const adminDirProd = path.resolve(process.cwd(), "dist/admin");
+  const adminDirDev = path.resolve(process.cwd(), "server/admin");
+  const fs = await import("fs");
+  const adminDir = fs.existsSync(adminDirProd) ? adminDirProd : adminDirDev;
   app.use("/admin", express.static(adminDir));
   app.get("/admin", (_req, res) => {
     res.sendFile(path.join(adminDir, "index.html"));

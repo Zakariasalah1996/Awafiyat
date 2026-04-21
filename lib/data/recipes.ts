@@ -29,42 +29,7 @@ export interface Recipe {
 }
 
 export const RECIPES: Recipe[] = [
-  {
-    id: "breakfast_1",
-    name: "خبز عروك عراقي",
-    description: "خبز عراقي تقليدي محشي بالخضروات، طعمه يخبل ويشبع",
-    category: "healthy",
-    mealType: ["breakfast"],
-    healthTags: ["all"],
-    difficulty: "medium",
-    prepTime: 20,
-    cookTime: 15,
-    servings: 4,
-    calories: 220,
-    protein: 6,
-    carbs: 35,
-    fat: 7,
-    fiber: 3,
-    ingredients: [
-      { name: "طحين", amount: "2 كوب" },
-      { name: "ماء دافئ", amount: "نصف كوب" },
-      { name: "ملح", amount: "نصف ملعقة صغيرة" },
-      { name: "بصل أخضر مفروم", amount: "حزمة" },
-      { name: "شبت مفروم", amount: "حزمة" },
-      { name: "كركم", amount: "ملعقة صغيرة" },
-      { name: "زيت نباتي - عراقي", amount: "2 ملعقة كبيرة" },
-    ],
-    steps: [
-      "اعجني الطحين مع الماء والملح حتى تحصلين على عجينة طرية",
-      "أضيفي البصل الأخضر والشبت والكركم للعجينة واعجنيها مرة ثانية",
-      "قسمي العجينة لكرات وافرديها بشكل دائري",
-      "حمي التاوة (المقلاة) على نار متوسطة مع شوية زيت",
-      "اطبخي كل رغيف 3-4 دقائق من كل جهة حتى يصير ذهبي",
-    ],
-    tips: "عيني قدميه مع جبن أو قيمر وشاي استكان، ألف عافية!",
-    isIraqi: true,
-    origin: "iraqi" as CountryOrigin,
-  },
+
   {
     id: "breakfast_2",
     name: "بيض بالطماطة (شكشوكة عراقية)",
@@ -9426,6 +9391,43 @@ export const RECIPES: Recipe[] = [
     isIraqi: false,
     origin: "saudi",
     image: undefined,
+  },
+  {
+    id: "breakfast_1",
+    name: "خبز عروك عراقي",
+    description: "خبز عراقي تقليدي محشي بالخضروات، طعمه يخبل ويشبع",
+    category: "healthy",
+    mealType: ["breakfast"],
+    healthTags: ["all"],
+    difficulty: "medium",
+    prepTime: 20,
+    cookTime: 15,
+    servings: 4,
+    calories: 220,
+    protein: 6,
+    carbs: 35,
+    fat: 7,
+    fiber: 3,
+    ingredients: [
+      { name: "طحين", amount: "2 كوب" },
+      { name: "ماء دافئ", amount: "نصف كوب" },
+      { name: "ملح", amount: "نصف ملعقة صغيرة" },
+      { name: "بصل أخضر مفروم", amount: "حزمة" },
+      { name: "شبت مفروم", amount: "حزمة" },
+      { name: "كركم", amount: "ملعقة صغيرة" },
+      { name: "زيت نباتي - عراقي", amount: "2 ملعقة كبيرة" }
+    ],
+    steps: [
+      "اعجني الطحين مع الماء والملح حتى تحصلين على عجينة طرية",
+      "أضيفي البصل الأخضر والشبت والكركم للعجينة واعجنيها مرة ثانية",
+      "قسمي العجينة لكرات وافرديها بشكل دائري",
+      "حمي التاوة (المقلاة) على نار متوسطة مع شوية زيت",
+      "اطبخي كل رغيف 3-4 دقائق من كل جهة حتى يصير ذهبي"
+    ],
+    tips: "عيني قدميه مع جبن أو قيمر وشاي استكان، ألف عافية!",
+    isIraqi: true,
+    origin: "iraqi" as CountryOrigin,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/recipe-images/1776783531058_1000169317_5964d6a4.png",
   },
 ];
 
