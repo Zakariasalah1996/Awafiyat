@@ -35,7 +35,7 @@ export interface AlarmSettings {
 
 const DEFAULT_SETTINGS: AlarmSettings = {
   enabled: true,
-  volume: 0.8,
+  volume: 0.5,
   tone: "morning",
   vibration: true,
 };
