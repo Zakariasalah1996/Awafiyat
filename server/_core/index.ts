@@ -208,18 +208,17 @@ async function startServer() {
     });
   });
 
-  // Serve admin panel static files (works in both dev and production)
+  // Serve admin panel - read HTML into memory and serve directly
   const fs = await import("fs");
   const __filename_local = fileURLToPath(import.meta.url);
   const __dirname_local = path.dirname(__filename_local);
-  // Try multiple possible locations for admin files
   const adminCandidates = [
-    path.resolve(__dirname_local, "../admin"),          // dev: server/_core/../admin = server/admin
-    path.resolve(__dirname_local, "admin"),              // prod: dist/admin (if copied next to dist/index.js)
-    path.resolve(process.cwd(), "dist/admin"),           // prod: from cwd
-    path.resolve(process.cwd(), "server/admin"),         // dev: from cwd
+    path.resolve(__dirname_local, "../admin"),
+    path.resolve(__dirname_local, "admin"),
+    path.resolve(process.cwd(), "dist/admin"),
+    path.resolve(process.cwd(), "server/admin"),
   ];
-  let adminDir = adminCandidates[3]; // fallback
+  let adminDir = adminCandidates[3];
   for (const candidate of adminCandidates) {
     if (fs.existsSync(path.join(candidate, "index.html"))) {
       adminDir = candidate;
@@ -227,10 +226,23 @@ async function startServer() {
     }
   }
   console.log(`[Admin] Serving admin panel from: ${adminDir}`);
-  console.log(`[Admin] index.html exists: ${fs.existsSync(path.join(adminDir, "index.html"))}`);
-  app.use("/admin", express.static(adminDir));
+  // Read admin HTML into memory at startup so it works regardless of static file serving issues
+  let adminHtml = "<h1>Admin panel not found</h1>";
+  try {
+    adminHtml = fs.readFileSync(path.join(adminDir, "index.html"), "utf-8");
+    console.log(`[Admin] HTML loaded successfully (${adminHtml.length} bytes)`);
+  } catch (e) {
+    console.error(`[Admin] Failed to load index.html:`, e);
+  }
+  // Serve admin HTML directly from memory for all admin routes
   app.get("/admin", (_req, res) => {
-    res.sendFile(path.join(adminDir, "index.html"));
+    res.type("html").send(adminHtml);
+  });
+  app.get("/admin/", (_req, res) => {
+    res.type("html").send(adminHtml);
+  });
+  app.get("/admin/index.html", (_req, res) => {
+    res.type("html").send(adminHtml);
   });
 
   // ==================== ADMIN REST API ====================
