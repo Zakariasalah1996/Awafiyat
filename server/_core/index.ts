@@ -181,6 +181,33 @@ async function startServer() {
     res.json({ ok: true, timestamp: Date.now() });
   });
 
+  // Debug endpoint to check file paths in production
+  app.get("/api/debug-paths", async (_req, res) => {
+    const fs = await import("fs");
+    const __fn = fileURLToPath(import.meta.url);
+    const __dn = path.dirname(__fn);
+    const candidates = [
+      path.resolve(__dn, "../admin"),
+      path.resolve(__dn, "admin"),
+      path.resolve(process.cwd(), "dist/admin"),
+      path.resolve(process.cwd(), "server/admin"),
+    ];
+    const results = candidates.map((c, i) => ({
+      index: i,
+      path: c,
+      exists: fs.existsSync(c),
+      hasIndex: fs.existsSync(path.join(c, "index.html")),
+    }));
+    res.json({
+      cwd: process.cwd(),
+      __dirname: __dn,
+      __filename: __fn,
+      nodeEnv: process.env.NODE_ENV,
+      candidates: results,
+      cwdFiles: fs.existsSync(process.cwd()) ? fs.readdirSync(process.cwd()).slice(0, 30) : [],
+    });
+  });
+
   // Serve admin panel static files (works in both dev and production)
   const fs = await import("fs");
   const __filename_local = fileURLToPath(import.meta.url);
