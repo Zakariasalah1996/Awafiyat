@@ -224,3 +224,11 @@
 ## الدفعة 28 - إصلاح اتصال APK بالسيرفر المنشور:
 
 - [ ] إصلاح عدم اتصال APK بالسيرفر المنشور (لا إشعارات، لا صور وصفات، لا تسجيل مستخدم)
+
+## الدفعة 29 - إصلاح نظام الإشعارات نهائياً (FCM V1 API مباشر):
+
+- [x] تعديل lib/notifications.ts: استخدام getDevicePushTokenAsync() أولاً (FCM token مباشر) بدلاً من getExpoPushTokenAsync()
+- [x] تعديل server/_core/index.ts: إضافة دالة sendPushViaFCM() للإرسال عبر Firebase FCM V1 API مباشرة
+- [x] تحديث endpoint /api/admin/notifications/send لاستخدام FCM V1 API بدلاً من Expo Push API
+- [x] تنظيف التوكنات القديمة (ExponentPushToken + test tokens) من قاعدة البيانات
+- [ ] حفظ checkpoint وبناء APK جديد عبر EAS Build

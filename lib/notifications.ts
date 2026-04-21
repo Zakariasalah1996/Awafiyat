@@ -76,46 +76,41 @@ const MEAL_LABEL: Record<string, string> = {
   dinner: "العشاء",
 };
 
-// Get Expo push token for backend notifications
+// Get push token for backend notifications
+// Strategy: Always use FCM token directly (via getDevicePushTokenAsync) for reliable delivery
+// This bypasses Expo Push Service entirely and sends via Firebase FCM V1 API
 export async function getExpoPushToken(): Promise<string | null> {
   try {
     if (Platform.OS === "web") return null;
 
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-    console.log("[Push] Using projectId:", projectId);
-
-    // Try with projectId first (works in EAS builds)
-    if (projectId) {
-      try {
-        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
-        console.log("[Push] Got Expo token with projectId:", tokenData.data?.substring(0, 30) + "...");
-        return tokenData.data;
-      } catch (e1) {
-        console.warn("[Push] Failed with projectId:", (e1 as Error)?.message);
-      }
-    }
-
-    // Fallback: try without projectId
-    try {
-      const tokenData = await Notifications.getExpoPushTokenAsync({});
-      console.log("[Push] Got Expo token without projectId:", tokenData.data?.substring(0, 30) + "...");
-      return tokenData.data;
-    } catch (e2) {
-      console.warn("[Push] Expo token failed, trying native FCM token:", (e2 as Error)?.message);
-    }
-
-    // Last resort: get native device push token (FCM on Android)
-    // This works even without EAS Build
+    // PRIMARY: Get native device push token (FCM on Android, APNs on iOS)
+    // This is the most reliable method - works with any build type
     try {
       const deviceToken = await Notifications.getDevicePushTokenAsync();
       const fcmToken = deviceToken.data as string;
-      console.log("[Push] Got native FCM token:", fcmToken?.substring(0, 30) + "...");
-      // Wrap FCM token in a recognizable format for our server
-      return `fcm:${fcmToken}`;
-    } catch (e3) {
-      console.error("[Push] All token methods failed:", (e3 as Error)?.message);
-      return null;
+      if (fcmToken) {
+        console.log("[Push] Got native FCM token:", fcmToken?.substring(0, 30) + "...");
+        // Prefix with fcm: so server knows to use FCM V1 API directly
+        return `fcm:${fcmToken}`;
+      }
+    } catch (e1) {
+      console.warn("[Push] Native FCM token failed:", (e1 as Error)?.message);
     }
+
+    // FALLBACK: Try Expo push token (only works if Expo Push Service is configured)
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    if (projectId) {
+      try {
+        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+        console.log("[Push] Got Expo token (fallback):", tokenData.data?.substring(0, 30) + "...");
+        return tokenData.data;
+      } catch (e2) {
+        console.warn("[Push] Expo token also failed:", (e2 as Error)?.message);
+      }
+    }
+
+    console.error("[Push] All token methods failed");
+    return null;
   } catch (e) {
     console.error("[Push] Failed to get push token:", e);
     return null;

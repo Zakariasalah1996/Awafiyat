@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { GoogleAuth } from "google-auth-library";
+import * as path from "path";
+import * as fs from "fs";
 import { COOKIE_NAME } from "../shared/const.js";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -14,16 +17,40 @@ import {
   getDailyStats, getDashboardStats,
 } from "./db";
 
-// Helper: send push notification via Expo Push API (supports both ExponentPushToken and fcm: tokens)
-async function sendExpoPushNotifications(tokens: string[], title: string, body: string) {
-  // Separate Expo tokens from FCM tokens
-  const expoTokens = tokens.filter(t => t.startsWith('ExponentPushToken'));
-  const fcmTokens = tokens.filter(t => t.startsWith('fcm:'));
+// Helper: get FCM V1 access token using Service Account
+let _fcmAccessToken: string | null = null;
+let _fcmTokenExpiry = 0;
+async function getFCMAccessToken(): Promise<string | null> {
+  try {
+    if (_fcmAccessToken && Date.now() < _fcmTokenExpiry) return _fcmAccessToken;
+    const serviceAccountPath = path.join(process.cwd(), 'server', 'firebase-service-account.json');
+    if (!fs.existsSync(serviceAccountPath)) {
+      console.error('[FCM] Service account file not found:', serviceAccountPath);
+      return null;
+    }
+    const auth = new GoogleAuth({
+      keyFile: serviceAccountPath,
+      scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
+    });
+    const client = await auth.getClient();
+    const tokenResponse = await client.getAccessToken();
+    _fcmAccessToken = tokenResponse.token || null;
+    _fcmTokenExpiry = Date.now() + 55 * 60 * 1000;
+    return _fcmAccessToken;
+  } catch (e) {
+    console.error('[FCM] Failed to get access token:', e);
+    return null;
+  }
+}
 
+// Helper: send push notification via FCM V1 API + Expo Push API
+async function sendExpoPushNotifications(tokens: string[], title: string, body: string) {
+  const expoTokens = tokens.filter(t => t.startsWith('ExponentPushToken'));
+  const fcmRawTokens = tokens.filter(t => !t.startsWith('ExponentPushToken'));
   let successCount = 0;
   let failCount = 0;
 
-  // Send via Expo Push API for ExponentPushToken
+  // Send ExponentPushToken via Expo Push API
   if (expoTokens.length > 0) {
     const messages = expoTokens.map((token) => ({
       to: token,
@@ -32,12 +59,10 @@ async function sendExpoPushNotifications(tokens: string[], title: string, body: 
       body,
       data: { type: "admin_notification" },
     }));
-
     const chunks: typeof messages[] = [];
     for (let i = 0; i < messages.length; i += 100) {
       chunks.push(messages.slice(i, i + 100));
     }
-
     for (const chunk of chunks) {
       try {
         const response = await fetch("https://exp.host/--/api/v2/push/send", {
@@ -59,43 +84,52 @@ async function sendExpoPushNotifications(tokens: string[], title: string, body: 
     }
   }
 
-  // Send via Expo Push API using FCM token format
-  if (fcmTokens.length > 0) {
-    const messages = fcmTokens.map((token) => ({
-      to: token.replace('fcm:', ''), // Remove fcm: prefix, send raw FCM token
-      sound: "default",
-      title,
-      body,
-      data: { type: "admin_notification" },
-    }));
-
-    const chunks: typeof messages[] = [];
-    for (let i = 0; i < messages.length; i += 100) {
-      chunks.push(messages.slice(i, i + 100));
-    }
-
-    for (const chunk of chunks) {
-      try {
-        const response = await fetch("https://exp.host/--/api/v2/push/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(chunk),
-        });
-        const data = await response.json();
-        if (data.data) {
-          for (const ticket of data.data) {
-            if (ticket.status === "ok") successCount++;
-            else { failCount++; console.warn("[Push] FCM ticket error:", ticket); }
+  // Send raw FCM tokens via FCM V1 API
+  if (fcmRawTokens.length > 0) {
+    const accessToken = await getFCMAccessToken();
+    if (!accessToken) {
+      failCount += fcmRawTokens.length;
+      console.error('[Push] No FCM access token available');
+    } else {
+      const projectId = 'awafiyat';
+      for (const token of fcmRawTokens) {
+        const rawToken = token.startsWith('fcm:') ? token.replace('fcm:', '') : token;
+        try {
+          const response = await fetch(
+            `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                message: {
+                  token: rawToken,
+                  notification: { title, body },
+                  android: { priority: 'high', notification: { sound: 'default' } },
+                  data: { type: 'admin_notification' },
+                },
+              }),
+            }
+          );
+          const result = await response.json();
+          if (response.ok) {
+            successCount++;
+            console.log('[Push] FCM V1 sent successfully:', result.name);
+          } else {
+            failCount++;
+            console.warn('[Push] FCM V1 error:', result);
           }
+        } catch (error) {
+          failCount++;
+          console.error('[Push] FCM V1 failed for token:', rawToken, error);
         }
-      } catch (error) {
-        failCount += chunk.length;
-        console.error("[Push] Failed to send FCM batch:", error);
       }
     }
   }
 
-  console.log(`[Push] Sent: ${tokens.length} total (${expoTokens.length} Expo + ${fcmTokens.length} FCM), success: ${successCount}, fail: ${failCount}`);
+  console.log(`[Push] Sent: ${tokens.length} total (${expoTokens.length} Expo + ${fcmRawTokens.length} FCM), success: ${successCount}, fail: ${failCount}`);
   return { successCount, failCount, sentCount: tokens.length };
 }
 

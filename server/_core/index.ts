@@ -10,6 +10,122 @@ import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { savePushToken } from "../db";
+import { GoogleAuth } from "google-auth-library";
+import * as fs from "fs";
+
+// ===== FCM V1 API Direct Send =====
+let _fcmAccessToken: string | null = null;
+let _fcmTokenExpiry = 0;
+async function getFCMAccessToken(): Promise<string | null> {
+  try {
+    if (_fcmAccessToken && Date.now() < _fcmTokenExpiry) return _fcmAccessToken;
+    const serviceAccountPath = path.join(process.cwd(), 'server', 'firebase-service-account.json');
+    if (!fs.existsSync(serviceAccountPath)) {
+      console.error('[FCM] Service account file not found:', serviceAccountPath);
+      return null;
+    }
+    const auth = new GoogleAuth({
+      keyFile: serviceAccountPath,
+      scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
+    });
+    const client = await auth.getClient();
+    const tokenResponse = await client.getAccessToken();
+    _fcmAccessToken = tokenResponse.token || null;
+    _fcmTokenExpiry = Date.now() + 55 * 60 * 1000;
+    console.log('[FCM] Got access token, expires in 55 min');
+    return _fcmAccessToken;
+  } catch (e) {
+    console.error('[FCM] Failed to get access token:', e);
+    return null;
+  }
+}
+
+async function sendPushViaFCM(tokens: string[], title: string, body: string) {
+  const expoTokens = tokens.filter(t => t.startsWith('ExponentPushToken'));
+  const fcmTokens = tokens.filter(t => !t.startsWith('ExponentPushToken'));
+  let successCount = 0;
+  let failCount = 0;
+
+  // Send ExponentPushToken via Expo Push API (legacy fallback)
+  if (expoTokens.length > 0) {
+    const messages = expoTokens.map((token: string) => ({
+      to: token, sound: 'default', title, body,
+      priority: 'high', channelId: 'meals',
+      data: { type: 'admin_notification' },
+    }));
+    try {
+      const pushRes = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(messages),
+      });
+      const pushData = await pushRes.json();
+      if (pushData.data) {
+        for (const ticket of pushData.data) {
+          if (ticket.status === 'ok') successCount++;
+          else { failCount++; console.warn('[Push] Expo ticket error:', ticket); }
+        }
+      }
+    } catch (err) {
+      console.error('[Push] Expo fetch error:', err);
+      failCount += expoTokens.length;
+    }
+  }
+
+  // Send FCM tokens via Firebase FCM V1 API directly
+  if (fcmTokens.length > 0) {
+    const accessToken = await getFCMAccessToken();
+    if (!accessToken) {
+      failCount += fcmTokens.length;
+      console.error('[Push] No FCM access token available');
+    } else {
+      const projectId = 'awafiyat';
+      for (const token of fcmTokens) {
+        const rawToken = token.startsWith('fcm:') ? token.substring(4) : token;
+        try {
+          const response = await fetch(
+            `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                message: {
+                  token: rawToken,
+                  notification: { title, body },
+                  android: {
+                    priority: 'high',
+                    notification: {
+                      sound: 'default',
+                      channel_id: 'meals',
+                    },
+                  },
+                  data: { type: 'admin_notification' },
+                },
+              }),
+            }
+          );
+          const result = await response.json();
+          if (response.ok) {
+            successCount++;
+            console.log('[Push] FCM V1 sent successfully:', result.name);
+          } else {
+            failCount++;
+            console.warn('[Push] FCM V1 error:', JSON.stringify(result));
+          }
+        } catch (error) {
+          failCount++;
+          console.error('[Push] FCM V1 failed for token:', rawToken?.substring(0, 20), error);
+        }
+      }
+    }
+  }
+
+  console.log(`[Push] Total: ${tokens.length} (${expoTokens.length} Expo + ${fcmTokens.length} FCM), success: ${successCount}, fail: ${failCount}`);
+  return { successCount, failCount, sentCount: tokens.length };
+}
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -245,36 +361,13 @@ async function startServer() {
         title, body, targetType: targetType || 'all', targetValue, sentCount: tokens.length,
       });
 
-      // Send via Expo Push API
+      // Send via FCM V1 API (direct) + Expo Push API (fallback for ExponentPushToken)
       let successCount = 0, failCount = 0;
       if (tokens.length > 0) {
-        const messages = tokens.map((token: string) => ({
-          to: token,
-          sound: 'alarm.wav',
-          title,
-          body,
-          priority: 'high',
-          channelId: 'meals',
-          data: { type: 'admin_notification' },
-        }));
-        try {
-          console.log('[Push] Sending to tokens:', tokens);
-          console.log('[Push] Messages:', JSON.stringify(messages, null, 2));
-          const pushRes = await fetch('https://exp.host/--/api/v2/push/send', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Accept-Encoding': 'gzip, deflate' },
-            body: JSON.stringify(messages),
-          });
-          const pushData = await pushRes.json();
-          console.log('[Push] Response:', JSON.stringify(pushData, null, 2));
-          if (pushData.data) {
-            for (const ticket of pushData.data) {
-              if (ticket.status === 'ok') successCount++; else { failCount++; console.error('[Push] Ticket error:', ticket); }
-            }
-          }
-        } catch (err) {
-          console.error('[Push] Fetch error:', err);
-          failCount = tokens.length;
-        }
+        console.log('[Push] Sending to', tokens.length, 'tokens:', tokens.map(t => t.substring(0, 25) + '...'));
+        const result = await sendPushViaFCM(tokens, title, body);
+        successCount = result.successCount;
+        failCount = result.failCount;
         if (notifId) {
           await adminDb.updateNotificationCounts(notifId, tokens.length, successCount, failCount);
         }
@@ -553,12 +646,13 @@ async function startServer() {
       const db = (await import('../db')).getDb;
       const dbInstance = await db();
       if (!dbInstance) return res.status(500).json({ error: 'DB not available' });
-      // Delete test/invalid tokens
       const { sql } = await import('drizzle-orm');
-      // Only delete test tokens, keep both ExponentPushToken and fcm: tokens
-      await dbInstance.execute(sql`DELETE FROM push_tokens WHERE token = 'test_token_123'`);
+      // Delete test tokens AND old ExponentPushToken entries (they no longer work)
+      const deleteResult = await dbInstance.execute(
+        sql`DELETE FROM push_tokens WHERE token LIKE 'test%' OR token LIKE 'ExponentPushToken%'`
+      );
       const remaining = await adminDb.getActivePushTokens();
-      res.json({ success: true, message: 'Cleaned up invalid tokens', remaining: remaining.length });
+      res.json({ success: true, message: 'Cleaned up invalid and old Expo tokens', remaining: remaining.length });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
