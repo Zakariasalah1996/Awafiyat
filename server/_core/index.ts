@@ -181,33 +181,6 @@ async function startServer() {
     res.json({ ok: true, timestamp: Date.now() });
   });
 
-  // Debug endpoint to check file paths in production
-  app.get("/api/debug-paths", async (_req, res) => {
-    const fs = await import("fs");
-    const __fn = fileURLToPath(import.meta.url);
-    const __dn = path.dirname(__fn);
-    const candidates = [
-      path.resolve(__dn, "../admin"),
-      path.resolve(__dn, "admin"),
-      path.resolve(process.cwd(), "dist/admin"),
-      path.resolve(process.cwd(), "server/admin"),
-    ];
-    const results = candidates.map((c, i) => ({
-      index: i,
-      path: c,
-      exists: fs.existsSync(c),
-      hasIndex: fs.existsSync(path.join(c, "index.html")),
-    }));
-    res.json({
-      cwd: process.cwd(),
-      __dirname: __dn,
-      __filename: __fn,
-      nodeEnv: process.env.NODE_ENV,
-      candidates: results,
-      cwdFiles: fs.existsSync(process.cwd()) ? fs.readdirSync(process.cwd()).slice(0, 30) : [],
-    });
-  });
-
   // Serve admin panel - read HTML into memory and serve directly
   const fs = await import("fs");
   const __filename_local = fileURLToPath(import.meta.url);
@@ -234,14 +207,19 @@ async function startServer() {
   } catch (e) {
     console.error(`[Admin] Failed to load index.html:`, e);
   }
-  // Serve admin HTML directly from memory for all admin routes
+  // Serve admin HTML directly from memory
+  // Use /api/admin-panel path so it works on production (platform only proxies /api/* to server)
+  // Also keep /admin for local dev convenience
+  app.get("/api/admin-panel", (_req, res) => {
+    res.type("html").send(adminHtml);
+  });
+  app.get("/api/admin-panel/", (_req, res) => {
+    res.type("html").send(adminHtml);
+  });
   app.get("/admin", (_req, res) => {
     res.type("html").send(adminHtml);
   });
   app.get("/admin/", (_req, res) => {
-    res.type("html").send(adminHtml);
-  });
-  app.get("/admin/index.html", (_req, res) => {
     res.type("html").send(adminHtml);
   });
 
