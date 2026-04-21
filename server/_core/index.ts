@@ -182,10 +182,25 @@ async function startServer() {
   });
 
   // Serve admin panel static files (works in both dev and production)
-  const adminDirProd = path.resolve(process.cwd(), "dist/admin");
-  const adminDirDev = path.resolve(process.cwd(), "server/admin");
   const fs = await import("fs");
-  const adminDir = fs.existsSync(adminDirProd) ? adminDirProd : adminDirDev;
+  const __filename_local = fileURLToPath(import.meta.url);
+  const __dirname_local = path.dirname(__filename_local);
+  // Try multiple possible locations for admin files
+  const adminCandidates = [
+    path.resolve(__dirname_local, "../admin"),          // dev: server/_core/../admin = server/admin
+    path.resolve(__dirname_local, "admin"),              // prod: dist/admin (if copied next to dist/index.js)
+    path.resolve(process.cwd(), "dist/admin"),           // prod: from cwd
+    path.resolve(process.cwd(), "server/admin"),         // dev: from cwd
+  ];
+  let adminDir = adminCandidates[3]; // fallback
+  for (const candidate of adminCandidates) {
+    if (fs.existsSync(path.join(candidate, "index.html"))) {
+      adminDir = candidate;
+      break;
+    }
+  }
+  console.log(`[Admin] Serving admin panel from: ${adminDir}`);
+  console.log(`[Admin] index.html exists: ${fs.existsSync(path.join(adminDir, "index.html"))}`);
   app.use("/admin", express.static(adminDir));
   app.get("/admin", (_req, res) => {
     res.sendFile(path.join(adminDir, "index.html"));
