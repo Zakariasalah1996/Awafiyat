@@ -607,7 +607,8 @@ export default function ProfileScreen() {
           {/* اختيار النغمة */}
           {alarmSettings.enabled && (
             <View className="py-3">
-              <Text className="text-base text-foreground mb-3">نغمة المنبه</Text>
+              <Text className="text-base text-foreground mb-2">نغمات التذكير</Text>
+              <Text className="text-xs text-muted mb-3">كل وجبة لها نغمتها الخاصة تلقائياً • اضغطي للمعاينة</Text>
               {(Object.keys(ALARM_TONE_LABELS) as AlarmTone[]).map((tone) => (
                 <TouchableOpacity
                   key={tone}

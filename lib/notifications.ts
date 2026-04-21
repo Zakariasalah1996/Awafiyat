@@ -192,15 +192,15 @@ export async function requestNotificationPermissions(): Promise<boolean> {
     if (Platform.OS === "android") {
       // قناة الوجبات بأولوية قصوى + صوت منبه طويل (30 ثانية)
       await Notifications.setNotificationChannelAsync("meals", {
-        name: "منبه الوجبات",
-        description: "منبه بصوت عالٍ لتذكيرك بأوقات الوجبات",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 1000, 500, 1000, 500, 1000, 500, 1000],
+        name: "تذكير الوجبات",
+        description: "تذكير لطيف بأوقات إعداد الوجبات",
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 500, 1000, 500],
         lightColor: "#4A7C59",
-        sound: "alarm.wav",
+        sound: "alarm_morning.mp3",
         enableVibrate: true,
         enableLights: true,
-        bypassDnd: true,
+        bypassDnd: false,
         lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
       });
       await Notifications.setNotificationChannelAsync("shopping", {
@@ -300,11 +300,12 @@ export async function scheduleMealReminder(
         body,
         sound: notificationSound,
         priority: Notifications.AndroidNotificationPriority.MAX,
-        sticky: true, // لا يختفي حتى يضغط المستخدم
-        vibrate: [0, 1000, 500, 1000, 500, 1000, 500, 1000],
+        sticky: false, // يختفي عند السحب - لا نريد إزعاج المستخدم
+        vibrate: [0, 500, 1000, 500], // اهتزاز لطيف
         data: {
           type: "meal",
           mealType,
+          scheduledTime: `${hour}:${String(minute).padStart(2, '0')}`, // لمعرفة إذا فات الوقت
           ...(recipeId && { recipeId }),
           ...(recipeName && { recipeName }),
         },
@@ -329,16 +330,15 @@ export async function scheduleMealReminder(
           alarmDate.setDate(alarmDate.getDate() + 1);
         }
         const alarmTitle = recipeName
-          ? `حان وقت ${label} - ${recipeName}`
-          : `حان وقت ${label}`;
+          ? `حان وقت إعداد ${label} - ${recipeName}`
+          : `حان وقت إعداد ${label}`;
         NativeAlarm.scheduleAlarm({
           uid: `meal_${mealType}`,
           day: alarmDate,
           title: alarmTitle,
-          description: recipeName ? `الوصفة: ${recipeName}` : `لا تنسي ${label}`,
+          description: recipeName ? `الوصفة المقترحة: ${recipeName}` : `هل أنتِ مستعدة لإعداد ${label}؟`,
           showDismiss: true,
-          showSnooze: true,
-          snoozeInterval: 5,
+          showSnooze: false, // لا غفوة
           repeating: true,
           active: true,
         } as any);

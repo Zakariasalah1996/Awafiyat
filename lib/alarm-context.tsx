@@ -4,29 +4,19 @@ import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// أصوات المنبه المتاحة
+// أصوات المنبه المتاحة - 3 أصوات لطيفة فقط
 const ALARM_SOUNDS = {
   morning: require("@/assets/alarm_morning.mp3"),
   lunch: require("@/assets/alarm_lunch.mp3"),
   dinner: require("@/assets/alarm_dinner.mp3"),
-  kitchen: require("@/assets/alarm_kitchen.wav"),
-  classic: require("@/assets/alarm_classic.wav"),
-  digital: require("@/assets/alarm_digital.wav"),
-  chime: require("@/assets/alarm_chime.wav"),
-  urgent: require("@/assets/alarm_urgent.wav"),
 };
 
 export type AlarmTone = keyof typeof ALARM_SOUNDS;
 
 export const ALARM_TONE_LABELS: Record<AlarmTone, string> = {
-  morning: "منبه الفطور الصباحي 🌅",
-  lunch: "منبه الغداء 🍽️",
-  dinner: "منبه العشاء المسائي 🌙",
-  kitchen: "جرس مطبخ 🍳",
-  classic: "نغمة كلاسيكية 📞",
-  digital: "تنبيه رقمي 🔊",
-  chime: "جرس هادئ 🔔",
-  urgent: "صفارة عاجلة 🚨",
+  morning: "نغمة الصباح 🌅",
+  lunch: "نغمة الظهيرة ☀️",
+  dinner: "نغمة المساء 🌙",
 };
 
 // نغمة الوجبة حسب النوع
@@ -45,7 +35,7 @@ export interface AlarmSettings {
 
 const DEFAULT_SETTINGS: AlarmSettings = {
   enabled: true,
-  volume: 1.0,
+  volume: 0.8,
   tone: "morning",
   vibration: true,
 };
@@ -108,21 +98,11 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
   const morningPlayer = useAudioPlayer(ALARM_SOUNDS.morning);
   const lunchPlayer = useAudioPlayer(ALARM_SOUNDS.lunch);
   const dinnerPlayer = useAudioPlayer(ALARM_SOUNDS.dinner);
-  const kitchenPlayer = useAudioPlayer(ALARM_SOUNDS.kitchen);
-  const classicPlayer = useAudioPlayer(ALARM_SOUNDS.classic);
-  const digitalPlayer = useAudioPlayer(ALARM_SOUNDS.digital);
-  const chimePlayer = useAudioPlayer(ALARM_SOUNDS.chime);
-  const urgentPlayer = useAudioPlayer(ALARM_SOUNDS.urgent);
 
   const players: Record<AlarmTone, ReturnType<typeof useAudioPlayer>> = {
     morning: morningPlayer,
     lunch: lunchPlayer,
     dinner: dinnerPlayer,
-    kitchen: kitchenPlayer,
-    classic: classicPlayer,
-    digital: digitalPlayer,
-    chime: chimePlayer,
-    urgent: urgentPlayer,
   };
 
   const vibrationRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -134,6 +114,10 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
       if (data) {
         try {
           const saved = JSON.parse(data) as AlarmSettings;
+          // التأكد من أن النغمة المحفوظة لا تزال متاحة
+          if (!ALARM_SOUNDS[saved.tone]) {
+            saved.tone = "morning";
+          }
           setSettings(saved);
           settingsRef.current = saved;
         } catch {}
@@ -192,14 +176,14 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
         player.play();
         previewPlayerRef.current = tone;
 
-        // إيقاف بعد 4 ثوانٍ
+        // إيقاف بعد 5 ثوانٍ
         setTimeout(() => {
           try {
             player.pause();
             player.seekTo(0);
           } catch {}
           previewPlayerRef.current = null;
-        }, 4000);
+        }, 5000);
       } catch (e) {
         console.warn("Preview failed:", e);
       }
@@ -229,8 +213,7 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
           title,
           description,
           showDismiss: true,
-          showSnooze: true,
-          snoozeInterval: 5,
+          showSnooze: false, // لا غفوة - فقط إيقاف
           repeating: true,
           active: true,
         } as any);
@@ -285,17 +268,11 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // اهتزاز إذا مفعّل
+      // اهتزاز لطيف إذا مفعّل (وليس عنيف)
       if (s.vibration && Platform.OS !== "web") {
-        Vibration.vibrate([0, 1000, 500, 1000, 500, 1000], true);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-
-        vibrationRef.current = setInterval(() => {
-          if (Platform.OS !== "web") {
-            Vibration.vibrate([0, 1000, 500, 1000, 500, 1000], false);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          }
-        }, 5000);
+        // نمط اهتزاز لطيف: قصير - توقف - قصير
+        Vibration.vibrate([0, 500, 1000, 500, 1000, 500], true);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     },
     [players]
