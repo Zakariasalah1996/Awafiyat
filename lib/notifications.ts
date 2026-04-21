@@ -197,7 +197,7 @@ export async function requestNotificationPermissions(): Promise<boolean> {
         importance: Notifications.AndroidImportance.HIGH,
         vibrationPattern: [0, 500, 1000, 500],
         lightColor: "#4A7C59",
-        sound: "alarm_morning.mp3",
+        sound: "notification.mp3",
         enableVibrate: true,
         enableLights: true,
         bypassDnd: false,
@@ -287,12 +287,8 @@ export async function scheduleMealReminder(
       body = getRandomItem(messages);
     }
 
-    // اختيار الصوت حسب نوع الوجبة
-    const notificationSound =
-      mealType === "breakfast" ? "alarm_morning.mp3" :
-      mealType === "lunch" ? "alarm_lunch.mp3" :
-      mealType === "dinner" ? "alarm_dinner.mp3" :
-      "alarm.wav";
+    // صوت الإشعار - لطيف وقصير (الأصوات الطويلة للمنبه فقط)
+    const notificationSound = "notification.mp3";
 
     const id = await Notifications.scheduleNotificationAsync({
       content: {
