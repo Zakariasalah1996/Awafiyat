@@ -283,13 +283,35 @@ export async function scheduleMealReminder(
       }));
     } catch {}
 
-    // تعطيل المنبه الأصلي نهائياً - الاعتماد على الإشعارات والشاشة الجميلة بالعربي فقط
-    // (المنبه الأصلي يعرض أزرار "Dismiss" بالإنجليزية)
-    if (false && NativeAlarm?.scheduleAlarm) {
-      // كود معطل - لا نستخدم المنبه الأصلي
+    // المنبه الأصلي (expo-alarm-module) - يرن فوق كل شيء حتى لو التطبيق مغلق
+    // عند الرنين يفتح التطبيق تلقائياً ← تظهر شاشة المنبه الجميلة بالعربي
+    if (Platform.OS === "android" && NativeAlarm?.scheduleAlarm) {
+      try {
+        const alarmDate = new Date();
+        alarmDate.setHours(hour, minute, 0, 0);
+        // إذا الوقت مضى اليوم، اجعله غداً
+        if (alarmDate.getTime() <= Date.now()) {
+          alarmDate.setDate(alarmDate.getDate() + 1);
+        }
+
+        NativeAlarm.scheduleAlarm({
+          uid: `meal_${mealType}`,
+          day: alarmDate,
+          title: `حان وقت ${label}!`,
+          description: recipeName ? `الوصفة: ${recipeName}` : `هل أنتِ مستعدة لإعداد ${label}؟`,
+          showDismiss: true,
+          showSnooze: false,
+          repeating: true,
+          active: true,
+        } as any);
+        console.log(`[Alarm] Native alarm scheduled: ${mealType} at ${hour}:${minute}`);
+      } catch (e) {
+        console.error("[Alarm] Native alarm schedule failed:", e);
+      }
     }
 
-    // جدول إشعار صامت يفتح التطبيق ويشغل شاشة المنبه الجميلة بالعربي
+    // إشعار fallback - يعمل كنسخة احتياطية إذا المنبه الأصلي لم يعمل
+    // أيضاً يُستخدم لتشغيل شاشة المنبه الجميلة بالعربي داخل التطبيق
     {
       const emoji = MEAL_EMOJI[mealType];
       const id = await Notifications.scheduleNotificationAsync({
@@ -314,7 +336,7 @@ export async function scheduleMealReminder(
           minute,
         },
       });
-      console.log(`[Alarm] Meal alarm notification scheduled: ${mealType} at ${hour}:${minute} (id: ${id})`);
+      console.log(`[Alarm] Fallback notification scheduled: ${mealType} at ${hour}:${minute} (id: ${id})`);
       return id;
     }
   } catch (e) {

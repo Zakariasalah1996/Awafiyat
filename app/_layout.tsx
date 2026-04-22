@@ -14,6 +14,7 @@ import { registerGuest } from "@/lib/guest-auth";
 import { useRouter } from "expo-router";
 import { AlarmProvider, useAlarm } from "@/lib/alarm-context";
 import { AlarmScreen } from "@/components/alarm-screen";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -52,7 +53,50 @@ function RootLayoutInner() {
     syncRecipeImages().catch((e) => console.warn("[RecipeImageSync] Error:", e));
     // Auto-register as guest user
     registerGuest().catch((e) => console.warn("[Guest] Error:", e));
+
+    // فحص إذا التطبيق فُتح بواسطة المنبه الأصلي (expo-alarm-module)
+    // عند رنين المنبه الأصلي، يفتح التطبيق تلقائياً → نشغّل شاشة المنبه الجميلة بالعربي
+    if (Platform.OS === "android") {
+      checkAlarmLaunch();
+    }
   }, []);
+
+  // فحص إذا التطبيق فُتح بواسطة المنبه الأصلي
+  const checkAlarmLaunch = useCallback(async () => {
+    try {
+      // فحص كل أنواع الوجبات
+      const mealTypes = ["breakfast", "lunch", "dinner"] as const;
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
+      for (const mealType of mealTypes) {
+        const data = await AsyncStorage.getItem(`@alarm_data_${mealType}`);
+        if (!data) continue;
+
+        const alarmData = JSON.parse(data);
+        const alarmHour = alarmData.hour;
+        const alarmMinute = alarmData.minute;
+
+        // إذا الوقت الحالي قريب من وقت المنبه (خلال 3 دقائق)
+        const diffMinutes = Math.abs((currentHour * 60 + currentMinute) - (alarmHour * 60 + alarmMinute));
+        if (diffMinutes <= 3) {
+          console.log(`[Alarm] App launched by native alarm: ${mealType}`);
+          // تشغيل شاشة المنبه الجميلة بالعربي
+          setTimeout(() => {
+            startAlarm(
+              alarmData.recipeName || "وجبتك",
+              alarmData.recipeId || "",
+              mealType
+            );
+          }, 1000); // انتظار ثانية ليكتمل تحميل التطبيق
+          break;
+        }
+      }
+    } catch (e) {
+      console.warn("[Alarm] Check alarm launch error:", e);
+    }
+  }, [startAlarm]);
 
   // Auto-register push notifications on app start (native only)
   useEffect(() => {

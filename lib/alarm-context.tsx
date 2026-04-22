@@ -35,7 +35,7 @@ export interface AlarmSettings {
 
 const DEFAULT_SETTINGS: AlarmSettings = {
   enabled: true,
-  volume: 0.3, // 30% - مستوى منخفض افتراضياً لراحة المستخدم
+  volume: 0.5, // 50% - مستوى متوسط افتراضياً للمنبه الحقيقي
   tone: "morning",
   vibration: true,
 };
@@ -268,10 +268,10 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // اهتزاز خفيف إذا مفعّل - لا يتكرر (مرة واحدة فقط)
+      // اهتزاز مستمر مثل المنبه الحقيقي
       if (s.vibration && Platform.OS !== "web") {
-        // نبضة واحدة لطيفة - ليست مزعجة
-        Vibration.vibrate([0, 300, 500, 300]);
+        // نمط اهتزاز متكرر - يستمر حتى الإيقاف
+        Vibration.vibrate([0, 500, 500, 500, 500, 500], true);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     },

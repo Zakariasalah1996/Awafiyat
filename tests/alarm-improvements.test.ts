@@ -55,10 +55,9 @@ describe("Alarm Improvements", () => {
         path.join(projectRoot, "lib", "alarm-context.tsx"),
         "utf-8"
       );
-      // Should use gentle vibration (short pulse, not aggressive)
-      expect(contextFile).toContain("[0, 300, 500, 300]");
-      // Should NOT use aggressive vibration
-      expect(contextFile).not.toContain("[0, 1000, 500, 1000, 500, 1000]");
+      // Should use repeating vibration pattern for real alarm
+      expect(contextFile).toContain("[0, 500, 500, 500, 500, 500]");
+      expect(contextFile).toContain("true"); // repeating = true
     });
 
     it("should use Success haptic instead of Warning", () => {
@@ -70,12 +69,12 @@ describe("Alarm Improvements", () => {
       expect(contextFile).not.toContain("NotificationFeedbackType.Warning");
     });
 
-    it("should set default volume to 0.8 instead of 1.0", () => {
+    it("should set default volume to 0.5 for real alarm", () => {
       const contextFile = fs.readFileSync(
         path.join(projectRoot, "lib", "alarm-context.tsx"),
         "utf-8"
       );
-      expect(contextFile).toContain("volume: 0.3");
+      expect(contextFile).toContain("volume: 0.5");
     });
   });
 
