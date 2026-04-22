@@ -6,6 +6,7 @@ import {
   ScrollView,
   I18nManager,
   Image,
+  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -13,12 +14,16 @@ import { useUser, type HealthCondition, type Country } from "@/lib/user-context"
 import Animated, {
   FadeInDown,
   FadeInUp,
+  FadeIn,
 } from "react-native-reanimated";
 import { useColors } from "@/hooks/use-colors";
+import { LinearGradient } from "expo-linear-gradient";
 
 // Force RTL
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const COUNTRIES: { id: Country; label: string; flag: string }[] = [
   { id: "iraq", label: "العراق", flag: "🇮🇶" },
@@ -77,36 +82,107 @@ export default function OnboardingScreen() {
     router.replace("/(tabs)");
   };
 
-  // Step 0: Welcome
+  // Step 0: Welcome - تصميم مبهر
   if (step === 0) {
     return (
-      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
-        <View className="flex-1 bg-background items-center justify-center px-8">
-          <Animated.View entering={FadeInDown.duration(600)} className="items-center">
+      <View style={{ flex: 1 }}>
+        {/* صورة الخلفية */}
+        <Animated.View entering={FadeIn.duration(800)} style={{ flex: 1 }}>
+          <Image
+            source={require("@/assets/images/welcome-hero.jpg")}
+            style={{
+              width: SCREEN_WIDTH,
+              height: SCREEN_HEIGHT,
+              position: "absolute",
+              top: 0,
+              left: 0,
+            }}
+            resizeMode="cover"
+          />
+          {/* تدرج لوني من الأسفل */}
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.3)", "rgba(0,0,0,0.85)"]}
+            locations={[0, 0.4, 0.75]}
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: SCREEN_HEIGHT * 0.65,
+            }}
+          />
+        </Animated.View>
+
+        {/* المحتوى فوق الصورة */}
+        <View
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            paddingHorizontal: 32,
+            paddingBottom: 60,
+          }}
+        >
+          {/* الشعار */}
+          <Animated.View entering={FadeInDown.delay(200).duration(600)} style={{ alignItems: "center" }}>
             <Image
               source={require("@/assets/images/icon.png")}
-              style={{ width: 140, height: 140, borderRadius: 28 }}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 24,
+                marginBottom: 16,
+              }}
             />
-            <Text className="text-4xl font-bold text-foreground mt-6 text-center">
-              عافيات
+          </Animated.View>
+
+          {/* النص */}
+          <Animated.View entering={FadeInDown.delay(400).duration(600)} style={{ alignItems: "center" }}>
+            <Text
+              style={{
+                fontSize: 36,
+                fontWeight: "bold",
+                color: "#FFFFFF",
+                textAlign: "center",
+                marginBottom: 8,
+              }}
+            >
+              ألف عافيات
             </Text>
-            <Text className="text-lg text-muted mt-4 text-center leading-8">
+            <Text
+              style={{
+                fontSize: 17,
+                color: "rgba(255,255,255,0.85)",
+                textAlign: "center",
+                lineHeight: 28,
+                marginBottom: 8,
+              }}
+            >
               أهلاً وسهلاً بك{"\n"}حيث نُطعم أجسادنا بالصحة والمحبة
             </Text>
           </Animated.View>
 
-          <Animated.View entering={FadeInUp.delay(400).duration(500)} className="w-full mt-12">
+          {/* زر لنبدأ */}
+          <Animated.View entering={FadeInUp.delay(700).duration(500)} style={{ marginTop: 28 }}>
             <TouchableOpacity
               onPress={handleStart}
-              className="w-full py-4 rounded-2xl items-center"
-              style={{ backgroundColor: colors.primary }}
+              style={{
+                width: "100%",
+                paddingVertical: 16,
+                borderRadius: 20,
+                alignItems: "center",
+                backgroundColor: colors.primary,
+              }}
               activeOpacity={0.8}
             >
-              <Text className="text-white text-lg font-bold">لنبدأ</Text>
+              <Text style={{ color: "#FFFFFF", fontSize: 18, fontWeight: "bold" }}>
+                لنبدأ
+              </Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
-      </ScreenContainer>
+      </View>
     );
   }
 
