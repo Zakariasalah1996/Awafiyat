@@ -129,23 +129,23 @@ describe("Alarm Improvements", () => {
     });
   });
 
-  describe("Stale alarm prevention", () => {
-    it("should check if alarm is still valid in _layout.tsx", () => {
-      const layoutFile = fs.readFileSync(
-        path.join(projectRoot, "app", "_layout.tsx"),
-        "utf-8"
-      );
-      expect(layoutFile).toContain("isAlarmStillValid");
-      expect(layoutFile).toContain("scheduledTime");
-      expect(layoutFile).toContain("Skipping stale alarm");
-    });
-
-    it("should include scheduledTime in notification data", () => {
+  describe("Alarm scheduling", () => {
+    it("should use native alarm module for meal reminders", () => {
       const notifFile = fs.readFileSync(
         path.join(projectRoot, "lib", "notifications.ts"),
         "utf-8"
       );
-      expect(notifFile).toContain("scheduledTime");
+      // المنبه الأصلي يعمل للوجبات
+      expect(notifFile).toContain("NativeAlarm");
+      expect(notifFile).toContain("scheduleAlarm");
+    });
+
+    it("should save alarm data in AsyncStorage for AlarmContext", () => {
+      const notifFile = fs.readFileSync(
+        path.join(projectRoot, "lib", "notifications.ts"),
+        "utf-8"
+      );
+      expect(notifFile).toContain("@alarm_data_");
     });
   });
 

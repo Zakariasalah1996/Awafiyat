@@ -4,13 +4,25 @@ import Constants from "expo-constants";
 import { getApiBaseUrl } from "@/constants/oauth";
 import { getGuestUserId } from "@/lib/guest-auth";
 
-// المنبه الأصلي (expo-alarm-module) معطّل - نستخدم فقط شاشة المنبه الجميلة بالعربي
-// السبب: المنبه الأصلي يعرض أزرار بالإنجليزية ويعمل بأقصى صوت بدون تحكم
-const NativeAlarm: {
+// expo-alarm-module - منبه أصلي على مستوى النظام (يعمل حتى لو التطبيق مغلق)
+let NativeAlarm: {
   scheduleAlarm: (params: any) => void;
   stopAlarm: () => void;
   removeAlarm: (uid: string) => void;
 } | null = null;
+
+try {
+  if (Platform.OS === "android") {
+    const mod = require("expo-alarm-module");
+    NativeAlarm = {
+      scheduleAlarm: mod.scheduleAlarm || mod.default?.scheduleAlarm,
+      stopAlarm: mod.stopAlarm || mod.default?.stopAlarm,
+      removeAlarm: mod.removeAlarm || mod.default?.removeAlarm,
+    };
+  }
+} catch (e) {
+  console.warn("[Alarm] expo-alarm-module not available:", e);
+}
 
 // Configure notification handler for foreground
 Notifications.setNotificationHandler({
@@ -241,7 +253,9 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 }
 
 /**
- * جدولة إشعار وجبة مع اسم الوصفة + صوت المنبه
+ * جدولة منبه وجبة (منبه فقط - بدون إشعار)
+ * المنبه يعمل عبر expo-alarm-module (يرن حتى لو التطبيق مغلق)
+ * عند فتح التطبيق تظهر شاشة المنبه الجميلة بالعربي (عرض الوصفة + إيقاف)
  * يُستدعى عند حفظ جدول الطبخ
  */
 export async function scheduleMealReminder(
@@ -252,59 +266,24 @@ export async function scheduleMealReminder(
   recipeName?: string
 ): Promise<string | null> {
   try {
-    // إلغاء الإشعارات السابقة لهذا النوع
+    // إلغاء المنبهات السابقة لهذا النوع
     await cancelMealReminder(mealType);
 
-    const emoji = MEAL_EMOJI[mealType];
     const label = MEAL_LABEL[mealType];
-    const messages =
-      mealType === "breakfast"
-        ? BREAKFAST_MESSAGES
-        : mealType === "lunch"
-        ? LUNCH_MESSAGES
-        : DINNER_MESSAGES;
 
-    // إذا كانت هناك وصفة مخططة، نضيف اسمها
-    let title: string;
-    let body: string;
-    if (recipeName) {
-      title = `${emoji} حان وقت ${label}!`;
-      body = `الوصفة المخططة: ${recipeName}\nاضغطي لعرض التفاصيل`;
-    } else {
-      title = `${emoji} حان وقت ${label}!`;
-      body = getRandomItem(messages);
-    }
-
-    // صوت الإشعار - لطيف وقصير (الأصوات الطويلة للمنبه فقط)
-    const notificationSound = "notification.mp3";
-
-    const id = await Notifications.scheduleNotificationAsync({
-      content: {
-        title,
-        body,
-        sound: notificationSound,
-        priority: Notifications.AndroidNotificationPriority.HIGH,
-        sticky: false, // يختفي عند السحب - لا نريد إزعاج المستخدم
-        vibrate: [0, 300, 500, 300], // اهتزاز خفيف
-        data: {
-          type: "meal",
-          mealType,
-          scheduledTime: `${hour}:${String(minute).padStart(2, '0')}`, // لمعرفة إذا فات الوقت
-          ...(recipeId && { recipeId }),
-          ...(recipeName && { recipeName }),
-        },
-        ...(Platform.OS === "android" && { channelId: "meals" }),
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+    // حفظ بيانات المنبه في AsyncStorage ليستخدمها AlarmContext عند الرنين
+    try {
+      const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+      await AsyncStorage.setItem(`@alarm_data_${mealType}`, JSON.stringify({
+        mealType,
         hour,
         minute,
-      },
-    });
+        recipeId: recipeId || "",
+        recipeName: recipeName || "",
+      }));
+    } catch {}
 
-    console.log(`[Notifications] Scheduled ${mealType} at ${hour}:${minute} → ${recipeName || "no recipe"} (id: ${id})`);
-
-    // جدولة منبه أصلي عبر expo-alarm-module (يرن حتى لو التطبيق مغلق)
+    // جدولة المنبه الأصلي عبر expo-alarm-module (يرن حتى لو التطبيق مغلق)
     if (NativeAlarm?.scheduleAlarm) {
       try {
         const alarmDate = new Date();
@@ -322,7 +301,7 @@ export async function scheduleMealReminder(
           title: alarmTitle,
           description: recipeName ? `الوصفة المقترحة: ${recipeName}` : `هل أنتِ مستعدة لإعداد ${label}؟`,
           showDismiss: true,
-          showSnooze: false, // لا غفوة
+          showSnooze: false,
           repeating: true,
           active: true,
         } as any);
@@ -332,16 +311,45 @@ export async function scheduleMealReminder(
       }
     }
 
-    return id;
+    // FALLBACK: إذا المنبه الأصلي غير متاح، نجدول إشعار صامت (بدون صوت) ليفتح التطبيق ويشغل شاشة المنبه
+    if (!NativeAlarm?.scheduleAlarm) {
+      const emoji = MEAL_EMOJI[mealType];
+      const id = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `${emoji} حان وقت ${label}!`,
+          body: recipeName ? `الوصفة: ${recipeName}` : `هل أنتِ مستعدة لإعداد ${label}؟`,
+          sound: "notification.mp3",
+          priority: Notifications.AndroidNotificationPriority.HIGH,
+          vibrate: [0, 300, 500, 300],
+          data: {
+            type: "meal_alarm",
+            mealType,
+            scheduledTime: `${hour}:${String(minute).padStart(2, '0')}`,
+            ...(recipeId && { recipeId }),
+            ...(recipeName && { recipeName }),
+          },
+          ...(Platform.OS === "android" && { channelId: "meals" }),
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DAILY,
+          hour,
+          minute,
+        },
+      });
+      console.log(`[Alarm] Fallback notification scheduled: ${mealType} at ${hour}:${minute} (id: ${id})`);
+      return id;
+    }
+
+    return `alarm_${mealType}`;
   } catch (e) {
-    console.warn("Meal reminders not available in Expo Go. This is normal.", e);
+    console.warn("Meal alarm scheduling not available in Expo Go. This is normal.", e);
     return null;
   }
 }
 
 /**
- * جدولة جميع إشعارات الوجبات بناءً على الجدول المحفوظ
- * يُستدعى عند حفظ الجدول أو عند بدء التطبيق
+ * جدولة جميع منبهات الوجبات بناءً على الجدول المحفوظ
+ * يُستدعى عند حفظ جدول الطبخ
  */
 export async function scheduleAllMealReminders(
   mealTimes: { breakfast: string; lunch: string; dinner: string },

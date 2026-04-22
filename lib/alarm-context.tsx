@@ -42,13 +42,25 @@ const DEFAULT_SETTINGS: AlarmSettings = {
 
 const STORAGE_KEY = "@alarm_settings";
 
-// المنبه الأصلي (expo-alarm-module) معطّل - نستخدم فقط شاشة المنبه الجميلة بالعربي
-// السبب: المنبه الأصلي يعرض أزرار بالإنجليزية (Dismiss) ويعمل بأقصى صوت بدون تحكم
-const AlarmModule: {
+// expo-alarm-module - منبه أصلي على مستوى النظام (يعمل حتى لو التطبيق مغلق)
+let AlarmModule: {
   scheduleAlarm: (params: any) => void;
   stopAlarm: () => void;
   removeAlarm: (uid: string) => void;
 } | null = null;
+
+try {
+  if (Platform.OS === "android") {
+    const mod = require("expo-alarm-module");
+    AlarmModule = {
+      scheduleAlarm: mod.scheduleAlarm || mod.default?.scheduleAlarm,
+      stopAlarm: mod.stopAlarm || mod.default?.stopAlarm,
+      removeAlarm: mod.removeAlarm || mod.default?.removeAlarm,
+    };
+  }
+} catch (e) {
+  console.warn("[Alarm] expo-alarm-module not available:", e);
+}
 
 interface AlarmState {
   isRinging: boolean;

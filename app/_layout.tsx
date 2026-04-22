@@ -75,32 +75,15 @@ function RootLayoutInner() {
         console.warn("[Push] Auto-registration error:", err);
       });
 
-    // دالة للتحقق من أن المنبه لم يفت وقته (أقل من 10 دقائق تأخير)
-    const isAlarmStillValid = (data: any): boolean => {
-      if (!data?.scheduledTime) return true; // إشعارات بدون وقت محدد تعمل دائماً
-      try {
-        const [h, m] = (data.scheduledTime as string).split(':').map(Number);
-        const now = new Date();
-        const scheduled = new Date();
-        scheduled.setHours(h, m, 0, 0);
-        const diffMinutes = (now.getTime() - scheduled.getTime()) / (1000 * 60);
-        // إذا فات أكثر من 10 دقائق، المنبه منتهي الصلاحية
-        if (diffMinutes > 10) {
-          console.log(`[Alarm] Skipping stale alarm (${diffMinutes.toFixed(0)} min late)`);
-          return false;
-        }
-        return true;
-      } catch {
-        return true;
-      }
-    };
-
     // Setup notification listeners
+    // الإشعارات للنصائح والتحفيز والتسوق فقط
+    // meal_alarm = fallback إذا المنبه الأصلي غير متاح، يفتح شاشة المنبه الجميلة
     const cleanup = setupNotificationListeners(
       (notification) => {
         console.log("[Push] Notification received:", notification.request.content.title);
         const data = notification.request.content.data;
-        if (data?.type === "meal" && isAlarmStillValid(data)) {
+        // إذا كان إشعار meal_alarm (fallback) نشغّل شاشة المنبه الجميلة
+        if (data?.type === "meal_alarm") {
           startAlarm(
             (data.recipeName as string) || "وجبتك",
             data.recipeId as string,
@@ -111,22 +94,13 @@ function RootLayoutInner() {
       (response) => {
         console.log("[Push] Notification tapped:", response.notification.request.content.title);
         const data = response.notification.request.content.data;
-        if (data?.type === "meal" && isAlarmStillValid(data)) {
+        if (data?.type === "meal_alarm") {
+          // فتح شاشة المنبه عند الضغط على الإشعار
           startAlarm(
             (data.recipeName as string) || "وجبتك",
             data.recipeId as string,
             data.mealType as string
           );
-        } else if (data?.type === "meal" && !isAlarmStillValid(data)) {
-          // المنبه فات وقته - فقط افتح الوصفة إذا ضغط المستخدم
-          if (data.recipeId) {
-            setTimeout(() => {
-              router.push({
-                pathname: "/sections/recipe-detail" as any,
-                params: { id: data.recipeId as string },
-              });
-            }, 500);
-          }
         } else if (data?.type === "shopping") {
           setTimeout(() => {
             router.push("/sections/shopping-list" as any);
