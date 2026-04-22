@@ -313,3 +313,7 @@
 - [x] إضافة دالة cancelUserSubscription في db.ts
 - [x] إضافة subscription.create و subscription.cancel endpoints في routers.ts
 - [x] تعديل subscription.tsx لإرسال طلب للسيرفر عند الاشتراك والإلغاء (مع حفظ محلي كاحتياط)
+
+## الدفعة 43 - إصلاح عدم ظهور إحصائيات الاشتراكات في لوحة التحكم:
+
+- [x] فحص وإصلاح مشكلة عدم ظهور الاشتراكات - السبب: endpoint كان يتطلب OAuth لكن المستخدم ضيف. الحل: دعم الاشتراك بدون OAuth عبر userName/userPhone

@@ -258,14 +258,39 @@ export const appRouter = router({
     create: publicProcedure
       .input(z.object({
         plan: z.enum(["monthly", "yearly"]),
+        userName: z.string().optional(),
+        userPhone: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        const userId = ctx.user?.id;
-        if (!userId) return { success: false, error: "يجب تسجيل الدخول أولاً" };
+        // Try authenticated user first, fallback to unauthenticated
+        let userId = ctx.user?.id;
+
+        // If not authenticated via OAuth, create/find user by phone or name
+        if (!userId && (input.userPhone || input.userName)) {
+          const db = await import("./db");
+          const dbConn = await db.getDb();
+          if (dbConn) {
+            // Try to find user by phone (stored in name field for guest users)
+            const identifier = input.userPhone || input.userName || "مشترك";
+            const { users } = await import("../drizzle/schema");
+            const { eq } = await import("drizzle-orm");
+            const existing = await dbConn.select().from(users).where(eq(users.name, identifier)).limit(1);
+            if (existing.length > 0) {
+              userId = existing[0].id;
+            }
+          }
+        }
+
+        // If still no userId, create a guest subscription record with userId = 0
+        if (!userId) {
+          userId = 0;
+        }
 
         // Check if user already has active subscription
-        const existingSub = await getUserSubscription(userId);
-        if (existingSub) return { success: false, error: "لديك اشتراك فعال بالفعل" };
+        if (userId > 0) {
+          const existingSub = await getUserSubscription(userId);
+          if (existingSub) return { success: false, error: "لديك اشتراك فعال بالفعل" };
+        }
 
         // Calculate end date
         const endDate = new Date();
@@ -287,9 +312,25 @@ export const appRouter = router({
 
     // Cancel active subscription
     cancel: publicProcedure
-      .mutation(async ({ ctx }) => {
-        const userId = ctx.user?.id;
-        if (!userId) return { success: false, error: "يجب تسجيل الدخول أولاً" };
+      .input(z.object({
+        userPhone: z.string().optional(),
+      }).optional())
+      .mutation(async ({ input, ctx }) => {
+        let userId = ctx.user?.id;
+
+        // Fallback: find user by phone
+        if (!userId && input?.userPhone) {
+          const db = await import("./db");
+          const dbConn = await db.getDb();
+          if (dbConn) {
+            const { users } = await import("../drizzle/schema");
+            const { eq } = await import("drizzle-orm");
+            const existing = await dbConn.select().from(users).where(eq(users.name, input.userPhone)).limit(1);
+            if (existing.length > 0) userId = existing[0].id;
+          }
+        }
+
+        if (!userId) return { success: false, error: "لم يتم العثور على المستخدم" };
         await cancelUserSubscription(userId);
         return { success: true };
       }),

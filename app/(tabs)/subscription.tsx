@@ -35,7 +35,11 @@ export default function SubscriptionScreen() {
             });
             // Save to server (non-blocking - don't fail if server unreachable)
             try {
-              await createSubscription.mutateAsync({ plan: type });
+              await createSubscription.mutateAsync({
+                plan: type,
+                userName: profile.name || undefined,
+                userPhone: profile.phone || undefined,
+              });
             } catch (e) {
               // Server save failed silently - local save is enough for functionality
               console.warn("[Subscription] Server save failed:", e);
@@ -65,7 +69,9 @@ export default function SubscriptionScreen() {
             });
             // Cancel on server (non-blocking)
             try {
-              await cancelSubscription.mutateAsync();
+              await cancelSubscription.mutateAsync({
+                userPhone: profile.phone || undefined,
+              });
             } catch (e) {
               console.warn("[Subscription] Server cancel failed:", e);
             }
