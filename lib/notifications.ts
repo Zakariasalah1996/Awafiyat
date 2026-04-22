@@ -283,36 +283,14 @@ export async function scheduleMealReminder(
       }));
     } catch {}
 
-    // جدولة المنبه الأصلي عبر expo-alarm-module (يرن حتى لو التطبيق مغلق)
-    if (NativeAlarm?.scheduleAlarm) {
-      try {
-        const alarmDate = new Date();
-        alarmDate.setHours(hour, minute, 0, 0);
-        // إذا الوقت فات اليوم، جدوله للغد
-        if (alarmDate.getTime() <= Date.now()) {
-          alarmDate.setDate(alarmDate.getDate() + 1);
-        }
-        const alarmTitle = recipeName
-          ? `حان وقت إعداد ${label} - ${recipeName}`
-          : `حان وقت إعداد ${label}`;
-        NativeAlarm.scheduleAlarm({
-          uid: `meal_${mealType}`,
-          day: alarmDate,
-          title: alarmTitle,
-          description: recipeName ? `الوصفة المقترحة: ${recipeName}` : `هل أنتِ مستعدة لإعداد ${label}؟`,
-          showDismiss: true,
-          showSnooze: false,
-          repeating: true,
-          active: true,
-        } as any);
-        console.log(`[Alarm] Native alarm scheduled: meal_${mealType} at ${hour}:${minute}`);
-      } catch (alarmErr) {
-        console.warn("[Alarm] Failed to schedule native alarm:", alarmErr);
-      }
+    // تعطيل المنبه الأصلي نهائياً - الاعتماد على الإشعارات والشاشة الجميلة بالعربي فقط
+    // (المنبه الأصلي يعرض أزرار "Dismiss" بالإنجليزية)
+    if (false && NativeAlarm?.scheduleAlarm) {
+      // كود معطل - لا نستخدم المنبه الأصلي
     }
 
-    // FALLBACK: إذا المنبه الأصلي غير متاح، نجدول إشعار صامت (بدون صوت) ليفتح التطبيق ويشغل شاشة المنبه
-    if (!NativeAlarm?.scheduleAlarm) {
+    // جدول إشعار صامت يفتح التطبيق ويشغل شاشة المنبه الجميلة بالعربي
+    {
       const emoji = MEAL_EMOJI[mealType];
       const id = await Notifications.scheduleNotificationAsync({
         content: {
@@ -336,11 +314,9 @@ export async function scheduleMealReminder(
           minute,
         },
       });
-      console.log(`[Alarm] Fallback notification scheduled: ${mealType} at ${hour}:${minute} (id: ${id})`);
+      console.log(`[Alarm] Meal alarm notification scheduled: ${mealType} at ${hour}:${minute} (id: ${id})`);
       return id;
     }
-
-    return `alarm_${mealType}`;
   } catch (e) {
     console.warn("Meal alarm scheduling not available in Expo Go. This is normal.", e);
     return null;
