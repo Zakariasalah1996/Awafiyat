@@ -1220,6 +1220,16 @@ async function saveRecipe() {
     result = await api('recipes', 'POST', recipe);
   }
   if (result && result.success) {
+    // Save image to DB for persistence across deployments
+    const finalImageUrl = imageUrl || document.getElementById('rmImageUrl').value.trim();
+    if (finalImageUrl) {
+      try {
+        await api('recipe-image', 'POST', { recipeId: id, imageUrl: finalImageUrl });
+        console.log('Image saved to DB for recipe:', id);
+      } catch (e) {
+        console.error('Failed to save image to DB:', e);
+      }
+    }
     showToast(editingRecipeId ? 'تم تعديل الوصفة بنجاح' : 'تم إضافة الوصفة بنجاح');
     closeRecipeModal();
     loadRecipes();

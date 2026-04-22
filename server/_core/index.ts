@@ -9,7 +9,9 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { savePushToken } from "../db";
+import { savePushToken, getDb } from "../db";
+import { recipeImages } from "../../drizzle/schema";
+import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
 import * as fs from "fs";
 
@@ -490,7 +492,7 @@ async function startServer() {
   // ==================== IMAGE UPLOAD ====================
   app.post('/api/admin/upload-image', adminAuth, async (req, res) => {
     try {
-      const { imageData, fileName, contentType } = req.body;
+      const { imageData, fileName, contentType, recipeId } = req.body;
       if (!imageData || !fileName) {
         return res.status(400).json({ error: 'imageData and fileName are required' });
       }
@@ -500,6 +502,25 @@ async function startServer() {
       const fileKey = `recipe-images/${fileName}`;
       const { url } = await storagePut(fileKey, buffer, contentType || 'image/jpeg');
       console.log('[Upload] Image uploaded successfully:', url);
+      
+      // Also save to DB if recipeId is provided
+      if (recipeId) {
+        try {
+          const db = await getDb();
+          if (db) {
+            const existing = await db.select().from(recipeImages).where(eq(recipeImages.recipeId, recipeId));
+            if (existing.length > 0) {
+              await db.update(recipeImages).set({ imageUrl: url }).where(eq(recipeImages.recipeId, recipeId));
+            } else {
+              await db.insert(recipeImages).values({ recipeId, imageUrl: url });
+            }
+            console.log('[Upload] Image URL saved to DB for recipe:', recipeId);
+          }
+        } catch (dbErr) {
+          console.error('[Upload] Failed to save image URL to DB:', dbErr);
+        }
+      }
+      
       res.json({ success: true, url });
     } catch (e: any) {
       console.error('[Upload] Failed to upload image:', e);
@@ -507,18 +528,55 @@ async function startServer() {
     }
   });
 
+  // Save recipe image URL to DB (called when updating recipe with image)
+  app.post('/api/admin/recipe-image', adminAuth, async (req, res) => {
+    try {
+      const { recipeId, imageUrl } = req.body;
+      if (!recipeId || !imageUrl) {
+        return res.status(400).json({ error: 'recipeId and imageUrl are required' });
+      }
+      const db = await getDb();
+      if (!db) return res.status(500).json({ error: 'Database not available' });
+      
+      const existing = await db.select().from(recipeImages).where(eq(recipeImages.recipeId, recipeId));
+      if (existing.length > 0) {
+        await db.update(recipeImages).set({ imageUrl }).where(eq(recipeImages.recipeId, recipeId));
+      } else {
+        await db.insert(recipeImages).values({ recipeId, imageUrl });
+      }
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ==================== PUBLIC RECIPE IMAGES API ====================
-  // Public endpoint - no auth needed - returns recipe image URLs for the app
+  // Public endpoint - returns recipe image URLs from DB first, then fallback to code file
   app.get('/api/recipes/images', async (_req, res) => {
     try {
-      const recipes = recipesApi.getAllRecipes();
       const imageMap: Record<string, string> = {};
+      
+      // 1. Get images from code file (fallback/default)
+      const recipes = recipesApi.getAllRecipes();
       for (const r of recipes) {
-        // Return any image URL (both absolute URLs and storage URLs)
         if (r.image && r.image.trim()) {
           imageMap[r.id] = r.image;
         }
       }
+      
+      // 2. Override with DB images (these are the user-uploaded ones that persist)
+      try {
+        const db = await getDb();
+        if (db) {
+          const dbImages = await db.select().from(recipeImages);
+          for (const img of dbImages) {
+            imageMap[img.recipeId] = img.imageUrl;
+          }
+        }
+      } catch (dbErr) {
+        console.error('[Images] Failed to load DB images:', dbErr);
+      }
+      
       res.json(imageMap);
     } catch (e: any) {
       res.status(500).json({ error: e.message });

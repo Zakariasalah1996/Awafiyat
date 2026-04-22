@@ -131,3 +131,18 @@ export const dailyStats = mysqlTable("daily_stats", {
 
 export type DailyStat = typeof dailyStats.$inferSelect;
 export type InsertDailyStat = typeof dailyStats.$inferInsert;
+
+/**
+ * Recipe images - stores image URLs for recipes (persisted in DB, not in code files).
+ * This ensures images survive deployments and code updates.
+ */
+export const recipeImages = mysqlTable("recipe_images", {
+  id: int("id").autoincrement().primaryKey(),
+  recipeId: varchar("recipeId", { length: 64 }).notNull().unique(),
+  imageUrl: text("imageUrl").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type RecipeImage = typeof recipeImages.$inferSelect;
+export type InsertRecipeImage = typeof recipeImages.$inferInsert;
