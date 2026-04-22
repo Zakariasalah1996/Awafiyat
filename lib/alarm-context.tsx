@@ -35,32 +35,20 @@ export interface AlarmSettings {
 
 const DEFAULT_SETTINGS: AlarmSettings = {
   enabled: true,
-  volume: 0.5,
+  volume: 0.3, // 30% - مستوى منخفض افتراضياً لراحة المستخدم
   tone: "morning",
   vibration: true,
 };
 
 const STORAGE_KEY = "@alarm_settings";
 
-// expo-alarm-module - منبه أصلي على مستوى النظام
-let AlarmModule: {
+// المنبه الأصلي (expo-alarm-module) معطّل - نستخدم فقط شاشة المنبه الجميلة بالعربي
+// السبب: المنبه الأصلي يعرض أزرار بالإنجليزية (Dismiss) ويعمل بأقصى صوت بدون تحكم
+const AlarmModule: {
   scheduleAlarm: (params: any) => void;
   stopAlarm: () => void;
   removeAlarm: (uid: string) => void;
 } | null = null;
-
-try {
-  if (Platform.OS === "android") {
-    const mod = require("expo-alarm-module");
-    AlarmModule = {
-      scheduleAlarm: mod.scheduleAlarm || mod.default?.scheduleAlarm,
-      stopAlarm: mod.stopAlarm || mod.default?.stopAlarm,
-      removeAlarm: mod.removeAlarm || mod.default?.removeAlarm,
-    };
-  }
-} catch (e) {
-  console.warn("[Alarm] expo-alarm-module not available:", e);
-}
 
 interface AlarmState {
   isRinging: boolean;
@@ -268,10 +256,10 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // اهتزاز لطيف إذا مفعّل (وليس عنيف)
+      // اهتزاز خفيف إذا مفعّل - لا يتكرر (مرة واحدة فقط)
       if (s.vibration && Platform.OS !== "web") {
-        // نمط اهتزاز لطيف: قصير - توقف - قصير
-        Vibration.vibrate([0, 500, 1000, 500, 1000, 500], true);
+        // نبضة واحدة لطيفة - ليست مزعجة
+        Vibration.vibrate([0, 300, 500, 300]);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     },

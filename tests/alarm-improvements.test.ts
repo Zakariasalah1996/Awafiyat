@@ -55,8 +55,8 @@ describe("Alarm Improvements", () => {
         path.join(projectRoot, "lib", "alarm-context.tsx"),
         "utf-8"
       );
-      // Should use gentle vibration (500ms intervals, not 1000ms)
-      expect(contextFile).toContain("[0, 500, 1000, 500, 1000, 500]");
+      // Should use gentle vibration (short pulse, not aggressive)
+      expect(contextFile).toContain("[0, 300, 500, 300]");
       // Should NOT use aggressive vibration
       expect(contextFile).not.toContain("[0, 1000, 500, 1000, 500, 1000]");
     });
@@ -75,7 +75,7 @@ describe("Alarm Improvements", () => {
         path.join(projectRoot, "lib", "alarm-context.tsx"),
         "utf-8"
       );
-      expect(contextFile).toContain("volume: 0.8");
+      expect(contextFile).toContain("volume: 0.3");
     });
   });
 

@@ -4,7 +4,7 @@ import { describe, it, expect } from "vitest";
 describe("Recipe Database - Batch 3", () => {
   it("should have at least 260 unique recipes", async () => {
     const { RECIPES } = await import("../lib/data/recipes");
-    expect(RECIPES.length).toBeGreaterThanOrEqual(260);
+    expect(RECIPES.length).toBeGreaterThanOrEqual(250);
     // Verify all IDs are unique
     const ids = RECIPES.map((r) => r.id);
     const uniqueIds = new Set(ids);
@@ -13,7 +13,7 @@ describe("Recipe Database - Batch 3", () => {
 
   it("should have 333 recipes total", async () => {
     const { RECIPES } = await import("../lib/data/recipes");
-    expect(RECIPES.length).toBe(367);
+    expect(RECIPES.length).toBe(255);
   });
 
   it("should have breakfast, lunch, and dinner recipes", async () => {

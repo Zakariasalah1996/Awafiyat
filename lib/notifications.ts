@@ -4,25 +4,13 @@ import Constants from "expo-constants";
 import { getApiBaseUrl } from "@/constants/oauth";
 import { getGuestUserId } from "@/lib/guest-auth";
 
-// expo-alarm-module - منبه أصلي على مستوى النظام
-let NativeAlarm: {
+// المنبه الأصلي (expo-alarm-module) معطّل - نستخدم فقط شاشة المنبه الجميلة بالعربي
+// السبب: المنبه الأصلي يعرض أزرار بالإنجليزية ويعمل بأقصى صوت بدون تحكم
+const NativeAlarm: {
   scheduleAlarm: (params: any) => void;
   stopAlarm: () => void;
   removeAlarm: (uid: string) => void;
 } | null = null;
-
-try {
-  if (Platform.OS === "android") {
-    const mod = require("expo-alarm-module");
-    NativeAlarm = {
-      scheduleAlarm: mod.scheduleAlarm || mod.default?.scheduleAlarm,
-      stopAlarm: mod.stopAlarm || mod.default?.stopAlarm,
-      removeAlarm: mod.removeAlarm || mod.default?.removeAlarm,
-    };
-  }
-} catch (e) {
-  console.warn("[Alarm] expo-alarm-module not available:", e);
-}
 
 // Configure notification handler for foreground
 Notifications.setNotificationHandler({
@@ -190,12 +178,12 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 
   try {
     if (Platform.OS === "android") {
-      // قناة الوجبات بأولوية قصوى + صوت منبه طويل (30 ثانية)
+      // قناة الوجبات - صوت إشعار لطيف + اهتزاز خفيف
       await Notifications.setNotificationChannelAsync("meals", {
         name: "تذكير الوجبات",
         description: "تذكير لطيف بأوقات إعداد الوجبات",
         importance: Notifications.AndroidImportance.HIGH,
-        vibrationPattern: [0, 500, 1000, 500],
+        vibrationPattern: [0, 300, 500, 300],
         lightColor: "#4A7C59",
         sound: "notification.mp3",
         enableVibrate: true,
@@ -295,9 +283,9 @@ export async function scheduleMealReminder(
         title,
         body,
         sound: notificationSound,
-        priority: Notifications.AndroidNotificationPriority.MAX,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
         sticky: false, // يختفي عند السحب - لا نريد إزعاج المستخدم
-        vibrate: [0, 500, 1000, 500], // اهتزاز لطيف
+        vibrate: [0, 300, 500, 300], // اهتزاز خفيف
         data: {
           type: "meal",
           mealType,
