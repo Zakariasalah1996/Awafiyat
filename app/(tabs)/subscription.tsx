@@ -4,15 +4,18 @@ import { useColors } from "@/hooks/use-colors";
 import { useUser } from "@/lib/user-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { trpc } from "@/lib/trpc";
 
 export default function SubscriptionScreen() {
   const colors = useColors();
   const { profile, updateProfile } = useUser();
+  const createSubscription = trpc.subscription.create.useMutation();
+  const cancelSubscription = trpc.subscription.cancel.useMutation();
 
   const handleSubscribe = (type: "monthly" | "yearly") => {
     Alert.alert(
       "تأكيد الاشتراك",
-      `هل تريد الاشتراك في الباقة ${type === "monthly" ? "الشهرية (4,000 دينار)" : "السنوية (40,000 دينار)"}؟`,
+      `هل تريد الاشتراك في الباقة ${type === "monthly" ? "الشهرية (4,000 دينار)" : "السنوية (40,000 دينار)"}?`,
       [
         { text: "إلغاء", style: "cancel" },
         {
@@ -24,11 +27,19 @@ export default function SubscriptionScreen() {
             } else {
               expiry.setFullYear(expiry.getFullYear() + 1);
             }
+            // Save locally first
             await updateProfile({
               isSubscribed: true,
               subscriptionType: type,
               subscriptionExpiry: expiry.toISOString(),
             });
+            // Save to server (non-blocking - don't fail if server unreachable)
+            try {
+              await createSubscription.mutateAsync({ plan: type });
+            } catch (e) {
+              // Server save failed silently - local save is enough for functionality
+              console.warn("[Subscription] Server save failed:", e);
+            }
             Alert.alert("تم الاشتراك بنجاح! 🎉", "ألف عافية عليك، استمتع بجميع الميزات.");
           },
         },
@@ -46,11 +57,18 @@ export default function SubscriptionScreen() {
           text: "نعم، إلغاء",
           style: "destructive",
           onPress: async () => {
+            // Cancel locally
             await updateProfile({
               isSubscribed: false,
               subscriptionType: null,
               subscriptionExpiry: null,
             });
+            // Cancel on server (non-blocking)
+            try {
+              await cancelSubscription.mutateAsync();
+            } catch (e) {
+              console.warn("[Subscription] Server cancel failed:", e);
+            }
           },
         },
       ]

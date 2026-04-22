@@ -183,6 +183,14 @@ export async function getUserSubscription(userId: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function cancelUserSubscription(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(subscriptions)
+    .set({ status: "cancelled" })
+    .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")));
+}
+
 // ==================== PROMO CODES ====================
 
 export async function createPromoCode(data: InsertPromoCode) {

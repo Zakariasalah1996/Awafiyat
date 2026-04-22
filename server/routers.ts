@@ -10,7 +10,7 @@ import { invokeLLM } from "./_core/llm";
 import {
   getAllUsers, getUserCount, updateUserStatus, updateUserRole, getUsersByCountry,
   savePushToken, getActivePushTokens, getPushTokensByCountry,
-  createSubscription, getAllSubscriptions, getActiveSubscriptionCount, getUserSubscription,
+  createSubscription, getAllSubscriptions, getActiveSubscriptionCount, getUserSubscription, cancelUserSubscription,
   createPromoCode, getAllPromoCodes, getPromoCodeByCode, incrementPromoCodeUse, togglePromoCode,
   createFeedback, getAllFeedback, getFeedbackCount, updateFeedbackStatus,
   createNotification, getAllNotifications, updateNotificationCounts,
@@ -248,6 +248,49 @@ export const appRouter = router({
           message: input.message,
           rating: input.rating,
         });
+        return { success: true };
+      }),
+  }),
+
+  // ==================== SUBSCRIPTION ====================
+  subscription: router({
+    // Create a paid subscription (monthly or yearly)
+    create: publicProcedure
+      .input(z.object({
+        plan: z.enum(["monthly", "yearly"]),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const userId = ctx.user?.id;
+        if (!userId) return { success: false, error: "يجب تسجيل الدخول أولاً" };
+
+        // Check if user already has active subscription
+        const existingSub = await getUserSubscription(userId);
+        if (existingSub) return { success: false, error: "لديك اشتراك فعال بالفعل" };
+
+        // Calculate end date
+        const endDate = new Date();
+        if (input.plan === "monthly") {
+          endDate.setMonth(endDate.getMonth() + 1);
+        } else {
+          endDate.setFullYear(endDate.getFullYear() + 1);
+        }
+
+        await createSubscription({
+          userId,
+          plan: input.plan,
+          status: "active",
+          endDate,
+        });
+
+        return { success: true, endDate: endDate.toISOString() };
+      }),
+
+    // Cancel active subscription
+    cancel: publicProcedure
+      .mutation(async ({ ctx }) => {
+        const userId = ctx.user?.id;
+        if (!userId) return { success: false, error: "يجب تسجيل الدخول أولاً" };
+        await cancelUserSubscription(userId);
         return { success: true };
       }),
   }),
