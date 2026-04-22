@@ -9504,3 +9504,28 @@ export function getRecipesSortedByCountry(country: string): Recipe[] {
   const otherRecipes = RECIPES.filter((r) => !r.origin || !origins.includes(r.origin));
   return [...countryRecipes, ...otherRecipes];
 }
+
+// === نظام القفل (Paywall) ===
+// 50 وصفة مجانية متنوعة: 20 عراقي + 8 سعودي + 7 إماراتي + 5 كردي + 10 عام
+// موزعة بين فطور وغداء وعشاء
+export const FREE_RECIPE_IDS = new Set([
+  "breakfast_5", "dinner_1", "new_12", "kb_18", "kb_20", "kb_21", "kb_22",
+  "lunch_1", "lunch_2", "lunch_3", "lunch_4", "lunch_5", "lunch_6", "lunch_7",
+  "dinner_2", "dinner_3", "healthy_2", "dessert_1", "new_5", "new_6",
+  "gulf_92", "gulf_68", "gulf_69", "gulf_73", "gulf_76", "gulf_80", "gulf_84", "gulf_71",
+  "gb_1", "gb_2", "gb_3", "hd_18", "gulf_70", "gulf_72", "hd_8",
+  "kb_1", "kb_2", "kb_8", "kb_15", "kb_10",
+  "dinner_4", "dessert_2", "new_2", "new_9", "lunch_8", "healthy_1", "new_3", "new_11", "new_4", "kb_5",
+]);
+
+export function isRecipeFree(recipeId: string): boolean {
+  return FREE_RECIPE_IDS.has(recipeId);
+}
+
+export function getFreeRecipes(): Recipe[] {
+  return RECIPES.filter((r) => FREE_RECIPE_IDS.has(r.id));
+}
+
+export function getLockedRecipes(): Recipe[] {
+  return RECIPES.filter((r) => !FREE_RECIPE_IDS.has(r.id));
+}

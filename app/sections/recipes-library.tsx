@@ -21,7 +21,9 @@ import {
   getRecipesByCategory,
   getRecipesByHealth,
   searchRecipes,
+  isRecipeFree,
 } from "@/lib/data/recipes";
+import { Alert } from "react-native";
 import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
@@ -183,15 +185,34 @@ export default function RecipesLibraryScreen() {
       const totalTime = item.prepTime + item.cookTime;
       const originFlag = item.origin ? ORIGIN_FLAG[item.origin] || "" : "";
       const originLabel = item.origin ? ORIGIN_LABEL[item.origin] || "" : "";
+      const isFree = isRecipeFree(item.id);
+      const isLocked = !isFree && !profile.isSubscribed;
 
       return (
         <TouchableOpacity
-          onPress={() =>
+          onPress={() => {
+            if (isLocked) {
+              if (Platform.OS !== "web") {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+              }
+              Alert.alert(
+                "وصفة حصرية \uD83D\uDD12",
+                "هذه الوصفة متاحة للمشتركين فقط.\nاشترك الآن لفتح أكثر من 200 وصفة حصرية!",
+                [
+                  { text: "لاحقاً", style: "cancel" },
+                  {
+                    text: "اشترك الآن",
+                    onPress: () => router.push("/(tabs)/subscription" as any),
+                  },
+                ]
+              );
+              return;
+            }
             router.push({
               pathname: "/sections/recipe-detail" as any,
               params: { id: item.id },
-            })
-          }
+            });
+          }}
           className="mx-5 mb-3 rounded-2xl overflow-hidden"
           style={{
             backgroundColor: colors.surface,
@@ -225,6 +246,24 @@ export default function RecipesLibraryScreen() {
                   {originFlag} {originLabel}
                 </Text>
               </View>
+            ) : null}
+
+            {/* Lock badge */}
+            {isLocked ? (
+              <View
+                className="absolute top-2 right-2 rounded-full px-2.5 py-1.5"
+                style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
+              >
+                <Text style={{ fontSize: 14 }}>🔒</Text>
+              </View>
+            ) : null}
+
+            {/* Locked overlay */}
+            {isLocked ? (
+              <View
+                className="absolute inset-0"
+                style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
+              />
             ) : null}
 
           </View>

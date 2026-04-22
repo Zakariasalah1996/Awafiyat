@@ -31,6 +31,8 @@ const DAYS = ["السبت", "الأحد", "الإثنين", "الثلاثاء", 
 const MEAL_PLAN_STORAGE_KEY = "@awafiyat_meal_plan";
 const MEAL_TIMES_STORAGE_KEY = "@awafiyat_meal_times";
 const TIMES_SET_KEY = "@awafiyat_times_set";
+const MEAL_PLANNER_FIRST_USE_KEY = "@awafiyat_meal_planner_first_use";
+const FREE_TRIAL_DAYS = 5;
 
 // تحويل الفترة إلى عربي
 const getPeriodLabel = (hour: number): string => {
@@ -113,6 +115,8 @@ export default function MealPlannerScreen() {
   const [showTimePicker, setShowTimePicker] = useState<"breakfast" | "lunch" | "dinner" | null>(null);
   const [timesAlreadySet, setTimesAlreadySet] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [trialExpired, setTrialExpired] = useState(false);
+  const [trialDaysLeft, setTrialDaysLeft] = useState(FREE_TRIAL_DAYS);
 
   // منبه الطبخ - يستخدم AlarmContext العالمي
   const { alarm, startAlarm: globalStartAlarm, stopAlarm: globalStopAlarm } = useAlarm();
@@ -121,10 +125,11 @@ export default function MealPlannerScreen() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [savedTimes, savedPlan, savedTimesSet] = await Promise.all([
+        const [savedTimes, savedPlan, savedTimesSet, firstUse] = await Promise.all([
           AsyncStorage.getItem(MEAL_TIMES_STORAGE_KEY),
           AsyncStorage.getItem(MEAL_PLAN_STORAGE_KEY),
           AsyncStorage.getItem(TIMES_SET_KEY),
+          AsyncStorage.getItem(MEAL_PLANNER_FIRST_USE_KEY),
         ]);
         if (savedTimes) {
           setMealTimes(JSON.parse(savedTimes));
@@ -134,7 +139,27 @@ export default function MealPlannerScreen() {
         }
         if (savedTimesSet === "true") {
           setTimesAlreadySet(true);
-          setStep("plan"); // تخطي شاشة الأوقات إذا سبق تحديدها
+          setStep("plan");
+        }
+        // تتبع الفترة التجريبية (5 أيام)
+        if (!isSubscribed) {
+          if (firstUse) {
+            const firstDate = new Date(firstUse);
+            const now = new Date();
+            const diffMs = now.getTime() - firstDate.getTime();
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const remaining = FREE_TRIAL_DAYS - diffDays;
+            if (remaining <= 0) {
+              setTrialExpired(true);
+              setTrialDaysLeft(0);
+            } else {
+              setTrialDaysLeft(remaining);
+            }
+          } else {
+            // أول استخدام - حفظ التاريخ
+            await AsyncStorage.setItem(MEAL_PLANNER_FIRST_USE_KEY, new Date().toISOString());
+            setTrialDaysLeft(FREE_TRIAL_DAYS);
+          }
         }
       } catch (e) {
         console.error("Failed to load meal data:", e);
@@ -143,7 +168,7 @@ export default function MealPlannerScreen() {
       }
     };
     loadData();
-  }, []);
+  }, [isSubscribed]);
 
   // حفظ الأوقات عند التغيير
   const saveMealTimes = async (times: MealTimes) => {
@@ -168,7 +193,7 @@ export default function MealPlannerScreen() {
     globalStartAlarm(recipeName, recipeId);
   }, [globalStartAlarm]);
 
-  const availableDays = isSubscribed ? DAYS : DAYS.slice(0, 2);
+  const availableDays = isSubscribed ? DAYS : (trialExpired ? [] : DAYS);
 
   const suggestedRecipes = useMemo(() => {
     if (!showRecipePicker) return [];
@@ -299,6 +324,53 @@ export default function MealPlannerScreen() {
   }
 
   // شاشة المنبه الآن تُعرض عبر AlarmScreen في _layout.tsx (فوق كل شيء)
+
+  // شاشة انتهاء الفترة التجريبية
+  if (trialExpired && !isSubscribed) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+        <View className="flex-1 items-center justify-center px-6">
+          <Text style={{ fontSize: 64, marginBottom: 16 }}>🔒</Text>
+          <Text
+            className="text-foreground font-bold"
+            style={{ fontSize: 24, textAlign: "center", marginBottom: 12 }}
+          >
+            انتهت الفترة التجريبية
+          </Text>
+          <Text
+            className="text-muted"
+            style={{ fontSize: 16, textAlign: "center", lineHeight: 26, marginBottom: 24 }}
+          >
+            لقد استمتعت بجدول الطبخ لمدة 5 أيام مجاناً.{"\n"}
+            اشترك الآن للاستمرار في تخطيط وجباتك الأسبوعية{"\n"}
+            مع منبهات ذكية ووصفات متجددة!
+          </Text>
+          <TouchableOpacity
+            onPress={() => {
+              if (Platform.OS !== "web") {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }
+              router.push("/(tabs)/subscription" as any);
+            }}
+            className="rounded-2xl px-8 py-4"
+            style={{ backgroundColor: colors.primary }}
+            activeOpacity={0.8}
+          >
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>
+              اشترك الآن
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="mt-4 py-2"
+            activeOpacity={0.6}
+          >
+            <Text className="text-muted" style={{ fontSize: 14 }}>رجوع</Text>
+          </TouchableOpacity>
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   // شاشة ضبط أوقات الوجبات
   if (step === "times") {
