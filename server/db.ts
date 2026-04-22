@@ -287,15 +287,24 @@ export async function getDailyStats(days = 30) {
 
 export async function getDashboardStats() {
   const db = await getDb();
-  if (!db) return { totalUsers: 0, activeSubscriptions: 0, newFeedback: 0, totalNotifications: 0 };
+  if (!db) return { totalUsers: 0, activeSubscriptions: 0, newFeedback: 0, totalNotifications: 0, freeSubscriptions: 0, monthlySubscriptions: 0, yearlySubscriptions: 0, promoSubscriptions: 0 };
   const [userCount] = await db.select({ count: count() }).from(users);
   const [subCount] = await db.select({ count: count() }).from(subscriptions).where(eq(subscriptions.status, "active"));
   const [fbCount] = await db.select({ count: count() }).from(feedback).where(eq(feedback.status, "new"));
   const [notifCount] = await db.select({ count: count() }).from(notifications);
+  // Subscription breakdown by plan
+  const [freeCount] = await db.select({ count: count() }).from(subscriptions).where(and(eq(subscriptions.status, "active"), eq(subscriptions.plan, "free")));
+  const [monthlyCount] = await db.select({ count: count() }).from(subscriptions).where(and(eq(subscriptions.status, "active"), eq(subscriptions.plan, "monthly")));
+  const [yearlyCount] = await db.select({ count: count() }).from(subscriptions).where(and(eq(subscriptions.status, "active"), eq(subscriptions.plan, "yearly")));
+  const [promoCount] = await db.select({ count: count() }).from(subscriptions).where(and(eq(subscriptions.status, "active"), eq(subscriptions.plan, "promo")));
   return {
     totalUsers: userCount?.count ?? 0,
     activeSubscriptions: subCount?.count ?? 0,
     newFeedback: fbCount?.count ?? 0,
     totalNotifications: notifCount?.count ?? 0,
+    freeSubscriptions: freeCount?.count ?? 0,
+    monthlySubscriptions: monthlyCount?.count ?? 0,
+    yearlySubscriptions: yearlyCount?.count ?? 0,
+    promoSubscriptions: promoCount?.count ?? 0,
   };
 }
