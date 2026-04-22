@@ -99,84 +99,85 @@ export default function OnboardingScreen() {
             }}
             resizeMode="cover"
           />
-          {/* تدرج لوني من الأسفل */}
+          {/* تدرج لوني يغطي الشاشة بالكامل */}
           <LinearGradient
-            colors={["transparent", "rgba(0,0,0,0.3)", "rgba(0,0,0,0.85)"]}
-            locations={[0, 0.4, 0.75]}
+            colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.2)", "rgba(0,0,0,0.5)", "rgba(0,0,0,0.8)"]}
+            locations={[0, 0.25, 0.55, 0.85]}
             style={{
               position: "absolute",
+              top: 0,
               bottom: 0,
               left: 0,
               right: 0,
-              height: SCREEN_HEIGHT * 0.65,
             }}
           />
         </Animated.View>
 
-        {/* المحتوى فوق الصورة */}
+        {/* المحتوى فوق الصورة - يملأ الشاشة بالكامل */}
         <View
           style={{
             position: "absolute",
+            top: 0,
             bottom: 0,
             left: 0,
             right: 0,
             paddingHorizontal: 32,
-            paddingBottom: 60,
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          {/* الشعار */}
-          <Animated.View entering={FadeInDown.delay(200).duration(600)} style={{ alignItems: "center" }}>
+          {/* الشعار - في الأعلى */}
+          <Animated.View entering={FadeInDown.delay(200).duration(600)} style={{ alignItems: "center", marginTop: -SCREEN_HEIGHT * 0.12 }}>
             <Image
               source={require("@/assets/images/icon.png")}
               style={{
-                width: 100,
-                height: 100,
-                borderRadius: 24,
-                marginBottom: 16,
+                width: 110,
+                height: 110,
+                borderRadius: 26,
+                marginBottom: 24,
               }}
             />
           </Animated.View>
 
-          {/* النص */}
+          {/* النص - أكبر وفي الوسط */}
           <Animated.View entering={FadeInDown.delay(400).duration(600)} style={{ alignItems: "center" }}>
             <Text
               style={{
-                fontSize: 36,
+                fontSize: 42,
                 fontWeight: "bold",
                 color: "#FFFFFF",
                 textAlign: "center",
-                marginBottom: 8,
+                marginBottom: 12,
               }}
             >
               ألف عافيات
             </Text>
             <Text
               style={{
-                fontSize: 17,
-                color: "rgba(255,255,255,0.85)",
+                fontSize: 20,
+                color: "rgba(255,255,255,0.9)",
                 textAlign: "center",
-                lineHeight: 28,
-                marginBottom: 8,
+                lineHeight: 32,
               }}
             >
               أهلاً وسهلاً بك{"\n"}حيث نُطعم أجسادنا بالصحة والمحبة
             </Text>
           </Animated.View>
 
-          {/* زر لنبدأ */}
-          <Animated.View entering={FadeInUp.delay(700).duration(500)} style={{ marginTop: 28 }}>
+          {/* زر لنبدأ - في وسط الشاشة بالضبط */}
+          <Animated.View entering={FadeInUp.delay(700).duration(500)} style={{ marginTop: 40, width: "100%" }}>
             <TouchableOpacity
               onPress={handleStart}
               style={{
                 width: "100%",
-                paddingVertical: 16,
+                paddingVertical: 18,
                 borderRadius: 20,
                 alignItems: "center",
                 backgroundColor: colors.primary,
               }}
               activeOpacity={0.8}
             >
-              <Text style={{ color: "#FFFFFF", fontSize: 18, fontWeight: "bold" }}>
+              <Text style={{ color: "#FFFFFF", fontSize: 20, fontWeight: "bold" }}>
                 لنبدأ
               </Text>
             </TouchableOpacity>
