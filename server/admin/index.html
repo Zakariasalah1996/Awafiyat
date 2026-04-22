@@ -329,6 +329,28 @@
         <div class="stat-card"><div class="stat-icon feedback">💬</div><div class="stat-info"><h3 id="statFeedback">0</h3><p>ملاحظات جديدة</p></div></div>
         <div class="stat-card"><div class="stat-icon notifs">🔔</div><div class="stat-info"><h3 id="statNotifs">0</h3><p>إشعارات مرسلة</p></div></div>
       </div>
+      <!-- Subscription breakdown -->
+      <div style="margin-bottom:20px;">
+        <h3 style="margin-bottom:14px;font-size:16px;color:var(--text-secondary);">📊 تفصيل الاشتراكات</h3>
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+          <div class="stat-card" style="border-top:3px solid #22c55e;">
+            <div class="stat-icon" style="background:#dcfce7;color:#16a34a;">🆓</div>
+            <div class="stat-info"><h3 id="statSubsFree">0</h3><p>مجاني</p></div>
+          </div>
+          <div class="stat-card" style="border-top:3px solid #3b82f6;">
+            <div class="stat-icon" style="background:#dbeafe;color:#1d4ed8;">📅</div>
+            <div class="stat-info"><h3 id="statSubsMonthly">0</h3><p>شهري</p></div>
+          </div>
+          <div class="stat-card" style="border-top:3px solid #f59e0b;">
+            <div class="stat-icon" style="background:#fef3c7;color:#d97706;">🏆</div>
+            <div class="stat-info"><h3 id="statSubsYearly">0</h3><p>سنوي</p></div>
+          </div>
+          <div class="stat-card" style="border-top:3px solid #ec4899;">
+            <div class="stat-icon" style="background:#fce7f3;color:#be185d;">🎁</div>
+            <div class="stat-info"><h3 id="statSubsPromo">0</h3><p>ترويجي</p></div>
+          </div>
+        </div>
+      </div>
       <div class="charts-grid">
         <div class="chart-card"><h3>📈 نمو المستخدمين (آخر 30 يوم)</h3><div class="chart-container"><canvas id="usersChart"></canvas></div></div>
         <div class="chart-card"><h3>🌍 توزيع المستخدمين حسب الدولة</h3><div class="chart-container"><canvas id="countryChart"></canvas></div></div>
@@ -722,6 +744,11 @@ async function loadDashboard() {
     document.getElementById('statSubs').textContent = data.activeSubscriptions || 0;
     document.getElementById('statFeedback').textContent = data.newFeedback || 0;
     document.getElementById('statNotifs').textContent = data.totalNotifications || 0;
+    // Subscription breakdown
+    document.getElementById('statSubsFree').textContent = data.freeSubscriptions || 0;
+    document.getElementById('statSubsMonthly').textContent = data.monthlySubscriptions || 0;
+    document.getElementById('statSubsYearly').textContent = data.yearlySubscriptions || 0;
+    document.getElementById('statSubsPromo').textContent = data.promoSubscriptions || 0;
     if (data.newFeedback > 0) {
       document.getElementById('feedbackBadge').style.display = 'inline';
       document.getElementById('feedbackBadge').textContent = data.newFeedback;
@@ -733,6 +760,10 @@ async function loadDashboard() {
     document.getElementById('statSubs').textContent = '0';
     document.getElementById('statFeedback').textContent = '0';
     document.getElementById('statNotifs').textContent = '0';
+    document.getElementById('statSubsFree').textContent = '0';
+    document.getElementById('statSubsMonthly').textContent = '0';
+    document.getElementById('statSubsYearly').textContent = '0';
+    document.getElementById('statSubsPromo').textContent = '0';
     renderUsersChart([]);
     renderCountryChart([]);
   }

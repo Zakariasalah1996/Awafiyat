@@ -691,20 +691,6 @@ export default function ProfileScreen() {
           <MaterialIcons name="chevron-left" size={20} color={colors.muted} />
         </TouchableOpacity>
 
-        {/* Admin Stats - only shown for admins (phone number check as simple gate) */}
-        <TouchableOpacity
-          onPress={() => router.push("/sections/admin-stats" as any)}
-          className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border flex-row items-center justify-between"
-          style={{ borderColor: colors.border }}
-          activeOpacity={0.7}
-        >
-          <View className="flex-row items-center">
-            <Text className="text-lg ml-2">📊</Text>
-            <Text className="text-base font-bold text-foreground">لوحة الإحصائيات</Text>
-          </View>
-          <MaterialIcons name="chevron-left" size={20} color={colors.muted} />
-        </TouchableOpacity>
-
         {/* Logout */}
         <TouchableOpacity
           onPress={handleLogout}
