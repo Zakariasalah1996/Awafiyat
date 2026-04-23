@@ -1,5 +1,5 @@
 diff --git a/android/src/main/java/com/expoalarmmodule/Alarm.java b/android/src/main/java/com/expoalarmmodule/Alarm.java
-index 49daf38ac5620031fd3d1da8c52c0762d822b96a..b892397ea73283a58a0b2be1ca73e957ee728485 100644
+index 49daf38ac5620031fd3d1da8c52c0762d822b96a..c92673b7d900abfc42d1faede9ed32c5264e50d6 100644
 --- a/android/src/main/java/com/expoalarmmodule/Alarm.java
 +++ b/android/src/main/java/com/expoalarmmodule/Alarm.java
 @@ -55,7 +55,12 @@ public class Alarm implements Cloneable {
@@ -25,7 +25,7 @@ index 49daf38ac5620031fd3d1da8c52c0762d822b96a..b892397ea73283a58a0b2be1ca73e957
            this.date = date;
          }
 diff --git a/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java b/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
-index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..94c0b843f9bae692266a4418cd25eafef943ffda 100644
+index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..c8d4ea3ae531e295f377433b0ec6fdff743957f3 100644
 --- a/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
 +++ b/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
 @@ -155,6 +155,11 @@ public class ExpoAlarmModuleModule extends ReactContextBaseJavaModule {
@@ -59,8 +59,36 @@ index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..94c0b843f9bae692266a4418cd25eafe
  
      if( alarm.date != null) {
        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+diff --git a/android/src/main/java/com/expoalarmmodule/Helper.java b/android/src/main/java/com/expoalarmmodule/Helper.java
+index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..040882873e18cb62470a7bbab8ef17a0f286b6a7 100644
+--- a/android/src/main/java/com/expoalarmmodule/Helper.java
++++ b/android/src/main/java/com/expoalarmmodule/Helper.java
+@@ -122,8 +122,7 @@ public class Helper {
+             // Sets the notification light color for notifications posted to this
+             // channel, if the device supports this feature.
+             channel.setLightColor(Color.RED);
+-            channel.enableVibration(true);
+-            channel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
++            channel.enableVibration(false);
+             // Register the channel with the system; you can't change the importance
+             // or other notification behaviors after this
+             NotificationManager notificationManager = ContextCompat.getSystemService(context, NotificationManager.class);
+@@ -173,10 +172,10 @@ public class Helper {
+             builder.addAction(android.R.drawable.ic_menu_close_clear_cancel, dismissText, pendingIntentDismiss);
+         }
+ 
+-        // If snooze is active, add a button for snoozing.
++        // View recipe button - opens the app and shows the recipe
+         if(showSnooze) {
+-            PendingIntent pendingIntentSnoozee = createActionIntent(context, alarmUid, id, "SNOOZE_ACTION");
+-            builder.addAction(android.R.drawable.ic_menu_recent_history, snoozeText, pendingIntentSnoozee);
++            PendingIntent pendingIntentViewRecipe = createActionIntent(context, alarmUid, id, "VIEW_RECIPE_ACTION");
++            builder.addAction(android.R.drawable.ic_menu_view, snoozeText, pendingIntentViewRecipe);
+         }
+ 
+     
 diff --git a/android/src/main/java/com/expoalarmmodule/Manager.java b/android/src/main/java/com/expoalarmmodule/Manager.java
-index 004075da7464088c26edd8b5e6e2e5a191ec7633..a94800f0638b61fc1373fa54dd91fecc8ebe65b0 100644
+index 004075da7464088c26edd8b5e6e2e5a191ec7633..ac539f24be71a3c4aec52bfbf6b941b66556bddd 100644
 --- a/android/src/main/java/com/expoalarmmodule/Manager.java
 +++ b/android/src/main/java/com/expoalarmmodule/Manager.java
 @@ -114,9 +114,15 @@ public class Manager {
@@ -81,3 +109,102 @@ index 004075da7464088c26edd8b5e6e2e5a191ec7633..a94800f0638b61fc1373fa54dd91fecc
      }
  
      public static void stop(Context context) {
+diff --git a/android/src/main/java/com/expoalarmmodule/Sound.java b/android/src/main/java/com/expoalarmmodule/Sound.java
+index 73b00616707cd5533258ce215fb1fb1e2deafb50..198a275fe896b5f55afd7ee75b07deb54dcf86fe 100644
+--- a/android/src/main/java/com/expoalarmmodule/Sound.java
++++ b/android/src/main/java/com/expoalarmmodule/Sound.java
+@@ -4,27 +4,21 @@ import android.content.Context;
+ import android.media.AudioManager;
+ import android.media.MediaPlayer;
+ import android.net.Uri;
+-import android.os.Build;
+-import android.os.VibrationEffect;
+-import android.os.Vibrator;
+ import android.provider.Settings;
+ import android.util.Log;
+ 
+ class Sound {
+ 
+     private static final String TAG = "AlarmSound";
+-    private static final long DEFAULT_VIBRATION = 100;
+ 
+     private AudioManager audioManager;
+     private int userVolume;
+     private MediaPlayer mediaPlayer;
+-    private Vibrator vibrator;
+ 
+     private Context context;
+ 
+     Sound(Context context) {
+         this.context = context;
+-        this.vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+         this.audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+         this.userVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+         this.mediaPlayer = new MediaPlayer();
+@@ -33,14 +27,12 @@ class Sound {
+     void play(String sound) {
+         Uri soundUri = getSoundUri(sound);
+         playSound(soundUri);
+-        startVibration();
+     }
+ 
+     void stop() {
+         try {
+             if (mediaPlayer.isPlaying()) {
+                 stopSound();
+-                stopVibration();
+                 mediaPlayer.release();
+             }
+         } catch (IllegalStateException e) {
+@@ -76,26 +68,6 @@ class Sound {
+         }
+     }
+ 
+-    private void startVibration() {
+-        vibrator.vibrate(DEFAULT_VIBRATION);
+-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+-            vibrator.vibrate(VibrationEffect.createOneShot(5000, VibrationEffect.DEFAULT_AMPLITUDE));
+-        } else {
+-            //deprecated in API 26
+-            vibrator.vibrate(500);
+-        }
+-
+-        long[] pattern = {0, 100, 1000};
+-
+-        // The '0' here means to repeat indefinitely
+-        // '0' is actually the index at which the pattern keeps repeating from (the start)
+-        // To repeat the pattern from any other point, you could increase the index, e.g. '1'
+-        vibrator.vibrate(pattern, 0);
+-    }
+-
+-    private void stopVibration() {
+-        vibrator.cancel();
+-    }
+ 
+     private Uri getSoundUri(String soundName) {
+         Uri soundUri;
+diff --git a/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java b/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
+index 0d2dba4f94c5f065f1f58accb4fa3415643b2bf6..1ede5e72661becbd66f24922c937b03d61ab28f2 100644
+--- a/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
++++ b/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
+@@ -44,6 +44,20 @@ public class NotificationActionReceiver extends BroadcastReceiver {
+                 this.removeNotification(context, notificationId);
+                 break;
+ 
++            case "VIEW_RECIPE_ACTION":
++                Log.d(TAG, "Received VIEW_RECIPE action for Alarm: " + alarmUid);
++                Manager.stop(context);
++                this.removeNotification(context, notificationId);
++                // Open the app - the app will detect alarm launch and show recipe
++                Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
++                if (launchIntent != null) {
++                    launchIntent.putExtra("ALARM_UID", alarmUid);
++                    launchIntent.putExtra("VIEW_RECIPE", true);
++                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
++                    context.startActivity(launchIntent);
++                }
++                break;
++
+             default:
+                 Log.e(TAG, "Unknown action received: " + action);
+                 break;
