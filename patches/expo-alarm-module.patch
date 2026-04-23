@@ -1,18 +1,69 @@
 diff --git a/android/src/main/java/com/expoalarmmodule/Alarm.java b/android/src/main/java/com/expoalarmmodule/Alarm.java
-index 49daf38ac5620031fd3d1da8c52c0762d822b96a..c92673b7d900abfc42d1faede9ed32c5264e50d6 100644
+index 49daf38ac5620031fd3d1da8c52c0762d822b96a..5e378b19779cbb44f3c542251d90e56c655b30d4 100644
 --- a/android/src/main/java/com/expoalarmmodule/Alarm.java
 +++ b/android/src/main/java/com/expoalarmmodule/Alarm.java
-@@ -55,7 +55,12 @@ public class Alarm implements Cloneable {
-     String dismissText;
-     String snoozeText;
+@@ -19,43 +19,48 @@ import static com.expoalarmmodule.GsonUtil.createSerialize;
+ 
+ public class Alarm implements Cloneable {
+ 
+-    String uid;
++    public String uid;
+ 
+-    ZonedDateTime date;
+-    String dateString;
++    public ZonedDateTime date;
++    public String dateString;
+ 
+-    ArrayList<Integer> days;
+-    int hour;
+-    int minutes;
++    public ArrayList<Integer> days;
++    public int hour;
++    public int minutes;
+ 
+-    String title;
+-    String description;
+-    boolean repeating;
+-    boolean active;
++    public String title;
++    public String description;
++    public boolean repeating;
++    public boolean active;
+     
+     /**
+      * Show dismiss button in notification. It is false by default.
+      */
+-    boolean showDismiss;
++    public boolean showDismiss;
+ 
+     /**
+      * Show snooze button. It is false by default.
+      */
+-    boolean showSnooze;
++    public boolean showSnooze;
+ 
+     /**
+      * Snooze interval in minutes
+      * Default is 5 minutes
+      */
+-    int snoozeInterval;
++    public int snoozeInterval;
+ 
+     /**
+      * Custom texts for buttons of notifications
+      */
+-    String dismissText;
+-    String snoozeText;
++    public String dismissText;
++    public String snoozeText;
  
 -    Alarm(String uid, ArrayList<Integer> days, ZonedDateTime date, int hour, int minutes, boolean showDismiss, boolean showSnooze, int snoozeInterval, String title, String description, boolean repeating, boolean active, String dismissText, String snoozeText) {
 +    /**
 +     * Custom sound name (matches res/raw/ file). Default is "default" (system ringtone).
 +     */
-+    String sound;
++    public String sound;
 +
-+    Alarm(String uid, ArrayList<Integer> days, ZonedDateTime date, int hour, int minutes, boolean showDismiss, boolean showSnooze, int snoozeInterval, String title, String description, boolean repeating, boolean active, String dismissText, String snoozeText, String sound) {
++    public Alarm(String uid, ArrayList<Integer> days, ZonedDateTime date, int hour, int minutes, boolean showDismiss, boolean showSnooze, int snoozeInterval, String title, String description, boolean repeating, boolean active, String dismissText, String snoozeText, String sound) {
          this.uid = uid;
          this.days = days;
          this.hour = hour;
