@@ -171,10 +171,10 @@ index 004075da7464088c26edd8b5e6e2e5a191ec7633..ac539f24be71a3c4aec52bfbf6b941b6
  
      public static void stop(Context context) {
 diff --git a/android/src/main/java/com/expoalarmmodule/Sound.java b/android/src/main/java/com/expoalarmmodule/Sound.java
-index 73b00616707cd5533258ce215fb1fb1e2deafb50..b84a5af5851bd1cd54678ede5ef6af228d6d429f 100644
+index 73b00616707cd5533258ce215fb1fb1e2deafb50..f7cb437a613671b2a08569d0a3cfbb9b687df5eb 100644
 --- a/android/src/main/java/com/expoalarmmodule/Sound.java
 +++ b/android/src/main/java/com/expoalarmmodule/Sound.java
-@@ -4,27 +4,21 @@ import android.content.Context;
+@@ -4,43 +4,35 @@ import android.content.Context;
  import android.media.AudioManager;
  import android.media.MediaPlayer;
  import android.net.Uri;
@@ -184,7 +184,8 @@ index 73b00616707cd5533258ce215fb1fb1e2deafb50..b84a5af5851bd1cd54678ede5ef6af22
  import android.provider.Settings;
  import android.util.Log;
  
- class Sound {
+-class Sound {
++public class Sound {
  
      private static final String TAG = "AlarmSound";
 -    private static final long DEFAULT_VIBRATION = 100;
@@ -196,20 +197,24 @@ index 73b00616707cd5533258ce215fb1fb1e2deafb50..b84a5af5851bd1cd54678ede5ef6af22
  
      private Context context;
  
-     Sound(Context context) {
+-    Sound(Context context) {
++    public Sound(Context context) {
          this.context = context;
 -        this.vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
          this.audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
          this.userVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
          this.mediaPlayer = new MediaPlayer();
-@@ -33,14 +27,12 @@ class Sound {
-     void play(String sound) {
+     }
+ 
+-    void play(String sound) {
++    public void play(String sound) {
          Uri soundUri = getSoundUri(sound);
          playSound(soundUri);
 -        startVibration();
      }
  
-     void stop() {
+-    void stop() {
++    public void stop() {
          try {
              if (mediaPlayer.isPlaying()) {
                  stopSound();
@@ -244,6 +249,66 @@ index 73b00616707cd5533258ce215fb1fb1e2deafb50..b84a5af5851bd1cd54678ede5ef6af22
  
      private Uri getSoundUri(String soundName) {
          Uri soundUri;
+diff --git a/android/src/main/java/com/expoalarmmodule/Storage.java b/android/src/main/java/com/expoalarmmodule/Storage.java
+index acb1e33bce9bb27c708ef2b0592db2ccc2c70892..0202c594914593fa4aab8a6bfd243cec14ff74b8 100644
+--- a/android/src/main/java/com/expoalarmmodule/Storage.java
++++ b/android/src/main/java/com/expoalarmmodule/Storage.java
+@@ -11,21 +11,21 @@ import java.util.ArrayList;
+ import java.util.Date;
+ import java.util.Map;
+ 
+-class Storage {
++public class Storage {
+ 
+-    static void saveAlarm(Context context, Alarm alarm) {
++    public static void saveAlarm(Context context, Alarm alarm) {
+         SharedPreferences.Editor editor = getEditor(context);
+         editor.putString(alarm.uid, Alarm.toJson(alarm));
+         editor.apply();
+     }
+ 
+-    static void saveDates(Context context, AlarmDates dates) {
++    public static void saveDates(Context context, AlarmDates dates) {
+         SharedPreferences.Editor editor = getEditor(context);
+         editor.putString(dates.uid, AlarmDates.toJson(dates));
+         editor.apply();
+     }
+ 
+-    static Alarm[] getAllAlarms(Context context) {
++    public static Alarm[] getAllAlarms(Context context) {
+         ArrayList<Alarm> alarms = new ArrayList<>();
+         SharedPreferences preferences = getSharedPreferences(context);
+         Map<String, ?> keyMap = preferences.getAll();
+@@ -38,7 +38,7 @@ class Storage {
+         return alarms.toArray(new Alarm[0]);
+     }
+ 
+-    static Alarm getAlarm(Context context, String alarmUid) {
++    public static Alarm getAlarm(Context context, String alarmUid) {
+         SharedPreferences preferences = getSharedPreferences(context);
+         String preferenceUid = preferences.getString(alarmUid, null);
+         if(preferenceUid != null) {
+@@ -52,17 +52,17 @@ class Storage {
+         }
+     }
+ 
+-    static AlarmDates getDates(Context context, String alarmUid) {
++    public static AlarmDates getDates(Context context, String alarmUid) {
+         SharedPreferences preferences = getSharedPreferences(context);
+         String json = preferences.getString(AlarmDates.getDatesId(alarmUid), null);
+         return AlarmDates.fromJson(json);
+     }
+ 
+-    static void removeAlarm(Context context, String alarmUid) {
++    public static void removeAlarm(Context context, String alarmUid) {
+         remove(context, alarmUid);
+     }
+ 
+-    static void removeDates(Context context, String alarmUid) {
++    public static void removeDates(Context context, String alarmUid) {
+         remove(context, AlarmDates.getDatesId(alarmUid));
+     }
+ 
 diff --git a/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java b/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
 index 0d2dba4f94c5f065f1f58accb4fa3415643b2bf6..1fd1e77563027fe947c68a2506c31bf60ad656d6 100644
 --- a/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
