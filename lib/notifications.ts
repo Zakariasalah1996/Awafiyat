@@ -304,11 +304,15 @@ export async function scheduleMealReminder(
         };
         const soundName = MEAL_SOUND[mealType] || "alarm_morning";
 
+        // نضمّن recipeId في description بصيغة خاصة ليقرأها Java عند الضغط على "عرض الوصفة"
+        const descriptionWithId = recipeId
+          ? `RECIPE_ID:${recipeId}|${recipeName || label}`
+          : (recipeName ? `الوصفة: ${recipeName}` : `هل أنتِ مستعدة لإعداد ${label}؟`);
         NativeAlarm.scheduleAlarm({
           uid: `meal_${mealType}`,
           day: alarmDate,
           title: `حان وقت ${label}!`,
-          description: recipeName ? `الوصفة: ${recipeName}` : `هل أنتِ مستعدة لإعداد ${label}؟`,
+          description: descriptionWithId,
           dismissText: "إيقاف",
           showDismiss: true,
           showSnooze: true,

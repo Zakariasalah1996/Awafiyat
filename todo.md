@@ -361,3 +361,9 @@
 - [x] إزالة DEFAULT_ALL (اهتزاز) + إضافة fullScreenIntent
 - [x] إضافة refreshAllAlarms لحذف المنبهات القديمة وإعادة جدولتها بالأصوات الجديدة
 - [x] إزالة AlarmScreen من _layout.tsx (لا شاشة منبه داخل التطبيق)
+## الدفعة 50 - إصلاح زر عرض الوصفة في المنبه:
+
+- [x] إصلاح VIEW_RECIPE_ACTION: زر عرض الوصفة يفتح deep link مباشرةً على صفحة الوصفة (RECIPE_ID في description + deep link intent)
+- [x] تضمين recipeId في description بصيغة RECIPE_ID:id|name في notifications.ts
+- [x] إضافة Linking listener في _layout.tsx لمعالجة deep links من المنبه
+- [x] تحديث pnpm patch ليشمل جميع التعديلات (10 ملفات)

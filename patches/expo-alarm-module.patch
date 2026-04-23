@@ -60,7 +60,7 @@ index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..c8d4ea3ae531e295f377433b0ec6fdff
      if( alarm.date != null) {
        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 diff --git a/android/src/main/java/com/expoalarmmodule/Helper.java b/android/src/main/java/com/expoalarmmodule/Helper.java
-index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..6698560ec2d2acd0e55a839e128b2fc81d19a625 100644
+index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..2f4992fd1c7ee3268c120ac09dc13a7113eba7da 100644
 --- a/android/src/main/java/com/expoalarmmodule/Helper.java
 +++ b/android/src/main/java/com/expoalarmmodule/Helper.java
 @@ -122,8 +122,7 @@ public class Helper {
@@ -194,10 +194,10 @@ index 73b00616707cd5533258ce215fb1fb1e2deafb50..b84a5af5851bd1cd54678ede5ef6af22
      private Uri getSoundUri(String soundName) {
          Uri soundUri;
 diff --git a/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java b/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
-index 0d2dba4f94c5f065f1f58accb4fa3415643b2bf6..1cfcab6efb8530598b672174297f7d8f03f07d80 100644
+index 0d2dba4f94c5f065f1f58accb4fa3415643b2bf6..1fd1e77563027fe947c68a2506c31bf60ad656d6 100644
 --- a/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
 +++ b/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
-@@ -44,6 +44,20 @@ public class NotificationActionReceiver extends BroadcastReceiver {
+@@ -44,6 +44,38 @@ public class NotificationActionReceiver extends BroadcastReceiver {
                  this.removeNotification(context, notificationId);
                  break;
  
@@ -205,13 +205,31 @@ index 0d2dba4f94c5f065f1f58accb4fa3415643b2bf6..1cfcab6efb8530598b672174297f7d8f
 +                Log.d(TAG, "Received VIEW_RECIPE action for Alarm: " + alarmUid);
 +                Manager.stop(context);
 +                this.removeNotification(context, notificationId);
-+                // Open the app - the app will detect alarm launch and show recipe
-+                Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
-+                if (launchIntent != null) {
-+                    launchIntent.putExtra("ALARM_UID", alarmUid);
-+                    launchIntent.putExtra("VIEW_RECIPE", true);
-+                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-+                    context.startActivity(launchIntent);
++                // قراءة بيانات المنبه من Storage لاستخراج recipeId
++                com.expoalarmmodule.Alarm viewAlarm = com.expoalarmmodule.Storage.getAlarm(context, alarmUid);
++                String recipeId = null;
++                if (viewAlarm != null && viewAlarm.description != null) {
++                    String desc = viewAlarm.description;
++                    if (desc.startsWith("RECIPE_ID:")) {
++                        int pipeIdx = desc.indexOf("|");
++                        recipeId = (pipeIdx > 0) ? desc.substring(10, pipeIdx) : desc.substring(10);
++                        Log.d(TAG, "Extracted recipeId: " + recipeId);
++                    }
++                }
++                if (recipeId != null && !recipeId.isEmpty()) {
++                    // فتح التطبيق مباشرةً على صفحة الوصفة عبر deep link
++                    String deepLink = "manus20260413170437://sections/recipe-detail?id=" + recipeId;
++                    Log.d(TAG, "Opening deep link: " + deepLink);
++                    Intent deepLinkIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(deepLink));
++                    deepLinkIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
++                    context.startActivity(deepLinkIntent);
++                } else {
++                    // لا يوجد recipeId - افتح التطبيق فقط
++                    Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
++                    if (launchIntent != null) {
++                        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
++                        context.startActivity(launchIntent);
++                    }
 +                }
 +                break;
 +
@@ -242,21 +260,6 @@ index 5378c0ab6d1e1ff1335e3740d13243549a07b77a..37a8d7116bd702979f99cff554219a64
    }
    static getEmpty() {
      return new Alarm({
-diff --git a/lib/typescript/src/types/Alarm.types.d.ts b/lib/typescript/src/types/Alarm.types.d.ts
-index 95fa365ce086e81b4ee70b940e2658bb3176776b..840ba3ff2693c2117a2014046a7a40436ae02892 100644
---- a/lib/typescript/src/types/Alarm.types.d.ts
-+++ b/lib/typescript/src/types/Alarm.types.d.ts
-@@ -51,5 +51,9 @@ export type AlarmSettings = {
-      * If the alarm needs to repeat.
-      */
-     repeating?: boolean | undefined;
-+    /**
-+     * Custom sound name from res/raw/ directory.
-+     */
-+    sound?: string | undefined;
- };
- //# sourceMappingURL=Alarm.types.d.ts.map
-\ No newline at end of file
 diff --git a/src/models/Alarm.tsx b/src/models/Alarm.tsx
 index c0bd28157e94e70e7c701f19718d90801069f913..d265d1360701ecabba21e28caa978d2f0af1001a 100644
 --- a/src/models/Alarm.tsx

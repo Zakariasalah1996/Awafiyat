@@ -25,6 +25,7 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { UserProvider } from "@/lib/user-context";
+import * as Linking from "expo-linking";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -95,6 +96,45 @@ function RootLayoutInner() {
       }
     } catch (e) {
       console.warn("[Alarm] Check alarm launch error:", e);
+    }
+  }, [router]);
+
+  // معالجة deep links من المنبه (عند الضغط على "عرض الوصفة")
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+
+    // معالجة deep link إذا التطبيق فُتح من deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink(url);
+      }
+    }).catch((e) => console.warn("[DeepLink] getInitialURL error:", e));
+
+    // الاستماع لـ deep links أثناء تشغيل التطبيق
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      if (url) handleDeepLink(url);
+    });
+
+    return () => subscription.remove();
+  }, [router]);
+
+  const handleDeepLink = useCallback((url: string) => {
+    try {
+      // نمط: manus20260413170437://sections/recipe-detail?id=recipe_123
+      const parsed = Linking.parse(url);
+      console.log("[DeepLink] Received:", url, "parsed:", JSON.stringify(parsed));
+      if (parsed.path === "sections/recipe-detail" && parsed.queryParams?.id) {
+        const recipeId = parsed.queryParams.id as string;
+        console.log("[DeepLink] Navigating to recipe:", recipeId);
+        setTimeout(() => {
+          router.push({
+            pathname: "/sections/recipe-detail" as any,
+            params: { id: recipeId },
+          });
+        }, 500);
+      }
+    } catch (e) {
+      console.warn("[DeepLink] Error handling deep link:", e);
     }
   }, [router]);
 
