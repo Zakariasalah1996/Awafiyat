@@ -294,51 +294,35 @@ export async function scheduleMealReminder(
           alarmDate.setDate(alarmDate.getDate() + 1);
         }
 
+        // اختيار الصوت حسب نوع الوجبة
+        const MEAL_SOUND: Record<string, string> = {
+          breakfast: "alarm_morning",
+          lunch: "alarm_lunch",
+          dinner: "alarm_dinner",
+        };
+        const soundName = MEAL_SOUND[mealType] || "alarm_morning";
+
         NativeAlarm.scheduleAlarm({
           uid: `meal_${mealType}`,
           day: alarmDate,
           title: `حان وقت ${label}!`,
           description: recipeName ? `الوصفة: ${recipeName}` : `هل أنتِ مستعدة لإعداد ${label}؟`,
+          dismissText: "إيقاف",
           showDismiss: true,
           showSnooze: false,
           repeating: true,
           active: true,
+          sound: soundName,
         } as any);
-        console.log(`[Alarm] Native alarm scheduled: ${mealType} at ${hour}:${minute}`);
+        console.log(`[Alarm] Native alarm scheduled: ${mealType} at ${hour}:${minute} with sound: ${soundName}`);
       } catch (e) {
         console.error("[Alarm] Native alarm schedule failed:", e);
       }
     }
 
-    // إشعار fallback - يعمل كنسخة احتياطية إذا المنبه الأصلي لم يعمل
-    // أيضاً يُستخدم لتشغيل شاشة المنبه الجميلة بالعربي داخل التطبيق
-    {
-      const emoji = MEAL_EMOJI[mealType];
-      const id = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: `${emoji} حان وقت ${label}!`,
-          body: recipeName ? `الوصفة: ${recipeName}` : `هل أنتِ مستعدة لإعداد ${label}؟`,
-          sound: "notification.mp3",
-          priority: Notifications.AndroidNotificationPriority.HIGH,
-          vibrate: [0, 300, 500, 300],
-          data: {
-            type: "meal_alarm",
-            mealType,
-            scheduledTime: `${hour}:${String(minute).padStart(2, '0')}`,
-            ...(recipeId && { recipeId }),
-            ...(recipeName && { recipeName }),
-          },
-          ...(Platform.OS === "android" && { channelId: "meals" }),
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DAILY,
-          hour,
-          minute,
-        },
-      });
-      console.log(`[Alarm] Fallback notification scheduled: ${mealType} at ${hour}:${minute} (id: ${id})`);
-      return id;
-    }
+    // لا إشعارات للوجبات - المنبه الأصلي فقط
+    // الإشعارات تُستخدم فقط للتحفيز والنصائح الصحية
+    return `meal_${mealType}`;
   } catch (e) {
     console.warn("Meal alarm scheduling not available in Expo Go. This is normal.", e);
     return null;

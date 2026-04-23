@@ -120,32 +120,15 @@ function RootLayoutInner() {
       });
 
     // Setup notification listeners
-    // الإشعارات للنصائح والتحفيز والتسوق فقط
-    // meal_alarm = fallback إذا المنبه الأصلي غير متاح، يفتح شاشة المنبه الجميلة
+    // الإشعارات للنصائح والتحفيز والتسوق فقط - المنبه الأصلي يتكفل بالوجبات
     const cleanup = setupNotificationListeners(
       (notification) => {
         console.log("[Push] Notification received:", notification.request.content.title);
-        const data = notification.request.content.data;
-        // إذا كان إشعار meal_alarm (fallback) نشغّل شاشة المنبه الجميلة
-        if (data?.type === "meal_alarm") {
-          startAlarm(
-            (data.recipeName as string) || "وجبتك",
-            data.recipeId as string,
-            data.mealType as string
-          );
-        }
       },
       (response) => {
         console.log("[Push] Notification tapped:", response.notification.request.content.title);
         const data = response.notification.request.content.data;
-        if (data?.type === "meal_alarm") {
-          // فتح شاشة المنبه عند الضغط على الإشعار
-          startAlarm(
-            (data.recipeName as string) || "وجبتك",
-            data.recipeId as string,
-            data.mealType as string
-          );
-        } else if (data?.type === "shopping") {
+        if (data?.type === "shopping") {
           setTimeout(() => {
             router.push("/sections/shopping-list" as any);
           }, 500);
