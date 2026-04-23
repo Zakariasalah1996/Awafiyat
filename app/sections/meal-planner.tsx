@@ -117,6 +117,7 @@ export default function MealPlannerScreen() {
   const [loading, setLoading] = useState(true);
   const [trialExpired, setTrialExpired] = useState(false);
   const [trialDaysLeft, setTrialDaysLeft] = useState(FREE_TRIAL_DAYS);
+  const [showLockedDayModal, setShowLockedDayModal] = useState(false);
 
   // منبه الطبخ - يستخدم AlarmContext العالمي
   const { alarm, startAlarm: globalStartAlarm, stopAlarm: globalStopAlarm } = useAlarm();
@@ -774,7 +775,12 @@ export default function MealPlannerScreen() {
               <TouchableOpacity
                 key={day}
                 onPress={() => {
-                  if (isAvailable) setSelectedDay(index);
+                  if (isAvailable) {
+                    setSelectedDay(index);
+                  } else {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowLockedDayModal(true);
+                  }
                 }}
                 className="rounded-xl px-4 py-2 items-center"
                 style={{
@@ -963,6 +969,114 @@ export default function MealPlannerScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Locked Day Modal */}
+      <Modal
+        visible={showLockedDayModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLockedDayModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.55)",
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 28,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: colors.background,
+              borderRadius: 24,
+              padding: 28,
+              alignItems: "center",
+              width: "100%",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.18,
+              shadowRadius: 20,
+              elevation: 10,
+            }}
+          >
+            {/* Icon */}
+            <View
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 36,
+                backgroundColor: colors.primary + "18",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 16,
+              }}
+            >
+              <Text style={{ fontSize: 36 }}>🔒</Text>
+            </View>
+
+            {/* Title */}
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "800",
+                color: colors.foreground,
+                textAlign: "center",
+                marginBottom: 10,
+                writingDirection: "rtl",
+              }}
+            >
+              هذا اليوم حصري للمشتركين
+            </Text>
+
+            {/* Description */}
+            <Text
+              style={{
+                fontSize: 14,
+                color: colors.muted,
+                textAlign: "center",
+                lineHeight: 22,
+                writingDirection: "rtl",
+                marginBottom: 24,
+              }}
+            >
+              النسخة المجانية تتيح لك التخطيط لـ 5 أيام فقط.{"\n"}
+              اشترك الآن للحصول على جدول طبخ أسبوعي كامل وميزات حصرية أخرى!
+            </Text>
+
+            {/* Subscribe Button */}
+            <TouchableOpacity
+              onPress={() => {
+                setShowLockedDayModal(false);
+                router.push("/(tabs)/subscription" as any);
+              }}
+              style={{
+                backgroundColor: colors.primary,
+                borderRadius: 14,
+                paddingVertical: 14,
+                paddingHorizontal: 32,
+                width: "100%",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+              activeOpacity={0.85}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+                اشترك الآن ✨
+              </Text>
+            </TouchableOpacity>
+
+            {/* Dismiss */}
+            <TouchableOpacity
+              onPress={() => setShowLockedDayModal(false)}
+              style={{ paddingVertical: 8 }}
+              activeOpacity={0.7}
+            >
+              <Text style={{ color: colors.muted, fontSize: 14 }}>ربما لاحقاً</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }
