@@ -8,12 +8,11 @@ import "react-native-reanimated";
 import { Platform, I18nManager } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
-import { requestNotificationPermissions, setupNotificationListeners, getSavedPushToken, registerPushToken } from "@/lib/notifications";
+import { requestNotificationPermissions, setupNotificationListeners, getSavedPushToken, registerPushToken, refreshAllAlarms } from "@/lib/notifications";
 import { syncRecipeImages } from "@/lib/recipe-image-sync";
 import { registerGuest } from "@/lib/guest-auth";
 import { useRouter } from "expo-router";
-import { AlarmProvider, useAlarm } from "@/lib/alarm-context";
-import { AlarmScreen } from "@/components/alarm-screen";
+import { AlarmProvider } from "@/lib/alarm-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   SafeAreaFrameContext,
@@ -40,7 +39,7 @@ export const unstable_settings = {
 
 function RootLayoutInner() {
   const router = useRouter();
-  const { startAlarm } = useAlarm();
+
   const initialInsets = initialWindowMetrics?.insets ?? DEFAULT_WEB_INSETS;
   const initialFrame = initialWindowMetrics?.frame ?? DEFAULT_WEB_FRAME;
 
@@ -58,13 +57,15 @@ function RootLayoutInner() {
     // عند رنين المنبه الأصلي، يفتح التطبيق تلقائياً → نشغّل شاشة المنبه الجميلة بالعربي
     if (Platform.OS === "android") {
       checkAlarmLaunch();
+      // إعادة جدولة المنبهات بالأصوات الجديدة (يحذف القديمة ويعيد جدولتها)
+      refreshAllAlarms().catch((e) => console.warn("[Alarm] Refresh failed:", e));
     }
   }, []);
 
-  // فحص إذا التطبيق فُتح بواسطة المنبه الأصلي
+  // فحص إذا التطبيق فُتح بواسطة المنبه (عبر زر "عرض الوصفة")
+  // يذهب مباشرة لصفحة الوصفة - بدون شاشة منبه داخلية
   const checkAlarmLaunch = useCallback(async () => {
     try {
-      // فحص كل أنواع الوجبات
       const mealTypes = ["breakfast", "lunch", "dinner"] as const;
       const now = new Date();
       const currentHour = now.getHours();
@@ -78,25 +79,24 @@ function RootLayoutInner() {
         const alarmHour = alarmData.hour;
         const alarmMinute = alarmData.minute;
 
-        // إذا الوقت الحالي قريب من وقت المنبه (خلال 3 دقائق)
+        // إذا الوقت الحالي قريب من وقت المنبه (خلال 5 دقائق)
         const diffMinutes = Math.abs((currentHour * 60 + currentMinute) - (alarmHour * 60 + alarmMinute));
-        if (diffMinutes <= 3) {
-          console.log(`[Alarm] App launched by native alarm: ${mealType}`);
-          // تشغيل شاشة المنبه الجميلة بالعربي
+        if (diffMinutes <= 5 && alarmData.recipeId) {
+          console.log(`[Alarm] App launched by native alarm: ${mealType}, navigating to recipe: ${alarmData.recipeId}`);
+          // الذهاب مباشرة لصفحة الوصفة
           setTimeout(() => {
-            startAlarm(
-              alarmData.recipeName || "وجبتك",
-              alarmData.recipeId || "",
-              mealType
-            );
-          }, 1000); // انتظار ثانية ليكتمل تحميل التطبيق
+            router.push({
+              pathname: "/sections/recipe-detail" as any,
+              params: { id: alarmData.recipeId },
+            });
+          }, 1500); // انتظار ليكتمل تحميل التطبيق
           break;
         }
       }
     } catch (e) {
       console.warn("[Alarm] Check alarm launch error:", e);
     }
-  }, [startAlarm]);
+  }, [router]);
 
   // Auto-register push notifications on app start (native only)
   useEffect(() => {
@@ -178,8 +178,7 @@ function RootLayoutInner() {
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <UserProvider>
-        {/* شاشة المنبه - تظهر فوق كل شيء عند الرنين */}
-        <AlarmScreen />
+
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
             <Stack screenOptions={{ headerShown: false }}>

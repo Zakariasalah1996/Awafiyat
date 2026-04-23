@@ -351,3 +351,13 @@
 - [x] حذف الاهتزاز نهائياً من المنبه (Sound.java - إزالة Vibrator)
 - [x] إشعارات الوجبات ملغاة - المنبه الأصلي فقط
 - [x] زر "عرض الوصفة" يوقف المنبه ويفتح التطبيق على صفحة الوصفة (VIEW_RECIPE_ACTION)
+
+## الدفعة 49 - إصلاح المنبه (الصوت لم يتغير + زر عرض الوصفة لا يعمل):
+
+- [x] فحص الباتش: مطبق بنجاح على node_modules (10 ملفات Java + JS + Types)
+- [x] الأصوات موجودة في assets/ وتُنسخ إلى res/raw عبر expo-notifications plugin
+- [x] إصلاح الصوت: JS Alarm model يمرر sound + Manager.java يقرأ soundName + Sound.java يشغل من res/raw
+- [x] إصلاح زر عرض الوصفة: VIEW_RECIPE_ACTION + checkAlarmLaunch يذهب للوصفة مباشرة
+- [x] إزالة DEFAULT_ALL (اهتزاز) + إضافة fullScreenIntent
+- [x] إضافة refreshAllAlarms لحذف المنبهات القديمة وإعادة جدولتها بالأصوات الجديدة
+- [x] إزالة AlarmScreen من _layout.tsx (لا شاشة منبه داخل التطبيق)

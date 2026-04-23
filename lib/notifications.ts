@@ -9,6 +9,7 @@ let NativeAlarm: {
   scheduleAlarm: (params: any) => void;
   stopAlarm: () => void;
   removeAlarm: (uid: string) => void;
+  removeAllAlarms: () => void;
 } | null = null;
 
 try {
@@ -18,6 +19,7 @@ try {
       scheduleAlarm: mod.scheduleAlarm || mod.default?.scheduleAlarm,
       stopAlarm: mod.stopAlarm || mod.default?.stopAlarm,
       removeAlarm: mod.removeAlarm || mod.default?.removeAlarm,
+      removeAllAlarms: mod.removeAllAlarms || mod.default?.removeAllAlarms,
     };
   }
 } catch (e) {
@@ -443,5 +445,50 @@ export async function cancelAllNotifications(): Promise<void> {
     await Notifications.cancelAllScheduledNotificationsAsync();
   } catch (e) {
     console.warn("Cancel all notifications not available in Expo Go. This is normal.", e);
+  }
+}
+
+/**
+ * إعادة جدولة جميع منبهات الوجبات بالأصوات الجديدة
+ * يحذف كل المنبهات القديمة ويعيد جدولتها من AsyncStorage
+ * يُستدعى عند فتح التطبيق لضمان تطبيق الأصوات المخصصة
+ */
+export async function refreshAllAlarms(): Promise<void> {
+  if (Platform.OS !== "android" || !NativeAlarm) return;
+  
+  try {
+    // حذف كل المنبهات القديمة
+    if (NativeAlarm.removeAllAlarms) {
+      try {
+        NativeAlarm.removeAllAlarms();
+        console.log("[Alarm] All old alarms removed");
+      } catch (e) {
+        // حذف يدوي
+        for (const mealType of ["breakfast", "lunch", "dinner"]) {
+          try { NativeAlarm.removeAlarm(`meal_${mealType}`); } catch {}
+        }
+      }
+    }
+
+    // قراءة أوقات الوجبات المحفوظة من AsyncStorage
+    const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+    const mealTypes = ["breakfast", "lunch", "dinner"] as const;
+    
+    for (const mealType of mealTypes) {
+      try {
+        const data = await AsyncStorage.getItem(`@alarm_data_${mealType}`);
+        if (data) {
+          const { hour, minute, recipeId, recipeName } = JSON.parse(data);
+          await scheduleMealReminder(mealType, hour, minute, recipeId, recipeName);
+          console.log(`[Alarm] Refreshed alarm: ${mealType} at ${hour}:${minute}`);
+        }
+      } catch (e) {
+        console.warn(`[Alarm] Failed to refresh ${mealType}:`, e);
+      }
+    }
+    
+    console.log("[Alarm] All alarms refreshed with custom sounds");
+  } catch (e) {
+    console.warn("[Alarm] refreshAllAlarms failed:", e);
   }
 }

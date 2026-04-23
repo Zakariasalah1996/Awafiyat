@@ -60,7 +60,7 @@ index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..c8d4ea3ae531e295f377433b0ec6fdff
      if( alarm.date != null) {
        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 diff --git a/android/src/main/java/com/expoalarmmodule/Helper.java b/android/src/main/java/com/expoalarmmodule/Helper.java
-index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..040882873e18cb62470a7bbab8ef17a0f286b6a7 100644
+index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..6698560ec2d2acd0e55a839e128b2fc81d19a625 100644
 --- a/android/src/main/java/com/expoalarmmodule/Helper.java
 +++ b/android/src/main/java/com/expoalarmmodule/Helper.java
 @@ -122,8 +122,7 @@ public class Helper {
@@ -73,7 +73,17 @@ index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..040882873e18cb62470a7bbab8ef17a0
              // Register the channel with the system; you can't change the importance
              // or other notification behaviors after this
              NotificationManager notificationManager = ContextCompat.getSystemService(context, NotificationManager.class);
-@@ -173,10 +172,10 @@ public class Helper {
+@@ -157,7 +156,8 @@ public class Helper {
+                 .setContentTitle(title)
+                 .setTicker(null)
+                 .setContentText(description)
+-                .setDefaults(NotificationCompat.DEFAULT_ALL)
++                .setDefaults(NotificationCompat.DEFAULT_LIGHTS)
++                .setFullScreenIntent(createOnClickedIntent(context, alarmUid, id), true)
+                 .setPriority(NotificationCompat.PRIORITY_MAX)
+                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                 .setCategory(NotificationCompat.CATEGORY_ALARM)
+@@ -173,10 +173,10 @@ public class Helper {
              builder.addAction(android.R.drawable.ic_menu_close_clear_cancel, dismissText, pendingIntentDismiss);
          }
  
@@ -110,7 +120,7 @@ index 004075da7464088c26edd8b5e6e2e5a191ec7633..ac539f24be71a3c4aec52bfbf6b941b6
  
      public static void stop(Context context) {
 diff --git a/android/src/main/java/com/expoalarmmodule/Sound.java b/android/src/main/java/com/expoalarmmodule/Sound.java
-index 73b00616707cd5533258ce215fb1fb1e2deafb50..198a275fe896b5f55afd7ee75b07deb54dcf86fe 100644
+index 73b00616707cd5533258ce215fb1fb1e2deafb50..b84a5af5851bd1cd54678ede5ef6af228d6d429f 100644
 --- a/android/src/main/java/com/expoalarmmodule/Sound.java
 +++ b/android/src/main/java/com/expoalarmmodule/Sound.java
 @@ -4,27 +4,21 @@ import android.content.Context;
@@ -184,7 +194,7 @@ index 73b00616707cd5533258ce215fb1fb1e2deafb50..198a275fe896b5f55afd7ee75b07deb5
      private Uri getSoundUri(String soundName) {
          Uri soundUri;
 diff --git a/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java b/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
-index 0d2dba4f94c5f065f1f58accb4fa3415643b2bf6..1ede5e72661becbd66f24922c937b03d61ab28f2 100644
+index 0d2dba4f94c5f065f1f58accb4fa3415643b2bf6..1cfcab6efb8530598b672174297f7d8f03f07d80 100644
 --- a/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
 +++ b/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
 @@ -44,6 +44,20 @@ public class NotificationActionReceiver extends BroadcastReceiver {
@@ -208,3 +218,62 @@ index 0d2dba4f94c5f065f1f58accb4fa3415643b2bf6..1ede5e72661becbd66f24922c937b03d
              default:
                  Log.e(TAG, "Unknown action received: " + action);
                  break;
+diff --git a/lib/commonjs/models/Alarm.js b/lib/commonjs/models/Alarm.js
+index 125b8e88fe8e1b460734d1add901e0aa3aa80881..b71a0992cc59a0d0db076e409f9d412c501663ba 100644
+--- a/lib/commonjs/models/Alarm.js
++++ b/lib/commonjs/models/Alarm.js
+@@ -20,6 +20,7 @@ class Alarm {
+     this.repeating = (0, _utils.getParam)(params, 'repeating');
+     this.active = (0, _utils.getParam)(params, 'active');
+     this.day = (0, _utils.getParam)(params, 'day');
++    this.sound = (0, _utils.getParam)(params, 'sound');
+   }
+   static getEmpty() {
+     return new Alarm({
+diff --git a/lib/module/models/Alarm.js b/lib/module/models/Alarm.js
+index 5378c0ab6d1e1ff1335e3740d13243549a07b77a..37a8d7116bd702979f99cff554219a64509375cd 100644
+--- a/lib/module/models/Alarm.js
++++ b/lib/module/models/Alarm.js
+@@ -14,6 +14,7 @@ class Alarm {
+     this.repeating = getParam(params, 'repeating');
+     this.active = getParam(params, 'active');
+     this.day = getParam(params, 'day');
++    this.sound = getParam(params, 'sound');
+   }
+   static getEmpty() {
+     return new Alarm({
+diff --git a/lib/typescript/src/types/Alarm.types.d.ts b/lib/typescript/src/types/Alarm.types.d.ts
+index 95fa365ce086e81b4ee70b940e2658bb3176776b..840ba3ff2693c2117a2014046a7a40436ae02892 100644
+--- a/lib/typescript/src/types/Alarm.types.d.ts
++++ b/lib/typescript/src/types/Alarm.types.d.ts
+@@ -51,5 +51,9 @@ export type AlarmSettings = {
+      * If the alarm needs to repeat.
+      */
+     repeating?: boolean | undefined;
++    /**
++     * Custom sound name from res/raw/ directory.
++     */
++    sound?: string | undefined;
+ };
+ //# sourceMappingURL=Alarm.types.d.ts.map
+\ No newline at end of file
+diff --git a/src/models/Alarm.tsx b/src/models/Alarm.tsx
+index c0bd28157e94e70e7c701f19718d90801069f913..d265d1360701ecabba21e28caa978d2f0af1001a 100644
+--- a/src/models/Alarm.tsx
++++ b/src/models/Alarm.tsx
+@@ -14,6 +14,7 @@ class Alarm {
+   repeating?: boolean | undefined;
+   active?: boolean | undefined;
+   day?: string | Date | number[] | undefined;
++  sound?: string | undefined;
+ 
+   constructor(params: any = null) {
+     this.uid = getParam(params, 'uid');
+@@ -29,6 +30,7 @@ class Alarm {
+     this.repeating = getParam(params, 'repeating');
+     this.active = getParam(params, 'active');
+     this.day = getParam(params, 'day');
++    this.sound = getParam(params, 'sound');
+   }
+ 
+   static getEmpty() {
