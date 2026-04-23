@@ -257,26 +257,6 @@ export default function SubscriptionScreen() {
             ))}
           </Animated.View>
 
-          {/* Payment methods */}
-          <Animated.View entering={FadeInDown.delay(400).duration(400)} className="mt-6">
-            <Text className="text-base font-bold text-foreground mb-3">طرق الدفع المتاحة</Text>
-            <View className="gap-3">
-              {[
-                { name: "Zain Cash", color: "#4CAF50", icon: "account-balance-wallet" },
-                { name: "Qi Card", color: "#1976D2", icon: "credit-card" },
-                { name: "فيزا / ماستركارد", color: "#FF9800", icon: "payment" },
-              ].map((method, i) => (
-                <View
-                  key={i}
-                  className="flex-row items-center gap-3 px-4 py-3 rounded-xl border"
-                  style={{ borderColor: colors.border, backgroundColor: colors.surface }}
-                >
-                  <MaterialIcons name={method.icon as any} size={24} color={method.color} />
-                  <Text className="text-base text-foreground font-medium">{method.name}</Text>
-                </View>
-              ))}
-            </View>
-          </Animated.View>
         </View>
       </ScrollView>
     </ScreenContainer>

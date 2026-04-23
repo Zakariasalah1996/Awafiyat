@@ -193,7 +193,9 @@ export default function MealPlannerScreen() {
     globalStartAlarm(recipeName, recipeId);
   }, [globalStartAlarm]);
 
-  const availableDays = isSubscribed ? DAYS : (trialExpired ? [] : DAYS);
+  // 5 أيام مجانية فقط - الأيام 6 و 7 مقفلة للمشتركين
+  const FREE_DAYS_COUNT = 5;
+  const availableDays = isSubscribed ? DAYS : (trialExpired ? [] : DAYS.slice(0, FREE_DAYS_COUNT));
 
   const suggestedRecipes = useMemo(() => {
     if (!showRecipePicker) return [];
@@ -816,7 +818,7 @@ export default function MealPlannerScreen() {
                 writingDirection: "rtl",
               }}
             >
-              النسخة المجانية تشمل يومين فقط. اشتركي للحصول على جدول أسبوعي كامل!
+              النسخة المجانية تشمل 5 أيام فقط. اشترك للحصول على جدول أسبوعي كامل!
             </Text>
           </View>
         )}

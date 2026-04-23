@@ -367,3 +367,7 @@
 - [x] تضمين recipeId في description بصيغة RECIPE_ID:id|name في notifications.ts
 - [x] إضافة Linking listener في _layout.tsx لمعالجة deep links من المنبه
 - [x] تحديث pnpm patch ليشمل جميع التعديلات (10 ملفات)
+
+## الدفعة 51 - تعديل Paywall جدول الطبخ وحذف طرق الدفع:
+- [x] تغيير حد جدول الطبخ المجاني من 7 أيام إلى 5 أيام (الأيام 6 و 7 مقفلة)
+- [x] حذف قسم "طرق الدفع المتاحة" (Zain Cash / Qi Card / فيزا) من شاشة الاشتراك
