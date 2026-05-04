@@ -1,5 +1,5 @@
 diff --git a/android/src/main/java/com/expoalarmmodule/Alarm.java b/android/src/main/java/com/expoalarmmodule/Alarm.java
-index 49daf38ac5620031fd3d1da8c52c0762d822b96a..6e9f60add03fd4480eab31ae72e508ebd8cb6523 100644
+index 49daf38ac5620031fd3d1da8c52c0762d822b96a..5e378b19779cbb44f3c542251d90e56c655b30d4 100644
 --- a/android/src/main/java/com/expoalarmmodule/Alarm.java
 +++ b/android/src/main/java/com/expoalarmmodule/Alarm.java
 @@ -19,43 +19,48 @@ import static com.expoalarmmodule.GsonUtil.createSerialize;
@@ -75,87 +75,6 @@ index 49daf38ac5620031fd3d1da8c52c0762d822b96a..6e9f60add03fd4480eab31ae72e508eb
          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
            this.date = date;
          }
-diff --git a/android/src/main/java/com/expoalarmmodule/AlarmService.java b/android/src/main/java/com/expoalarmmodule/AlarmService.java
-index 805e6224eb5b6e3194ce92247401d498ac6a2033..dffd259aee41b946b09c650865138dcff588f986 100644
---- a/android/src/main/java/com/expoalarmmodule/AlarmService.java
-+++ b/android/src/main/java/com/expoalarmmodule/AlarmService.java
-@@ -1,34 +1,35 @@
- package com.expoalarmmodule;
- 
-+import android.app.KeyguardManager;
- import android.app.Notification;
- import android.app.Service;
-+import android.content.Context;
- import android.content.Intent;
-+import android.os.Build;
- import android.os.IBinder;
- import android.util.Log;
-+import android.view.WindowManager;
- 
- public class AlarmService extends Service {
--
-     private static final String TAG = "AlarmService";
- 
-     @Override
-     public IBinder onBind(final Intent intent) {
--        Log.d(TAG, "On bind " + intent.getExtras());
-         return null;
-     }
- 
--    // called only the first time we start the service
-     @Override
-     public void onCreate() {
-         super.onCreate();
-         Log.d(TAG, "Creating service");
-     }
-+
-     @Override
-     public void onDestroy() {
-         super.onDestroy();
-         Log.d(TAG, "Stopping service");
-     }
- 
--    // triggered every time we call startService() when we start our service
-     @Override
-     public int onStartCommand(final Intent intent, final int flags, final int startId) {
-         super.onStartCommand(intent, flags, startId);
-@@ -37,11 +38,34 @@ public class AlarmService extends Service {
-         String alarmUid = intent.getStringExtra("ALARM_UID");
-         Alarm alarm = Storage.getAlarm(getApplicationContext(), alarmUid);
-         Notification notification = Helper.getAlarmNotification(this, alarm, 1);
-+
-+        // ===== الإصلاح 2: إيقاظ الشاشة عند الرنين على جميع الأجهزة =====
-+        // تشغيل الشاشة حتى لو كانت مقفلة (Android 8.0+)
-+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-+            try {
-+                // إظهار النشاط فوق شاشة القفل
-+                android.app.Activity activity = getMainActivity();
-+                if (activity != null) {
-+                    activity.setShowWhenLocked(true);
-+                    activity.setTurnScreenOn(true);
-+                    KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-+                    if (keyguardManager != null) {
-+                        keyguardManager.requestDismissKeyguard(activity, null);
-+                    }
-+                }
-+            } catch (Exception e) {
-+                Log.w(TAG, "Could not set showWhenLocked: " + e.getMessage());
-+            }
-+        }
-+
-         Manager.start(getApplicationContext(), alarmUid);
-         startForeground(1, notification);
--
--        // service will be explicitly started and stopped
-         return START_STICKY;
-     }
- 
-+    private android.app.Activity getMainActivity() {
-+        // لا يمكن الوصول للـ Activity من Service مباشرة
-+        // الـ WakeLock في AlarmReceiver يتكفل بإيقاظ الشاشة
-+        return null;
-+    }
- }
 diff --git a/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java b/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
 index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..c8d4ea3ae531e295f377433b0ec6fdff743957f3 100644
 --- a/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
@@ -192,7 +111,7 @@ index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..c8d4ea3ae531e295f377433b0ec6fdff
      if( alarm.date != null) {
        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 diff --git a/android/src/main/java/com/expoalarmmodule/Helper.java b/android/src/main/java/com/expoalarmmodule/Helper.java
-index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..a669b77e94b0a150dddf261672e6b17e546459a3 100644
+index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..2f4992fd1c7ee3268c120ac09dc13a7113eba7da 100644
 --- a/android/src/main/java/com/expoalarmmodule/Helper.java
 +++ b/android/src/main/java/com/expoalarmmodule/Helper.java
 @@ -122,8 +122,7 @@ public class Helper {
@@ -229,28 +148,6 @@ index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..a669b77e94b0a150dddf261672e6b17e
          }
  
      
-@@ -195,14 +195,19 @@ public class Helper {
-     private static PendingIntent createOnClickedIntent(Context context, String alarmUid, int notificationID) {
-         Intent resultIntent = new Intent(context, Helper.getMainActivityClass(context));
-         resultIntent.putExtra("ALARM_UID", alarmUid);
--
-+        // ===== الإصلاح 2: إيقاظ الشاشة وإظهار التطبيق فوق شاشة القفل =====
-+        resultIntent.addFlags(
-+            Intent.FLAG_ACTIVITY_NEW_TASK |
-+            Intent.FLAG_ACTIVITY_CLEAR_TOP |
-+            Intent.FLAG_ACTIVITY_SINGLE_TOP
-+        );
-         PendingIntent pendingIntent = null;
-         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {  
-             pendingIntent = PendingIntent.getActivity(
-                 context,
-                 notificationID,
-                 resultIntent,
--                PendingIntent.FLAG_MUTABLE);
-+                PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-         } else {
-             pendingIntent = PendingIntent.getActivity(
-                 context,
 diff --git a/android/src/main/java/com/expoalarmmodule/Manager.java b/android/src/main/java/com/expoalarmmodule/Manager.java
 index 004075da7464088c26edd8b5e6e2e5a191ec7633..ac539f24be71a3c4aec52bfbf6b941b66556bddd 100644
 --- a/android/src/main/java/com/expoalarmmodule/Manager.java
@@ -353,7 +250,7 @@ index 73b00616707cd5533258ce215fb1fb1e2deafb50..f7cb437a613671b2a08569d0a3cfbb9b
      private Uri getSoundUri(String soundName) {
          Uri soundUri;
 diff --git a/android/src/main/java/com/expoalarmmodule/Storage.java b/android/src/main/java/com/expoalarmmodule/Storage.java
-index acb1e33bce9bb27c708ef2b0592db2ccc2c70892..62dfb97b618b9226eec7dc700f3634f70d0bd48a 100644
+index acb1e33bce9bb27c708ef2b0592db2ccc2c70892..0202c594914593fa4aab8a6bfd243cec14ff74b8 100644
 --- a/android/src/main/java/com/expoalarmmodule/Storage.java
 +++ b/android/src/main/java/com/expoalarmmodule/Storage.java
 @@ -11,21 +11,21 @@ import java.util.ArrayList;
@@ -412,76 +309,8 @@ index acb1e33bce9bb27c708ef2b0592db2ccc2c70892..62dfb97b618b9226eec7dc700f3634f7
          remove(context, AlarmDates.getDatesId(alarmUid));
      }
  
-diff --git a/android/src/main/java/com/expoalarmmodule/receivers/AlarmReceiver.java b/android/src/main/java/com/expoalarmmodule/receivers/AlarmReceiver.java
-index c51a294a42f5cb6b027e1ae0c854abe1a04ceeac..0d73cbbd1801fae43bed32def6ccaa99d6287761 100644
---- a/android/src/main/java/com/expoalarmmodule/receivers/AlarmReceiver.java
-+++ b/android/src/main/java/com/expoalarmmodule/receivers/AlarmReceiver.java
-@@ -1,27 +1,58 @@
- package com.expoalarmmodule.receivers;
- 
--
- import android.content.BroadcastReceiver;
- import android.content.Context;
- import android.content.Intent;
- import android.os.Build;
-+import android.os.PowerManager;
- import android.util.Log;
--import android.widget.Toast;
- 
- import com.expoalarmmodule.AlarmService;
--import com.expoalarmmodule.Manager;
-+import com.expoalarmmodule.Alarm;
-+import com.expoalarmmodule.Storage;
- 
- public class AlarmReceiver extends BroadcastReceiver {
--
-     private static final String TAG = "AlarmReceiver";
-+    // الحد الأقصى للتأخير المسموح به: 30 دقيقة
-+    private static final long MAX_DELAY_MS = 30 * 60 * 1000;
- 
-     @Override
-     public void onReceive(Context context, Intent intent) {
-         String alarmUid = intent.getStringExtra("ALARM_UID");
- 
-+        // ===== الإصلاح 1: تجاهل المنبه إذا فات وقته بأكثر من 30 دقيقة =====
-+        Alarm alarm = Storage.getAlarm(context, alarmUid);
-+        if (alarm != null) {
-+            long nowMs = System.currentTimeMillis();
-+            java.util.Calendar alarmCal = java.util.Calendar.getInstance();
-+            alarmCal.set(java.util.Calendar.HOUR_OF_DAY, alarm.hour);
-+            alarmCal.set(java.util.Calendar.MINUTE, alarm.minutes);
-+            alarmCal.set(java.util.Calendar.SECOND, 0);
-+            alarmCal.set(java.util.Calendar.MILLISECOND, 0);
-+            long alarmTimeMs = alarmCal.getTimeInMillis();
-+            // إذا الوقت الحالي أكبر من وقت المنبه + 30 دقيقة → تجاهل
-+            if (nowMs > alarmTimeMs + MAX_DELAY_MS) {
-+                Log.w(TAG, "Alarm " + alarmUid + " is stale (fired " +
-+                    ((nowMs - alarmTimeMs) / 60000) + " min late). Skipping.");
-+                return;
-+            }
-+        }
-+
-+        // ===== الإصلاح 2: إيقاظ الشاشة على جميع الأجهزة =====
-+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-+        if (pm != null) {
-+            @SuppressWarnings("deprecation")
-+            PowerManager.WakeLock wl = pm.newWakeLock(
-+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
-+                PowerManager.ACQUIRE_CAUSES_WAKEUP |
-+                PowerManager.ON_AFTER_RELEASE,
-+                "awafiyat:AlarmWakeLock"
-+            );
-+            wl.acquire(60 * 1000L);
-+        }
-+
-         Intent serviceIntent = new Intent(context, AlarmService.class);
-         serviceIntent.putExtra("ALARM_UID", alarmUid);
--        serviceIntent.putExtras(serviceIntent);
-         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-             context.startForegroundService(serviceIntent);
-         } else {
 diff --git a/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java b/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
-index 0d2dba4f94c5f065f1f58accb4fa3415643b2bf6..2bf870902e104c414e8ae6bad59238f0c5b66fbc 100644
+index 0d2dba4f94c5f065f1f58accb4fa3415643b2bf6..1fd1e77563027fe947c68a2506c31bf60ad656d6 100644
 --- a/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
 +++ b/android/src/main/java/com/expoalarmmodule/receivers/NotificationActionReceiver.java
 @@ -44,6 +44,38 @@ public class NotificationActionReceiver extends BroadcastReceiver {

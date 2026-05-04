@@ -80,9 +80,12 @@ function RootLayoutInner() {
         const alarmHour = alarmData.hour;
         const alarmMinute = alarmData.minute;
 
-        // إذا الوقت الحالي قريب من وقت المنبه (خلال 5 دقائق)
-        const diffMinutes = Math.abs((currentHour * 60 + currentMinute) - (alarmHour * 60 + alarmMinute));
-        if (diffMinutes <= 5 && alarmData.recipeId) {
+        // إذا الوقت الحالي قريب من وقت المنبه (خلال 30 دقيقة)
+        // ملاحظة: نتحقق فقط إذا الوقت الحالي بعد وقت المنبه (ليس قبله)
+        const nowTotalMinutes = currentHour * 60 + currentMinute;
+        const alarmTotalMinutes = alarmHour * 60 + alarmMinute;
+        const diffMinutes = nowTotalMinutes - alarmTotalMinutes;
+        if (diffMinutes >= 0 && diffMinutes <= 30 && alarmData.recipeId) {
           console.log(`[Alarm] App launched by native alarm: ${mealType}, navigating to recipe: ${alarmData.recipeId}`);
           // الذهاب مباشرة لصفحة الوصفة
           setTimeout(() => {

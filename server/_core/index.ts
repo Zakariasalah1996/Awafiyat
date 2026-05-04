@@ -21,15 +21,32 @@ let _fcmTokenExpiry = 0;
 async function getFCMAccessToken(): Promise<string | null> {
   try {
     if (_fcmAccessToken && Date.now() < _fcmTokenExpiry) return _fcmAccessToken;
-    const serviceAccountPath = path.join(process.cwd(), 'server', 'firebase-service-account.json');
-    if (!fs.existsSync(serviceAccountPath)) {
-      console.error('[FCM] Service account file not found:', serviceAccountPath);
-      return null;
+    
+    let authConfig: any;
+    
+    // Try environment variable first (for Render deployment)
+    const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+    if (serviceAccountBase64) {
+      const serviceAccountJson = Buffer.from(serviceAccountBase64, 'base64').toString('utf8');
+      const credentials = JSON.parse(serviceAccountJson);
+      authConfig = {
+        credentials,
+        scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
+      };
+    } else {
+      // Fallback to file (for local development)
+      const serviceAccountPath = path.join(process.cwd(), 'server', 'firebase-service-account.json');
+      if (!fs.existsSync(serviceAccountPath)) {
+        console.error('[FCM] Service account file not found and FIREBASE_SERVICE_ACCOUNT_BASE64 not set');
+        return null;
+      }
+      authConfig = {
+        keyFile: serviceAccountPath,
+        scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
+      };
     }
-    const auth = new GoogleAuth({
-      keyFile: serviceAccountPath,
-      scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
-    });
+    
+    const auth = new GoogleAuth(authConfig);
     const client = await auth.getClient();
     const tokenResponse = await client.getAccessToken();
     _fcmAccessToken = tokenResponse.token || null;
@@ -180,13 +197,49 @@ async function startServer() {
   registerOAuthRoutes(app);
 
   app.get("/api/health", (_req, res) => {
-    res.json({ ok: true, timestamp: Date.now() });
+    const dbUrl = process.env.DATABASE_URL || 'NOT SET';
+    res.json({ ok: true, timestamp: Date.now(), db_prefix: dbUrl.substring(0, 20), db_type: dbUrl.startsWith('postgresql') ? 'postgres' : dbUrl.startsWith('mysql') ? 'mysql' : 'unknown' });
+  });
+  app.get("/api/db-test", async (_req, res) => {
+    try {
+      const { Pool } = await import('pg');
+      const dbUrl = process.env.DATABASE_URL || '';
+      const useSSL = dbUrl.includes('dpg-') || dbUrl.includes('render.com') || dbUrl.includes('sslmode=require');
+      const pool = new Pool({ connectionString: dbUrl, ssl: useSSL ? { rejectUnauthorized: false } : false, connectionTimeoutMillis: 8000 });
+      const result = await pool.query('SELECT NOW() as now, current_database() as db');
+      await pool.end();
+      res.json({ ok: true, time: result.rows[0].now, db: result.rows[0].db, ssl: useSSL, url_prefix: dbUrl.substring(0, 40) });
+    } catch (err: any) {
+      res.json({ ok: false, error: err.message, code: err.code, url_prefix: (process.env.DATABASE_URL || '').substring(0, 40) });
+    }
   });
 
-  // Serve admin panel - read HTML into memory and serve directly
-  const fs = await import("fs");
+  // Serve landing page at root /
   const __filename_local = fileURLToPath(import.meta.url);
   const __dirname_local = path.dirname(__filename_local);
+  const landingCandidates = [
+    path.resolve(__dirname_local, "../public"),
+    path.resolve(process.cwd(), "dist/public"),
+    path.resolve(process.cwd(), "server/public"),
+  ];
+  let landingHtml = "";
+  for (const candidate of landingCandidates) {
+    const htmlPath = path.join(candidate, "index.html");
+    if (fs.existsSync(htmlPath)) {
+      landingHtml = fs.readFileSync(htmlPath, "utf-8");
+      console.log(`[Landing] Serving from: ${candidate}`);
+      break;
+    }
+  }
+  if (landingHtml) {
+    app.get("/", (_req, res) => res.type("html").send(landingHtml));
+    app.get("/index.html", (_req, res) => res.type("html").send(landingHtml));
+  }
+
+  // Serve admin panel - read HTML into memory and serve directly
+  const fs2 = fs;
+  const __filename_local2 = __filename_local;
+  const __dirname_local2 = __dirname_local;
   const adminCandidates = [
     path.resolve(__dirname_local, "../admin"),
     path.resolve(__dirname_local, "admin"),
@@ -684,7 +737,7 @@ async function startServer() {
         isActive: true,
       });
 
-      const newUserId = result[0].insertId;
+      const newUserId = (result as any)[0].insertId;
       console.log('[Guest] New guest registered:', { deviceId, userId: newUserId });
       res.json({ success: true, userId: newUserId, isNew: true });
     } catch (e: any) {

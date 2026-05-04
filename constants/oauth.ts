@@ -50,7 +50,7 @@ export function getApiBaseUrl(): string {
 
   // On native (iOS/Android), use the published production domain
   if (ReactNative.Platform.OS !== "web") {
-    return "https://awafiyatapp-mmvdqjeh.manus.space";
+    return "https://alfafiyat.com";
   }
 
   // Fallback to empty (will use relative URL)

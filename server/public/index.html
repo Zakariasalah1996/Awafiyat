@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ألف عافيات – وصفاتك العراقية الصحية</title>
+  <meta name="description" content="تطبيق الوصفات العراقية الصحية. وصفات لذيذة مناسبة لحالتك الصحية، مع ميزة ثلاجتي الذكية وجدول الطبخ الأسبوعي." />
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #2d7a4f;
+      --green-light: #e8f5ee;
+      --green-mid: #4caf78;
+      --text: #1a2e1f;
+      --muted: #5a7a65;
+      --bg: #f9fdf9;
+      --white: #ffffff;
+      --radius: 20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ===== NAV ===== */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(249, 253, 249, 0.92);
+      backdrop-filter: blur(12px);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(45, 122, 79, 0.1);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav-logo img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .nav-logo span {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--green);
+    }
+
+    .nav-badge {
+      background: var(--green-light);
+      color: var(--green);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 50px;
+      border: 1px solid rgba(45, 122, 79, 0.2);
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(45, 122, 79, 0.08) 0%, transparent 70%);
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-light);
+      color: var(--green);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 50px;
+      margin-bottom: 28px;
+      border: 1px solid rgba(45, 122, 79, 0.15);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 20px;
+      max-width: 700px;
+    }
+
+    .hero h1 span {
+      color: var(--green);
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--muted);
+      max-width: 520px;
+      margin-bottom: 40px;
+      font-weight: 400;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 64px;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: 'Tajawal', sans-serif;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(45, 122, 79, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(45, 122, 79, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--green);
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Tajawal', sans-serif;
+      text-decoration: none;
+      border: 2px solid rgba(45, 122, 79, 0.25);
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      border-color: var(--green);
+    }
+
+    /* ===== PHONE MOCKUP ===== */
+    .phone-mockup {
+      position: relative;
+      width: 260px;
+      height: 520px;
+      background: #111;
+      border-radius: 42px;
+      box-shadow:
+        0 40px 80px rgba(0,0,0,0.25),
+        0 0 0 8px #222,
+        0 0 0 10px #333;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(160deg, #1a3a2a 0%, #2d7a4f 40%, #4caf78 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+      gap: 16px;
+    }
+
+    .phone-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    .phone-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 20px;
+    }
+
+    .phone-title {
+      color: white;
+      font-size: 1.4rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .phone-subtitle {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.85rem;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .phone-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .phone-card {
+      background: rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(8px);
+    }
+
+    .phone-card-icon {
+      font-size: 1.4rem;
+    }
+
+    .phone-card-text {
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    /* ===== FEATURES ===== */
+    .section {
+      padding: 80px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      text-align: center;
+      color: var(--green);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+
+    .section-desc {
+      text-align: center;
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 500px;
+      margin: 0 auto 56px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      border: 1px solid rgba(45, 122, 79, 0.1);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(45, 122, 79, 0.12);
+    }
+
+    .feature-icon {
+      font-size: 2.2rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .feature-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .feature-desc {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ===== ABOUT ===== */
+    .about-section {
+      background: linear-gradient(135deg, var(--green) 0%, #1a5c35 100%);
+      padding: 80px 24px;
+      text-align: center;
+      color: white;
+    }
+
+    .about-inner {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .about-section .section-label {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .about-section .section-title {
+      color: white;
+    }
+
+    .about-section p {
+      color: rgba(255,255,255,0.85);
+      font-size: 1.1rem;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    /* ===== COMING SOON ===== */
+    .stores-section {
+      padding: 80px 24px;
+      text-align: center;
+    }
+
+    .stores-inner {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .store-badges {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 36px;
+    }
+
+    .store-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #111;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 16px;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      opacity: 0.6;
+      cursor: default;
+      position: relative;
+    }
+
+    .store-badge .soon {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: var(--green);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    .store-badge svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: #111;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 0.9rem;
+    }
+
+    footer span {
+      color: var(--green-mid);
+    }
+
+    /* ===== DIVIDER ===== */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(45,122,79,0.15), transparent);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
+      nav { padding: 12px 20px; }
+      .hero { padding: 100px 20px 60px; }
+      .phone-mockup { width: 220px; height: 440px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="/">
+      <img src="https://pub-cdn.apphub.cloud/u/U_310519663550643615/i/i_1776893087517_bda5af36-icon.png" alt="عوافيات" onerror="this.style.display='none'" />
+      <span>ألف عافيات</span>
+    </a>
+    <span class="nav-badge">قريباً 🚀</span>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      🍲 وصفات عراقية صحية
+    </div>
+    <h1>أكل صحي <span>يناسبك</span><br/>ويشبع شهيتك</h1>
+    <p>وصفات عراقية لذيذة مصممة خصيصاً لحالتك الصحية، مع ذكاء اصطناعي يقترح لك الأكل من مكونات ثلاجتك</p>
+    <div class="hero-buttons">
+      <a href="#features" class="btn-primary">اكتشف التطبيق</a>
+      <a href="#about" class="btn-secondary">من نحن</a>
+    </div>
+
+    <!-- Phone Mockup -->
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="phone-logo">
+          <img src="https://pub-cdn.apphub.cloud/u/U_310519663550643615/i/i_1776893087517_bda5af36-icon.png" alt="عوافيات" onerror="this.parentElement.innerHTML='🍲'" />
+        </div>
+        <div class="phone-title">ألف عافيات</div>
+        <div class="phone-subtitle">وصفاتك العراقية الصحية</div>
+        <div class="phone-cards">
+          <div class="phone-card">
+            <span class="phone-card-icon">🥘</span>
+            <span class="phone-card-text">مرق بامية عراقي</span>
+          </div>
+          <div class="phone-card">
+            <span class="phone-card-icon">🧆</span>
+            <span class="phone-card-text">كبة موصلية</span>
+          </div>
+          <div class="phone-card">
+            <span class="phone-card-icon">🍚</span>
+            <span class="phone-card-text">تمن زعفران</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="section-label">مميزات التطبيق</div>
+    <h2 class="section-title">كل شي تحتاجه في مطبخك</h2>
+    <p class="section-desc">من الوصفة إلى المنبه، التطبيق رفيقك اليومي في المطبخ</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🥘</span>
+        <div class="feature-title">وصفات عراقية أصيلة</div>
+        <p class="feature-desc">مئات الوصفات العراقية والخليجية والكردية، مرتبة حسب الوجبة والحالة الصحية</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🧊</span>
+        <div class="feature-title">شنو في ثلاجتي؟</div>
+        <p class="feature-desc">أخبرنا بالمكونات الموجودة عندك، والذكاء الاصطناعي يقترح لك أفضل الوصفات</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📅</span>
+        <div class="feature-title">جدول الطبخ الأسبوعي</div>
+        <p class="feature-desc">خطط وجباتك لكل أسبوع بسهولة، مع قائمة تسوق تلقائية لكل ما تحتاجه</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⏰</span>
+        <div class="feature-title">منبه الوجبات</div>
+        <p class="feature-desc">منبه ذكي يذكرك بوقت الطبخ لكل وجبة بأصوات مخصصة للفطور والغداء والعشاء</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">💚</span>
+        <div class="feature-title">مناسب لحالتك الصحية</div>
+        <p class="feature-desc">وصفات مصنفة للسكري وضغط الدم والسمنة والكوليسترول، أكل لذيذ وصحي في آنٍ واحد</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🛒</span>
+        <div class="feature-title">قائمة التسوق</div>
+        <p class="feature-desc">قائمة تسوق ذكية تُجمع تلقائياً من وصفاتك المختارة، لا تنسى شيئاً من السوق</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ABOUT -->
+  <section class="about-section" id="about">
+    <div class="about-inner">
+      <div class="section-label">من نحن</div>
+      <h2 class="section-title">فكرة وُلدت من المطبخ العراقي</h2>
+      <p>
+        ألف عافيات تطبيق عراقي يؤمن بأن الأكل الصحي لا يعني التخلي عن النكهة الأصيلة.
+        جمعنا أشهى الوصفات العراقية وكيّفناها لتناسب مختلف الحالات الصحية.
+      </p>
+      <p>
+        هدفنا بسيط: كل عراقي يستحق أن يأكل وجبة لذيذة تناسب صحته، بدون تعقيد ولا حرمان.
+      </p>
+    </div>
+  </section>
+
+  <!-- COMING SOON -->
+  <section class="stores-section">
+    <div class="stores-inner">
+      <div class="section-label">التحميل</div>
+      <h2 class="section-title">قريباً على المتاجر</h2>
+      <p style="color: var(--muted); font-size: 1.05rem;">التطبيق في مراحله الأخيرة، ترقبوا الإطلاق قريباً</p>
+      <div class="store-badges">
+        <div class="store-badge">
+          <span class="soon">قريباً</span>
+          <svg viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.33.07 2.25.73 3.02.78 1.16-.22 2.27-.91 3.5-.84 1.5.1 2.63.64 3.35 1.6-3.06 1.83-2.55 5.9.47 7.05-.56 1.52-1.28 3.02-2.34 4.29zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+          App Store
+        </div>
+        <div class="store-badge">
+          <span class="soon">قريباً</span>
+          <svg viewBox="0 0 24 24"><path d="M3.18 23.76c.3.17.64.22.97.14l11.4-6.58-2.45-2.46-9.92 8.9zm-1.1-19.7C2 4.4 2 4.8 2 5.2v13.6c0 .4 0 .8.08 1.14l.06.06 7.62-7.62v-.18L2.08 4.06zm18.54 8.46l-2.17-1.25-2.73 2.73 2.73 2.73 2.19-1.26c.62-.36.62-.94 0-1.3l-.02.35zM4.15.24L15.55 6.82l-2.45 2.46L3.18.24C3.5.16 3.84.21 4.15.38z"/></svg>
+          Google Play
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 <span>ألف عافيات</span> · جميع الحقوق محفوظة</p>
+  </footer>
+
+</body>
+</html>
