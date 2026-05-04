@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "ألف عافيات",
+    "slug": "awafiyat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "manus20260413170437",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "space.manus.awafiyat.t20260413170437"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundColor": "#5D8A3C"
+      },
+      "package": "space.manus.awafiyat.t20260413170437"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ac8a9414-c049-43f6-aa26-4647b61e4d28"
+      }
+    }
+  }
+}
