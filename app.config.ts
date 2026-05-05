@@ -95,6 +95,7 @@ const config: ExpoConfig = {
     "expo-router",
     "expo-alarm-module",
     "./plugins/withAlarmSounds",
+    "./plugins/withOverlayPermission",
     [
       "expo-notifications",
       {
