@@ -286,16 +286,9 @@ export async function scheduleMealReminder(
     } catch {}
 
     // المنبه الأصلي (expo-alarm-module) - يرن فوق كل شيء حتى لو التطبيق مغلق
-    // عند الرنين يفتح التطبيق تلقائياً ← تظهر شاشة المنبه الجميلة بالعربي
+    // يستخدم days array [0,1,2,3,4,5,6] للتكرار اليومي مع hour/minutes
     if (Platform.OS === "android" && NativeAlarm?.scheduleAlarm) {
       try {
-        const alarmDate = new Date();
-        alarmDate.setHours(hour, minute, 0, 0);
-        // إذا الوقت مضى اليوم، اجعله غداً
-        if (alarmDate.getTime() <= Date.now()) {
-          alarmDate.setDate(alarmDate.getDate() + 1);
-        }
-
         // اختيار الصوت حسب نوع الوجبة
         const MEAL_SOUND: Record<string, string> = {
           breakfast: "alarm_morning",
@@ -308,9 +301,14 @@ export async function scheduleMealReminder(
         const descriptionWithId = recipeId
           ? `RECIPE_ID:${recipeId}|${recipeName || label}`
           : (recipeName ? `الوصفة: ${recipeName}` : `هل أنتِ مستعدة لإعداد ${label}؟`);
+
+        // استخدام days array [0,1,2,3,4,5,6] = كل أيام الأسبوع للتكرار اليومي
+        // هذا هو الاستخدام الصحيح للمنبه المتكرر - بدون Date object
         NativeAlarm.scheduleAlarm({
           uid: `meal_${mealType}`,
-          day: alarmDate,
+          day: [0, 1, 2, 3, 4, 5, 6], // كل أيام الأسبوع
+          hour: hour,
+          minutes: minute,
           title: `حان وقت ${label}!`,
           description: descriptionWithId,
           dismissText: "إيقاف",
@@ -321,7 +319,7 @@ export async function scheduleMealReminder(
           active: true,
           sound: soundName,
         } as any);
-        console.log(`[Alarm] Native alarm scheduled: ${mealType} at ${hour}:${minute} with sound: ${soundName}`);
+        console.log(`[Alarm] Native alarm scheduled: ${mealType} at ${hour}:${minute} (daily repeat) with sound: ${soundName}`);
       } catch (e) {
         console.error("[Alarm] Native alarm schedule failed:", e);
       }
