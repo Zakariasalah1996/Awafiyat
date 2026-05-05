@@ -285,6 +285,21 @@ export async function scheduleMealReminder(
       }));
     } catch {}
 
+    // طلب صلاحية SCHEDULE_EXACT_ALARM على Android 12+ (لضبط وقت المنبه بدقة)
+    if (Platform.OS === "android") {
+      try {
+        const { Linking } = require("react-native");
+        const { NativeModules } = require("react-native");
+        // طلب صلاحية SCHEDULE_EXACT_ALARM من المستخدم (فقط على Android 12+)
+        if (NativeModules?.AlarmManager?.canScheduleExactAlarms !== undefined) {
+          const canSchedule = await NativeModules.AlarmManager.canScheduleExactAlarms();
+          if (!canSchedule) {
+            Linking.openSettings();
+          }
+        }
+      } catch {}
+    }
+
     // المنبه الأصلي (expo-alarm-module) - يرن فوق كل شيء حتى لو التطبيق مغلق
     // يستخدم days array [0,1,2,3,4,5,6] للتكرار اليومي مع hour/minutes
     if (Platform.OS === "android" && NativeAlarm?.scheduleAlarm) {
