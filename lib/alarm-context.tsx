@@ -1,139 +1,86 @@
 import React, { createContext, useContext, useCallback, useRef, useEffect, useState } from "react";
-import { Vibration, Platform } from "react-native";
+import { Platform } from "react-native";
 import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
-import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { VoiceGender, getVoiceGender, setVoiceGender, refreshAllAlarms } from "@/lib/notifications";
 
-// أصوات المنبه المتاحة - 3 أصوات لطيفة فقط
-const ALARM_SOUNDS = {
-  morning: require("@/assets/alarm_morning.mp3"),
-  lunch: require("@/assets/alarm_lunch.mp3"),
-  dinner: require("@/assets/alarm_dinner.mp3"),
-};
+// ============================================================
+// AlarmContext الجديد - بدون expo-alarm-module
+// يدير فقط: إعدادات الصوت (رجل/امرأة) + معاينة الصوت
+// الإشعارات الفعلية تُدار عبر lib/notifications.ts
+// ============================================================
 
-export type AlarmTone = keyof typeof ALARM_SOUNDS;
-
-export const ALARM_TONE_LABELS: Record<AlarmTone, string> = {
-  morning: "نغمة الصباح 🌅",
-  lunch: "نغمة الظهيرة ☀️",
-  dinner: "نغمة المساء 🌙",
-};
-
-// نغمة الوجبة حسب النوع
-export const MEAL_DEFAULT_TONE: Record<"breakfast" | "lunch" | "dinner", AlarmTone> = {
-  breakfast: "morning",
-  lunch: "lunch",
-  dinner: "dinner",
+// أصوات المعاينة
+const PREVIEW_SOUNDS = {
+  female: require("@/assets/notification_female.mp3"),
+  male: require("@/assets/notification_male.mp3"),
 };
 
 export interface AlarmSettings {
   enabled: boolean;
-  volume: number; // 0.0 - 1.0
-  tone: AlarmTone;
-  vibration: boolean;
+  voiceGender: VoiceGender;
 }
 
 const DEFAULT_SETTINGS: AlarmSettings = {
   enabled: true,
-  volume: 0.5, // 50% - مستوى متوسط افتراضياً للمنبه الحقيقي
-  tone: "morning",
-  vibration: true,
+  voiceGender: "female",
 };
 
-const STORAGE_KEY = "@alarm_settings";
-
-// expo-alarm-module - منبه أصلي على مستوى النظام (يعمل حتى لو التطبيق مغلق)
-let AlarmModule: {
-  scheduleAlarm: (params: any) => void;
-  stopAlarm: () => void;
-  removeAlarm: (uid: string) => void;
-} | null = null;
-
-try {
-  if (Platform.OS === "android") {
-    const mod = require("expo-alarm-module");
-    AlarmModule = {
-      scheduleAlarm: mod.scheduleAlarm || mod.default?.scheduleAlarm,
-      stopAlarm: mod.stopAlarm || mod.default?.stopAlarm,
-      removeAlarm: mod.removeAlarm || mod.default?.removeAlarm,
-    };
-  }
-} catch (e) {
-  console.warn("[Alarm] expo-alarm-module not available:", e);
-}
-
-interface AlarmState {
-  isRinging: boolean;
-  recipeName: string;
-  recipeId: string;
-  mealType: string;
-}
+const STORAGE_KEY = "@alarm_settings_v2";
 
 interface AlarmContextType {
-  alarm: AlarmState;
   settings: AlarmSettings;
-  startAlarm: (recipeName: string, recipeId?: string, mealType?: string) => void;
-  stopAlarm: () => void;
-  scheduleNativeAlarm: (uid: string, date: Date, title: string, description: string) => void;
-  cancelNativeAlarm: (uid: string) => void;
   updateSettings: (newSettings: Partial<AlarmSettings>) => void;
-  previewTone: (tone: AlarmTone) => void;
+  previewVoice: (gender: VoiceGender) => void;
   stopPreview: () => void;
 }
 
 const AlarmContext = createContext<AlarmContextType | null>(null);
 
 export function AlarmProvider({ children }: { children: React.ReactNode }) {
-  const [alarm, setAlarm] = useState<AlarmState>({
-    isRinging: false,
-    recipeName: "",
-    recipeId: "",
-    mealType: "",
-  });
-
   const [settings, setSettings] = useState<AlarmSettings>(DEFAULT_SETTINGS);
   const settingsRef = useRef<AlarmSettings>(DEFAULT_SETTINGS);
 
-  // مشغلات الصوت لكل نغمة
-  const morningPlayer = useAudioPlayer(ALARM_SOUNDS.morning);
-  const lunchPlayer = useAudioPlayer(ALARM_SOUNDS.lunch);
-  const dinnerPlayer = useAudioPlayer(ALARM_SOUNDS.dinner);
+  // مشغلات المعاينة
+  const femalePlayer = useAudioPlayer(PREVIEW_SOUNDS.female);
+  const malePlayer = useAudioPlayer(PREVIEW_SOUNDS.male);
 
-  const players: Record<AlarmTone, ReturnType<typeof useAudioPlayer>> = {
-    morning: morningPlayer,
-    lunch: lunchPlayer,
-    dinner: dinnerPlayer,
+  const players: Record<VoiceGender, ReturnType<typeof useAudioPlayer>> = {
+    female: femalePlayer,
+    male: malePlayer,
   };
 
-  const vibrationRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const previewPlayerRef = useRef<AlarmTone | null>(null);
+  const previewActiveRef = useRef<VoiceGender | null>(null);
 
   // تحميل الإعدادات من AsyncStorage
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((data) => {
-      if (data) {
-        try {
+    (async () => {
+      try {
+        const data = await AsyncStorage.getItem(STORAGE_KEY);
+        if (data) {
           const saved = JSON.parse(data) as AlarmSettings;
-          // التأكد من أن النغمة المحفوظة لا تزال متاحة
-          if (!ALARM_SOUNDS[saved.tone]) {
-            saved.tone = "morning";
-          }
           setSettings(saved);
           settingsRef.current = saved;
-        } catch {}
-      }
-    });
+        } else {
+          // محاولة قراءة الإعداد القديم
+          const oldGender = await getVoiceGender();
+          if (oldGender) {
+            const s = { ...DEFAULT_SETTINGS, voiceGender: oldGender };
+            setSettings(s);
+            settingsRef.current = s;
+          }
+        }
+      } catch {}
 
-    if (Platform.OS !== "web") {
-      setAudioModeAsync({ playsInSilentMode: true });
-    }
+      if (Platform.OS !== "web") {
+        setAudioModeAsync({ playsInSilentMode: true });
+      }
+    })();
 
     return () => {
       Object.values(players).forEach((p) => {
         try { p.release(); } catch {}
       });
-      if (vibrationRef.current) clearInterval(vibrationRef.current);
-      Vibration.cancel();
     };
   }, []);
 
@@ -141,6 +88,8 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
   const saveSettings = useCallback(async (s: AlarmSettings) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      // مزامنة voiceGender مع notifications.ts
+      await setVoiceGender(s.voiceGender);
     } catch {}
   }, []);
 
@@ -151,41 +100,49 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
         const updated = { ...prev, ...newSettings };
         settingsRef.current = updated;
         saveSettings(updated);
+
+        // إذا تغير الصوت، إعادة جدولة الإشعارات بالصوت الجديد
+        if (newSettings.voiceGender && newSettings.voiceGender !== prev.voiceGender) {
+          refreshAllAlarms().catch((e) =>
+            console.warn("[AlarmContext] Failed to refresh alarms after voice change:", e)
+          );
+        }
+
         return updated;
       });
     },
     [saveSettings]
   );
 
-  // معاينة نغمة
-  const previewTone = useCallback(
-    (tone: AlarmTone) => {
+  // معاينة صوت
+  const previewVoice = useCallback(
+    (gender: VoiceGender) => {
       // إيقاف أي معاينة سابقة
-      if (previewPlayerRef.current) {
+      if (previewActiveRef.current) {
         try {
-          players[previewPlayerRef.current].pause();
-          players[previewPlayerRef.current].seekTo(0);
+          players[previewActiveRef.current].pause();
+          players[previewActiveRef.current].seekTo(0);
         } catch {}
       }
 
-      const player = players[tone];
+      const player = players[gender];
       try {
         player.loop = false;
-        player.volume = settingsRef.current.volume;
+        player.volume = 1.0;
         player.seekTo(0);
         player.play();
-        previewPlayerRef.current = tone;
+        previewActiveRef.current = gender;
 
-        // إيقاف بعد 5 ثوانٍ
+        // إيقاف بعد 8 ثوانٍ (مدة الملف تقريباً)
         setTimeout(() => {
           try {
             player.pause();
             player.seekTo(0);
           } catch {}
-          previewPlayerRef.current = null;
-        }, 5000);
+          previewActiveRef.current = null;
+        }, 9000);
       } catch (e) {
-        console.warn("Preview failed:", e);
+        console.warn("[AlarmContext] Preview failed:", e);
       }
     },
     [players]
@@ -193,123 +150,21 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
 
   // إيقاف المعاينة
   const stopPreview = useCallback(() => {
-    if (previewPlayerRef.current) {
+    if (previewActiveRef.current) {
       try {
-        players[previewPlayerRef.current].pause();
-        players[previewPlayerRef.current].seekTo(0);
+        players[previewActiveRef.current].pause();
+        players[previewActiveRef.current].seekTo(0);
       } catch {}
-      previewPlayerRef.current = null;
-    }
-  }, [players]);
-
-  // جدولة منبه أصلي
-  const scheduleNativeAlarm = useCallback(
-    (uid: string, date: Date, title: string, description: string) => {
-      if (Platform.OS !== "android" || !AlarmModule?.scheduleAlarm) return;
-      try {
-        AlarmModule.scheduleAlarm({
-          uid,
-          day: date,
-          title,
-          description,
-          showDismiss: true,
-          showSnooze: false, // لا غفوة - فقط إيقاف
-          repeating: true,
-          active: true,
-        } as any);
-        console.log(`[Alarm] Native scheduled: ${uid} at ${date.toLocaleTimeString()}`);
-      } catch (e) {
-        console.error("[Alarm] Schedule failed:", e);
-      }
-    },
-    []
-  );
-
-  // إلغاء منبه أصلي
-  const cancelNativeAlarm = useCallback((uid: string) => {
-    if (Platform.OS !== "android" || !AlarmModule?.removeAlarm) return;
-    try {
-      AlarmModule.removeAlarm(uid);
-    } catch {}
-  }, []);
-
-  // تشغيل المنبه - يختار الصوت حسب نوع الوجبة تلقائياً
-  const startAlarm = useCallback(
-    (recipeName: string, recipeId?: string, mealType?: string) => {
-      const s = settingsRef.current;
-
-      setAlarm({
-        isRinging: true,
-        recipeName: recipeName || "وجبتك",
-        recipeId: recipeId || "",
-        mealType: mealType || "",
-      });
-
-      // تشغيل الصوت إذا مفعّل
-      if (s.enabled && s.volume > 0) {
-        try {
-          // اختيار الصوت حسب نوع الوجبة تلقائياً
-          const toneToPlay: AlarmTone =
-            mealType === "breakfast"
-              ? "morning"
-              : mealType === "lunch"
-              ? "lunch"
-              : mealType === "dinner"
-              ? "dinner"
-              : s.tone;
-
-          const player = players[toneToPlay];
-          player.loop = true;
-          player.volume = s.volume;
-          player.seekTo(0);
-          player.play();
-        } catch (e) {
-          console.warn("Alarm play failed:", e);
-        }
-      }
-
-      // اهتزاز مستمر مثل المنبه الحقيقي
-      if (s.vibration && Platform.OS !== "web") {
-        // نمط اهتزاز متكرر - يستمر حتى الإيقاف
-        Vibration.vibrate([0, 500, 500, 500, 500, 500], true);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-    },
-    [players]
-  );
-
-  // إيقاف المنبه
-  const stopAlarm = useCallback(() => {
-    setAlarm({ isRinging: false, recipeName: "", recipeId: "", mealType: "" });
-
-    // إيقاف كل المشغلات
-    Object.values(players).forEach((p) => {
-      try { p.pause(); p.seekTo(0); } catch {}
-    });
-
-    // إيقاف المنبه الأصلي
-    if (AlarmModule?.stopAlarm) {
-      try { AlarmModule.stopAlarm(); } catch {}
-    }
-
-    Vibration.cancel();
-    if (vibrationRef.current) {
-      clearInterval(vibrationRef.current);
-      vibrationRef.current = null;
+      previewActiveRef.current = null;
     }
   }, [players]);
 
   return (
     <AlarmContext.Provider
       value={{
-        alarm,
         settings,
-        startAlarm,
-        stopAlarm,
-        scheduleNativeAlarm,
-        cancelNativeAlarm,
         updateSettings,
-        previewTone,
+        previewVoice,
         stopPreview,
       }}
     >

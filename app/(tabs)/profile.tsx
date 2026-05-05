@@ -24,7 +24,8 @@ import {
   registerPushToken,
   getSavedPushToken,
 } from "@/lib/notifications";
-import { useAlarm, ALARM_TONE_LABELS, type AlarmTone } from "@/lib/alarm-context";
+import { useAlarm } from "@/lib/alarm-context";
+import type { VoiceGender } from "@/lib/notifications";
 
 const HEALTH_LABELS: Record<HealthCondition, string> = {
   diabetes: "السكري",
@@ -59,7 +60,7 @@ export default function ProfileScreen() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [pushTokenStatus, setPushTokenStatus] = useState<"checking" | "registered" | "not_registered" | "error">("checking");
   const [isRegisteringToken, setIsRegisteringToken] = useState(false);
-  const { settings: alarmSettings, updateSettings: updateAlarmSettings, previewTone } = useAlarm();
+  const { settings: alarmSettings, updateSettings: updateAlarmSettings, previewVoice, stopPreview } = useAlarm();
 
   // Request notification permissions on mount
   useEffect(() => {
@@ -527,14 +528,14 @@ export default function ProfileScreen() {
         <View className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border" style={{ borderColor: colors.border }}>
           <View className="flex-row items-center mb-3">
             <Text className="text-lg ml-2">⏰</Text>
-            <Text className="text-base font-bold text-foreground">إعدادات المنبه</Text>
+            <Text className="text-base font-bold text-foreground">إعدادات التذكير</Text>
           </View>
 
-          {/* تفعيل/إيقاف الصوت */}
+          {/* تفعيل/إيقاف التذكير */}
           <View className="flex-row items-center justify-between py-3 border-b" style={{ borderBottomColor: colors.border }}>
             <View className="flex-1 mr-3">
-              <Text className="text-base text-foreground">صوت المنبه</Text>
-              <Text className="text-xs text-muted mt-0.5">تفعيل أو إيقاف صوت المنبه</Text>
+              <Text className="text-base text-foreground">تذكير الوجبات</Text>
+              <Text className="text-xs text-muted mt-0.5">تفعيل أو إيقاف تذكير أوقات الوجبات</Text>
             </View>
             <Switch
               value={alarmSettings.enabled}
@@ -544,98 +545,42 @@ export default function ProfileScreen() {
             />
           </View>
 
-          {/* تفعيل/إيقاف الاهتزاز */}
-          <View className="flex-row items-center justify-between py-3 border-b" style={{ borderBottomColor: colors.border }}>
-            <View className="flex-1 mr-3">
-              <Text className="text-base text-foreground">الاهتزاز</Text>
-              <Text className="text-xs text-muted mt-0.5">اهتزاز مع صوت المنبه</Text>
-            </View>
-            <Switch
-              value={alarmSettings.vibration}
-              onValueChange={(v) => updateAlarmSettings({ vibration: v })}
-              trackColor={{ false: colors.border, true: `${colors.primary}60` }}
-              thumbColor={alarmSettings.vibration ? colors.primary : "#f4f3f4"}
-            />
-          </View>
-
-          {/* مستوى الصوت */}
-          {alarmSettings.enabled && (
-            <View className="py-3 border-b" style={{ borderBottomColor: colors.border }}>
-              <View className="flex-row items-center justify-between mb-2">
-                <Text className="text-base text-foreground">مستوى الصوت</Text>
-                <Text className="text-sm text-muted">{Math.round(alarmSettings.volume * 100)}%</Text>
-              </View>
-              <View className="flex-row items-center gap-3">
-                <Text className="text-sm text-muted">🔈</Text>
-                <View className="flex-1 h-8 justify-center">
-                  <View className="h-2 rounded-full" style={{ backgroundColor: colors.border }}>
-                    <View
-                      className="h-2 rounded-full"
-                      style={{
-                        backgroundColor: colors.primary,
-                        width: `${alarmSettings.volume * 100}%`,
-                      }}
-                    />
-                  </View>
-                  <View className="flex-row justify-between mt-2">
-                    {[0.25, 0.5, 0.75, 1.0].map((v) => (
-                      <TouchableOpacity
-                        key={v}
-                        onPress={() => updateAlarmSettings({ volume: v })}
-                        style={{
-                          paddingHorizontal: 10,
-                          paddingVertical: 4,
-                          borderRadius: 12,
-                          backgroundColor: alarmSettings.volume === v ? colors.primary : `${colors.border}50`,
-                        }}
-                      >
-                        <Text
-                          className="text-xs font-medium"
-                          style={{ color: alarmSettings.volume === v ? "#fff" : colors.muted }}
-                        >
-                          {Math.round(v * 100)}%
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-                <Text className="text-sm text-muted">🔊</Text>
-              </View>
-            </View>
-          )}
-
-          {/* اختيار النغمة */}
+          {/* اختيار صوت رجل/امرأة */}
           {alarmSettings.enabled && (
             <View className="py-3">
-              <Text className="text-base text-foreground mb-2">نغمات التذكير</Text>
-              <Text className="text-xs text-muted mb-3">كل وجبة لها نغمتها الخاصة تلقائياً • اضغطي للمعاينة</Text>
-              {(Object.keys(ALARM_TONE_LABELS) as AlarmTone[]).map((tone) => (
-                <TouchableOpacity
-                  key={tone}
-                  onPress={() => {
-                    updateAlarmSettings({ tone });
-                    previewTone(tone);
-                  }}
-                  className="flex-row items-center justify-between py-3 px-3 rounded-xl mb-1"
-                  style={{
-                    backgroundColor: alarmSettings.tone === tone ? `${colors.primary}15` : "transparent",
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    className="text-base"
-                    style={{
-                      color: alarmSettings.tone === tone ? colors.primary : colors.foreground,
-                      fontWeight: alarmSettings.tone === tone ? "700" : "400",
+              <Text className="text-base text-foreground mb-1">صوت التذكير</Text>
+              <Text className="text-xs text-muted mb-3">اختر صوت التذكير المفضل • اضغط للمعاينة</Text>
+              {(["female", "male"] as VoiceGender[]).map((gender) => {
+                const isSelected = alarmSettings.voiceGender === gender;
+                const label = gender === "female" ? "👩 صوت امرأة" : "👨 صوت رجل";
+                return (
+                  <TouchableOpacity
+                    key={gender}
+                    onPress={() => {
+                      updateAlarmSettings({ voiceGender: gender });
+                      previewVoice(gender);
                     }}
+                    className="flex-row items-center justify-between py-3 px-3 rounded-xl mb-1"
+                    style={{
+                      backgroundColor: isSelected ? `${colors.primary}15` : "transparent",
+                    }}
+                    activeOpacity={0.7}
                   >
-                    {ALARM_TONE_LABELS[tone]}
-                  </Text>
-                  {alarmSettings.tone === tone && (
-                    <Text style={{ color: colors.primary, fontSize: 18 }}>✓</Text>
-                  )}
-                </TouchableOpacity>
-              ))}
+                    <Text
+                      className="text-base"
+                      style={{
+                        color: isSelected ? colors.primary : colors.foreground,
+                        fontWeight: isSelected ? "700" : "400",
+                      }}
+                    >
+                      {label}
+                    </Text>
+                    {isSelected && (
+                      <Text style={{ color: colors.primary, fontSize: 18 }}>✓</Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
         </View>

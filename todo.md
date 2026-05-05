@@ -383,3 +383,19 @@
 - [ ] المشكلة 1: المنبه يرن بعد فتح الهاتف حتى لو فات وقته (تجاهل المنبه إذا مر أكثر من 30 دقيقة)
 - [ ] المشكلة 2: الشاشة لا تضيء عند رنين المنبه والهاتف مقفل (إضافة WakeLock + fullScreenIntent صحيح)
 - [ ] المشكلة 3: زر "عرض الوصفة" لا يفتح التطبيق على الوصفة (إصلاح deep link + checkAlarmLaunch)
+
+## الدفعة 53 - حذف expo-alarm-module واستبداله بإشعارات محلية بأولوية قصوى:
+
+- [x] حذف expo-alarm-module بالكامل من المشروع (package.json + patchedDependencies + patches/)
+- [x] حذف withOverlayPermission.js (لم تعد ضرورية)
+- [x] تحديث withAlarmSounds.js لنسخ الأصوات الجديدة (notification_female.mp3 + notification_male.mp3)
+- [x] تحديث app.config.ts (حذف plugins القديمة + تحديث قائمة الأصوات)
+- [x] إعادة كتابة lib/notifications.ts بالكامل (expo-notifications فقط + DAILY trigger + MAX importance + أزرار تفاعلية)
+- [x] إعادة كتابة lib/alarm-context.tsx (بدون expo-alarm-module + خيار صوت رجل/امرأة)
+- [x] إعادة كتابة app/_layout.tsx (حذف checkAlarmLaunch + حذف Linking + معالجة NotificationResponse)
+- [x] تحديث profile.tsx (استبدال نغمات المنبه القديمة بخيار صوت رجل/امرأة)
+- [x] تحديث meal-planner.tsx (استبدال handleStartAlarm بـ scheduleMealReminder)
+- [x] حذف components/alarm-screen.tsx (لم تعد مطلوبة)
+- [x] حذف ملفات الصوت القديمة (alarm_morning/lunch/dinner.mp3)
+- [x] حذف tests/alarm-improvements.test.ts
+- [x] التحقق من TypeScript بدون أخطاء

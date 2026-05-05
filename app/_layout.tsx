@@ -8,12 +8,19 @@ import "react-native-reanimated";
 import { Platform, I18nManager } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
-import { requestNotificationPermissions, setupNotificationListeners, getSavedPushToken, registerPushToken, refreshAllAlarms } from "@/lib/notifications";
+import {
+  requestNotificationPermissions,
+  setupNotificationListeners,
+  getSavedPushToken,
+  registerPushToken,
+  refreshAllAlarms,
+  ACTION_VIEW_RECIPE,
+} from "@/lib/notifications";
 import { syncRecipeImages } from "@/lib/recipe-image-sync";
 import { registerGuest } from "@/lib/guest-auth";
 import { useRouter } from "expo-router";
 import { AlarmProvider } from "@/lib/alarm-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -25,7 +32,6 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { UserProvider } from "@/lib/user-context";
-import * as Linking from "expo-linking";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -53,93 +59,7 @@ function RootLayoutInner() {
     syncRecipeImages().catch((e) => console.warn("[RecipeImageSync] Error:", e));
     // Auto-register as guest user
     registerGuest().catch((e) => console.warn("[Guest] Error:", e));
-
-    // فحص إذا التطبيق فُتح بواسطة المنبه الأصلي (expo-alarm-module)
-    // عند رنين المنبه الأصلي، يفتح التطبيق تلقائياً → نشغّل شاشة المنبه الجميلة بالعربي
-    if (Platform.OS === "android") {
-      checkAlarmLaunch();
-      // إعادة جدولة المنبهات بالأصوات الجديدة (يحذف القديمة ويعيد جدولتها)
-      refreshAllAlarms().catch((e) => console.warn("[Alarm] Refresh failed:", e));
-    }
   }, []);
-
-  // فحص إذا التطبيق فُتح بواسطة المنبه (عبر زر "عرض الوصفة")
-  // يذهب مباشرة لصفحة الوصفة - بدون شاشة منبه داخلية
-  const checkAlarmLaunch = useCallback(async () => {
-    try {
-      const mealTypes = ["breakfast", "lunch", "dinner"] as const;
-      const now = new Date();
-      const currentHour = now.getHours();
-      const currentMinute = now.getMinutes();
-
-      for (const mealType of mealTypes) {
-        const data = await AsyncStorage.getItem(`@alarm_data_${mealType}`);
-        if (!data) continue;
-
-        const alarmData = JSON.parse(data);
-        const alarmHour = alarmData.hour;
-        const alarmMinute = alarmData.minute;
-
-        // إذا الوقت الحالي قريب من وقت المنبه (خلال 30 دقيقة)
-        // ملاحظة: نتحقق فقط إذا الوقت الحالي بعد وقت المنبه (ليس قبله)
-        const nowTotalMinutes = currentHour * 60 + currentMinute;
-        const alarmTotalMinutes = alarmHour * 60 + alarmMinute;
-        const diffMinutes = nowTotalMinutes - alarmTotalMinutes;
-        if (diffMinutes >= 0 && diffMinutes <= 30 && alarmData.recipeId) {
-          console.log(`[Alarm] App launched by native alarm: ${mealType}, navigating to recipe: ${alarmData.recipeId}`);
-          // الذهاب مباشرة لصفحة الوصفة
-          setTimeout(() => {
-            router.push({
-              pathname: "/sections/recipe-detail" as any,
-              params: { id: alarmData.recipeId },
-            });
-          }, 1500); // انتظار ليكتمل تحميل التطبيق
-          break;
-        }
-      }
-    } catch (e) {
-      console.warn("[Alarm] Check alarm launch error:", e);
-    }
-  }, [router]);
-
-  // معالجة deep links من المنبه (عند الضغط على "عرض الوصفة")
-  useEffect(() => {
-    if (Platform.OS !== "android") return;
-
-    // معالجة deep link إذا التطبيق فُتح من deep link
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleDeepLink(url);
-      }
-    }).catch((e) => console.warn("[DeepLink] getInitialURL error:", e));
-
-    // الاستماع لـ deep links أثناء تشغيل التطبيق
-    const subscription = Linking.addEventListener("url", ({ url }) => {
-      if (url) handleDeepLink(url);
-    });
-
-    return () => subscription.remove();
-  }, [router]);
-
-  const handleDeepLink = useCallback((url: string) => {
-    try {
-      // نمط: manus20260413170437://sections/recipe-detail?id=recipe_123
-      const parsed = Linking.parse(url);
-      console.log("[DeepLink] Received:", url, "parsed:", JSON.stringify(parsed));
-      if (parsed.path === "sections/recipe-detail" && parsed.queryParams?.id) {
-        const recipeId = parsed.queryParams.id as string;
-        console.log("[DeepLink] Navigating to recipe:", recipeId);
-        setTimeout(() => {
-          router.push({
-            pathname: "/sections/recipe-detail" as any,
-            params: { id: recipeId },
-          });
-        }, 500);
-      }
-    } catch (e) {
-      console.warn("[DeepLink] Error handling deep link:", e);
-    }
-  }, [router]);
 
   // Auto-register push notifications on app start (native only)
   useEffect(() => {
@@ -149,7 +69,6 @@ function RootLayoutInner() {
     requestNotificationPermissions()
       .then(async (granted) => {
         console.log("[Push] Auto-registration result:", granted ? "granted" : "denied");
-        // Also try to re-register saved token in case previous registration failed
         if (granted) {
           const savedToken = await getSavedPushToken();
           if (savedToken) {
@@ -162,25 +81,58 @@ function RootLayoutInner() {
         console.warn("[Push] Auto-registration error:", err);
       });
 
+    // إعادة جدولة الإشعارات بالإعدادات الحالية عند فتح التطبيق
+    refreshAllAlarms().catch((e) => console.warn("[Notifications] Refresh failed:", e));
+
     // Setup notification listeners
-    // الإشعارات للنصائح والتحفيز والتسوق فقط - المنبه الأصلي يتكفل بالوجبات
     const cleanup = setupNotificationListeners(
       (notification) => {
-        console.log("[Push] Notification received:", notification.request.content.title);
+        console.log("[Notifications] Received:", notification.request.content.title);
       },
       (response) => {
-        console.log("[Push] Notification tapped:", response.notification.request.content.title);
-        const data = response.notification.request.content.data;
-        if (data?.type === "shopping") {
-          setTimeout(() => {
-            router.push("/sections/shopping-list" as any);
-          }, 500);
-        }
+        // معالجة ضغط الأزرار التفاعلية
+        handleNotificationResponse(response);
       }
     );
 
+    // التحقق من آخر استجابة (إذا التطبيق كان مغلقاً)
+    Notifications.getLastNotificationResponseAsync().then((response) => {
+      if (response) {
+        handleNotificationResponse(response);
+      }
+    });
+
     return cleanup;
   }, []);
+
+  // معالجة استجابة الإشعار (ضغط زر أو ضغط على الإشعار نفسه)
+  const handleNotificationResponse = useCallback(
+    (response: Notifications.NotificationResponse) => {
+      const actionId = response.actionIdentifier;
+      const data = response.notification.request.content.data;
+
+      console.log("[Notifications] Response:", actionId, "data:", JSON.stringify(data));
+
+      // إذا ضغط "عرض الوصفة" أو ضغط على الإشعار مباشرة (DEFAULT_ACTION_IDENTIFIER)
+      if (
+        actionId === ACTION_VIEW_RECIPE ||
+        actionId === Notifications.DEFAULT_ACTION_IDENTIFIER
+      ) {
+        if (data?.recipeId) {
+          const recipeId = data.recipeId as string;
+          console.log("[Notifications] Navigating to recipe:", recipeId);
+          setTimeout(() => {
+            router.push({
+              pathname: "/sections/recipe-detail" as any,
+              params: { id: recipeId },
+            });
+          }, 1000);
+        }
+      }
+      // إذا ضغط "إيقاف" - لا نفعل شيئاً (الإشعار يُغلق تلقائياً)
+    },
+    [router]
+  );
 
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {
     setInsets(metrics.insets);
@@ -221,7 +173,6 @@ function RootLayoutInner() {
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <UserProvider>
-
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
             <Stack screenOptions={{ headerShown: false }}>

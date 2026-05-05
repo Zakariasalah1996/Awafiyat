@@ -1,16 +1,15 @@
 /**
  * Expo Config Plugin: withAlarmSounds
- * ينسخ ملفات صوت المنبه مباشرة إلى android/app/src/main/res/raw/
- * حتى يتمكن expo-alarm-module من إيجادها عبر getIdentifier()
+ * ينسخ ملفات صوت الإشعارات المخصصة إلى android/app/src/main/res/raw/
+ * حتى يتمكن expo-notifications من استخدامها في NotificationChannel
  */
 const { withDangerousMod } = require("@expo/config-plugins");
 const fs = require("fs");
 const path = require("path");
 
-const ALARM_SOUNDS = [
-  "alarm_morning.mp3",
-  "alarm_lunch.mp3",
-  "alarm_dinner.mp3",
+const NOTIFICATION_SOUNDS = [
+  "notification_female.mp3",
+  "notification_male.mp3",
 ];
 
 const withAlarmSounds = (config) => {
@@ -33,7 +32,7 @@ const withAlarmSounds = (config) => {
       }
 
       // نسخ كل ملف صوت
-      for (const soundFile of ALARM_SOUNDS) {
+      for (const soundFile of NOTIFICATION_SOUNDS) {
         const srcPath = path.join(projectRoot, "assets", soundFile);
         const destPath = path.join(rawDir, soundFile);
 

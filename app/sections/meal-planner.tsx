@@ -21,7 +21,7 @@ import { getFoodCategoryImage } from "@/lib/food-category-images";
 import { getRecipeCustomImage } from "@/lib/recipe-image-sync";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { scheduleAllMealReminders } from "@/lib/notifications";
+import { scheduleAllMealReminders, scheduleMealReminder } from "@/lib/notifications";
 import { useAlarm } from "@/lib/alarm-context";
 
 I18nManager.forceRTL(true);
@@ -119,8 +119,8 @@ export default function MealPlannerScreen() {
   const [trialDaysLeft, setTrialDaysLeft] = useState(FREE_TRIAL_DAYS);
   const [showLockedDayModal, setShowLockedDayModal] = useState(false);
 
-  // منبه الطبخ - يستخدم AlarmContext العالمي
-  const { alarm, startAlarm: globalStartAlarm, stopAlarm: globalStopAlarm } = useAlarm();
+  // إعدادات التذكير
+  const { settings: alarmSettings } = useAlarm();
 
   // تحميل البيانات المحفوظة
   useEffect(() => {
@@ -189,10 +189,7 @@ export default function MealPlannerScreen() {
     }
   };
 
-  // تشغيل المنبه عبر AlarmContext العالمي
-  const handleStartAlarm = useCallback((recipeName: string, recipeId?: string) => {
-    globalStartAlarm(recipeName, recipeId);
-  }, [globalStartAlarm]);
+
 
   // 5 أيام مجانية فقط - الأيام 6 و 7 مقفلة للمشتركين
   const FREE_DAYS_COUNT = 5;
@@ -884,13 +881,19 @@ export default function MealPlannerScreen() {
                       <TouchableOpacity
                         onPress={() => {
                           Alert.alert(
-                            "تشغيل المنبه",
-                            `هل تريدين تشغيل منبه الطبخ لـ "${planned.recipeName}"؟`,
+                            "تذكير الطبخ",
+                            `هل تريد تفعيل تذكير لـ "${planned.recipeName}"?`,
                             [
                               { text: "إلغاء", style: "cancel" },
                               {
-                                text: "تشغيل",
-                                onPress: () => handleStartAlarm(planned.recipeName, planned.recipeId),
+                                text: "تفعيل",
+                                onPress: async () => {
+                                  const mealKey = meal.key as "breakfast" | "lunch" | "dinner";
+                                  const time = mealTimes[mealKey];
+                                  const [h, m] = time.split(":").map(Number);
+                                  await scheduleMealReminder(mealKey, h, m, planned.recipeId, planned.recipeName);
+                                  Alert.alert("تم", `سيتم تذكيرك بـ "${planned.recipeName}" في الساعة ${time}`);
+                                },
                               },
                             ]
                           );

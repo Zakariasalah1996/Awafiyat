@@ -69,8 +69,6 @@ const config: ExpoConfig = {
       "POST_NOTIFICATIONS",
       "VIBRATE",
       "USE_FULL_SCREEN_INTENT",
-      "SCHEDULE_EXACT_ALARM",
-      "USE_EXACT_ALARM",
     ],
     intentFilters: [
       {
@@ -93,13 +91,11 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
-    "expo-alarm-module",
     "./plugins/withAlarmSounds",
-    "./plugins/withOverlayPermission",
     [
       "expo-notifications",
       {
-        "sounds": ["./assets/notification.mp3", "./assets/alarm_morning.mp3", "./assets/alarm_lunch.mp3", "./assets/alarm_dinner.mp3"]
+        "sounds": ["./assets/notification_female.mp3", "./assets/notification_male.mp3"]
       }
     ],
     [

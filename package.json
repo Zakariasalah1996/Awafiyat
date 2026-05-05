@@ -95,10 +95,5 @@
     "typescript": "~5.9.3",
     "vitest": "^2.1.9"
   },
-  "packageManager": "pnpm@9.12.0",
-  "pnpm": {
-    "patchedDependencies": {
-      "expo-alarm-module": "patches/expo-alarm-module.patch"
-    }
-  }
+  "packageManager": "pnpm@9.12.0"
 }

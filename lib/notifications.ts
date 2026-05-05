@@ -3,28 +3,33 @@ import { Platform } from "react-native";
 import Constants from "expo-constants";
 import { getApiBaseUrl } from "@/constants/oauth";
 import { getGuestUserId } from "@/lib/guest-auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// expo-alarm-module - منبه أصلي على مستوى النظام (يعمل حتى لو التطبيق مغلق)
-let NativeAlarm: {
-  scheduleAlarm: (params: any) => void;
-  stopAlarm: () => void;
-  removeAlarm: (uid: string) => void;
-  removeAllAlarms: () => void;
-} | null = null;
+// ============================================================
+// نظام الإشعارات الجديد - expo-notifications فقط
+// بدون expo-alarm-module
+// ============================================================
 
-try {
-  if (Platform.OS === "android") {
-    const mod = require("expo-alarm-module");
-    NativeAlarm = {
-      scheduleAlarm: mod.scheduleAlarm || mod.default?.scheduleAlarm,
-      stopAlarm: mod.stopAlarm || mod.default?.stopAlarm,
-      removeAlarm: mod.removeAlarm || mod.default?.removeAlarm,
-      removeAllAlarms: mod.removeAllAlarms || mod.default?.removeAllAlarms,
-    };
-  }
-} catch (e) {
-  console.warn("[Alarm] expo-alarm-module not available:", e);
-}
+// === أنواع الأصوات ===
+export type VoiceGender = "female" | "male";
+
+const VOICE_SOUND_FILE: Record<VoiceGender, string> = {
+  female: "notification_female.mp3",
+  male: "notification_male.mp3",
+};
+
+// === مفاتيح التخزين ===
+const VOICE_GENDER_KEY = "@notification_voice_gender";
+const PUSH_TOKEN_KEY = "expo_push_token";
+
+// === معرّفات القنوات والفئات ===
+const CHANNEL_FEMALE = "meal_reminder_female";
+const CHANNEL_MALE = "meal_reminder_male";
+const CATEGORY_ID = "meal_alarm";
+
+// === معرّفات الأزرار ===
+export const ACTION_VIEW_RECIPE = "VIEW_RECIPE";
+export const ACTION_DISMISS = "DISMISS";
 
 // Configure notification handler for foreground
 Notifications.setNotificationHandler({
@@ -37,34 +42,104 @@ Notifications.setNotificationHandler({
   }),
 });
 
-// Fusha motivational messages
-const BREAKFAST_MESSAGES = [
-  "حان وقت الفطور، لا تنسي أن تبدئي يومك بوجبة صحية",
-  "هل أعددتِ فطورك؟ صحتك أولاً",
-  "لا تخرجي من المنزل دون فطور",
-];
-
-const LUNCH_MESSAGES = [
-  "لا تنسي وجبة الغداء، جسمك يحتاج إلى الطاقة",
-  "هيا نختر وصفة لذيذة وصحية، عافية مقدماً",
-  "غداء صحي يعني يوماً سعيداً",
-];
-
-const DINNER_MESSAGES = [
-  "عشاء خفيف وصحي هو الأفضل قبل النوم",
-  "لا تنسي عشاءك، واحرصي أن يكون خفيفاً",
-  "وجبة خفيفة ولذيذة تجعل نومك هادئاً",
-];
-
-const MOTIVATION_MESSAGES = [
-  { title: "عافيات تهتم بك! 💚", body: "تذكّري: صحتك أمانة، حافظي عليها بالغذاء الصحي" },
-  { title: "نصيحة اليوم 🌿", body: "اشربي كمية كافية من الماء اليوم، جسمك يحتاج 8 أكواب على الأقل" },
-  { title: "كيف حالك اليوم؟ 😊", body: "لا تنسي تصفح الوصفات الجديدة، لدينا أطباق رائعة!" },
-];
-
-function getRandomItem<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
+// === إدارة صوت الإشعار ===
+export async function getVoiceGender(): Promise<VoiceGender> {
+  try {
+    const saved = await AsyncStorage.getItem(VOICE_GENDER_KEY);
+    if (saved === "male" || saved === "female") return saved;
+  } catch {}
+  return "female"; // الافتراضي: امرأة
 }
+
+export async function setVoiceGender(gender: VoiceGender): Promise<void> {
+  await AsyncStorage.setItem(VOICE_GENDER_KEY, gender);
+}
+
+// === إعداد القنوات والفئات ===
+/**
+ * إنشاء قنوات الإشعارات (Android 8+) وفئة الأزرار التفاعلية
+ * يجب استدعاؤها مرة واحدة عند بدء التطبيق
+ */
+export async function setupNotificationChannelsAndCategories(): Promise<void> {
+  if (Platform.OS === "web") return;
+
+  try {
+    if (Platform.OS === "android") {
+      // قناة صوت المرأة - أولوية قصوى
+      await Notifications.setNotificationChannelAsync(CHANNEL_FEMALE, {
+        name: "تذكير الوجبات - صوت امرأة",
+        description: "تذكير بأوقات إعداد الوجبات بصوت امرأة",
+        importance: Notifications.AndroidImportance.MAX,
+        sound: VOICE_SOUND_FILE.female,
+        vibrationPattern: [0, 500, 200, 500],
+        enableVibrate: true,
+        enableLights: true,
+        lightColor: "#4A7C59",
+        bypassDnd: false,
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      });
+
+      // قناة صوت الرجل - أولوية قصوى
+      await Notifications.setNotificationChannelAsync(CHANNEL_MALE, {
+        name: "تذكير الوجبات - صوت رجل",
+        description: "تذكير بأوقات إعداد الوجبات بصوت رجل",
+        importance: Notifications.AndroidImportance.MAX,
+        sound: VOICE_SOUND_FILE.male,
+        vibrationPattern: [0, 500, 200, 500],
+        enableVibrate: true,
+        enableLights: true,
+        lightColor: "#4A7C59",
+        bypassDnd: false,
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      });
+
+      // قناة التسوق
+      await Notifications.setNotificationChannelAsync("shopping", {
+        name: "تذكير التسوق",
+        importance: Notifications.AndroidImportance.DEFAULT,
+      });
+
+      // قناة التحفيز
+      await Notifications.setNotificationChannelAsync("motivation", {
+        name: "تحفيز وتشجيع",
+        importance: Notifications.AndroidImportance.DEFAULT,
+      });
+    }
+
+    // إنشاء فئة الأزرار التفاعلية (تعمل على Android و iOS)
+    await Notifications.setNotificationCategoryAsync(CATEGORY_ID, [
+      {
+        identifier: ACTION_VIEW_RECIPE,
+        buttonTitle: "عرض الوصفة 📖",
+        options: {
+          opensAppToForeground: true,
+          isDestructive: false,
+          isAuthenticationRequired: false,
+        },
+      },
+      {
+        identifier: ACTION_DISMISS,
+        buttonTitle: "إيقاف",
+        options: {
+          opensAppToForeground: false,
+          isDestructive: true,
+          isAuthenticationRequired: false,
+        },
+      },
+    ]);
+
+    console.log("[Notifications] Channels and categories set up successfully");
+  } catch (e) {
+    console.warn("[Notifications] Setup channels/categories failed:", e);
+  }
+}
+
+// === رسائل التذكير ===
+const MEAL_LABEL: Record<string, string> = {
+  breakfast: "الفطور",
+  lunch: "الغداء",
+  dinner: "العشاء",
+};
 
 const MEAL_EMOJI: Record<string, string> = {
   breakfast: "🌅",
@@ -72,193 +147,34 @@ const MEAL_EMOJI: Record<string, string> = {
   dinner: "🌙",
 };
 
-const MEAL_LABEL: Record<string, string> = {
-  breakfast: "الفطور",
-  lunch: "الغداء",
-  dinner: "العشاء",
+// رسائل لطيفة بدون كلمة "صحي"
+const MEAL_MESSAGES: Record<string, string[]> = {
+  breakfast: [
+    "عزيزي الشيف، حان وقت إعداد الفطور! هل أنت مستعد؟",
+    "صباح الخير! حان وقت تحضير فطور لذيذ",
+    "يلا نبدأ يومنا بفطور رائع!",
+  ],
+  lunch: [
+    "عزيزي الشيف، حان وقت إعداد الغداء! هل أنت مستعد؟",
+    "حان وقت الغداء! يلا نحضّر شي لذيذ",
+    "وقت الغداء! شنو رأيك نطبخ اليوم؟",
+  ],
+  dinner: [
+    "عزيزي الشيف، حان وقت إعداد العشاء! هل أنت مستعد؟",
+    "مساء الخير! حان وقت تحضير عشاء خفيف ولذيذ",
+    "وقت العشاء! يلا نحضّر شي حلو",
+  ],
 };
 
-// Get push token for backend notifications
-// Strategy: Always use FCM token directly (via getDevicePushTokenAsync) for reliable delivery
-// This bypasses Expo Push Service entirely and sends via Firebase FCM V1 API
-export async function getExpoPushToken(): Promise<string | null> {
-  try {
-    if (Platform.OS === "web") return null;
-
-    // PRIMARY: Get native device push token (FCM on Android, APNs on iOS)
-    // This is the most reliable method - works with any build type
-    try {
-      const deviceToken = await Notifications.getDevicePushTokenAsync();
-      const fcmToken = deviceToken.data as string;
-      if (fcmToken) {
-        console.log("[Push] Got native FCM token:", fcmToken?.substring(0, 30) + "...");
-        // Prefix with fcm: so server knows to use FCM V1 API directly
-        return `fcm:${fcmToken}`;
-      }
-    } catch (e1) {
-      console.warn("[Push] Native FCM token failed:", (e1 as Error)?.message);
-    }
-
-    // FALLBACK: Try Expo push token (only works if Expo Push Service is configured)
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-    if (projectId) {
-      try {
-        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
-        console.log("[Push] Got Expo token (fallback):", tokenData.data?.substring(0, 30) + "...");
-        return tokenData.data;
-      } catch (e2) {
-        console.warn("[Push] Expo token also failed:", (e2 as Error)?.message);
-      }
-    }
-
-    console.error("[Push] All token methods failed");
-    return null;
-  } catch (e) {
-    console.error("[Push] Failed to get push token:", e);
-    return null;
-  }
+function getRandomItem<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// Register push token with backend
-export async function registerPushToken(token: string, userId?: string): Promise<void> {
-  try {
-    const apiBase = getApiBaseUrl();
-    const url = apiBase ? `${apiBase}/api/user/push-token` : "/api/user/push-token";
-    const platform = Platform.OS === "ios" ? "ios" : Platform.OS === "android" ? "android" : "web";
-    
-    // Try to get guest user ID if no userId provided
-    let finalUserId = userId || null;
-    if (!finalUserId) {
-      const guestId = await getGuestUserId();
-      if (guestId) finalUserId = guestId.toString();
-    }
-    
-    console.log("[Push] Registering token at:", url, "platform:", platform, "userId:", finalUserId);
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, userId: finalUserId, platform }),
-    });
-
-    if (!response.ok) {
-      console.error("Failed to register push token:", response.statusText);
-      return;
-    }
-
-    console.log("Push token registered successfully:", token.substring(0, 20) + "...");
-  } catch (e) {
-    console.error("Failed to register push token:", e);
-  }
-}
-
-// Setup notification listeners
-export function setupNotificationListeners(
-  onNotificationReceived?: (notification: Notifications.Notification) => void,
-  onNotificationResponse?: (response: Notifications.NotificationResponse) => void
-) {
-  try {
-    const receivedSub = Notifications.addNotificationReceivedListener((notification) => {
-      onNotificationReceived?.(notification);
-    });
-
-    const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
-      onNotificationResponse?.(response);
-    });
-
-    return () => {
-      receivedSub.remove();
-      responseSub.remove();
-    };
-  } catch (e) {
-    console.warn("Notification listeners not available in Expo Go. This is normal.", e);
-    return () => {};
-  }
-}
-
-// Store token in AsyncStorage to avoid re-fetching every time
-const PUSH_TOKEN_KEY = "expo_push_token";
-
-export async function getSavedPushToken(): Promise<string | null> {
-  try {
-    const AsyncStorage = require("@react-native-async-storage/async-storage").default;
-    return await AsyncStorage.getItem(PUSH_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-export async function requestNotificationPermissions(): Promise<boolean> {
-  if (Platform.OS === "web") return false;
-
-  try {
-    if (Platform.OS === "android") {
-      // قناة الوجبات - صوت إشعار لطيف + اهتزاز خفيف
-      await Notifications.setNotificationChannelAsync("meals", {
-        name: "تذكير الوجبات",
-        description: "تذكير لطيف بأوقات إعداد الوجبات",
-        importance: Notifications.AndroidImportance.HIGH,
-        vibrationPattern: [0, 300, 500, 300],
-        lightColor: "#4A7C59",
-        sound: "notification.mp3",
-        enableVibrate: true,
-        enableLights: true,
-        bypassDnd: false,
-        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-      });
-      await Notifications.setNotificationChannelAsync("shopping", {
-        name: "تذكير التسوق",
-        importance: Notifications.AndroidImportance.DEFAULT,
-      });
-      await Notifications.setNotificationChannelAsync("motivation", {
-        name: "تحفيز وتشجيع",
-        importance: Notifications.AndroidImportance.DEFAULT,
-      });
-    }
-
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    if (finalStatus === "granted") {
-      // Try to get token with retries
-      let token: string | null = null;
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        console.log(`[Push] Getting push token, attempt ${attempt}/3...`);
-        token = await getExpoPushToken();
-        if (token) break;
-        // Wait before retry
-        await new Promise((r) => setTimeout(r, 2000 * attempt));
-      }
-
-      if (token) {
-        // Save token locally
-        try {
-          const AsyncStorage = require("@react-native-async-storage/async-storage").default;
-          await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
-        } catch {}
-        await registerPushToken(token);
-        console.log("[Push] Token registered successfully after permissions granted");
-      } else {
-        console.warn("[Push] Could not get push token after 3 attempts");
-      }
-    }
-
-    return finalStatus === "granted";
-  } catch (e) {
-    console.warn("Notification permissions not available in Expo Go. This is normal.", e);
-    return false;
-  }
-}
-
+// === جدولة إشعار وجبة ===
 /**
- * جدولة منبه وجبة (منبه فقط - بدون إشعار)
- * المنبه يعمل عبر expo-alarm-module (يرن حتى لو التطبيق مغلق)
- * عند فتح التطبيق تظهر شاشة المنبه الجميلة بالعربي (عرض الوصفة + إيقاف)
- * يُستدعى عند حفظ جدول الطبخ
+ * جدولة إشعار تذكير بوجبة - يعمل حتى لو التطبيق مغلق
+ * يستخدم DAILY trigger للتكرار اليومي
+ * يعرض إشعار بأولوية قصوى (heads-up) مع صوت مخصص وأزرار تفاعلية
  */
 export async function scheduleMealReminder(
   mealType: "breakfast" | "lunch" | "dinner",
@@ -268,77 +184,65 @@ export async function scheduleMealReminder(
   recipeName?: string
 ): Promise<string | null> {
   try {
-    // إلغاء المنبهات السابقة لهذا النوع
+    // إلغاء الإشعارات السابقة لهذا النوع
     await cancelMealReminder(mealType);
 
-    const label = MEAL_LABEL[mealType];
+    // حفظ بيانات المنبه في AsyncStorage
+    await AsyncStorage.setItem(
+      `@alarm_data_${mealType}`,
+      JSON.stringify({ mealType, hour, minute, recipeId: recipeId || "", recipeName: recipeName || "" })
+    );
 
-    // حفظ بيانات المنبه في AsyncStorage ليستخدمها AlarmContext عند الرنين
-    try {
-      const AsyncStorage = require("@react-native-async-storage/async-storage").default;
-      await AsyncStorage.setItem(`@alarm_data_${mealType}`, JSON.stringify({
-        mealType,
+    // اختيار الصوت حسب تفضيل المستخدم
+    const voiceGender = await getVoiceGender();
+    const soundFile = VOICE_SOUND_FILE[voiceGender];
+    const channelId = voiceGender === "male" ? CHANNEL_MALE : CHANNEL_FEMALE;
+
+    // اختيار رسالة عشوائية
+    const messages = MEAL_MESSAGES[mealType] || MEAL_MESSAGES.breakfast;
+    const body = recipeName
+      ? `${getRandomItem(messages)}\nالوصفة: ${recipeName}`
+      : getRandomItem(messages);
+
+    const label = MEAL_LABEL[mealType];
+    const emoji = MEAL_EMOJI[mealType];
+
+    // جدولة الإشعار
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `${emoji} حان وقت ${label}!`,
+        body,
+        sound: soundFile,
+        data: {
+          type: "meal_reminder",
+          mealType,
+          recipeId: recipeId || "",
+          recipeName: recipeName || "",
+        },
+        categoryIdentifier: CATEGORY_ID,
+        priority: "max",
+        ...(Platform.OS === "android" && { channelId }),
+        // iOS: interruptionLevel for high priority
+        ...(Platform.OS === "ios" && { interruptionLevel: "timeSensitive" as const }),
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
         hour,
         minute,
-        recipeId: recipeId || "",
-        recipeName: recipeName || "",
-      }));
-    } catch {}
+        ...(Platform.OS === "android" && { channelId }),
+      },
+    });
 
-    // setAlarmClock لا يحتاج أي صلاحيات إضافية - يعمل على جميع الأجهزة
-
-    // المنبه الأصلي (expo-alarm-module) - يرن فوق كل شيء حتى لو التطبيق مغلق
-    // يستخدم days array [0,1,2,3,4,5,6] للتكرار اليومي مع hour/minutes
-    if (Platform.OS === "android" && NativeAlarm?.scheduleAlarm) {
-      try {
-        // اختيار الصوت حسب نوع الوجبة
-        const MEAL_SOUND: Record<string, string> = {
-          breakfast: "alarm_morning",
-          lunch: "alarm_lunch",
-          dinner: "alarm_dinner",
-        };
-        const soundName = MEAL_SOUND[mealType] || "alarm_morning";
-
-        // نضمّن recipeId في description بصيغة خاصة ليقرأها Java عند الضغط على "عرض الوصفة"
-        const descriptionWithId = recipeId
-          ? `RECIPE_ID:${recipeId}|${recipeName || label}`
-          : (recipeName ? `الوصفة: ${recipeName}` : `هل أنتِ مستعدة لإعداد ${label}؟`);
-
-        // استخدام days array [0,1,2,3,4,5,6] = كل أيام الأسبوع للتكرار اليومي
-        // هذا هو الاستخدام الصحيح للمنبه المتكرر - بدون Date object
-        NativeAlarm.scheduleAlarm({
-          uid: `meal_${mealType}`,
-          day: [0, 1, 2, 3, 4, 5, 6], // كل أيام الأسبوع
-          hour: hour,
-          minutes: minute,
-          title: `حان وقت ${label}!`,
-          description: descriptionWithId,
-          dismissText: "إيقاف",
-          showDismiss: true,
-          showSnooze: true,
-          snoozeText: "عرض الوصفة 📖",
-          repeating: true,
-          active: true,
-          sound: soundName,
-        } as any);
-        console.log(`[Alarm] Native alarm scheduled: ${mealType} at ${hour}:${minute} (daily repeat) with sound: ${soundName}`);
-      } catch (e) {
-        console.error("[Alarm] Native alarm schedule failed:", e);
-      }
-    }
-
-    // لا إشعارات للوجبات - المنبه الأصلي فقط
-    // الإشعارات تُستخدم فقط للتحفيز والنصائح الصحية
-    return `meal_${mealType}`;
+    console.log(`[Notifications] Meal reminder scheduled: ${mealType} at ${hour}:${String(minute).padStart(2, "0")} (id: ${id}, voice: ${voiceGender})`);
+    return id;
   } catch (e) {
-    console.warn("Meal alarm scheduling not available in Expo Go. This is normal.", e);
+    console.warn("[Notifications] Schedule meal reminder failed:", e);
     return null;
   }
 }
 
 /**
  * جدولة جميع منبهات الوجبات بناءً على الجدول المحفوظ
- * يُستدعى عند حفظ جدول الطبخ
  */
 export async function scheduleAllMealReminders(
   mealTimes: { breakfast: string; lunch: string; dinner: string },
@@ -358,21 +262,18 @@ export async function scheduleAllMealReminders(
       const minute = parseInt(minuteStr);
 
       const meal = todayMeals?.[mealType];
-      await scheduleMealReminder(
-        mealType,
-        hour,
-        minute,
-        meal?.recipeId,
-        meal?.recipeName
-      );
+      await scheduleMealReminder(mealType, hour, minute, meal?.recipeId, meal?.recipeName);
     }
 
     console.log("[Notifications] All meal reminders scheduled successfully");
   } catch (e) {
-    console.warn("Failed to schedule all meal reminders:", e);
+    console.warn("[Notifications] Failed to schedule all meal reminders:", e);
   }
 }
 
+/**
+ * إلغاء إشعار وجبة محددة
+ */
 export async function cancelMealReminder(mealType: string): Promise<void> {
   try {
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
@@ -381,18 +282,41 @@ export async function cancelMealReminder(mealType: string): Promise<void> {
         await Notifications.cancelScheduledNotificationAsync(notification.identifier);
       }
     }
-    // إلغاء المنبه الأصلي أيضاً
-    if (NativeAlarm?.removeAlarm) {
-      try {
-        NativeAlarm.removeAlarm(`meal_${mealType}`);
-      } catch (e) {
-        // ignore
-      }
-    }
   } catch (e) {
-    console.warn("Cancel meal reminder not available in Expo Go. This is normal.", e);
+    console.warn("[Notifications] Cancel meal reminder failed:", e);
   }
 }
+
+/**
+ * إعادة جدولة جميع المنبهات (عند تغيير الصوت مثلاً)
+ * يحذف كل الإشعارات المجدولة ويعيد جدولتها بالإعدادات الجديدة
+ */
+export async function refreshAllAlarms(): Promise<void> {
+  try {
+    const mealTypes = ["breakfast", "lunch", "dinner"] as const;
+
+    for (const mealType of mealTypes) {
+      const data = await AsyncStorage.getItem(`@alarm_data_${mealType}`);
+      if (data) {
+        const { hour, minute, recipeId, recipeName } = JSON.parse(data);
+        await scheduleMealReminder(mealType, hour, minute, recipeId, recipeName);
+        console.log(`[Notifications] Refreshed: ${mealType} at ${hour}:${minute}`);
+      }
+    }
+
+    console.log("[Notifications] All alarms refreshed");
+  } catch (e) {
+    console.warn("[Notifications] refreshAllAlarms failed:", e);
+  }
+}
+
+// === إشعارات أخرى ===
+
+const MOTIVATION_MESSAGES = [
+  { title: "عافيات تهتم بك! 💚", body: "تذكّري: صحتك أمانة، حافظي عليها بالغذاء المتوازن" },
+  { title: "نصيحة اليوم 🌿", body: "اشربي كمية كافية من الماء اليوم، جسمك يحتاج 8 أكواب على الأقل" },
+  { title: "كيف حالك اليوم؟ 😊", body: "لا تنسي تصفح الوصفات الجديدة، لدينا أطباق رائعة!" },
+];
 
 export async function scheduleShoppingReminder(
   items: string[],
@@ -416,7 +340,7 @@ export async function scheduleShoppingReminder(
     });
     return id;
   } catch (e) {
-    console.warn("Shopping reminders not available in Expo Go. This is normal.", e);
+    console.warn("[Notifications] Shopping reminder failed:", e);
     return null;
   }
 }
@@ -439,7 +363,7 @@ export async function scheduleDailyMotivation(): Promise<string | null> {
     });
     return id;
   } catch (e) {
-    console.warn("Daily motivation not available in Expo Go. This is normal.", e);
+    console.warn("[Notifications] Daily motivation failed:", e);
     return null;
   }
 }
@@ -448,51 +372,148 @@ export async function cancelAllNotifications(): Promise<void> {
   try {
     await Notifications.cancelAllScheduledNotificationsAsync();
   } catch (e) {
-    console.warn("Cancel all notifications not available in Expo Go. This is normal.", e);
+    console.warn("[Notifications] Cancel all failed:", e);
   }
 }
 
-/**
- * إعادة جدولة جميع منبهات الوجبات بالأصوات الجديدة
- * يحذف كل المنبهات القديمة ويعيد جدولتها من AsyncStorage
- * يُستدعى عند فتح التطبيق لضمان تطبيق الأصوات المخصصة
- */
-export async function refreshAllAlarms(): Promise<void> {
-  if (Platform.OS !== "android" || !NativeAlarm) return;
-  
+// === Push Token Management ===
+
+export async function getExpoPushToken(): Promise<string | null> {
   try {
-    // حذف كل المنبهات القديمة
-    if (NativeAlarm.removeAllAlarms) {
+    if (Platform.OS === "web") return null;
+
+    // PRIMARY: Get native device push token (FCM on Android, APNs on iOS)
+    try {
+      const deviceToken = await Notifications.getDevicePushTokenAsync();
+      const fcmToken = deviceToken.data as string;
+      if (fcmToken) {
+        console.log("[Push] Got native FCM token:", fcmToken?.substring(0, 30) + "...");
+        return `fcm:${fcmToken}`;
+      }
+    } catch (e1) {
+      console.warn("[Push] Native FCM token failed:", (e1 as Error)?.message);
+    }
+
+    // FALLBACK: Try Expo push token
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    if (projectId) {
       try {
-        NativeAlarm.removeAllAlarms();
-        console.log("[Alarm] All old alarms removed");
-      } catch (e) {
-        // حذف يدوي
-        for (const mealType of ["breakfast", "lunch", "dinner"]) {
-          try { NativeAlarm.removeAlarm(`meal_${mealType}`); } catch {}
-        }
+        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+        console.log("[Push] Got Expo token (fallback):", tokenData.data?.substring(0, 30) + "...");
+        return tokenData.data;
+      } catch (e2) {
+        console.warn("[Push] Expo token also failed:", (e2 as Error)?.message);
       }
     }
 
-    // قراءة أوقات الوجبات المحفوظة من AsyncStorage
-    const AsyncStorage = require("@react-native-async-storage/async-storage").default;
-    const mealTypes = ["breakfast", "lunch", "dinner"] as const;
-    
-    for (const mealType of mealTypes) {
-      try {
-        const data = await AsyncStorage.getItem(`@alarm_data_${mealType}`);
-        if (data) {
-          const { hour, minute, recipeId, recipeName } = JSON.parse(data);
-          await scheduleMealReminder(mealType, hour, minute, recipeId, recipeName);
-          console.log(`[Alarm] Refreshed alarm: ${mealType} at ${hour}:${minute}`);
-        }
-      } catch (e) {
-        console.warn(`[Alarm] Failed to refresh ${mealType}:`, e);
+    console.error("[Push] All token methods failed");
+    return null;
+  } catch (e) {
+    console.error("[Push] Failed to get push token:", e);
+    return null;
+  }
+}
+
+export async function registerPushToken(token: string, userId?: string): Promise<void> {
+  try {
+    const apiBase = getApiBaseUrl();
+    const url = apiBase ? `${apiBase}/api/user/push-token` : "/api/user/push-token";
+    const platform = Platform.OS === "ios" ? "ios" : Platform.OS === "android" ? "android" : "web";
+
+    let finalUserId = userId || null;
+    if (!finalUserId) {
+      const guestId = await getGuestUserId();
+      if (guestId) finalUserId = guestId.toString();
+    }
+
+    console.log("[Push] Registering token at:", url, "platform:", platform, "userId:", finalUserId);
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, userId: finalUserId, platform }),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to register push token:", response.statusText);
+      return;
+    }
+
+    console.log("Push token registered successfully:", token.substring(0, 20) + "...");
+  } catch (e) {
+    console.error("Failed to register push token:", e);
+  }
+}
+
+export function setupNotificationListeners(
+  onNotificationReceived?: (notification: Notifications.Notification) => void,
+  onNotificationResponse?: (response: Notifications.NotificationResponse) => void
+) {
+  try {
+    const receivedSub = Notifications.addNotificationReceivedListener((notification) => {
+      onNotificationReceived?.(notification);
+    });
+
+    const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
+      onNotificationResponse?.(response);
+    });
+
+    return () => {
+      receivedSub.remove();
+      responseSub.remove();
+    };
+  } catch (e) {
+    console.warn("Notification listeners not available:", e);
+    return () => {};
+  }
+}
+
+export async function getSavedPushToken(): Promise<string | null> {
+  try {
+    return await AsyncStorage.getItem(PUSH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export async function requestNotificationPermissions(): Promise<boolean> {
+  if (Platform.OS === "web") return false;
+
+  try {
+    // إعداد القنوات والفئات أولاً
+    await setupNotificationChannelsAndCategories();
+
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus === "granted") {
+      // Try to get token with retries
+      let token: string | null = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        console.log(`[Push] Getting push token, attempt ${attempt}/3...`);
+        token = await getExpoPushToken();
+        if (token) break;
+        await new Promise((r) => setTimeout(r, 2000 * attempt));
+      }
+
+      if (token) {
+        try {
+          await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
+        } catch {}
+        await registerPushToken(token);
+        console.log("[Push] Token registered successfully after permissions granted");
+      } else {
+        console.warn("[Push] Could not get push token after 3 attempts");
       }
     }
-    
-    console.log("[Alarm] All alarms refreshed with custom sounds");
+
+    return finalStatus === "granted";
   } catch (e) {
-    console.warn("[Alarm] refreshAllAlarms failed:", e);
+    console.warn("Notification permissions not available:", e);
+    return false;
   }
 }
