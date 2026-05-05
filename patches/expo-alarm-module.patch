@@ -1,5 +1,5 @@
 diff --git a/android/lib/commonjs/main/java/com/expoalarmmodule/Alarm.java b/android/lib/commonjs/main/java/com/expoalarmmodule/Alarm.java
-index 49daf38ac5620031fd3d1da8c52c0762d822b96a..3331b32f01a59b16389857d445d58c6a3f061aea 100644
+index 49daf38ac5620031fd3d1da8c52c0762d822b96a..30c0a194750c29691b2bebcb9f9a79da5dfd2a34 100644
 --- a/android/lib/commonjs/main/java/com/expoalarmmodule/Alarm.java
 +++ b/android/lib/commonjs/main/java/com/expoalarmmodule/Alarm.java
 @@ -54,8 +54,9 @@ public class Alarm implements Cloneable {
@@ -21,8 +21,31 @@ index 49daf38ac5620031fd3d1da8c52c0762d822b96a..3331b32f01a59b16389857d445d58c6a
          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
            this.date = date;
          }
+@@ -99,12 +101,20 @@ public class Alarm implements Cloneable {
+     @RequiresApi(api = Build.VERSION_CODES.O)
+     static Alarm fromJson(String json) {
+       Alarm alarmTemp = createSerialize().fromJson(json, Alarm.class);
+-      alarmTemp.date = ZonedDateTime.parse(alarmTemp.dateString);
++      if (alarmTemp.dateString != null && !alarmTemp.dateString.isEmpty()) {
++          try {
++              alarmTemp.date = ZonedDateTime.parse(alarmTemp.dateString);
++          } catch (Exception e) {
++              alarmTemp.date = null;
++          }
++      } else {
++          alarmTemp.date = null;
++      }
+       return alarmTemp;
+     }
+ 
+     static String toJson(Alarm alarm) {
+-        alarm.dateString = alarm.date.toString();
++        alarm.dateString = alarm.date != null ? alarm.date.toString() : null;
+         return createSerialize().toJson(alarm);
+     }
+ 
 diff --git a/android/lib/commonjs/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java b/android/lib/commonjs/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
-index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..1a0e2286941b9aabb243899de93f80d477157abb 100644
+index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..c603bd74bc8f9efe240eec7a4b5ddc0477d320eb 100644
 --- a/android/lib/commonjs/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
 +++ b/android/lib/commonjs/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
 @@ -154,6 +154,7 @@ public class ExpoAlarmModuleModule extends ReactContextBaseJavaModule {
@@ -43,7 +66,7 @@ index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..1a0e2286941b9aabb243899de93f80d4
  
    private WritableMap serializeAlarmObject (Alarm alarm) throws Exception {
 diff --git a/android/lib/commonjs/main/java/com/expoalarmmodule/Helper.java b/android/lib/commonjs/main/java/com/expoalarmmodule/Helper.java
-index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..3583f363bbc4295d07bf9419cd0e79129315252d 100644
+index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..004b6cac4c169fbdcf8baae190acf317f383d7f2 100644
 --- a/android/lib/commonjs/main/java/com/expoalarmmodule/Helper.java
 +++ b/android/lib/commonjs/main/java/com/expoalarmmodule/Helper.java
 @@ -51,12 +51,23 @@ public class Helper {
@@ -76,7 +99,7 @@ index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..3583f363bbc4295d07bf9419cd0e7912
          Log.d(TAG, "SDK version: " + Build.VERSION.SDK_INT);
          Log.d(TAG, "scheduling alarm with notification id: " + notificationID);
 diff --git a/android/lib/commonjs/main/java/com/expoalarmmodule/Manager.java b/android/lib/commonjs/main/java/com/expoalarmmodule/Manager.java
-index 004075da7464088c26edd8b5e6e2e5a191ec7633..047f25808690b4d0ab2dcc4056026c5e7f89dc9d 100644
+index 004075da7464088c26edd8b5e6e2e5a191ec7633..c65a8c756aa605e571daba3e4386a4c33d15a9b2 100644
 --- a/android/lib/commonjs/main/java/com/expoalarmmodule/Manager.java
 +++ b/android/lib/commonjs/main/java/com/expoalarmmodule/Manager.java
 @@ -114,9 +114,11 @@ public class Manager {
@@ -95,7 +118,7 @@ index 004075da7464088c26edd8b5e6e2e5a191ec7633..047f25808690b4d0ab2dcc4056026c5e
  
      public static void stop(Context context) {
 diff --git a/android/src/main/java/com/expoalarmmodule/Alarm.java b/android/src/main/java/com/expoalarmmodule/Alarm.java
-index 49daf38ac5620031fd3d1da8c52c0762d822b96a..3331b32f01a59b16389857d445d58c6a3f061aea 100644
+index 49daf38ac5620031fd3d1da8c52c0762d822b96a..30c0a194750c29691b2bebcb9f9a79da5dfd2a34 100644
 --- a/android/src/main/java/com/expoalarmmodule/Alarm.java
 +++ b/android/src/main/java/com/expoalarmmodule/Alarm.java
 @@ -54,8 +54,9 @@ public class Alarm implements Cloneable {
@@ -117,8 +140,31 @@ index 49daf38ac5620031fd3d1da8c52c0762d822b96a..3331b32f01a59b16389857d445d58c6a
          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
            this.date = date;
          }
+@@ -99,12 +101,20 @@ public class Alarm implements Cloneable {
+     @RequiresApi(api = Build.VERSION_CODES.O)
+     static Alarm fromJson(String json) {
+       Alarm alarmTemp = createSerialize().fromJson(json, Alarm.class);
+-      alarmTemp.date = ZonedDateTime.parse(alarmTemp.dateString);
++      if (alarmTemp.dateString != null && !alarmTemp.dateString.isEmpty()) {
++          try {
++              alarmTemp.date = ZonedDateTime.parse(alarmTemp.dateString);
++          } catch (Exception e) {
++              alarmTemp.date = null;
++          }
++      } else {
++          alarmTemp.date = null;
++      }
+       return alarmTemp;
+     }
+ 
+     static String toJson(Alarm alarm) {
+-        alarm.dateString = alarm.date.toString();
++        alarm.dateString = alarm.date != null ? alarm.date.toString() : null;
+         return createSerialize().toJson(alarm);
+     }
+ 
 diff --git a/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java b/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
-index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..1a0e2286941b9aabb243899de93f80d477157abb 100644
+index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..c603bd74bc8f9efe240eec7a4b5ddc0477d320eb 100644
 --- a/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
 +++ b/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
 @@ -154,6 +154,7 @@ public class ExpoAlarmModuleModule extends ReactContextBaseJavaModule {
@@ -139,7 +185,7 @@ index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..1a0e2286941b9aabb243899de93f80d4
  
    private WritableMap serializeAlarmObject (Alarm alarm) throws Exception {
 diff --git a/android/src/main/java/com/expoalarmmodule/Helper.java b/android/src/main/java/com/expoalarmmodule/Helper.java
-index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..3583f363bbc4295d07bf9419cd0e79129315252d 100644
+index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..004b6cac4c169fbdcf8baae190acf317f383d7f2 100644
 --- a/android/src/main/java/com/expoalarmmodule/Helper.java
 +++ b/android/src/main/java/com/expoalarmmodule/Helper.java
 @@ -51,12 +51,23 @@ public class Helper {
@@ -172,7 +218,7 @@ index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..3583f363bbc4295d07bf9419cd0e7912
          Log.d(TAG, "SDK version: " + Build.VERSION.SDK_INT);
          Log.d(TAG, "scheduling alarm with notification id: " + notificationID);
 diff --git a/android/src/main/java/com/expoalarmmodule/Manager.java b/android/src/main/java/com/expoalarmmodule/Manager.java
-index 004075da7464088c26edd8b5e6e2e5a191ec7633..047f25808690b4d0ab2dcc4056026c5e7f89dc9d 100644
+index 004075da7464088c26edd8b5e6e2e5a191ec7633..c65a8c756aa605e571daba3e4386a4c33d15a9b2 100644
 --- a/android/src/main/java/com/expoalarmmodule/Manager.java
 +++ b/android/src/main/java/com/expoalarmmodule/Manager.java
 @@ -114,9 +114,11 @@ public class Manager {
