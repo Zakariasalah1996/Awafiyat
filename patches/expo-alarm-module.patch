@@ -1,42 +1,192 @@
+diff --git a/android/lib/commonjs/main/java/com/expoalarmmodule/Alarm.java b/android/lib/commonjs/main/java/com/expoalarmmodule/Alarm.java
+index 49daf38ac5620031fd3d1da8c52c0762d822b96a..3331b32f01a59b16389857d445d58c6a3f061aea 100644
+--- a/android/lib/commonjs/main/java/com/expoalarmmodule/Alarm.java
++++ b/android/lib/commonjs/main/java/com/expoalarmmodule/Alarm.java
+@@ -54,8 +54,9 @@ public class Alarm implements Cloneable {
+      */
+     String dismissText;
+     String snoozeText;
++    String sound;
+ 
+-    Alarm(String uid, ArrayList<Integer> days, ZonedDateTime date, int hour, int minutes, boolean showDismiss, boolean showSnooze, int snoozeInterval, String title, String description, boolean repeating, boolean active, String dismissText, String snoozeText) {
++    Alarm(String uid, ArrayList<Integer> days, ZonedDateTime date, int hour, int minutes, boolean showDismiss, boolean showSnooze, int snoozeInterval, String title, String description, boolean repeating, boolean active, String dismissText, String snoozeText, String sound) {
+         this.uid = uid;
+         this.days = days;
+         this.hour = hour;
+@@ -69,6 +70,7 @@ public class Alarm implements Cloneable {
+         this.active = active;
+         this.dismissText = dismissText;
+         this.snoozeText = snoozeText;
++        this.sound = sound;
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+           this.date = date;
+         }
+diff --git a/android/lib/commonjs/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java b/android/lib/commonjs/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
+index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..1a0e2286941b9aabb243899de93f80d477157abb 100644
+--- a/android/lib/commonjs/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
++++ b/android/lib/commonjs/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
+@@ -154,6 +154,7 @@ public class ExpoAlarmModuleModule extends ReactContextBaseJavaModule {
+      */
+     String dismissText = alarm.hasKey("dismissText") ? alarm.getString("dismissText") : "Dismiss";
+     String snoozeText = alarm.hasKey("snoozeText") ? alarm.getString("snoozeText") : "Snooze";
++    String sound = alarm.hasKey("sound") ? alarm.getString("sound") : "default";
+ 
+     ArrayList<Integer> days = new ArrayList<>();
+ 
+@@ -176,7 +177,7 @@ public class ExpoAlarmModuleModule extends ReactContextBaseJavaModule {
+         }
+       }
+     }
+-    return new Alarm(uid, days, date, hour, minutes, showDismiss, showSnooze, snoozeInterval, title, description, repeating, active, dismissText, snoozeText);
++    return new Alarm(uid, days, date, hour, minutes, showDismiss, showSnooze, snoozeInterval, title, description, repeating, active, dismissText, snoozeText, sound);
+   }
+ 
+   private WritableMap serializeAlarmObject (Alarm alarm) throws Exception {
 diff --git a/android/lib/commonjs/main/java/com/expoalarmmodule/Helper.java b/android/lib/commonjs/main/java/com/expoalarmmodule/Helper.java
-index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..784777a456aa67b3592d0a5d522eeaa62642639c 100644
+index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..3583f363bbc4295d07bf9419cd0e79129315252d 100644
 --- a/android/lib/commonjs/main/java/com/expoalarmmodule/Helper.java
 +++ b/android/lib/commonjs/main/java/com/expoalarmmodule/Helper.java
-@@ -51,7 +51,15 @@ public class Helper {
+@@ -51,12 +51,23 @@ public class Helper {
              );
          }
  
 -        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-+            if (alarmManager.canScheduleExactAlarms()) {
-+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
-+                Log.d(TAG, "Using setExactAndAllowWhileIdle (exact alarm permission granted)");
+-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
++        // setAlarmClock: guaranteed delivery on ALL Android versions (no permissions needed)
++        // Does NOT get affected by Doze, Battery Optimization, or Samsung restrictions
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
++            Intent showIntent = new Intent(context, Helper.getMainActivityClass(context));
++            showIntent.putExtra("ALARM_UID", alarmUid);
++            PendingIntent showPendingIntent;
++            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
++                showPendingIntent = PendingIntent.getActivity(context, notificationID + 10000, showIntent, PendingIntent.FLAG_MUTABLE);
 +            } else {
-+                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
-+                Log.d(TAG, "Using setAndAllowWhileIdle (SCHEDULE_EXACT_ALARM not granted - fallback)");
++                showPendingIntent = PendingIntent.getActivity(context, notificationID + 10000, showIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 +            }
-+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
-         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-             alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
++            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(triggerAtMillis, showPendingIntent);
++            alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
++            Log.d(TAG, "Using setAlarmClock (guaranteed delivery, no permissions needed)");
+         } else {
+-            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
++            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
++            Log.d(TAG, "Using setExact (pre-Lollipop fallback)");
+         }
+         Log.d(TAG, "SDK version: " + Build.VERSION.SDK_INT);
+         Log.d(TAG, "scheduling alarm with notification id: " + notificationID);
+diff --git a/android/lib/commonjs/main/java/com/expoalarmmodule/Manager.java b/android/lib/commonjs/main/java/com/expoalarmmodule/Manager.java
+index 004075da7464088c26edd8b5e6e2e5a191ec7633..047f25808690b4d0ab2dcc4056026c5e7f89dc9d 100644
+--- a/android/lib/commonjs/main/java/com/expoalarmmodule/Manager.java
++++ b/android/lib/commonjs/main/java/com/expoalarmmodule/Manager.java
+@@ -114,9 +114,11 @@ public class Manager {
+     static void start(Context context, String alarmUid) {
+         activeAlarmUid = alarmUid;
+         sound = new Sound(context);
+-        sound.play("default");
+-
+-        Log.d(TAG, "Starting " + activeAlarmUid);
++        // Use the alarm's custom sound if available
++        Alarm alarm = Storage.getAlarm(context, alarmUid);
++        String soundName = (alarm != null && alarm.sound != null && !alarm.sound.isEmpty()) ? alarm.sound : "default";
++        sound.play(soundName);
++        Log.d(TAG, "Starting " + activeAlarmUid + " with sound: " + soundName);
+     }
+ 
+     public static void stop(Context context) {
+diff --git a/android/src/main/java/com/expoalarmmodule/Alarm.java b/android/src/main/java/com/expoalarmmodule/Alarm.java
+index 49daf38ac5620031fd3d1da8c52c0762d822b96a..3331b32f01a59b16389857d445d58c6a3f061aea 100644
+--- a/android/src/main/java/com/expoalarmmodule/Alarm.java
++++ b/android/src/main/java/com/expoalarmmodule/Alarm.java
+@@ -54,8 +54,9 @@ public class Alarm implements Cloneable {
+      */
+     String dismissText;
+     String snoozeText;
++    String sound;
+ 
+-    Alarm(String uid, ArrayList<Integer> days, ZonedDateTime date, int hour, int minutes, boolean showDismiss, boolean showSnooze, int snoozeInterval, String title, String description, boolean repeating, boolean active, String dismissText, String snoozeText) {
++    Alarm(String uid, ArrayList<Integer> days, ZonedDateTime date, int hour, int minutes, boolean showDismiss, boolean showSnooze, int snoozeInterval, String title, String description, boolean repeating, boolean active, String dismissText, String snoozeText, String sound) {
+         this.uid = uid;
+         this.days = days;
+         this.hour = hour;
+@@ -69,6 +70,7 @@ public class Alarm implements Cloneable {
+         this.active = active;
+         this.dismissText = dismissText;
+         this.snoozeText = snoozeText;
++        this.sound = sound;
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+           this.date = date;
+         }
+diff --git a/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java b/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
+index 552911d58dbc4123c3eff79031d88bd8e4dc1ed9..1a0e2286941b9aabb243899de93f80d477157abb 100644
+--- a/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
++++ b/android/src/main/java/com/expoalarmmodule/ExpoAlarmModuleModule.java
+@@ -154,6 +154,7 @@ public class ExpoAlarmModuleModule extends ReactContextBaseJavaModule {
+      */
+     String dismissText = alarm.hasKey("dismissText") ? alarm.getString("dismissText") : "Dismiss";
+     String snoozeText = alarm.hasKey("snoozeText") ? alarm.getString("snoozeText") : "Snooze";
++    String sound = alarm.hasKey("sound") ? alarm.getString("sound") : "default";
+ 
+     ArrayList<Integer> days = new ArrayList<>();
+ 
+@@ -176,7 +177,7 @@ public class ExpoAlarmModuleModule extends ReactContextBaseJavaModule {
+         }
+       }
+     }
+-    return new Alarm(uid, days, date, hour, minutes, showDismiss, showSnooze, snoozeInterval, title, description, repeating, active, dismissText, snoozeText);
++    return new Alarm(uid, days, date, hour, minutes, showDismiss, showSnooze, snoozeInterval, title, description, repeating, active, dismissText, snoozeText, sound);
+   }
+ 
+   private WritableMap serializeAlarmObject (Alarm alarm) throws Exception {
 diff --git a/android/src/main/java/com/expoalarmmodule/Helper.java b/android/src/main/java/com/expoalarmmodule/Helper.java
-index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..784777a456aa67b3592d0a5d522eeaa62642639c 100644
+index 1c5b665000d21998b8ccfb8ff51e9041cc4c640b..3583f363bbc4295d07bf9419cd0e79129315252d 100644
 --- a/android/src/main/java/com/expoalarmmodule/Helper.java
 +++ b/android/src/main/java/com/expoalarmmodule/Helper.java
-@@ -51,7 +51,15 @@ public class Helper {
+@@ -51,12 +51,23 @@ public class Helper {
              );
          }
  
 -        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-+            if (alarmManager.canScheduleExactAlarms()) {
-+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
-+                Log.d(TAG, "Using setExactAndAllowWhileIdle (exact alarm permission granted)");
+-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
++        // setAlarmClock: guaranteed delivery on ALL Android versions (no permissions needed)
++        // Does NOT get affected by Doze, Battery Optimization, or Samsung restrictions
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
++            Intent showIntent = new Intent(context, Helper.getMainActivityClass(context));
++            showIntent.putExtra("ALARM_UID", alarmUid);
++            PendingIntent showPendingIntent;
++            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
++                showPendingIntent = PendingIntent.getActivity(context, notificationID + 10000, showIntent, PendingIntent.FLAG_MUTABLE);
 +            } else {
-+                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
-+                Log.d(TAG, "Using setAndAllowWhileIdle (SCHEDULE_EXACT_ALARM not granted - fallback)");
++                showPendingIntent = PendingIntent.getActivity(context, notificationID + 10000, showIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 +            }
-+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
-         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-             alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
++            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(triggerAtMillis, showPendingIntent);
++            alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
++            Log.d(TAG, "Using setAlarmClock (guaranteed delivery, no permissions needed)");
+         } else {
+-            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
++            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
++            Log.d(TAG, "Using setExact (pre-Lollipop fallback)");
+         }
+         Log.d(TAG, "SDK version: " + Build.VERSION.SDK_INT);
+         Log.d(TAG, "scheduling alarm with notification id: " + notificationID);
+diff --git a/android/src/main/java/com/expoalarmmodule/Manager.java b/android/src/main/java/com/expoalarmmodule/Manager.java
+index 004075da7464088c26edd8b5e6e2e5a191ec7633..047f25808690b4d0ab2dcc4056026c5e7f89dc9d 100644
+--- a/android/src/main/java/com/expoalarmmodule/Manager.java
++++ b/android/src/main/java/com/expoalarmmodule/Manager.java
+@@ -114,9 +114,11 @@ public class Manager {
+     static void start(Context context, String alarmUid) {
+         activeAlarmUid = alarmUid;
+         sound = new Sound(context);
+-        sound.play("default");
+-
+-        Log.d(TAG, "Starting " + activeAlarmUid);
++        // Use the alarm's custom sound if available
++        Alarm alarm = Storage.getAlarm(context, alarmUid);
++        String soundName = (alarm != null && alarm.sound != null && !alarm.sound.isEmpty()) ? alarm.sound : "default";
++        sound.play(soundName);
++        Log.d(TAG, "Starting " + activeAlarmUid + " with sound: " + soundName);
+     }
+ 
+     public static void stop(Context context) {
