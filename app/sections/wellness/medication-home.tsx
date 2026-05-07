@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   ScrollView,
   Text,
@@ -9,7 +9,11 @@ import {
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
-import { useMedication, type Medication } from "@/lib/medication-context";
+import {
+  useMedication,
+  type Medication,
+  TIME_PERIODS,
+} from "@/lib/medication-context";
 import { useUser } from "@/lib/user-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -33,11 +37,12 @@ const DAY_LABELS: Record<string, string> = {
 
 export default function MedicationHomeScreen() {
   const colors = useColors();
-  const { state, deleteMedication, canAddMoreMedications } = useMedication();
+  const { state, deleteMedication, canAddMoreMedications, recordIntake, getIntakeForDate, getWeeklyAdherence } = useMedication();
   const { profile } = useUser();
 
   const activeMeds = state.medications.filter((m) => m.isActive);
   const hasMeds = activeMeds.length > 0;
+  const today = new Date().toISOString().split("T")[0];
 
   const handleAddMedication = () => {
     if (!canAddMoreMedications(profile.isSubscribed)) {
@@ -57,6 +62,10 @@ export default function MedicationHomeScreen() {
     router.push("/sections/wellness/add-medication" as any);
   };
 
+  const handleEditMedication = (med: Medication) => {
+    router.push(`/sections/wellness/edit-medication?id=${med.id}` as any);
+  };
+
   const handleDeleteMedication = (med: Medication) => {
     Alert.alert(
       "حذف الدواء",
@@ -67,13 +76,16 @@ export default function MedicationHomeScreen() {
           text: "حذف",
           style: "destructive",
           onPress: async () => {
-            // إلغاء الإشعارات
-            await cancelMedicationReminder(med.id);
+            await cancelMedicationReminder(med);
             await deleteMedication(med.id);
           },
         },
       ]
     );
+  };
+
+  const handleRecordIntake = async (medId: string, timeIndex: number, taken: boolean) => {
+    await recordIntake(medId, timeIndex, taken);
   };
 
   const formatTime = (hour: number, minute: number) => {
@@ -165,88 +177,174 @@ export default function MedicationHomeScreen() {
 
         {/* قائمة الأدوية */}
         {hasMeds ? (
-          <View className="px-5 gap-3">
-            {activeMeds.map((med, idx) => (
-              <Animated.View
-                key={med.id}
-                entering={FadeInDown.delay(idx * 80).duration(400)}
-              >
-                <View
-                  className="rounded-2xl p-4 border"
-                  style={{
-                    backgroundColor: colors.surface,
-                    borderColor: colors.border,
-                  }}
+          <View className="px-5 gap-4">
+            {activeMeds.map((med, idx) => {
+              const adherence = getWeeklyAdherence(med.id);
+              const todayIntake = getIntakeForDate(med.id, today);
+
+              return (
+                <Animated.View
+                  key={med.id}
+                  entering={FadeInDown.delay(idx * 80).duration(400)}
                 >
                   <View
-                    className="flex-row items-center justify-between"
-                    style={{ flexDirection: "row-reverse" }}
+                    className="rounded-2xl p-4 border"
+                    style={{
+                      backgroundColor: colors.surface,
+                      borderColor: colors.border,
+                    }}
                   >
-                    <View className="flex-row items-center" style={{ flexDirection: "row-reverse" }}>
-                      <View
-                        className="w-10 h-10 rounded-full items-center justify-center"
-                        style={{ backgroundColor: `${colors.primary}15` }}
-                      >
-                        <Text style={{ fontSize: 20 }}>💊</Text>
-                      </View>
-                      <View className="mr-3" style={{ alignItems: "flex-end" }}>
-                        <Text
-                          className="text-base font-bold text-foreground"
-                          style={{ textAlign: "right" }}
-                        >
-                          {med.name}
-                        </Text>
-                        <Text className="text-xs text-muted mt-0.5">
-                          {FREQUENCY_LABELS[med.frequency]}
-                          {med.frequency === "daily" && med.timesPerDay > 1
-                            ? ` - ${med.timesPerDay} مرات`
-                            : ""}
-                          {med.frequency === "weekly" && med.dayOfWeek
-                            ? ` - ${DAY_LABELS[med.dayOfWeek]}`
-                            : ""}
-                          {med.frequency === "monthly" && med.dayOfMonth
-                            ? ` - يوم ${med.dayOfMonth}`
-                            : ""}
-                        </Text>
-                      </View>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => handleDeleteMedication(med)}
-                      className="w-8 h-8 rounded-full items-center justify-center"
-                      style={{ backgroundColor: `${colors.error}15` }}
-                      activeOpacity={0.7}
+                    {/* Header: اسم + أزرار */}
+                    <View
+                      className="flex-row items-center justify-between"
+                      style={{ flexDirection: "row-reverse" }}
                     >
-                      <MaterialIcons name="delete" size={16} color={colors.error} />
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* أوقات الدواء */}
-                  <View className="mt-3 pt-3" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
-                    <View className="flex-row flex-wrap gap-2" style={{ flexDirection: "row-reverse" }}>
-                      {med.times.map((time, tIdx) => (
+                      <View className="flex-row items-center flex-1" style={{ flexDirection: "row-reverse" }}>
                         <View
-                          key={tIdx}
-                          className="px-3 py-1.5 rounded-full flex-row items-center"
-                          style={{
-                            backgroundColor: `${colors.primary}10`,
-                            flexDirection: "row-reverse",
-                          }}
+                          className="w-10 h-10 rounded-full items-center justify-center"
+                          style={{ backgroundColor: `${colors.primary}15` }}
                         >
-                          <MaterialIcons name="schedule" size={14} color={colors.primary} />
-                          <Text
-                            className="text-xs font-medium mr-1"
-                            style={{ color: colors.primary }}
-                          >
-                            {formatTime(time.hour, time.minute)}
-                            {time.label ? ` (${time.label})` : ""}
-                          </Text>
+                          <Text style={{ fontSize: 20 }}>💊</Text>
                         </View>
-                      ))}
+                        <View className="mr-3 flex-1" style={{ alignItems: "flex-end" }}>
+                          <Text
+                            className="text-base font-bold text-foreground"
+                            style={{ textAlign: "right" }}
+                          >
+                            {med.name}
+                          </Text>
+                          <Text className="text-xs text-muted mt-0.5" style={{ writingDirection: "rtl" }}>
+                            {FREQUENCY_LABELS[med.frequency]}
+                            {med.frequency === "daily" && med.timesPerDay > 1
+                              ? ` - ${med.timesPerDay} مرات`
+                              : ""}
+                            {med.frequency === "weekly" && med.dayOfWeek
+                              ? ` - ${DAY_LABELS[med.dayOfWeek]}`
+                              : ""}
+                            {med.frequency === "monthly" && med.dayOfMonth
+                              ? ` - يوم ${med.dayOfMonth}`
+                              : ""}
+                          </Text>
+                          {med.dosage && (
+                            <Text className="text-xs text-muted" style={{ writingDirection: "rtl" }}>
+                              الجرعة: {med.dosage}
+                            </Text>
+                          )}
+                          {med.note && (
+                            <Text className="text-xs" style={{ color: colors.warning, writingDirection: "rtl" }}>
+                              📝 {med.note}
+                            </Text>
+                          )}
+                        </View>
+                      </View>
+
+                      {/* أزرار تعديل وحذف */}
+                      <View className="flex-row gap-2">
+                        <TouchableOpacity
+                          onPress={() => handleEditMedication(med)}
+                          className="w-8 h-8 rounded-full items-center justify-center"
+                          style={{ backgroundColor: `${colors.primary}15` }}
+                          activeOpacity={0.7}
+                        >
+                          <MaterialIcons name="edit" size={16} color={colors.primary} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => handleDeleteMedication(med)}
+                          className="w-8 h-8 rounded-full items-center justify-center"
+                          style={{ backgroundColor: `${colors.error}15` }}
+                          activeOpacity={0.7}
+                        >
+                          <MaterialIcons name="delete" size={16} color={colors.error} />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+
+                    {/* نسبة الالتزام */}
+                    {adherence > 0 && (
+                      <View className="mt-3 flex-row items-center gap-2" style={{ flexDirection: "row-reverse" }}>
+                        <View className="flex-1 h-2 rounded-full" style={{ backgroundColor: colors.border }}>
+                          <View
+                            className="h-2 rounded-full"
+                            style={{
+                              backgroundColor: adherence >= 80 ? colors.success : adherence >= 50 ? colors.warning : colors.error,
+                              width: `${adherence}%`,
+                            }}
+                          />
+                        </View>
+                        <Text className="text-xs font-bold" style={{ color: adherence >= 80 ? colors.success : adherence >= 50 ? colors.warning : colors.error }}>
+                          {adherence}%
+                        </Text>
+                      </View>
+                    )}
+
+                    {/* أوقات الدواء + سجل التناول */}
+                    <View className="mt-3 pt-3" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
+                      {med.times.map((time, tIdx) => {
+                        const period = TIME_PERIODS.find((p) => p.id === time.period);
+                        const intakeRecord = todayIntake.find((r) => r.timeIndex === tIdx);
+                        const isTaken = intakeRecord?.taken === true;
+                        const isMissed = intakeRecord?.taken === false;
+
+                        return (
+                          <View
+                            key={tIdx}
+                            className="flex-row items-center justify-between py-2"
+                            style={{ flexDirection: "row-reverse" }}
+                          >
+                            <View className="flex-row items-center gap-2" style={{ flexDirection: "row-reverse" }}>
+                              <Text style={{ fontSize: 16 }}>{period?.emoji || "⏰"}</Text>
+                              <Text className="text-sm text-foreground font-medium">
+                                {period?.label} - {formatTime(time.hour, time.minute)}
+                              </Text>
+                            </View>
+
+                            {/* أزرار تسجيل التناول */}
+                            <View className="flex-row gap-2">
+                              {isTaken ? (
+                                <View className="px-3 py-1.5 rounded-full" style={{ backgroundColor: `${colors.success}20` }}>
+                                  <Text className="text-xs font-bold" style={{ color: colors.success }}>
+                                    تناولته ✅
+                                  </Text>
+                                </View>
+                              ) : isMissed ? (
+                                <View className="px-3 py-1.5 rounded-full" style={{ backgroundColor: `${colors.error}20` }}>
+                                  <Text className="text-xs font-bold" style={{ color: colors.error }}>
+                                    فاتني ❌
+                                  </Text>
+                                </View>
+                              ) : (
+                                <>
+                                  <TouchableOpacity
+                                    onPress={() => handleRecordIntake(med.id, tIdx, true)}
+                                    className="px-3 py-1.5 rounded-full"
+                                    style={{ backgroundColor: `${colors.success}15` }}
+                                    activeOpacity={0.7}
+                                  >
+                                    <Text className="text-xs font-bold" style={{ color: colors.success }}>
+                                      تناولته ✅
+                                    </Text>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity
+                                    onPress={() => handleRecordIntake(med.id, tIdx, false)}
+                                    className="px-3 py-1.5 rounded-full"
+                                    style={{ backgroundColor: `${colors.error}10` }}
+                                    activeOpacity={0.7}
+                                  >
+                                    <Text className="text-xs font-bold" style={{ color: colors.error }}>
+                                      فاتني
+                                    </Text>
+                                  </TouchableOpacity>
+                                </>
+                              )}
+                            </View>
+                          </View>
+                        );
+                      })}
                     </View>
                   </View>
-                </View>
-              </Animated.View>
-            ))}
+                </Animated.View>
+              );
+            })}
           </View>
         ) : (
           <Animated.View entering={FadeInDown.duration(400)} className="px-5">

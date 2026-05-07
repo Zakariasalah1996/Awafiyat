@@ -6,9 +6,12 @@ import type { Medication, DayOfWeek } from "@/lib/medication-context";
 // ============================================================
 // نظام إشعارات تذكير الدواء - رفيق الدواء
 // إشعارات محلية بأولوية قصوى مع رسائل إنسانية
+// + تذكير ثانٍ بعد 15 دقيقة إذا لم يتفاعل
+// + ملاحظة وجرعة في الإشعار
 // ============================================================
 
-const NOTIFICATION_IDS_KEY = "@medication_notification_ids_v1";
+const NOTIFICATION_IDS_KEY = "@medication_notification_ids_v2";
+const FOLLOWUP_IDS_KEY = "@medication_followup_ids_v1";
 
 // رسائل تذكير الدواء - إنسانية ودافئة
 const MEDICATION_MESSAGES = [
@@ -22,6 +25,14 @@ const MEDICATION_MESSAGES = [
   "تذكير حبيب: دواؤك الآن. الله يديم عليك العافية 💊",
 ];
 
+// رسائل التذكير الثاني (بعد 15 دقيقة)
+const FOLLOWUP_MESSAGES = [
+  "لا تنسَ دواءك! مرّ وقت ولم تتناوله بعد 💊",
+  "تذكير ثانٍ: دواؤك لا يزال ينتظرك 💚",
+  "ما زلنا نذكّرك بدوائك، صحتك تهمنا 🌿",
+  "لم تتناول دواءك بعد! خذه الآن بإذن الله 💊",
+];
+
 // تحويل يوم الأسبوع إلى رقم expo-notifications (1=Sunday, 7=Saturday)
 const DAY_MAP: Record<DayOfWeek, number> = {
   sun: 1,
@@ -32,6 +43,26 @@ const DAY_MAP: Record<DayOfWeek, number> = {
   fri: 6,
   sat: 7,
 };
+
+/**
+ * بناء نص الإشعار مع الجرعة والملاحظة
+ */
+function buildNotificationBody(medication: Medication, isFollowup: boolean = false): string {
+  const messages = isFollowup ? FOLLOWUP_MESSAGES : MEDICATION_MESSAGES;
+  let body = messages[Math.floor(Math.random() * messages.length)];
+
+  // إضافة الجرعة
+  if (medication.dosage) {
+    body += `\nالجرعة: ${medication.dosage}`;
+  }
+
+  // إضافة الملاحظة
+  if (medication.note) {
+    body += `\n📝 ${medication.note}`;
+  }
+
+  return body;
+}
 
 /**
  * إعداد قناة إشعارات الدواء (Android)
@@ -47,32 +78,43 @@ export async function setupMedicationChannel(): Promise<void> {
       enableVibrate: true,
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     });
+
+    // قناة التذكير الثاني
+    await Notifications.setNotificationChannelAsync("medication-followup", {
+      name: "تذكير ثانٍ بالدواء",
+      description: "تذكير إضافي إذا لم يتم تناول الدواء",
+      importance: Notifications.AndroidImportance.HIGH,
+      sound: "default",
+      vibrationPattern: [0, 500, 250, 500],
+      enableVibrate: true,
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+    });
   }
 }
 
 /**
- * جدولة إشعارات لدواء معين
+ * جدولة إشعارات لدواء معين (مع تذكير ثانٍ بعد 15 دقيقة)
  */
 export async function scheduleMedicationReminder(medication: Medication): Promise<string[]> {
   // إلغاء أي إشعارات سابقة لهذا الدواء
-  await cancelMedicationReminder(medication.id);
+  await cancelMedicationReminder(medication);
 
   const notificationIds: string[] = [];
-  const message = MEDICATION_MESSAGES[Math.floor(Math.random() * MEDICATION_MESSAGES.length)];
+  const followupIds: string[] = [];
+  const body = buildNotificationBody(medication, false);
+  const followupBody = buildNotificationBody(medication, true);
 
   for (let i = 0; i < medication.times.length; i++) {
     const time = medication.times[i];
     let trigger: Notifications.NotificationTriggerInput;
 
     if (medication.frequency === "daily") {
-      // تذكير يومي
       trigger = {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
         hour: time.hour,
         minute: time.minute,
       };
     } else if (medication.frequency === "weekly" && medication.dayOfWeek) {
-      // تذكير أسبوعي
       trigger = {
         type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
         weekday: DAY_MAP[medication.dayOfWeek],
@@ -80,8 +122,6 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
         minute: time.minute,
       };
     } else if (medication.frequency === "monthly" && medication.dayOfMonth) {
-      // تذكير شهري - نستخدم YEARLY مع كل شهر أو DAILY مع شرط
-      // expo-notifications لا يدعم monthly مباشرة، نستخدم calendar trigger
       trigger = {
         type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
         day: medication.dayOfMonth,
@@ -90,7 +130,6 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
         repeats: true,
       };
     } else {
-      // fallback to daily
       trigger = {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
         hour: time.hour,
@@ -99,10 +138,11 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
     }
 
     try {
+      // الإشعار الرئيسي
       const id = await Notifications.scheduleNotificationAsync({
         content: {
           title: `💊 ${medication.name}`,
-          body: message,
+          body,
           sound: "default",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
@@ -112,12 +152,73 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
             type: "medication_reminder",
             medicationId: medication.id,
             medicationName: medication.name,
+            timeIndex: i,
           },
           categoryIdentifier: "medication_action",
         },
         trigger,
       });
       notificationIds.push(id);
+
+      // التذكير الثاني بعد 15 دقيقة
+      let followupHour = time.hour;
+      let followupMinute = time.minute + 15;
+      if (followupMinute >= 60) {
+        followupMinute -= 60;
+        followupHour = (followupHour + 1) % 24;
+      }
+
+      let followupTrigger: Notifications.NotificationTriggerInput;
+
+      if (medication.frequency === "daily") {
+        followupTrigger = {
+          type: Notifications.SchedulableTriggerInputTypes.DAILY,
+          hour: followupHour,
+          minute: followupMinute,
+        };
+      } else if (medication.frequency === "weekly" && medication.dayOfWeek) {
+        followupTrigger = {
+          type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+          weekday: DAY_MAP[medication.dayOfWeek],
+          hour: followupHour,
+          minute: followupMinute,
+        };
+      } else if (medication.frequency === "monthly" && medication.dayOfMonth) {
+        followupTrigger = {
+          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+          day: medication.dayOfMonth,
+          hour: followupHour,
+          minute: followupMinute,
+          repeats: true,
+        };
+      } else {
+        followupTrigger = {
+          type: Notifications.SchedulableTriggerInputTypes.DAILY,
+          hour: followupHour,
+          minute: followupMinute,
+        };
+      }
+
+      const followupId = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `⚠️ لم تتناول ${medication.name} بعد!`,
+          body: followupBody,
+          sound: "default",
+          priority: Notifications.AndroidNotificationPriority.HIGH,
+          ...(Platform.OS === "android" && {
+            channelId: "medication-followup",
+          }),
+          data: {
+            type: "medication_followup",
+            medicationId: medication.id,
+            medicationName: medication.name,
+            timeIndex: i,
+          },
+          categoryIdentifier: "medication_action",
+        },
+        trigger: followupTrigger,
+      });
+      followupIds.push(followupId);
     } catch (e) {
       console.error(`[MedNotif] Failed to schedule for ${medication.name} time ${i}:`, e);
     }
@@ -125,20 +226,33 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
 
   // حفظ معرفات الإشعارات
   await saveNotificationIds(medication.id, notificationIds);
+  await saveFollowupIds(medication.id, followupIds);
   return notificationIds;
 }
 
 /**
- * إلغاء إشعارات دواء معين
+ * إلغاء إشعارات دواء معين (يقبل medication object أو id string)
  */
-export async function cancelMedicationReminder(medicationId: string): Promise<void> {
-  const ids = await getNotificationIds(medicationId);
+export async function cancelMedicationReminder(medicationOrId: Medication | string): Promise<void> {
+  const medId = typeof medicationOrId === "string" ? medicationOrId : medicationOrId.id;
+
+  // إلغاء الإشعارات الرئيسية
+  const ids = await getNotificationIds(medId);
   for (const id of ids) {
     try {
       await Notifications.cancelScheduledNotificationAsync(id);
     } catch {}
   }
-  await removeNotificationIds(medicationId);
+  await removeNotificationIds(medId);
+
+  // إلغاء إشعارات المتابعة
+  const followupIds = await getFollowupIds(medId);
+  for (const id of followupIds) {
+    try {
+      await Notifications.cancelScheduledNotificationAsync(id);
+    } catch {}
+  }
+  await removeFollowupIds(medId);
 }
 
 /**
@@ -151,13 +265,22 @@ export async function cancelAllMedicationReminders(): Promise<void> {
       const allIds: Record<string, string[]> = JSON.parse(stored);
       for (const ids of Object.values(allIds)) {
         for (const id of ids) {
-          try {
-            await Notifications.cancelScheduledNotificationAsync(id);
-          } catch {}
+          try { await Notifications.cancelScheduledNotificationAsync(id); } catch {}
         }
       }
     }
     await AsyncStorage.removeItem(NOTIFICATION_IDS_KEY);
+
+    const followups = await AsyncStorage.getItem(FOLLOWUP_IDS_KEY);
+    if (followups) {
+      const allIds: Record<string, string[]> = JSON.parse(followups);
+      for (const ids of Object.values(allIds)) {
+        for (const id of ids) {
+          try { await Notifications.cancelScheduledNotificationAsync(id); } catch {}
+        }
+      }
+    }
+    await AsyncStorage.removeItem(FOLLOWUP_IDS_KEY);
   } catch {}
 }
 
@@ -199,11 +322,11 @@ export async function handleMedicationNotificationResponse(
   const actionId = response.actionIdentifier;
   const data = response.notification.request.content.data;
 
-  if (data?.type !== "medication_reminder") return;
+  if (data?.type !== "medication_reminder" && data?.type !== "medication_followup") return;
 
   if (actionId === "SNOOZE_MEDICATION") {
     // إعادة جدولة بعد 10 دقائق
-    const medName = data.medicationName as string || "دواءك";
+    const medName = (data.medicationName as string) || "دواءك";
     try {
       await Notifications.scheduleNotificationAsync({
         content: {
@@ -218,6 +341,7 @@ export async function handleMedicationNotificationResponse(
             type: "medication_reminder",
             medicationId: data.medicationId,
             medicationName: medName,
+            timeIndex: data.timeIndex,
           },
           categoryIdentifier: "medication_action",
         },
@@ -231,7 +355,17 @@ export async function handleMedicationNotificationResponse(
       console.error("[MedNotif] Failed to snooze:", e);
     }
   }
-  // TOOK_MEDICATION - لا حاجة لفعل شيء إضافي
+
+  if (actionId === "TOOK_MEDICATION") {
+    // إلغاء التذكير الثاني إذا تناول الدواء
+    const medId = data.medicationId as string;
+    if (medId) {
+      const followupIds = await getFollowupIds(medId);
+      for (const id of followupIds) {
+        try { await Notifications.cancelScheduledNotificationAsync(id); } catch {}
+      }
+    }
+  }
 }
 
 // === Helper functions ===
@@ -263,6 +397,37 @@ async function removeNotificationIds(medId: string): Promise<void> {
       const allIds: Record<string, string[]> = JSON.parse(stored);
       delete allIds[medId];
       await AsyncStorage.setItem(NOTIFICATION_IDS_KEY, JSON.stringify(allIds));
+    }
+  } catch {}
+}
+
+async function saveFollowupIds(medId: string, ids: string[]): Promise<void> {
+  try {
+    const stored = await AsyncStorage.getItem(FOLLOWUP_IDS_KEY);
+    const allIds: Record<string, string[]> = stored ? JSON.parse(stored) : {};
+    allIds[medId] = ids;
+    await AsyncStorage.setItem(FOLLOWUP_IDS_KEY, JSON.stringify(allIds));
+  } catch {}
+}
+
+async function getFollowupIds(medId: string): Promise<string[]> {
+  try {
+    const stored = await AsyncStorage.getItem(FOLLOWUP_IDS_KEY);
+    if (stored) {
+      const allIds: Record<string, string[]> = JSON.parse(stored);
+      return allIds[medId] || [];
+    }
+  } catch {}
+  return [];
+}
+
+async function removeFollowupIds(medId: string): Promise<void> {
+  try {
+    const stored = await AsyncStorage.getItem(FOLLOWUP_IDS_KEY);
+    if (stored) {
+      const allIds: Record<string, string[]> = JSON.parse(stored);
+      delete allIds[medId];
+      await AsyncStorage.setItem(FOLLOWUP_IDS_KEY, JSON.stringify(allIds));
     }
   } catch {}
 }
