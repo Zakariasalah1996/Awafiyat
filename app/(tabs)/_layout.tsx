@@ -58,6 +58,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="wellness"
+        options={{
+          title: "عافيتي",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={26} name="heart.text.square.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="subscription"
         options={{
           title: "اشتراكي",

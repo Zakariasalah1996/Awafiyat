@@ -20,6 +20,12 @@ import { syncRecipeImages } from "@/lib/recipe-image-sync";
 import { registerGuest } from "@/lib/guest-auth";
 import { useRouter } from "expo-router";
 import { AlarmProvider } from "@/lib/alarm-context";
+import { MedicationProvider } from "@/lib/medication-context";
+import {
+  setupMedicationChannel,
+  setupMedicationNotificationActions,
+  handleMedicationNotificationResponse,
+} from "@/lib/medication-notifications";
 import * as Notifications from "expo-notifications";
 import {
   SafeAreaFrameContext,
@@ -84,6 +90,10 @@ function RootLayoutInner() {
     // إعادة جدولة الإشعارات بالإعدادات الحالية عند فتح التطبيق
     refreshAllAlarms().catch((e) => console.warn("[Notifications] Refresh failed:", e));
 
+    // إعداد قناة إشعارات الدواء وأزرار التفاعل
+    setupMedicationChannel().catch((e) => console.warn("[MedNotif] Channel setup failed:", e));
+    setupMedicationNotificationActions().catch((e) => console.warn("[MedNotif] Actions setup failed:", e));
+
     // Setup notification listeners
     const cleanup = setupNotificationListeners(
       (notification) => {
@@ -130,6 +140,12 @@ function RootLayoutInner() {
         }
       }
       // إذا ضغط "إيقاف" - لا نفعل شيئاً (الإشعار يُغلق تلقائياً)
+
+      // معالجة إشعارات الدواء
+      if (data?.type === "medication_reminder") {
+        handleMedicationNotificationResponse(response);
+        return;
+      }
     },
     [router]
   );
@@ -222,11 +238,13 @@ function RootLayoutInner() {
   );
 }
 
-// المكون الرئيسي يلف كل شيء بـ AlarmProvider
+// المكون الرئيسي يلف كل شيء بـ AlarmProvider + MedicationProvider
 export default function RootLayout() {
   return (
     <AlarmProvider>
-      <RootLayoutInner />
+      <MedicationProvider>
+        <RootLayoutInner />
+      </MedicationProvider>
     </AlarmProvider>
   );
 }

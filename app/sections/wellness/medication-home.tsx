@@ -1,0 +1,304 @@
+import { useState } from "react";
+import {
+  ScrollView,
+  Text,
+  View,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import { router } from "expo-router";
+import { ScreenContainer } from "@/components/screen-container";
+import { useColors } from "@/hooks/use-colors";
+import { useMedication, type Medication } from "@/lib/medication-context";
+import { useUser } from "@/lib/user-context";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { cancelMedicationReminder } from "@/lib/medication-notifications";
+
+const FREQUENCY_LABELS: Record<string, string> = {
+  daily: "يومياً",
+  weekly: "أسبوعياً",
+  monthly: "شهرياً",
+};
+
+const DAY_LABELS: Record<string, string> = {
+  sat: "السبت",
+  sun: "الأحد",
+  mon: "الاثنين",
+  tue: "الثلاثاء",
+  wed: "الأربعاء",
+  thu: "الخميس",
+  fri: "الجمعة",
+};
+
+export default function MedicationHomeScreen() {
+  const colors = useColors();
+  const { state, deleteMedication, canAddMoreMedications } = useMedication();
+  const { profile } = useUser();
+
+  const activeMeds = state.medications.filter((m) => m.isActive);
+  const hasMeds = activeMeds.length > 0;
+
+  const handleAddMedication = () => {
+    if (!canAddMoreMedications(profile.isSubscribed)) {
+      Alert.alert(
+        "اشتراك مطلوب 👑",
+        "الدواء الأول مجاني! لإضافة أدوية إضافية، يرجى الاشتراك في النسخة الكاملة.",
+        [
+          { text: "لاحقاً", style: "cancel" },
+          {
+            text: "اشترك الآن",
+            onPress: () => router.push("/(tabs)/subscription" as any),
+          },
+        ]
+      );
+      return;
+    }
+    router.push("/sections/wellness/add-medication" as any);
+  };
+
+  const handleDeleteMedication = (med: Medication) => {
+    Alert.alert(
+      "حذف الدواء",
+      `هل تريد حذف "${med.name}" من قائمة أدويتك؟`,
+      [
+        { text: "إلغاء", style: "cancel" },
+        {
+          text: "حذف",
+          style: "destructive",
+          onPress: async () => {
+            // إلغاء الإشعارات
+            await cancelMedicationReminder(med.id);
+            await deleteMedication(med.id);
+          },
+        },
+      ]
+    );
+  };
+
+  const formatTime = (hour: number, minute: number) => {
+    const period = hour >= 12 ? "م" : "ص";
+    const h = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+    return `${h}:${String(minute).padStart(2, "0")} ${period}`;
+  };
+
+  // إذا لم يكمل الإعداد بعد
+  if (!state.setupComplete) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+        <View className="flex-1 items-center justify-center px-8 bg-background">
+          <Animated.View entering={FadeInDown.duration(500)} className="items-center w-full">
+            <Text style={{ fontSize: 64, marginBottom: 20 }}>💊</Text>
+            <Text
+              className="text-2xl font-bold text-foreground text-center mb-3"
+              style={{ writingDirection: "rtl" }}
+            >
+              رفيق الدواء
+            </Text>
+            <Text
+              className="text-base text-muted text-center mb-10 leading-7"
+              style={{ writingDirection: "rtl" }}
+            >
+              سجّل أدويتك ونذكّرك بمواعيدها بكل حب ورعاية
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => router.push("/sections/wellness/medication-setup" as any)}
+              className="w-full py-4 rounded-2xl items-center"
+              style={{ backgroundColor: colors.primary }}
+              activeOpacity={0.8}
+            >
+              <Text className="text-white text-lg font-bold">ابدأ الإعداد</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="mt-4 py-2"
+              activeOpacity={0.7}
+            >
+              <Text className="text-base text-muted">رجوع</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </ScreenContainer>
+    );
+  }
+
+  return (
+    <ScreenContainer className="px-0">
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 30 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View className="px-6 pt-4 pb-4">
+          <View
+            className="flex-row items-center justify-between"
+            style={{ flexDirection: "row-reverse" }}
+          >
+            <View style={{ alignItems: "flex-end" }}>
+              <Text
+                className="text-2xl font-bold text-foreground"
+                style={{ textAlign: "right", writingDirection: "rtl" }}
+              >
+                رفيق الدواء 💊
+              </Text>
+              <Text
+                className="text-sm text-muted mt-1"
+                style={{ textAlign: "right", writingDirection: "rtl" }}
+              >
+                {hasMeds
+                  ? "أدويتك مسجلة وسنذكّرك بمواعيدها"
+                  : "أضف دواءك الأول"}
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="w-10 h-10 rounded-full items-center justify-center"
+              style={{ backgroundColor: colors.surface }}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="arrow-forward" size={22} color={colors.foreground} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* قائمة الأدوية */}
+        {hasMeds ? (
+          <View className="px-5 gap-3">
+            {activeMeds.map((med, idx) => (
+              <Animated.View
+                key={med.id}
+                entering={FadeInDown.delay(idx * 80).duration(400)}
+              >
+                <View
+                  className="rounded-2xl p-4 border"
+                  style={{
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                  }}
+                >
+                  <View
+                    className="flex-row items-center justify-between"
+                    style={{ flexDirection: "row-reverse" }}
+                  >
+                    <View className="flex-row items-center" style={{ flexDirection: "row-reverse" }}>
+                      <View
+                        className="w-10 h-10 rounded-full items-center justify-center"
+                        style={{ backgroundColor: `${colors.primary}15` }}
+                      >
+                        <Text style={{ fontSize: 20 }}>💊</Text>
+                      </View>
+                      <View className="mr-3" style={{ alignItems: "flex-end" }}>
+                        <Text
+                          className="text-base font-bold text-foreground"
+                          style={{ textAlign: "right" }}
+                        >
+                          {med.name}
+                        </Text>
+                        <Text className="text-xs text-muted mt-0.5">
+                          {FREQUENCY_LABELS[med.frequency]}
+                          {med.frequency === "daily" && med.timesPerDay > 1
+                            ? ` - ${med.timesPerDay} مرات`
+                            : ""}
+                          {med.frequency === "weekly" && med.dayOfWeek
+                            ? ` - ${DAY_LABELS[med.dayOfWeek]}`
+                            : ""}
+                          {med.frequency === "monthly" && med.dayOfMonth
+                            ? ` - يوم ${med.dayOfMonth}`
+                            : ""}
+                        </Text>
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteMedication(med)}
+                      className="w-8 h-8 rounded-full items-center justify-center"
+                      style={{ backgroundColor: `${colors.error}15` }}
+                      activeOpacity={0.7}
+                    >
+                      <MaterialIcons name="delete" size={16} color={colors.error} />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* أوقات الدواء */}
+                  <View className="mt-3 pt-3" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
+                    <View className="flex-row flex-wrap gap-2" style={{ flexDirection: "row-reverse" }}>
+                      {med.times.map((time, tIdx) => (
+                        <View
+                          key={tIdx}
+                          className="px-3 py-1.5 rounded-full flex-row items-center"
+                          style={{
+                            backgroundColor: `${colors.primary}10`,
+                            flexDirection: "row-reverse",
+                          }}
+                        >
+                          <MaterialIcons name="schedule" size={14} color={colors.primary} />
+                          <Text
+                            className="text-xs font-medium mr-1"
+                            style={{ color: colors.primary }}
+                          >
+                            {formatTime(time.hour, time.minute)}
+                            {time.label ? ` (${time.label})` : ""}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                </View>
+              </Animated.View>
+            ))}
+          </View>
+        ) : (
+          <Animated.View entering={FadeInDown.duration(400)} className="px-5">
+            <View
+              className="rounded-2xl p-8 items-center border"
+              style={{
+                backgroundColor: `${colors.primary}05`,
+                borderColor: `${colors.primary}20`,
+                borderStyle: "dashed",
+              }}
+            >
+              <Text style={{ fontSize: 48, marginBottom: 12 }}>💊</Text>
+              <Text
+                className="text-base text-muted text-center leading-6"
+                style={{ writingDirection: "rtl" }}
+              >
+                لم تسجل أي دواء بعد.{"\n"}أضف دواءك الأول وسنذكّرك بمواعيده.
+              </Text>
+            </View>
+          </Animated.View>
+        )}
+
+        {/* زر إضافة دواء */}
+        <Animated.View entering={FadeInDown.delay(300).duration(400)} className="px-5 mt-6">
+          <TouchableOpacity
+            onPress={handleAddMedication}
+            className="w-full py-4 rounded-2xl items-center flex-row justify-center"
+            style={{
+              backgroundColor: colors.primary,
+              flexDirection: "row-reverse",
+            }}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="add" size={22} color="#fff" />
+            <Text className="text-white text-lg font-bold mr-2">
+              {hasMeds ? "إضافة دواء آخر" : "إضافة دواء"}
+            </Text>
+          </TouchableOpacity>
+
+          {/* ملاحظة الاشتراك */}
+          {!profile.isSubscribed && activeMeds.length >= 1 && (
+            <View className="mt-3 px-4 py-3 rounded-xl" style={{ backgroundColor: "#FFF3E0" }}>
+              <Text
+                className="text-xs text-center leading-5"
+                style={{ color: "#E65100", writingDirection: "rtl" }}
+              >
+                👑 الدواء الأول مجاني! لإضافة أدوية إضافية، اشترك في النسخة الكاملة.
+              </Text>
+            </View>
+          )}
+        </Animated.View>
+      </ScrollView>
+    </ScreenContainer>
+  );
+}

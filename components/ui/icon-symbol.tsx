@@ -48,6 +48,10 @@ const MAPPING = {
   "xmark.circle.fill": "cancel",
   "camera.fill": "camera-alt",
   "photo.fill": "photo",
+  "cross.case.fill": "medical-services",
+  "drop.fill": "water-drop",
+  "pills.fill": "medication",
+  "heart.text.square.fill": "health-and-safety",
 } as IconMapping;
 
 export function IconSymbol({

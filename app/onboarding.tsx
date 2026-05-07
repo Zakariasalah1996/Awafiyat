@@ -79,7 +79,12 @@ export default function OnboardingScreen() {
       healthCondition: condition,
       onboardingComplete: true,
     });
-    router.replace("/(tabs)");
+    // إذا اختار مرضاً، نوجهه لإعداد رفيق الدواء
+    if (condition !== "none") {
+      router.replace("/sections/wellness/medication-setup" as any);
+    } else {
+      router.replace("/(tabs)");
+    }
   };
 
   // Step 0: Welcome - تصميم مبهر
