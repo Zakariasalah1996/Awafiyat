@@ -33,7 +33,7 @@ export async function setupWaterChannel(): Promise<void> {
       name: "تذكير شرب الماء",
       description: "إشعارات تذكير بشرب الماء",
       importance: Notifications.AndroidImportance.DEFAULT,
-      sound: "default",
+      sound: "water_reminder.mp3",
       vibrationPattern: [0, 200, 100, 200],
       enableVibrate: true,
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
@@ -66,7 +66,7 @@ export async function scheduleWaterReminders(
         content: {
           title: "💧 وقت شرب الماء",
           body: message,
-          sound: "default",
+          sound: "water_reminder.mp3",
           priority: Notifications.AndroidNotificationPriority.DEFAULT,
           ...(Platform.OS === "android" && {
             channelId: "water-reminder",
@@ -147,7 +147,7 @@ export async function handleWaterNotificationResponse(
         content: {
           title: "💧 تذكير: اشرب ماءً!",
           body: message,
-          sound: "default",
+          sound: "water_reminder.mp3",
           priority: Notifications.AndroidNotificationPriority.DEFAULT,
           ...(Platform.OS === "android" && {
             channelId: "water-reminder",
