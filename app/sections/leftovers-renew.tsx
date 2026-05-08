@@ -367,11 +367,11 @@ export default function LeftoversRenewScreen() {
                 >
                   أين محفوظ هذا الأكل؟
                 </Text>
-                <View className="flex-row justify-center gap-3" style={{ flexDirection: "row-reverse" }}>
+                <View style={{ flexDirection: "row-reverse", flexWrap: "wrap", gap: 10, justifyContent: "center" }}>
                   {([
-                    { key: "fridge" as StorageLocation, label: "🧊 ثلاجة", color: "#E3F2FD", borderColor: "#90CAF9", activeColor: "#2196F3" },
-                    { key: "freezer" as StorageLocation, label: "❄️ فريزر", color: "#E8EAF6", borderColor: "#9FA8DA", activeColor: "#3F51B5" },
-                    { key: "outside" as StorageLocation, label: "🍽️ خارجهما", color: "#FFF3E0", borderColor: "#FFE0B2", activeColor: "#E65100" },
+                    { key: "fridge" as StorageLocation, emoji: "🧲", label: "ثلاجة", color: "#E3F2FD", borderColor: "#90CAF9", activeColor: "#2196F3" },
+                    { key: "freezer" as StorageLocation, emoji: "❄️", label: "فريزر", color: "#E8EAF6", borderColor: "#9FA8DA", activeColor: "#3F51B5" },
+                    { key: "outside" as StorageLocation, emoji: "🍽️", label: "خارجهما", color: "#FFF3E0", borderColor: "#FFE0B2", activeColor: "#E65100" },
                   ]).map((item) => (
                     <TouchableOpacity
                       key={item.key}
@@ -383,19 +383,21 @@ export default function LeftoversRenewScreen() {
                         }
                       }}
                       style={{
-                        flex: 1,
+                        minWidth: 100,
                         backgroundColor: storageLocation === item.key ? item.activeColor : item.color,
                         borderRadius: 14,
                         paddingVertical: 14,
+                        paddingHorizontal: 16,
                         alignItems: "center",
                         borderWidth: 2,
                         borderColor: storageLocation === item.key ? item.activeColor : item.borderColor,
                       }}
                       activeOpacity={0.7}
                     >
+                      <Text style={{ fontSize: 22, marginBottom: 4 }}>{item.emoji}</Text>
                       <Text
                         style={{
-                          fontSize: 14,
+                          fontSize: 15,
                           fontWeight: "700",
                           color: storageLocation === item.key ? "#fff" : "#333",
                         }}
