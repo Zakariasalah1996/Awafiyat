@@ -30,6 +30,7 @@ export default function FridgeScreen() {
   const colors = useColors();
   const { profile } = useUser();
   const isSubscribed = profile.isSubscribed;
+  const [activeSection, setActiveSection] = useState<"choose" | "fresh" | "leftovers">("choose");
   const [inputText, setInputText] = useState("");
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<Ingredient[]>([]);
@@ -163,6 +164,99 @@ export default function FridgeScreen() {
     );
   }
 
+  // شاشة الاختيار (مواد طازجة / تجديد النعمة)
+  if (activeSection === "choose") {
+    return (
+      <ScreenContainer edges={["top", "left", "right", "bottom"]}>
+        <View className="flex-1 px-5 pt-3">
+          {/* Header */}
+          <View className="flex-row items-center justify-between pb-4">
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{ padding: 8 }}
+            >
+              <MaterialIcons name="arrow-forward" size={24} color="#2D5A3D" />
+            </TouchableOpacity>
+            <Text
+              className="text-xl font-bold text-foreground"
+            >
+              ماذا في ثلاجتي؟ 🧴
+            </Text>
+            <View style={{ width: 40 }} />
+          </View>
+
+          {/* البطاقتين */}
+          <View className="flex-1 justify-center gap-5 px-2">
+            {/* بطاقة مواد طازجة */}
+            <TouchableOpacity
+              onPress={() => {
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setActiveSection("fresh");
+              }}
+              activeOpacity={0.8}
+              style={{
+                backgroundColor: "#F0F7EC",
+                borderRadius: 20,
+                padding: 24,
+                borderWidth: 1.5,
+                borderColor: "#C8E6C9",
+              }}
+            >
+              <View className="flex-row items-center gap-4">
+                <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: "#E8F5E9", alignItems: "center", justifyContent: "center" }}>
+                  <Text style={{ fontSize: 28 }}>🥬</Text>
+                </View>
+                <View className="flex-1">
+                  <Text style={{ fontSize: 20, fontWeight: "700", color: "#2D5A3D", marginBottom: 4 }}>
+                    مواد طازجة
+                  </Text>
+                  <Text style={{ fontSize: 14, color: "#5D8A3C", lineHeight: 20 }}>
+                    عندك مكونات خامة؟ أخبرنا ونقترح لك وصفة!
+                  </Text>
+                </View>
+                <MaterialIcons name="chevron-left" size={24} color="#5D8A3C" />
+              </View>
+            </TouchableOpacity>
+
+            {/* بطاقة تجديد النعمة */}
+            <TouchableOpacity
+              onPress={() => {
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/sections/leftovers-renew" as any);
+              }}
+              activeOpacity={0.8}
+              style={{
+                backgroundColor: "#FFF5EB",
+                borderRadius: 20,
+                padding: 24,
+                borderWidth: 1.5,
+                borderColor: "#FFE0B2",
+              }}
+            >
+              <View className="flex-row items-center gap-4">
+                <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: "#FFF3E0", alignItems: "center", justifyContent: "center" }}>
+                  <Text style={{ fontSize: 28 }}>🍲</Text>
+                </View>
+                <View className="flex-1">
+                  <Text style={{ fontSize: 20, fontWeight: "700", color: "#E65100", marginBottom: 4 }}>
+                    تجديد النعمة
+                  </Text>
+                  <Text style={{ fontSize: 14, color: "#E67E22", lineHeight: 20 }}>
+                    الأكلات المتبقية من أمس - لا ترميها!
+                  </Text>
+                </View>
+                <MaterialIcons name="chevron-left" size={24} color="#E67E22" />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScreenContainer>
+    );
+  }
+
+  // إذا اختار "تجديد النعمة" يذهب لشاشة leftovers-renew (handled above via router.push)
+  // إذا اختار "مواد طازجة" يكمل للأسفل (الشاشة الأصلية)
+
   // شاشة انتهاء المرات المجانية
   if (fridgeLimitReached && !isSubscribed) {
     return (
@@ -221,16 +315,15 @@ export default function FridgeScreen() {
         {/* Header */}
         <View className="flex-row items-center justify-between px-5 pt-3 pb-2">
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => setActiveSection("choose")}
             style={{ padding: 8 }}
           >
             <MaterialIcons name="arrow-forward" size={24} color="#2D5A3D" />
           </TouchableOpacity>
           <Text
             className="text-xl font-bold text-foreground"
-            style={{ fontFamily: Platform.OS === "ios" ? undefined : undefined }}
           >
-            شنو في ثلاجتي؟ 🧊
+            مواد طازجة 🥬
           </Text>
           <View style={{ width: 40 }} />
         </View>
