@@ -516,11 +516,8 @@ export default function EditMedicationScreen() {
 
             {/* يوم الأسبوع */}
             {frequency === "weekly" && (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 8, paddingVertical: 8 }}
-                style={{ flexDirection: "row-reverse", marginTop: 8 }}
+              <View
+                style={{ flexDirection: "row-reverse", flexWrap: "wrap", gap: 8, paddingVertical: 8, marginTop: 8, justifyContent: "center" }}
               >
                 {DAYS_OF_WEEK.map((day) => (
                   <TouchableOpacity
@@ -538,7 +535,7 @@ export default function EditMedicationScreen() {
                     </Text>
                   </TouchableOpacity>
                 ))}
-              </ScrollView>
+              </View>
             )}
 
             {/* يوم الشهر */}

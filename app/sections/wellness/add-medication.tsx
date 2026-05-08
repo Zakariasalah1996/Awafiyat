@@ -574,11 +574,8 @@ export default function AddMedicationScreen() {
               في أي يوم من الأسبوع؟
             </Text>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 10, paddingHorizontal: 4 }}
-              style={{ flexDirection: "row-reverse" }}
+            <View
+              style={{ flexDirection: "row-reverse", flexWrap: "wrap", gap: 10, justifyContent: "center", paddingHorizontal: 4 }}
             >
               {DAYS_OF_WEEK.map((day) => (
                 <TouchableOpacity
@@ -600,7 +597,7 @@ export default function AddMedicationScreen() {
                   </Text>
                 </TouchableOpacity>
               ))}
-            </ScrollView>
+            </View>
 
             <TouchableOpacity
               onPress={() => {
