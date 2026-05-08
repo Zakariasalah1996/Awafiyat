@@ -22,7 +22,7 @@ import { useRouter } from "expo-router";
 import { AlarmProvider } from "@/lib/alarm-context";
 import { MedicationProvider } from "@/lib/medication-context";
 import { WaterProvider } from "@/lib/water-context";
-import { setupWaterChannel, setupWaterNotificationActions } from "@/lib/water-notifications";
+import { setupWaterChannel, setupWaterNotificationActions, handleWaterNotificationResponse } from "@/lib/water-notifications";
 import {
   setupMedicationChannel,
   setupMedicationNotificationActions,
@@ -150,6 +150,12 @@ function RootLayoutInner() {
       // معالجة إشعارات الدواء
       if (data?.type === "medication_reminder") {
         handleMedicationNotificationResponse(response);
+        return;
+      }
+
+      // معالجة إشعارات شرب الماء
+      if (data?.type === "water_reminder") {
+        handleWaterNotificationResponse(response);
         return;
       }
     },
