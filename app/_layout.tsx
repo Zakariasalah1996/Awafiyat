@@ -202,6 +202,7 @@ function RootLayoutInner() {
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="oauth/callback" />
               <Stack.Screen name="sections/fridge" options={{ gestureEnabled: true }} />
+              <Stack.Screen name="sections/leftovers-renew" options={{ gestureEnabled: true }} />
               <Stack.Screen name="sections/recipe-detail" options={{ gestureEnabled: true }} />
               <Stack.Screen name="sections/recipes-library" options={{ gestureEnabled: true }} />
               <Stack.Screen name="sections/calorie-calculator" options={{ gestureEnabled: true }} />

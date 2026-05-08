@@ -217,6 +217,105 @@ export const appRouter = router({
       }),
   }),
 
+  // ==================== LEFTOVERS RENEWAL (تجديد النعمة) ====================
+  leftovers: router({
+    suggest: publicProcedure
+      .input(
+        z.object({
+          leftovers: z.string().min(1),
+          storageLocation: z.enum(["fridge", "freezer", "outside"]),
+          timeSince: z.enum(["today", "yesterday", "two_plus"]),
+          healthCondition: z.string().default("none"),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const storageText =
+          input.storageLocation === "fridge"
+            ? "محفوظ في الثلاجة"
+            : input.storageLocation === "freezer"
+              ? "محفوظ في الفريزر (مجمّد)"
+              : "خارج الثلاجة";
+
+        const timeText =
+          input.timeSince === "today"
+            ? "من اليوم (أقل من 12 ساعة)"
+            : input.timeSince === "yesterday"
+              ? "من أمس (يوم واحد)"
+              : "يومين أو أكثر";
+
+        const healthNote =
+          input.healthCondition !== "none"
+            ? `المستخدم يعاني من ${
+                input.healthCondition === "diabetes"
+                  ? "السكري (قلل السكريات والكربوهيدرات)"
+                  : input.healthCondition === "hypertension"
+                    ? "ضغط الدم (قلل الأملاح)"
+                    : input.healthCondition === "obesity"
+                      ? "السمنة (قلل الدهون والسعرات)"
+                      : "الكوليسترول (قلل الدهون المشبعة)"
+              }. يجب أن تكون الوصفة مناسبة لحالته الصحية.`
+            : "";
+
+        const freezerNote =
+          input.storageLocation === "freezer"
+            ? "\nملاحظة مهمة: الأكل مجمّد، لذا:\n- نبّه المستخدم بتذويبه أولاً قبل الاستخدام\n- اقترح وصفات تضيف رطوبة (صلصات، شوربات، مرق) لأن التجميد يجفف الطعام"
+            : "";
+
+        const oldFoodNote =
+          input.timeSince === "two_plus" && input.storageLocation === "fridge"
+            ? "\nتنبيه: الأكل في الثلاجة منذ يومين أو أكثر. نبّه المستخدم بضرورة شمّه والتأكد من سلامته قبل الاستخدام، وأن يسخّنه جيداً (حرارة عالية)."
+            : "";
+
+        const response = await invokeLLM({
+          messages: [
+            {
+              role: "system",
+              content: `أنت طباخ متخصص بالمطبخ العراقي والعربي. مهمتك تحويل بقايا الأكل المطبوخ إلى وصفات جديدة ولذيذة بدلاً من رميها.
+
+القواعد المهمة:
+1. هذا أكل مطبوخ مسبقاً وليس مكونات خام - الوصفة يجب أن تكون سريعة لأن المكونات الأساسية جاهزة
+2. اقترح وصفة واحدة فقط تحوّل هذه البقايا لأكلة مختلفة تماماً
+3. الوصفة يجب أن تكون عراقية أو عربية أصيلة وواقعية
+4. استخدم العربية الفصحى البسيطة فقط - تجنب أي لهجة محلية
+5. المكونات الإضافية المطلوبة يجب أن تكون بسيطة ومتوفرة في أي مطبخ
+6. ${healthNote}
+${freezerNote}
+${oldFoodNote}
+
+معلومات عن حالة الطعام:
+- ${storageText}
+- عمره: ${timeText}
+
+أجب بالتنسيق التالي:
+🍽️ **اسم الوصفة الجديدة**
+
+⏱️ الوقت: (المدة التقريبية - عادة قصيرة لأن الأكل مطبوخ)
+
+📝 **المكونات الإضافية المطلوبة:**
+- (فقط المكونات الجديدة التي يحتاجها، ليس البقايا نفسها)
+
+👩‍🍳 **طريقة التحضير:**
+1. (خطوات مختصرة وواضحة)
+
+💡 **نصيحة:** (نصيحة قصيرة عن حفظ الطعام أو التدوير)
+
+تجديد النعمة! 🌿`,
+            },
+            {
+              role: "user",
+              content: `البقايا الموجودة عندي: ${input.leftovers}`,
+            },
+          ],
+        });
+
+        return {
+          suggestion:
+            response.choices[0]?.message?.content ||
+            "عذراً، لم أستطع اقتراح وصفة. حاول مرة أخرى!",
+        };
+      }),
+  }),
+
   // ==================== PUSH TOKEN REGISTRATION ====================
   pushToken: router({
     register: publicProcedure
