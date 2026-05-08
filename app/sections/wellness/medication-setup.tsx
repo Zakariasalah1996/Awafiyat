@@ -118,7 +118,7 @@ export default function MedicationSetupScreen() {
               <TouchableOpacity
                 onPress={async () => {
                   await setSetupComplete(true);
-                  router.back();
+                  router.replace("/(tabs)" as any);
                 }}
                 className="w-full py-4 rounded-2xl items-center"
                 style={{ backgroundColor: colors.muted + "30" }}
@@ -164,7 +164,7 @@ export default function MedicationSetupScreen() {
           <TouchableOpacity
             onPress={async () => {
               await setSetupComplete(true);
-              router.back();
+              router.replace("/(tabs)" as any);
             }}
             className="w-full py-4 rounded-2xl items-center"
             style={{ backgroundColor: colors.primary }}

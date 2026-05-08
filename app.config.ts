@@ -95,7 +95,7 @@ const config: ExpoConfig = {
     [
       "expo-notifications",
       {
-        "sounds": ["./assets/notification_female.mp3", "./assets/notification_male.mp3"]
+        "sounds": ["./assets/notification_female.mp3", "./assets/notification_male.mp3", "./assets/notifications/medication_reminder.mp3"]
       }
     ],
     [

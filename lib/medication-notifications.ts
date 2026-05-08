@@ -73,7 +73,7 @@ export async function setupMedicationChannel(): Promise<void> {
       name: "تذكير الدواء",
       description: "إشعارات تذكير بمواعيد الأدوية",
       importance: Notifications.AndroidImportance.HIGH,
-      sound: "default",
+      sound: "medication_reminder",
       vibrationPattern: [0, 250, 250, 250],
       enableVibrate: true,
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
@@ -143,7 +143,7 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
         content: {
           title: `💊 ${medication.name}`,
           body,
-          sound: "default",
+          sound: "medication_reminder",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
             channelId: "medication-reminder",
@@ -203,7 +203,7 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
         content: {
           title: `⚠️ لم تتناول ${medication.name} بعد!`,
           body: followupBody,
-          sound: "default",
+          sound: "medication_reminder",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
             channelId: "medication-followup",
@@ -332,7 +332,7 @@ export async function handleMedicationNotificationResponse(
         content: {
           title: `💊 ${medName}`,
           body: "تذكير: لا تنسَ دواءك! 💚",
-          sound: "default",
+          sound: "medication_reminder",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
             channelId: "medication-reminder",

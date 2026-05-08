@@ -8,8 +8,9 @@ const fs = require("fs");
 const path = require("path");
 
 const NOTIFICATION_SOUNDS = [
-  "notification_female.mp3",
-  "notification_male.mp3",
+  { file: "notification_female.mp3", src: "assets/notification_female.mp3" },
+  { file: "notification_male.mp3", src: "assets/notification_male.mp3" },
+  { file: "medication_reminder.mp3", src: "assets/notifications/medication_reminder.mp3" },
 ];
 
 const withAlarmSounds = (config) => {
@@ -32,13 +33,13 @@ const withAlarmSounds = (config) => {
       }
 
       // نسخ كل ملف صوت
-      for (const soundFile of NOTIFICATION_SOUNDS) {
-        const srcPath = path.join(projectRoot, "assets", soundFile);
-        const destPath = path.join(rawDir, soundFile);
+      for (const sound of NOTIFICATION_SOUNDS) {
+        const srcPath = path.join(projectRoot, sound.src);
+        const destPath = path.join(rawDir, sound.file);
 
         if (fs.existsSync(srcPath)) {
           fs.copyFileSync(srcPath, destPath);
-          console.log(`[withAlarmSounds] Copied ${soundFile} → res/raw/`);
+          console.log(`[withAlarmSounds] Copied ${sound.file} → res/raw/`);
         } else {
           console.warn(`[withAlarmSounds] Sound file not found: ${srcPath}`);
         }
