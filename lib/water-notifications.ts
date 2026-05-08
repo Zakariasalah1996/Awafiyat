@@ -29,10 +29,16 @@ const WATER_MESSAGES = [
  */
 export async function setupWaterChannel(): Promise<void> {
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("water-reminder", {
+    // ملاحظة: بعد إنشاء القناة لأول مرة، لا يمكن تغيير الصوت إلا بحذف القناة وإعادة إنشائها
+    // لذلك نحذف القناة القديمة أولاً ثم نعيد إنشاءها بالصوت الصحيح
+    try {
+      await Notifications.deleteNotificationChannelAsync("water-reminder");
+    } catch {}
+    
+    await Notifications.setNotificationChannelAsync("water_reminder", {
       name: "تذكير شرب الماء",
       description: "إشعارات تذكير بشرب الماء",
-      importance: Notifications.AndroidImportance.DEFAULT,
+      importance: Notifications.AndroidImportance.HIGH,
       sound: "water_reminder.mp3",
       vibrationPattern: [0, 200, 100, 200],
       enableVibrate: true,
@@ -67,9 +73,9 @@ export async function scheduleWaterReminders(
           title: "💧 وقت شرب الماء",
           body: message,
           sound: "water_reminder.mp3",
-          priority: Notifications.AndroidNotificationPriority.DEFAULT,
+          priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
-            channelId: "water-reminder",
+            channelId: "water_reminder",
           }),
           data: {
             type: "water_reminder",
@@ -119,12 +125,20 @@ export async function setupWaterNotificationActions(): Promise<void> {
     {
       identifier: "DRANK_WATER",
       buttonTitle: "✅ شربت",
-      options: { opensAppToForeground: false },
+      options: {
+        opensAppToForeground: true,
+        isDestructive: false,
+        isAuthenticationRequired: false,
+      },
     },
     {
       identifier: "SNOOZE_WATER",
       buttonTitle: "⏰ ذكّرني بعد 15 دقيقة",
-      options: { opensAppToForeground: false },
+      options: {
+        opensAppToForeground: true,
+        isDestructive: false,
+        isAuthenticationRequired: false,
+      },
     },
   ]);
 }
@@ -137,8 +151,18 @@ export async function handleWaterNotificationResponse(
 ): Promise<void> {
   const actionId = response.actionIdentifier;
   const data = response.notification.request.content.data;
+  const notificationId = response.notification.request.identifier;
 
   if (data?.type !== "water_reminder") return;
+
+  console.log("[WaterNotif] Handling response:", actionId, "notifId:", notificationId);
+
+  // إلغاء الإشعار المعروض (إخفاؤه من شريط الإشعارات)
+  try {
+    await Notifications.dismissNotificationAsync(notificationId);
+  } catch (e) {
+    console.warn("[WaterNotif] Failed to dismiss notification:", e);
+  }
 
   if (actionId === "SNOOZE_WATER") {
     try {
@@ -148,9 +172,9 @@ export async function handleWaterNotificationResponse(
           title: "💧 تذكير: اشرب ماءً!",
           body: message,
           sound: "water_reminder.mp3",
-          priority: Notifications.AndroidNotificationPriority.DEFAULT,
+          priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
-            channelId: "water-reminder",
+            channelId: "water_reminder",
           }),
           data: { type: "water_reminder" },
           categoryIdentifier: "water_action",

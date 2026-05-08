@@ -148,7 +148,7 @@ function RootLayoutInner() {
       // إذا ضغط "إيقاف" - لا نفعل شيئاً (الإشعار يُغلق تلقائياً)
 
       // معالجة إشعارات الدواء
-      if (data?.type === "medication_reminder") {
+      if (data?.type === "medication_reminder" || data?.type === "medication_followup") {
         handleMedicationNotificationResponse(response);
         return;
       }

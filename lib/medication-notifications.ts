@@ -69,22 +69,28 @@ function buildNotificationBody(medication: Medication, isFollowup: boolean = fal
  */
 export async function setupMedicationChannel(): Promise<void> {
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("medication-reminder", {
+    // حذف القنوات القديمة (التي كانت بشرطة) لإعادة إنشائها بالصوت الصحيح
+    try {
+      await Notifications.deleteNotificationChannelAsync("medication-reminder");
+      await Notifications.deleteNotificationChannelAsync("medication-followup");
+    } catch {}
+
+    await Notifications.setNotificationChannelAsync("medication_reminder", {
       name: "تذكير الدواء",
       description: "إشعارات تذكير بمواعيد الأدوية",
       importance: Notifications.AndroidImportance.HIGH,
-      sound: "medication_reminder",
+      sound: "medication_reminder.mp3",
       vibrationPattern: [0, 250, 250, 250],
       enableVibrate: true,
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     });
 
     // قناة التذكير الثاني
-    await Notifications.setNotificationChannelAsync("medication-followup", {
+    await Notifications.setNotificationChannelAsync("medication_followup", {
       name: "تذكير ثانٍ بالدواء",
       description: "تذكير إضافي إذا لم يتم تناول الدواء",
       importance: Notifications.AndroidImportance.HIGH,
-      sound: "default",
+      sound: "medication_reminder.mp3",
       vibrationPattern: [0, 500, 250, 500],
       enableVibrate: true,
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
@@ -143,10 +149,10 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
         content: {
           title: `💊 ${medication.name}`,
           body,
-          sound: "medication_reminder",
+          sound: "medication_reminder.mp3",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
-            channelId: "medication-reminder",
+            channelId: "medication_reminder",
           }),
           data: {
             type: "medication_reminder",
@@ -203,10 +209,10 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
         content: {
           title: `⚠️ لم تتناول ${medication.name} بعد!`,
           body: followupBody,
-          sound: "medication_reminder",
+          sound: "medication_reminder.mp3",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
-            channelId: "medication-followup",
+            channelId: "medication_followup",
           }),
           data: {
             type: "medication_followup",
@@ -303,12 +309,20 @@ export async function setupMedicationNotificationActions(): Promise<void> {
     {
       identifier: "TOOK_MEDICATION",
       buttonTitle: "✅ تناولته",
-      options: { opensAppToForeground: false },
+      options: {
+        opensAppToForeground: true,
+        isDestructive: false,
+        isAuthenticationRequired: false,
+      },
     },
     {
       identifier: "SNOOZE_MEDICATION",
       buttonTitle: "⏰ ذكّرني بعد 10 دقائق",
-      options: { opensAppToForeground: false },
+      options: {
+        opensAppToForeground: true,
+        isDestructive: false,
+        isAuthenticationRequired: false,
+      },
     },
   ]);
 }
@@ -321,8 +335,18 @@ export async function handleMedicationNotificationResponse(
 ): Promise<void> {
   const actionId = response.actionIdentifier;
   const data = response.notification.request.content.data;
+  const notificationId = response.notification.request.identifier;
 
   if (data?.type !== "medication_reminder" && data?.type !== "medication_followup") return;
+
+  console.log("[MedNotif] Handling response:", actionId, "notifId:", notificationId);
+
+  // إلغاء الإشعار المعروض (إخفاؤه من شريط الإشعارات)
+  try {
+    await Notifications.dismissNotificationAsync(notificationId);
+  } catch (e) {
+    console.warn("[MedNotif] Failed to dismiss notification:", e);
+  }
 
   if (actionId === "SNOOZE_MEDICATION") {
     // إعادة جدولة بعد 10 دقائق
@@ -332,10 +356,10 @@ export async function handleMedicationNotificationResponse(
         content: {
           title: `💊 ${medName}`,
           body: "تذكير: لا تنسَ دواءك! 💚",
-          sound: "medication_reminder",
+          sound: "medication_reminder.mp3",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
-            channelId: "medication-reminder",
+            channelId: "medication_reminder",
           }),
           data: {
             type: "medication_reminder",
