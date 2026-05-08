@@ -21,6 +21,8 @@ import { registerGuest } from "@/lib/guest-auth";
 import { useRouter } from "expo-router";
 import { AlarmProvider } from "@/lib/alarm-context";
 import { MedicationProvider } from "@/lib/medication-context";
+import { WaterProvider } from "@/lib/water-context";
+import { setupWaterChannel, setupWaterNotificationActions } from "@/lib/water-notifications";
 import {
   setupMedicationChannel,
   setupMedicationNotificationActions,
@@ -93,6 +95,10 @@ function RootLayoutInner() {
     // إعداد قناة إشعارات الدواء وأزرار التفاعل
     setupMedicationChannel().catch((e) => console.warn("[MedNotif] Channel setup failed:", e));
     setupMedicationNotificationActions().catch((e) => console.warn("[MedNotif] Actions setup failed:", e));
+
+    // إعداد قناة إشعارات شرب الماء
+    setupWaterChannel().catch((e) => console.warn("[WaterNotif] Channel setup failed:", e));
+    setupWaterNotificationActions().catch((e) => console.warn("[WaterNotif] Actions setup failed:", e));
 
     // Setup notification listeners
     const cleanup = setupNotificationListeners(
@@ -238,12 +244,14 @@ function RootLayoutInner() {
   );
 }
 
-// المكون الرئيسي يلف كل شيء بـ AlarmProvider + MedicationProvider
+// المكون الرئيسي يلف كل شيء بـ AlarmProvider + MedicationProvider + WaterProvider
 export default function RootLayout() {
   return (
     <AlarmProvider>
       <MedicationProvider>
-        <RootLayoutInner />
+        <WaterProvider>
+          <RootLayoutInner />
+        </WaterProvider>
       </MedicationProvider>
     </AlarmProvider>
   );

@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useMedication } from "@/lib/medication-context";
+import { useWater } from "@/lib/water-context";
 import { useUser } from "@/lib/user-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -10,10 +11,18 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 export default function WellnessScreen() {
   const colors = useColors();
   const { state } = useMedication();
+  const { state: waterState } = useWater();
   const { profile } = useUser();
 
   const activeMeds = state.medications.filter((m) => m.isActive);
   const hasMeds = activeMeds.length > 0;
+
+  const waterSetupDone = waterState.settings.setupComplete;
+  const waterProgress = waterState.settings.dailyGoalMl > 0
+    ? Math.min(100, Math.round((waterState.todayLog.totalMl / waterState.settings.dailyGoalMl) * 100))
+    : 0;
+  const waterCupsToday = waterState.todayLog.cupsCount;
+  const waterTotalCups = Math.ceil(waterState.settings.dailyGoalMl / waterState.settings.cupSizeMl);
 
   return (
     <ScreenContainer className="px-0">
@@ -124,14 +133,19 @@ export default function WellnessScreen() {
         {/* قسم شرب الماء */}
         <Animated.View entering={FadeInDown.delay(200).duration(400)} className="px-5 mb-4">
           <TouchableOpacity
+            onPress={() => {
+              if (waterSetupDone) {
+                router.push("/sections/wellness/water-home" as any);
+              } else {
+                router.push("/sections/wellness/water-setup" as any);
+              }
+            }}
             className="rounded-2xl p-5 border"
             style={{
               backgroundColor: "#EDF7FF",
               borderColor: "#B3D9FF30",
-              opacity: 0.7,
             }}
             activeOpacity={0.7}
-            disabled={true}
           >
             <View
               className="flex-row items-center justify-between"
@@ -149,25 +163,57 @@ export default function WellnessScreen() {
                     className="text-lg font-bold text-foreground"
                     style={{ textAlign: "right", writingDirection: "rtl" }}
                   >
-                    شرب الماء
+                    رفيق الماء
                   </Text>
                   <Text
                     className="text-sm text-muted mt-1"
                     style={{ textAlign: "right", writingDirection: "rtl" }}
                   >
-                    قريباً... تابع صحتك المائية
+                    {waterSetupDone
+                      ? `${waterCupsToday} من ${waterTotalCups} أكواب اليوم`
+                      : "تابع صحتك المائية وحافظ على ترطيب جسمك"}
                   </Text>
                 </View>
               </View>
-              <View
-                className="px-3 py-1 rounded-full"
-                style={{ backgroundColor: "#B3D9FF40" }}
-              >
-                <Text className="text-xs font-medium" style={{ color: "#4A90D9" }}>
-                  قريباً
-                </Text>
-              </View>
+              <MaterialIcons name="chevron-left" size={24} color={colors.muted} />
             </View>
+
+            {/* شريط التقدم إذا تم الإعداد */}
+            {waterSetupDone && (
+              <View className="mt-4 pt-4" style={{ borderTopWidth: 1, borderTopColor: "#B3D9FF20" }}>
+                <View className="flex-row items-center justify-between mb-2" style={{ flexDirection: "row-reverse" }}>
+                  <Text
+                    className="text-xs text-muted"
+                    style={{ writingDirection: "rtl" }}
+                  >
+                    {waterProgress}% من الهدف اليومي
+                  </Text>
+                  <Text className="text-xs" style={{ color: "#2196F3" }}>
+                    {waterState.todayLog.totalMl} / {waterState.settings.dailyGoalMl} مل
+                  </Text>
+                </View>
+                <View
+                  className="w-full h-3 rounded-full overflow-hidden"
+                  style={{ backgroundColor: "#E3F2FD" }}
+                >
+                  <View
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${waterProgress}%`,
+                      backgroundColor: waterProgress >= 100 ? "#4CAF50" : "#2196F3",
+                    }}
+                  />
+                </View>
+                {waterProgress >= 100 && (
+                  <Text
+                    className="text-xs mt-2 text-center"
+                    style={{ color: "#4CAF50", writingDirection: "rtl" }}
+                  >
+                    🎉 أكملت هدفك اليومي!
+                  </Text>
+                )}
+              </View>
+            )}
           </TouchableOpacity>
         </Animated.View>
 
