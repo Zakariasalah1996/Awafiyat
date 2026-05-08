@@ -10,6 +10,7 @@ import {
   Modal,
   FlatList,
   Alert,
+  Share,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -734,6 +735,68 @@ export default function ShoppingListScreen() {
             <MaterialIcons name="save" size={22} color="#fff" />
             <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>
               حفظ القائمة
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {/* زر مشاركة القائمة */}
+        {items.length > 0 && (
+          <TouchableOpacity
+            onPress={async () => {
+              const uncheckedItems = items.filter((i) => !i.checked);
+              const checkedItems = items.filter((i) => !i.checked ? false : true);
+              let message = "🛒 قائمة التسوق من \"ألف عافيات\":\n\n";
+              
+              // المواد المطلوبة (غير المشطوبة)
+              if (uncheckedItems.length > 0) {
+                uncheckedItems.forEach((item) => {
+                  message += `\u25CB ${item.emoji} ${item.name}\n`;
+                });
+              }
+              
+              // المواد المشتراة (المشطوبة)
+              const boughtItems = items.filter((i) => i.checked);
+              if (boughtItems.length > 0) {
+                message += "\n✅ تم شراؤها:\n";
+                boughtItems.forEach((item) => {
+                  message += `\u2713 ${item.emoji} ${item.name}\n`;
+                });
+              }
+              
+              message += "\nبالعافية! 💚";
+              
+              try {
+                await Share.share({
+                  message: message,
+                });
+                if (Platform.OS !== "web") {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                }
+              } catch (e) {
+                // المستخدم ألغى المشاركة
+              }
+            }}
+            style={{
+              marginHorizontal: 20,
+              marginTop: 12,
+              paddingVertical: 16,
+              borderRadius: 16,
+              backgroundColor: "#25D366",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "row",
+              gap: 8,
+              shadowColor: "#25D366",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 6,
+            }}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="share" size={22} color="#fff" />
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>
+              مشاركة القائمة
             </Text>
           </TouchableOpacity>
         )}
