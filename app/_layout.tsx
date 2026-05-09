@@ -29,6 +29,7 @@ import {
   handleMedicationNotificationResponse,
 } from "@/lib/medication-notifications";
 import * as Notifications from "expo-notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -123,17 +124,46 @@ function RootLayoutInner() {
 
   // معالجة استجابة الإشعار (ضغط زر أو ضغط على الإشعار نفسه)
   const handleNotificationResponse = useCallback(
-    (response: Notifications.NotificationResponse) => {
+    async (response: Notifications.NotificationResponse) => {
       const actionId = response.actionIdentifier;
       const data = response.notification.request.content.data;
+      const notificationId = response.notification.request.identifier;
 
       console.log("[Notifications] Response:", actionId, "data:", JSON.stringify(data));
+
+      // إذا ضغط "إيقاف" - إلغاء إشعارات الوجبة المجدولة + إخفاء الإشعار
+      if (actionId === "DISMISS") {
+        console.log("[Notifications] DISMISS pressed for:", data?.mealType);
+        try {
+          // إخفاء الإشعار من شريط الإشعارات
+          await Notifications.dismissNotificationAsync(notificationId);
+        } catch (e) {
+          console.warn("[Notifications] Failed to dismiss:", e);
+        }
+        try {
+          // إلغاء الإشعار المجدول لهذه الوجبة (إيقاف التكرار)
+          if (data?.mealType) {
+            const { cancelMealReminder } = await import("@/lib/notifications");
+            await cancelMealReminder(data.mealType as string);
+            // حذف بيانات المنبه من AsyncStorage
+            await AsyncStorage.removeItem(`@alarm_data_${data.mealType}`);
+            console.log(`[Notifications] Meal reminder cancelled for: ${data.mealType}`);
+          }
+        } catch (e) {
+          console.warn("[Notifications] Failed to cancel meal reminder:", e);
+        }
+        return; // لا نفتح التطبيق ولا نفعل شيء آخر
+      }
 
       // إذا ضغط "عرض الوصفة" أو ضغط على الإشعار مباشرة (DEFAULT_ACTION_IDENTIFIER)
       if (
         actionId === ACTION_VIEW_RECIPE ||
         actionId === Notifications.DEFAULT_ACTION_IDENTIFIER
       ) {
+        // إخفاء الإشعار
+        try {
+          await Notifications.dismissNotificationAsync(notificationId);
+        } catch {}
         if (data?.recipeId) {
           const recipeId = data.recipeId as string;
           console.log("[Notifications] Navigating to recipe:", recipeId);
@@ -145,7 +175,6 @@ function RootLayoutInner() {
           }, 1000);
         }
       }
-      // إذا ضغط "إيقاف" - لا نفعل شيئاً (الإشعار يُغلق تلقائياً)
 
       // معالجة إشعارات الدواء
       if (data?.type === "medication_reminder" || data?.type === "medication_followup") {
