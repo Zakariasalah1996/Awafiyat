@@ -508,3 +508,12 @@
 - [x] تحديث _layout.tsx لاستيراد وتسجيل الـ background task
 - [x] الإبقاء على زر "عرض الوصفة" في إشعار الوجبات يفتح التطبيق (opensAppToForeground: true)
 - [x] كتابة اختبارات وحدة (7 اختبارات - كلها ناجحة)
+
+## الدفعة 59.9 - إصلاح أزرار إشعارات الماء لا تزال تفتح التطبيق
+- [ ] تشخيص سبب فتح التطبيق عند الضغط على "شربت" رغم opensAppToForeground: false
+- [ ] تشخيص سبب فتح التطبيق عند الضغط على "إيقاف/ذكرني" رغم opensAppToForeground: false
+- [ ] إصلاح المشكلة نهائياً
+
+## الدفعة 59.10 - إصلاح crash التطبيق بعد تحديث Background Task
+- [x] تشخيص سبب عدم فتح التطبيق - TaskManager.defineTask في global scope يسبب crash
+- [x] إصلاح: حذف notification-background-task.ts + حذف expo-task-manager + الاعتماد على opensAppToForeground: false فقط

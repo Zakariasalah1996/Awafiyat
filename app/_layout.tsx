@@ -15,6 +15,7 @@ import {
   registerPushToken,
   refreshAllAlarms,
   ACTION_VIEW_RECIPE,
+  cancelMealReminder,
 } from "@/lib/notifications";
 import { syncRecipeImages } from "@/lib/recipe-image-sync";
 import { registerGuest } from "@/lib/guest-auth";
@@ -41,14 +42,6 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { UserProvider } from "@/lib/user-context";
-
-// ============================================================
-// استيراد الـ background task في الـ global scope
-// هذا ضروري لأن TaskManager.defineTask يجب أن يُستدعى
-// قبل mount أي component
-// ============================================================
-import "@/lib/notification-background-task";
-import { registerNotificationTask } from "@/lib/notification-background-task";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -109,16 +102,13 @@ function RootLayoutInner() {
     setupWaterChannel().catch((e) => console.warn("[WaterNotif] Channel setup failed:", e));
     setupWaterNotificationActions().catch((e) => console.warn("[WaterNotif] Actions setup failed:", e));
 
-    // تسجيل الـ background task لمعالجة استجابات الإشعارات بدون فتح التطبيق
-    registerNotificationTask().catch((e) => console.warn("[BgTask] Registration failed:", e));
-
-    // Setup notification listeners (للتعامل مع الإشعارات عندما التطبيق مفتوح)
+    // Setup notification listeners
     const cleanup = setupNotificationListeners(
       (notification) => {
         console.log("[Notifications] Received:", notification.request.content.title);
       },
       (response) => {
-        // معالجة ضغط الأزرار التفاعلية (عندما التطبيق في الواجهة)
+        // معالجة ضغط الأزرار التفاعلية
         handleNotificationResponse(response);
       }
     );
@@ -133,9 +123,7 @@ function RootLayoutInner() {
     return cleanup;
   }, []);
 
-  // معالجة استجابة الإشعار عندما التطبيق مفتوح (foreground)
-  // الأزرار التي عندها opensAppToForeground: false تُعالج بواسطة الـ background task
-  // هذا الـ handler يعالج فقط: عرض الوصفة + الضغط على الإشعار مباشرة (DEFAULT_ACTION)
+  // معالجة استجابة الإشعار
   const handleNotificationResponse = useCallback(
     async (response: Notifications.NotificationResponse) => {
       const actionId = response.actionIdentifier;
@@ -144,18 +132,20 @@ function RootLayoutInner() {
 
       console.log("[Notifications] Response:", actionId, "data:", JSON.stringify(data));
 
-      // إذا ضغط "إيقاف" - يُعالج بواسطة الـ background task
-      // لكن إذا وصل هنا (التطبيق مفتوح)، نعالجه أيضاً
+      // إخفاء الإشعار من شريط الإشعارات
+      try {
+        await Notifications.dismissNotificationAsync(notificationId);
+      } catch (e) {
+        console.warn("[Notifications] Failed to dismiss:", e);
+      }
+
+      // =============================================
+      // معالجة زر "إيقاف" في إشعارات الوجبات
+      // =============================================
       if (actionId === "DISMISS") {
         console.log("[Notifications] DISMISS pressed for:", data?.mealType);
         try {
-          await Notifications.dismissNotificationAsync(notificationId);
-        } catch (e) {
-          console.warn("[Notifications] Failed to dismiss:", e);
-        }
-        try {
           if (data?.mealType) {
-            const { cancelMealReminder } = await import("@/lib/notifications");
             await cancelMealReminder(data.mealType as string);
             await AsyncStorage.removeItem(`@alarm_data_${data.mealType}`);
             console.log(`[Notifications] Meal reminder cancelled for: ${data.mealType}`);
@@ -166,15 +156,13 @@ function RootLayoutInner() {
         return;
       }
 
-      // إذا ضغط "عرض الوصفة" أو ضغط على الإشعار مباشرة (DEFAULT_ACTION_IDENTIFIER)
+      // =============================================
+      // معالجة زر "عرض الوصفة" أو الضغط على الإشعار مباشرة
+      // =============================================
       if (
         actionId === ACTION_VIEW_RECIPE ||
         actionId === Notifications.DEFAULT_ACTION_IDENTIFIER
       ) {
-        // إخفاء الإشعار
-        try {
-          await Notifications.dismissNotificationAsync(notificationId);
-        } catch {}
         if (data?.recipeId) {
           const recipeId = data.recipeId as string;
           console.log("[Notifications] Navigating to recipe:", recipeId);
@@ -187,13 +175,17 @@ function RootLayoutInner() {
         }
       }
 
-      // معالجة إشعارات الدواء (عندما التطبيق مفتوح - fallback)
+      // =============================================
+      // معالجة إشعارات الدواء
+      // =============================================
       if (data?.type === "medication_reminder" || data?.type === "medication_followup") {
         handleMedicationNotificationResponse(response);
         return;
       }
 
-      // معالجة إشعارات شرب الماء (عندما التطبيق مفتوح - fallback)
+      // =============================================
+      // معالجة إشعارات شرب الماء
+      // =============================================
       if (data?.type === "water_reminder") {
         handleWaterNotificationResponse(response);
         return;

@@ -110,9 +110,6 @@ importers:
       expo-system-ui:
         specifier: ~6.0.9
         version: 6.0.9(expo@54.0.29)(react-native-web@0.21.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))
-      expo-task-manager:
-        specifier: ^55.0.15
-        version: 55.0.15(expo@54.0.29)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))
       expo-video:
         specifier: ~3.0.15
         version: 3.0.15(expo@54.0.29)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -3700,12 +3697,6 @@ packages:
       react-native-web:
         optional: true
 
-  expo-task-manager@55.0.15:
-    resolution: {integrity: sha512-wLqYkKBp9cxIonEIp3LYy9iFjlOxxw4ca8nZLdSriKVxzPvdUwX6cZ4g55Fi+uSi4oPVFo9JYFKVUEofc+do+A==}
-    peerDependencies:
-      expo: '*'
-      react-native: '*'
-
   expo-video@3.0.15:
     resolution: {integrity: sha512-KmxHVCtOBb1fnxXL6DpgLbEe7Qlv/vHNGTLfz0u/eY8fBC9s5cncD2BhPunEffrGvNMftBzYMYDaO86x+IYpnA==}
     peerDependencies:
@@ -6028,9 +6019,6 @@ packages:
   unicode-property-aliases-ecmascript@2.2.0:
     resolution: {integrity: sha512-hpbDzxUY9BFwX+UeBnxv3Sh1q7HFxj48DTmXchNgRa46lO8uj3/1iEn3MiNUYTg1g9ctIqXCCERn8gYZhHC5lQ==}
     engines: {node: '>=4'}
-
-  unimodules-app-loader@55.0.5:
-    resolution: {integrity: sha512-2eLjtaAVQTK3EeiUAgRbfEnX78f6cMtw5Js8Ri4OcEdkrozsmvG3Wu8YVfr6kfhea17FHZkKZmO1m4dL/Ky2Bg==}
 
   unique-string@2.0.0:
     resolution: {integrity: sha512-uNaeirEPvpZWSgzwsPGtU2zVSTrn/8L5q/IexZmH0eH6SA73CmAA5U4GwORTxQAZs95TAXLNqeLoPPNO5gZfWg==}
@@ -10128,12 +10116,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  expo-task-manager@55.0.15(expo@54.0.29)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)):
-    dependencies:
-      expo: 54.0.29(@babel/core@7.28.5)(@expo/metro-runtime@6.1.2)(expo-router@6.0.19)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
-      react-native: 0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)
-      unimodules-app-loader: 55.0.5
-
   expo-video@3.0.15(expo@54.0.29)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
     dependencies:
       expo: 54.0.29(@babel/core@7.28.5)(@expo/metro-runtime@6.1.2)(expo-router@6.0.19)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -12845,8 +12827,6 @@ snapshots:
   unicode-match-property-value-ecmascript@2.2.1: {}
 
   unicode-property-aliases-ecmascript@2.2.0: {}
-
-  unimodules-app-loader@55.0.5: {}
 
   unique-string@2.0.0:
     dependencies:
