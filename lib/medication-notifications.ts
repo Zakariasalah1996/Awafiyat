@@ -67,18 +67,28 @@ function buildNotificationBody(medication: Medication, isFollowup: boolean = fal
 /**
  * إعداد قناة إشعارات الدواء (Android)
  */
+// معرّفات القنوات الحالية - يجب تغييرها عند تغيير الصوت لأن Android لا يسمح بتعديل صوت قناة موجودة
+export const MED_CHANNEL_ID = "medication_reminder_v3";
+export const MED_FOLLOWUP_CHANNEL_ID = "medication_followup_v3";
+
 export async function setupMedicationChannel(): Promise<void> {
   if (Platform.OS === "android") {
-    // حذف القنوات القديمة (التي كانت بشرطة) لإعادة إنشائها بالصوت الصحيح
-    try {
-      await Notifications.deleteNotificationChannelAsync("medication-reminder");
-      await Notifications.deleteNotificationChannelAsync("medication-followup");
-    } catch {}
+    // حذف جميع القنوات القديمة (Android لا يسمح بتعديل صوت قناة بعد إنشائها)
+    const oldChannels = [
+      "medication-reminder", "medication-followup",
+      "medication_reminder", "medication_followup",
+      "medication_reminder_v2", "medication_followup_v2",
+    ];
+    for (const ch of oldChannels) {
+      try {
+        await Notifications.deleteNotificationChannelAsync(ch);
+      } catch {}
+    }
 
-    await Notifications.setNotificationChannelAsync("medication_reminder", {
+    await Notifications.setNotificationChannelAsync(MED_CHANNEL_ID, {
       name: "تذكير الدواء",
       description: "إشعارات تذكير بمواعيد الأدوية",
-      importance: Notifications.AndroidImportance.HIGH,
+      importance: Notifications.AndroidImportance.MAX,
       sound: "medication_reminder.mp3",
       vibrationPattern: [0, 250, 250, 250],
       enableVibrate: true,
@@ -86,10 +96,10 @@ export async function setupMedicationChannel(): Promise<void> {
     });
 
     // قناة التذكير الثاني
-    await Notifications.setNotificationChannelAsync("medication_followup", {
+    await Notifications.setNotificationChannelAsync(MED_FOLLOWUP_CHANNEL_ID, {
       name: "تذكير ثانٍ بالدواء",
       description: "تذكير إضافي إذا لم يتم تناول الدواء",
-      importance: Notifications.AndroidImportance.HIGH,
+      importance: Notifications.AndroidImportance.MAX,
       sound: "medication_reminder.mp3",
       vibrationPattern: [0, 500, 250, 500],
       enableVibrate: true,
@@ -152,7 +162,7 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
           sound: "medication_reminder.mp3",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
-            channelId: "medication_reminder",
+            channelId: MED_CHANNEL_ID,
           }),
           data: {
             type: "medication_reminder",
@@ -212,7 +222,7 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
           sound: "medication_reminder.mp3",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
-            channelId: "medication_followup",
+            channelId: MED_FOLLOWUP_CHANNEL_ID,
           }),
           data: {
             type: "medication_followup",
@@ -359,7 +369,7 @@ export async function handleMedicationNotificationResponse(
           sound: "medication_reminder.mp3",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
-            channelId: "medication_reminder",
+            channelId: MED_CHANNEL_ID,
           }),
           data: {
             type: "medication_reminder",

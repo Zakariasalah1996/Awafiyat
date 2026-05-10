@@ -27,18 +27,23 @@ const WATER_MESSAGES = [
 /**
  * إعداد قناة إشعارات الماء (Android)
  */
+// معرّف القناة الحالي - يجب تغييره عند تغيير الصوت لأن Android لا يسمح بتعديل صوت قناة موجودة
+const WATER_CHANNEL_ID = "water_reminder_v3";
+
 export async function setupWaterChannel(): Promise<void> {
   if (Platform.OS === "android") {
-    // ملاحظة: بعد إنشاء القناة لأول مرة، لا يمكن تغيير الصوت إلا بحذف القناة وإعادة إنشائها
-    // لذلك نحذف القناة القديمة أولاً ثم نعيد إنشاءها بالصوت الصحيح
-    try {
-      await Notifications.deleteNotificationChannelAsync("water-reminder");
-    } catch {}
+    // حذف جميع القنوات القديمة (Android لا يسمح بتعديل صوت قناة بعد إنشائها)
+    const oldChannels = ["water-reminder", "water_reminder", "water_reminder_v2"];
+    for (const ch of oldChannels) {
+      try {
+        await Notifications.deleteNotificationChannelAsync(ch);
+      } catch {}
+    }
     
-    await Notifications.setNotificationChannelAsync("water_reminder", {
+    await Notifications.setNotificationChannelAsync(WATER_CHANNEL_ID, {
       name: "تذكير شرب الماء",
       description: "إشعارات تذكير بشرب الماء",
-      importance: Notifications.AndroidImportance.HIGH,
+      importance: Notifications.AndroidImportance.MAX,
       sound: "water_reminder.mp3",
       vibrationPattern: [0, 200, 100, 200],
       enableVibrate: true,
@@ -75,7 +80,7 @@ export async function scheduleWaterReminders(
           sound: "water_reminder.mp3",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
-            channelId: "water_reminder",
+            channelId: WATER_CHANNEL_ID,
           }),
           data: {
             type: "water_reminder",
@@ -174,7 +179,7 @@ export async function handleWaterNotificationResponse(
           sound: "water_reminder.mp3",
           priority: Notifications.AndroidNotificationPriority.HIGH,
           ...(Platform.OS === "android" && {
-            channelId: "water_reminder",
+            channelId: WATER_CHANNEL_ID,
           }),
           data: { type: "water_reminder" },
           categoryIdentifier: "water_action",
