@@ -121,7 +121,7 @@ export async function setupNotificationChannelsAndCategories(): Promise<void> {
         identifier: ACTION_DISMISS,
         buttonTitle: "إيقاف",
         options: {
-          opensAppToForeground: false,
+          opensAppToForeground: true,
           isDestructive: true,
           isAuthenticationRequired: false,
         },

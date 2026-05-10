@@ -517,3 +517,7 @@
 ## الدفعة 59.10 - إصلاح crash التطبيق بعد تحديث Background Task
 - [x] تشخيص سبب عدم فتح التطبيق - TaskManager.defineTask في global scope يسبب crash
 - [x] إصلاح: حذف notification-background-task.ts + حذف expo-task-manager + الاعتماد على opensAppToForeground: false فقط
+
+## الدفعة 59.11 - إزالة الإشعار من القائمة عند الضغط على الأزرار
+- [x] إصلاح: الإشعار يبقى في قائمة الإشعارات بعد الضغط على أزرار (شربت/تناولته/إيقاف)
+- [x] الحل: إعادة opensAppToForeground: true + dismissNotificationAsync في المعالجة لإزالة الإشعار فوراً
