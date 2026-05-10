@@ -91,11 +91,10 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
-    "./plugins/withAlarmSounds",
     [
       "expo-notifications",
       {
-        "sounds": ["./assets/notification_female.mp3", "./assets/notification_male.mp3", "./assets/notifications/medication_reminder.mp3", "./assets/notifications/water_reminder.mp3"]
+        "sounds": ["./assets/notification_female.mp3", "./assets/notification_male.mp3", "./assets/medication_reminder.mp3", "./assets/water_reminder.mp3"]
       }
     ],
     [

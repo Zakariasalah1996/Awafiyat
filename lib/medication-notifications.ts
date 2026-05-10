@@ -68,8 +68,8 @@ function buildNotificationBody(medication: Medication, isFollowup: boolean = fal
  * إعداد قناة إشعارات الدواء (Android)
  */
 // معرّفات القنوات الحالية - يجب تغييرها عند تغيير الصوت لأن Android لا يسمح بتعديل صوت قناة موجودة
-export const MED_CHANNEL_ID = "medication_reminder_v3";
-export const MED_FOLLOWUP_CHANNEL_ID = "medication_followup_v3";
+export const MED_CHANNEL_ID = "medication_reminder_v4";
+export const MED_FOLLOWUP_CHANNEL_ID = "medication_followup_v4";
 
 export async function setupMedicationChannel(): Promise<void> {
   if (Platform.OS === "android") {
@@ -78,6 +78,7 @@ export async function setupMedicationChannel(): Promise<void> {
       "medication-reminder", "medication-followup",
       "medication_reminder", "medication_followup",
       "medication_reminder_v2", "medication_followup_v2",
+      "medication_reminder_v3", "medication_followup_v3",
     ];
     for (const ch of oldChannels) {
       try {
@@ -92,6 +93,9 @@ export async function setupMedicationChannel(): Promise<void> {
       sound: "medication_reminder.mp3",
       vibrationPattern: [0, 250, 250, 250],
       enableVibrate: true,
+      enableLights: true,
+      lightColor: "#4CAF50",
+      bypassDnd: false,
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     });
 
@@ -103,6 +107,9 @@ export async function setupMedicationChannel(): Promise<void> {
       sound: "medication_reminder.mp3",
       vibrationPattern: [0, 500, 250, 500],
       enableVibrate: true,
+      enableLights: true,
+      lightColor: "#4CAF50",
+      bypassDnd: false,
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     });
   }

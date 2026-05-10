@@ -28,12 +28,12 @@ const WATER_MESSAGES = [
  * إعداد قناة إشعارات الماء (Android)
  */
 // معرّف القناة الحالي - يجب تغييره عند تغيير الصوت لأن Android لا يسمح بتعديل صوت قناة موجودة
-const WATER_CHANNEL_ID = "water_reminder_v3";
+const WATER_CHANNEL_ID = "water_reminder_v4";
 
 export async function setupWaterChannel(): Promise<void> {
   if (Platform.OS === "android") {
     // حذف جميع القنوات القديمة (Android لا يسمح بتعديل صوت قناة بعد إنشائها)
-    const oldChannels = ["water-reminder", "water_reminder", "water_reminder_v2"];
+    const oldChannels = ["water-reminder", "water_reminder", "water_reminder_v2", "water_reminder_v3"];
     for (const ch of oldChannels) {
       try {
         await Notifications.deleteNotificationChannelAsync(ch);
@@ -47,6 +47,9 @@ export async function setupWaterChannel(): Promise<void> {
       sound: "water_reminder.mp3",
       vibrationPattern: [0, 200, 100, 200],
       enableVibrate: true,
+      enableLights: true,
+      lightColor: "#2196F3",
+      bypassDnd: false,
       lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     });
   }

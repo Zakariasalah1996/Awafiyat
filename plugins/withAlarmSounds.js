@@ -10,8 +10,8 @@ const path = require("path");
 const NOTIFICATION_SOUNDS = [
   { file: "notification_female.mp3", src: "assets/notification_female.mp3" },
   { file: "notification_male.mp3", src: "assets/notification_male.mp3" },
-  { file: "medication_reminder.mp3", src: "assets/notifications/medication_reminder.mp3" },
-  { file: "water_reminder.mp3", src: "assets/notifications/water_reminder.mp3" },
+  { file: "medication_reminder.mp3", src: "assets/medication_reminder.mp3" },
+  { file: "water_reminder.mp3", src: "assets/water_reminder.mp3" },
 ];
 
 const withAlarmSounds = (config) => {
