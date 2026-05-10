@@ -28,12 +28,12 @@ const WATER_MESSAGES = [
  * إعداد قناة إشعارات الماء (Android)
  */
 // معرّف القناة الحالي - يجب تغييره عند تغيير الصوت لأن Android لا يسمح بتعديل صوت قناة موجودة
-const WATER_CHANNEL_ID = "water_reminder_v5";
+const WATER_CHANNEL_ID = "water_reminder_v6";
 
 export async function setupWaterChannel(): Promise<void> {
   if (Platform.OS === "android") {
     // حذف جميع القنوات القديمة (Android لا يسمح بتعديل صوت قناة بعد إنشائها)
-    const oldChannels = ["water-reminder", "water_reminder", "water_reminder_v2", "water_reminder_v3", "water_reminder_v4"];
+    const oldChannels = ["water-reminder", "water_reminder", "water_reminder_v2", "water_reminder_v3", "water_reminder_v4", "water_reminder_v5"];
     for (const ch of oldChannels) {
       try {
         await Notifications.deleteNotificationChannelAsync(ch);
@@ -44,7 +44,7 @@ export async function setupWaterChannel(): Promise<void> {
       name: "تذكير شرب الماء",
       description: "إشعارات تذكير بشرب الماء",
       importance: Notifications.AndroidImportance.MAX,
-      sound: "notification_female.mp3",
+      sound: "water_reminder.mp3",
       vibrationPattern: [0, 200, 100, 200],
       enableVibrate: true,
       enableLights: true,
@@ -80,7 +80,7 @@ export async function scheduleWaterReminders(
         content: {
           title: "💧 وقت شرب الماء",
           body: message,
-          sound: "notification_female.mp3",
+          sound: "water_reminder.mp3",
           priority: "max",
           ...(Platform.OS === "android" && {
             channelId: WATER_CHANNEL_ID,
@@ -180,7 +180,7 @@ export async function handleWaterNotificationResponse(
         content: {
           title: "💧 تذكير: اشرب ماءً!",
           body: message,
-          sound: "notification_female.mp3",
+          sound: "water_reminder.mp3",
           priority: "max",
           ...(Platform.OS === "android" && {
             channelId: WATER_CHANNEL_ID,
