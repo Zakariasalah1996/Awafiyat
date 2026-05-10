@@ -337,7 +337,7 @@ export async function setupMedicationNotificationActions(): Promise<void> {
       identifier: "TOOK_MEDICATION",
       buttonTitle: "✅ تناولته",
       options: {
-        opensAppToForeground: true,
+        opensAppToForeground: false,
         isDestructive: false,
         isAuthenticationRequired: false,
       },
@@ -346,7 +346,7 @@ export async function setupMedicationNotificationActions(): Promise<void> {
       identifier: "SNOOZE_MEDICATION",
       buttonTitle: "⏰ ذكّرني بعد 10 دقائق",
       options: {
-        opensAppToForeground: true,
+        opensAppToForeground: false,
         isDestructive: false,
         isAuthenticationRequired: false,
       },

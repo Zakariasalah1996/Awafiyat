@@ -135,7 +135,7 @@ export async function setupWaterNotificationActions(): Promise<void> {
       identifier: "DRANK_WATER",
       buttonTitle: "✅ شربت",
       options: {
-        opensAppToForeground: true,
+        opensAppToForeground: false,
         isDestructive: false,
         isAuthenticationRequired: false,
       },
@@ -144,7 +144,7 @@ export async function setupWaterNotificationActions(): Promise<void> {
       identifier: "SNOOZE_WATER",
       buttonTitle: "⏰ ذكّرني بعد 15 دقيقة",
       options: {
-        opensAppToForeground: true,
+        opensAppToForeground: false,
         isDestructive: false,
         isAuthenticationRequired: false,
       },

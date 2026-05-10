@@ -42,6 +42,14 @@ import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { UserProvider } from "@/lib/user-context";
 
+// ============================================================
+// استيراد الـ background task في الـ global scope
+// هذا ضروري لأن TaskManager.defineTask يجب أن يُستدعى
+// قبل mount أي component
+// ============================================================
+import "@/lib/notification-background-task";
+import { registerNotificationTask } from "@/lib/notification-background-task";
+
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
@@ -101,18 +109,21 @@ function RootLayoutInner() {
     setupWaterChannel().catch((e) => console.warn("[WaterNotif] Channel setup failed:", e));
     setupWaterNotificationActions().catch((e) => console.warn("[WaterNotif] Actions setup failed:", e));
 
-    // Setup notification listeners
+    // تسجيل الـ background task لمعالجة استجابات الإشعارات بدون فتح التطبيق
+    registerNotificationTask().catch((e) => console.warn("[BgTask] Registration failed:", e));
+
+    // Setup notification listeners (للتعامل مع الإشعارات عندما التطبيق مفتوح)
     const cleanup = setupNotificationListeners(
       (notification) => {
         console.log("[Notifications] Received:", notification.request.content.title);
       },
       (response) => {
-        // معالجة ضغط الأزرار التفاعلية
+        // معالجة ضغط الأزرار التفاعلية (عندما التطبيق في الواجهة)
         handleNotificationResponse(response);
       }
     );
 
-    // التحقق من آخر استجابة (إذا التطبيق كان مغلقاً)
+    // التحقق من آخر استجابة (إذا التطبيق كان مغلقاً وفُتح بالضغط على الإشعار)
     Notifications.getLastNotificationResponseAsync().then((response) => {
       if (response) {
         handleNotificationResponse(response);
@@ -122,7 +133,9 @@ function RootLayoutInner() {
     return cleanup;
   }, []);
 
-  // معالجة استجابة الإشعار (ضغط زر أو ضغط على الإشعار نفسه)
+  // معالجة استجابة الإشعار عندما التطبيق مفتوح (foreground)
+  // الأزرار التي عندها opensAppToForeground: false تُعالج بواسطة الـ background task
+  // هذا الـ handler يعالج فقط: عرض الوصفة + الضغط على الإشعار مباشرة (DEFAULT_ACTION)
   const handleNotificationResponse = useCallback(
     async (response: Notifications.NotificationResponse) => {
       const actionId = response.actionIdentifier;
@@ -131,28 +144,26 @@ function RootLayoutInner() {
 
       console.log("[Notifications] Response:", actionId, "data:", JSON.stringify(data));
 
-      // إذا ضغط "إيقاف" - إلغاء إشعارات الوجبة المجدولة + إخفاء الإشعار
+      // إذا ضغط "إيقاف" - يُعالج بواسطة الـ background task
+      // لكن إذا وصل هنا (التطبيق مفتوح)، نعالجه أيضاً
       if (actionId === "DISMISS") {
         console.log("[Notifications] DISMISS pressed for:", data?.mealType);
         try {
-          // إخفاء الإشعار من شريط الإشعارات
           await Notifications.dismissNotificationAsync(notificationId);
         } catch (e) {
           console.warn("[Notifications] Failed to dismiss:", e);
         }
         try {
-          // إلغاء الإشعار المجدول لهذه الوجبة (إيقاف التكرار)
           if (data?.mealType) {
             const { cancelMealReminder } = await import("@/lib/notifications");
             await cancelMealReminder(data.mealType as string);
-            // حذف بيانات المنبه من AsyncStorage
             await AsyncStorage.removeItem(`@alarm_data_${data.mealType}`);
             console.log(`[Notifications] Meal reminder cancelled for: ${data.mealType}`);
           }
         } catch (e) {
           console.warn("[Notifications] Failed to cancel meal reminder:", e);
         }
-        return; // لا نفتح التطبيق ولا نفعل شيء آخر
+        return;
       }
 
       // إذا ضغط "عرض الوصفة" أو ضغط على الإشعار مباشرة (DEFAULT_ACTION_IDENTIFIER)
@@ -176,13 +187,13 @@ function RootLayoutInner() {
         }
       }
 
-      // معالجة إشعارات الدواء
+      // معالجة إشعارات الدواء (عندما التطبيق مفتوح - fallback)
       if (data?.type === "medication_reminder" || data?.type === "medication_followup") {
         handleMedicationNotificationResponse(response);
         return;
       }
 
-      // معالجة إشعارات شرب الماء
+      // معالجة إشعارات شرب الماء (عندما التطبيق مفتوح - fallback)
       if (data?.type === "water_reminder") {
         handleWaterNotificationResponse(response);
         return;
