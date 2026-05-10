@@ -68,8 +68,8 @@ function buildNotificationBody(medication: Medication, isFollowup: boolean = fal
  * إعداد قناة إشعارات الدواء (Android)
  */
 // معرّفات القنوات الحالية - يجب تغييرها عند تغيير الصوت لأن Android لا يسمح بتعديل صوت قناة موجودة
-export const MED_CHANNEL_ID = "medication_reminder_v4";
-export const MED_FOLLOWUP_CHANNEL_ID = "medication_followup_v4";
+export const MED_CHANNEL_ID = "medication_reminder_v5";
+export const MED_FOLLOWUP_CHANNEL_ID = "medication_followup_v5";
 
 export async function setupMedicationChannel(): Promise<void> {
   if (Platform.OS === "android") {
@@ -79,6 +79,7 @@ export async function setupMedicationChannel(): Promise<void> {
       "medication_reminder", "medication_followup",
       "medication_reminder_v2", "medication_followup_v2",
       "medication_reminder_v3", "medication_followup_v3",
+      "medication_reminder_v4", "medication_followup_v4",
     ];
     for (const ch of oldChannels) {
       try {
@@ -90,7 +91,7 @@ export async function setupMedicationChannel(): Promise<void> {
       name: "تذكير الدواء",
       description: "إشعارات تذكير بمواعيد الأدوية",
       importance: Notifications.AndroidImportance.MAX,
-      sound: "medication_reminder.mp3",
+      sound: "notification_female.mp3",
       vibrationPattern: [0, 250, 250, 250],
       enableVibrate: true,
       enableLights: true,
@@ -104,7 +105,7 @@ export async function setupMedicationChannel(): Promise<void> {
       name: "تذكير ثانٍ بالدواء",
       description: "تذكير إضافي إذا لم يتم تناول الدواء",
       importance: Notifications.AndroidImportance.MAX,
-      sound: "medication_reminder.mp3",
+      sound: "notification_female.mp3",
       vibrationPattern: [0, 500, 250, 500],
       enableVibrate: true,
       enableLights: true,
@@ -136,6 +137,7 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
         hour: time.hour,
         minute: time.minute,
+        ...(Platform.OS === "android" && { channelId: MED_CHANNEL_ID }),
       };
     } else if (medication.frequency === "weekly" && medication.dayOfWeek) {
       trigger = {
@@ -143,6 +145,7 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
         weekday: DAY_MAP[medication.dayOfWeek],
         hour: time.hour,
         minute: time.minute,
+        ...(Platform.OS === "android" && { channelId: MED_CHANNEL_ID }),
       };
     } else if (medication.frequency === "monthly" && medication.dayOfMonth) {
       trigger = {
@@ -151,12 +154,14 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
         hour: time.hour,
         minute: time.minute,
         repeats: true,
+        ...(Platform.OS === "android" && { channelId: MED_CHANNEL_ID }),
       };
     } else {
       trigger = {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
         hour: time.hour,
         minute: time.minute,
+        ...(Platform.OS === "android" && { channelId: MED_CHANNEL_ID }),
       };
     }
 
@@ -166,8 +171,8 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
         content: {
           title: `💊 ${medication.name}`,
           body,
-          sound: "medication_reminder.mp3",
-          priority: Notifications.AndroidNotificationPriority.HIGH,
+          sound: "notification_female.mp3",
+          priority: "max",
           ...(Platform.OS === "android" && {
             channelId: MED_CHANNEL_ID,
           }),
@@ -198,6 +203,7 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
           type: Notifications.SchedulableTriggerInputTypes.DAILY,
           hour: followupHour,
           minute: followupMinute,
+          ...(Platform.OS === "android" && { channelId: MED_FOLLOWUP_CHANNEL_ID }),
         };
       } else if (medication.frequency === "weekly" && medication.dayOfWeek) {
         followupTrigger = {
@@ -205,6 +211,7 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
           weekday: DAY_MAP[medication.dayOfWeek],
           hour: followupHour,
           minute: followupMinute,
+          ...(Platform.OS === "android" && { channelId: MED_FOLLOWUP_CHANNEL_ID }),
         };
       } else if (medication.frequency === "monthly" && medication.dayOfMonth) {
         followupTrigger = {
@@ -213,12 +220,14 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
           hour: followupHour,
           minute: followupMinute,
           repeats: true,
+          ...(Platform.OS === "android" && { channelId: MED_FOLLOWUP_CHANNEL_ID }),
         };
       } else {
         followupTrigger = {
           type: Notifications.SchedulableTriggerInputTypes.DAILY,
           hour: followupHour,
           minute: followupMinute,
+          ...(Platform.OS === "android" && { channelId: MED_FOLLOWUP_CHANNEL_ID }),
         };
       }
 
@@ -226,8 +235,8 @@ export async function scheduleMedicationReminder(medication: Medication): Promis
         content: {
           title: `⚠️ لم تتناول ${medication.name} بعد!`,
           body: followupBody,
-          sound: "medication_reminder.mp3",
-          priority: Notifications.AndroidNotificationPriority.HIGH,
+          sound: "notification_female.mp3",
+          priority: "max",
           ...(Platform.OS === "android" && {
             channelId: MED_FOLLOWUP_CHANNEL_ID,
           }),
@@ -373,8 +382,8 @@ export async function handleMedicationNotificationResponse(
         content: {
           title: `💊 ${medName}`,
           body: "تذكير: لا تنسَ دواءك! 💚",
-          sound: "medication_reminder.mp3",
-          priority: Notifications.AndroidNotificationPriority.HIGH,
+          sound: "notification_female.mp3",
+          priority: "max",
           ...(Platform.OS === "android" && {
             channelId: MED_CHANNEL_ID,
           }),
@@ -390,6 +399,7 @@ export async function handleMedicationNotificationResponse(
           type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
           seconds: 600, // 10 دقائق
           repeats: false,
+          ...(Platform.OS === "android" && { channelId: MED_CHANNEL_ID }),
         },
       });
     } catch (e) {
