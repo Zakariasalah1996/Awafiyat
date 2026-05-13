@@ -75,21 +75,31 @@ function RootLayoutInner() {
   useEffect(() => {
     if (Platform.OS === "web") return;
 
-    // Request permissions and register push token automatically
-    requestNotificationPermissions()
-      .then(async (granted) => {
+    // Wait for guest registration to complete first, then register push token
+    // This ensures userId is available when registering the token
+    const registerPushFlow = async () => {
+      try {
+        // Wait a bit for guest registration to complete
+        await new Promise((r) => setTimeout(r, 3000));
+
+        // Request permissions and register push token
+        const granted = await requestNotificationPermissions();
         console.log("[Push] Auto-registration result:", granted ? "granted" : "denied");
+
         if (granted) {
+          // Also re-register saved token to ensure it's in the server DB
           const savedToken = await getSavedPushToken();
           if (savedToken) {
             console.log("[Push] Re-registering saved token on startup...");
             await registerPushToken(savedToken);
           }
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.warn("[Push] Auto-registration error:", err);
-      });
+      }
+    };
+
+    registerPushFlow();
 
     // إعادة جدولة الإشعارات بالإعدادات الحالية عند فتح التطبيق
     refreshAllAlarms().catch((e) => console.warn("[Notifications] Refresh failed:", e));

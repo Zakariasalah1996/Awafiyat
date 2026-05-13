@@ -29,6 +29,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
 import { getRecipeCustomImage } from "@/lib/recipe-image-sync";
+import { useRecipeImagesVersion } from "@/hooks/use-recipe-images";
 import * as Haptics from "expo-haptics";
 
 I18nManager.forceRTL(true);
@@ -95,6 +96,8 @@ export default function RecipesLibraryScreen() {
   const colors = useColors();
   const params = useLocalSearchParams<{ category?: string; mealType?: string }>();
   const { profile, saveRecipe, unsaveRecipe } = useUser();
+  // Subscribe to recipe image sync updates for reactivity
+  const _imagesVersion = useRecipeImagesVersion();
 
   const [activeFilter, setActiveFilter] = useState<FilterType>(
     (params.category as FilterType) || "all"

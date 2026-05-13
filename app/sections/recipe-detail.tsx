@@ -16,6 +16,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
 import { getRecipeCustomImage } from "@/lib/recipe-image-sync";
+import { useRecipeImagesVersion } from "@/hooks/use-recipe-images";
 import * as Haptics from "expo-haptics";
 import type { HealthCondition } from "@/lib/user-context";
 
@@ -100,6 +101,7 @@ export default function RecipeDetailScreen() {
   const colors = useColors();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile, saveRecipe, unsaveRecipe, rateRecipe, incrementRecipesViewed } = useUser();
+  const _imagesVersion = useRecipeImagesVersion();
   const recipe = getRecipeById(id || "");
 
   const [userRating, setUserRating] = useState(() => {

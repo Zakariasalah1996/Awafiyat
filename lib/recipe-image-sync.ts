@@ -3,18 +3,33 @@
  * When admin uploads a new image via the dashboard, the app fetches it on next open
  * 
  * Only stores HTTP URLs (uploaded images), NOT local category names like "kurdish-dishes"
+ * 
+ * Uses a listener pattern so React components can re-render when images are synced.
  */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApiBaseUrl } from "@/constants/oauth";
 
-const RECIPE_IMAGES_KEY = "recipe_custom_images_v2";
-const LAST_SYNC_KEY = "recipe_images_last_sync_v2";
-const SYNC_INTERVAL = 2 * 60 * 1000; // Sync every 2 minutes (was 5)
+const RECIPE_IMAGES_KEY = "recipe_custom_images_v3";
+const LAST_SYNC_KEY = "recipe_images_last_sync_v3";
+const SYNC_INTERVAL = 2 * 60 * 1000; // Sync every 2 minutes
 
 // In-memory cache for fast access
 let cachedImages: Record<string, string> = {};
 let loaded = false;
 let syncing = false;
+
+// Listener pattern for reactivity
+type Listener = () => void;
+const listeners: Set<Listener> = new Set();
+
+export function subscribeRecipeImages(listener: Listener): () => void {
+  listeners.add(listener);
+  return () => { listeners.delete(listener); };
+}
+
+function notifyListeners() {
+  listeners.forEach((fn) => fn());
+}
 
 /**
  * Load cached images from AsyncStorage
@@ -56,6 +71,10 @@ export async function syncRecipeImages(): Promise<void> {
     // Check if we need to sync from server
     const lastSync = await AsyncStorage.getItem(LAST_SYNC_KEY);
     if (lastSync && Date.now() - parseInt(lastSync) < SYNC_INTERVAL) {
+      // Still notify listeners with cached data on first load
+      if (Object.keys(cachedImages).length > 0) {
+        notifyListeners();
+      }
       return;
     }
 
@@ -90,6 +109,9 @@ export async function syncRecipeImages(): Promise<void> {
       await AsyncStorage.setItem(RECIPE_IMAGES_KEY, JSON.stringify(httpImages));
       await AsyncStorage.setItem(LAST_SYNC_KEY, Date.now().toString());
       console.log(`[RecipeImageSync] Synced ${uploadedCount} uploaded images`);
+      
+      // Notify all listening components to re-render
+      notifyListeners();
     } else {
       console.warn("[RecipeImageSync] Server returned:", response.status);
     }
@@ -127,4 +149,18 @@ export function getRecipeCustomImage(recipeId: string): string | null {
  */
 export function hasCustomImage(recipeId: string): boolean {
   return !!getRecipeCustomImage(recipeId);
+}
+
+/**
+ * Get all cached images (for hook usage)
+ */
+export function getAllCachedImages(): Record<string, string> {
+  return cachedImages;
+}
+
+/**
+ * Ensure images are loaded from AsyncStorage (call before first render)
+ */
+export async function ensureImagesLoaded(): Promise<void> {
+  await loadCachedImages();
 }

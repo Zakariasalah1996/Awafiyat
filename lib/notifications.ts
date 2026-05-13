@@ -382,7 +382,22 @@ export async function getExpoPushToken(): Promise<string | null> {
   try {
     if (Platform.OS === "web") return null;
 
-    // PRIMARY: Get native device push token (FCM on Android, APNs on iOS)
+    // Try Expo push token first (works in Expo Go and dev builds)
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    if (projectId) {
+      try {
+        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+        if (tokenData.data) {
+          console.log("[Push] Got Expo token:", tokenData.data?.substring(0, 30) + "...");
+          return tokenData.data;
+        }
+      } catch (e1) {
+        console.warn("[Push] Expo token failed:", (e1 as Error)?.message);
+      }
+    }
+
+    // FALLBACK: Get native device push token (FCM on Android, APNs on iOS)
+    // This works in standalone/production builds with google-services.json
     try {
       const deviceToken = await Notifications.getDevicePushTokenAsync();
       const fcmToken = deviceToken.data as string;
@@ -390,20 +405,8 @@ export async function getExpoPushToken(): Promise<string | null> {
         console.log("[Push] Got native FCM token:", fcmToken?.substring(0, 30) + "...");
         return `fcm:${fcmToken}`;
       }
-    } catch (e1) {
-      console.warn("[Push] Native FCM token failed:", (e1 as Error)?.message);
-    }
-
-    // FALLBACK: Try Expo push token
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-    if (projectId) {
-      try {
-        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
-        console.log("[Push] Got Expo token (fallback):", tokenData.data?.substring(0, 30) + "...");
-        return tokenData.data;
-      } catch (e2) {
-        console.warn("[Push] Expo token also failed:", (e2 as Error)?.message);
-      }
+    } catch (e2) {
+      console.warn("[Push] Native FCM token failed:", (e2 as Error)?.message);
     }
 
     console.error("[Push] All token methods failed");
