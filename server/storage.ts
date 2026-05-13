@@ -89,3 +89,4 @@ export async function storageGet(relKey: string): Promise<{ key: string; url: st
   const url = await getSignedUrl(client, command, { expiresIn: 3600 });
   return { key, url };
 }
+// R2 storage integration - build fix Wed May 13 17:52:00 EDT 2026
