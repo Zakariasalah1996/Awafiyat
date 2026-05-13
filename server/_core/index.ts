@@ -9,7 +9,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { savePushToken, getDb } from "../db";
+import { savePushToken, getDb, deactivatePushToken } from "../db";
 import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
@@ -59,7 +59,7 @@ async function getFCMAccessToken(): Promise<string | null> {
   }
 }
 
-async function sendPushViaFCM(tokens: string[], title: string, body: string) {
+async function sendPushViaFCM(tokens: string[], title: string, body: string, dbDeactivate?: (token: string) => Promise<void>) {
   const expoTokens = tokens.filter(t => t.startsWith('ExponentPushToken'));
   const fcmTokens = tokens.filter(t => !t.startsWith('ExponentPushToken'));
   let successCount = 0;
@@ -80,9 +80,19 @@ async function sendPushViaFCM(tokens: string[], title: string, body: string) {
       });
       const pushData = await pushRes.json();
       if (pushData.data) {
-        for (const ticket of pushData.data) {
-          if (ticket.status === 'ok') successCount++;
-          else { failCount++; console.warn('[Push] Expo ticket error:', ticket); }
+        for (let i = 0; i < pushData.data.length; i++) {
+          const ticket = pushData.data[i];
+          if (ticket.status === 'ok') {
+            successCount++;
+          } else {
+            failCount++;
+            console.warn('[Push] Expo ticket error:', ticket);
+            // Deactivate invalid tokens
+            if (ticket.details?.error === 'DeviceNotRegistered' && dbDeactivate) {
+              await dbDeactivate(expoTokens[i]);
+              console.log('[Push] Deactivated unregistered Expo token:', expoTokens[i].substring(0, 25));
+            }
+          }
         }
       }
     } catch (err) {
@@ -133,6 +143,12 @@ async function sendPushViaFCM(tokens: string[], title: string, body: string) {
           } else {
             failCount++;
             console.warn('[Push] FCM V1 error:', JSON.stringify(result));
+            // Auto-deactivate UNREGISTERED tokens
+            const errorCode = result?.error?.details?.[0]?.errorCode;
+            if ((errorCode === 'UNREGISTERED' || result?.error?.status === 'NOT_FOUND') && dbDeactivate) {
+              await dbDeactivate(token);
+              console.log('[Push] Deactivated unregistered FCM token:', token.substring(0, 25));
+            }
           }
         } catch (error) {
           failCount++;
@@ -455,7 +471,7 @@ async function startServer() {
       let successCount = 0, failCount = 0;
       if (tokens.length > 0) {
         console.log('[Push] Sending to', tokens.length, 'tokens:', tokens.map(t => t.substring(0, 25) + '...'));
-        const result = await sendPushViaFCM(tokens, title, body);
+        const result = await sendPushViaFCM(tokens, title, body, deactivatePushToken);
         successCount = result.successCount;
         failCount = result.failCount;
         if (notifId) {

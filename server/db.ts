@@ -172,6 +172,11 @@ export async function getPushTokensByCountry(country: string) {
     .where(and(eq(users.country, country), eq(pushTokens.isActive, true)));
 }
 
+export async function deactivatePushToken(token: string) {
+  if (!_db) return;
+  await _db.update(pushTokens).set({ isActive: false }).where(eq(pushTokens.token, token));
+}
+
 // ==================== SUBSCRIPTIONS ====================
 
 export async function createSubscription(data: InsertSubscription) {
