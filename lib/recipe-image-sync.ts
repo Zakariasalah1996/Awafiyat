@@ -11,12 +11,13 @@ import { getApiBaseUrl } from "@/constants/oauth";
 
 const RECIPE_IMAGES_KEY = "recipe_custom_images_v3";
 const LAST_SYNC_KEY = "recipe_images_last_sync_v3";
-const SYNC_INTERVAL = 2 * 60 * 1000; // Sync every 2 minutes
+const SYNC_INTERVAL = 5 * 60 * 1000; // Sync every 5 minutes max
 
 // In-memory cache for fast access
 let cachedImages: Record<string, string> = {};
 let loaded = false;
 let syncing = false;
+let lastSyncTime = 0;
 
 // Listener pattern for reactivity
 type Listener = () => void;
@@ -28,24 +29,29 @@ export function subscribeRecipeImages(listener: Listener): () => void {
 }
 
 function notifyListeners() {
-  listeners.forEach((fn) => fn());
+  listeners.forEach((fn) => {
+    try { fn(); } catch {}
+  });
 }
 
 /**
- * Load cached images from AsyncStorage
+ * Load cached images from AsyncStorage into memory
  */
 async function loadCachedImages(): Promise<void> {
   if (loaded) return;
   try {
     const stored = await AsyncStorage.getItem(RECIPE_IMAGES_KEY);
     if (stored) {
-      cachedImages = JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === "object") {
+        cachedImages = parsed;
+        console.log(`[RecipeImageSync] Loaded ${Object.keys(cachedImages).length} cached images from storage`);
+      }
     }
-    loaded = true;
   } catch (e) {
     console.error("[RecipeImageSync] Failed to load cached images:", e);
-    loaded = true;
   }
+  loaded = true;
 }
 
 /**
@@ -68,28 +74,38 @@ export async function syncRecipeImages(): Promise<void> {
     // Always load cache first
     await loadCachedImages();
 
-    // Check if we need to sync from server
-    const lastSync = await AsyncStorage.getItem(LAST_SYNC_KEY);
-    if (lastSync && Date.now() - parseInt(lastSync) < SYNC_INTERVAL) {
-      // Still notify listeners with cached data on first load
-      if (Object.keys(cachedImages).length > 0) {
+    // If cache is empty, ALWAYS sync (don't respect interval)
+    const cacheIsEmpty = Object.keys(cachedImages).length === 0;
+    
+    // Check if we need to sync from server (skip interval check if cache is empty)
+    if (!cacheIsEmpty) {
+      const lastSync = await AsyncStorage.getItem(LAST_SYNC_KEY);
+      if (lastSync && Date.now() - parseInt(lastSync) < SYNC_INTERVAL) {
+        // Notify listeners with existing cached data
         notifyListeners();
+        return;
       }
-      return;
     }
 
     const baseUrl = getApiBaseUrl();
     if (!baseUrl) {
       console.warn("[RecipeImageSync] No API base URL available");
+      // Still notify with whatever we have
+      if (!cacheIsEmpty) notifyListeners();
       return;
     }
 
     console.log("[RecipeImageSync] Syncing from:", baseUrl);
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
     const response = await fetch(`${baseUrl}/api/recipes/images`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
 
     if (response.ok) {
       const imageMap: Record<string, string> = await response.json();
@@ -106,17 +122,26 @@ export async function syncRecipeImages(): Promise<void> {
 
       cachedImages = httpImages;
       loaded = true;
+      lastSyncTime = Date.now();
       await AsyncStorage.setItem(RECIPE_IMAGES_KEY, JSON.stringify(httpImages));
-      await AsyncStorage.setItem(LAST_SYNC_KEY, Date.now().toString());
-      console.log(`[RecipeImageSync] Synced ${uploadedCount} uploaded images`);
+      await AsyncStorage.setItem(LAST_SYNC_KEY, lastSyncTime.toString());
+      console.log(`[RecipeImageSync] Synced ${uploadedCount} uploaded images successfully`);
       
       // Notify all listening components to re-render
       notifyListeners();
     } else {
       console.warn("[RecipeImageSync] Server returned:", response.status);
+      // Still notify with cached data
+      if (!cacheIsEmpty) notifyListeners();
     }
-  } catch (e) {
-    console.warn("[RecipeImageSync] Sync error:", e);
+  } catch (e: any) {
+    if (e?.name === "AbortError") {
+      console.warn("[RecipeImageSync] Sync timed out");
+    } else {
+      console.warn("[RecipeImageSync] Sync error:", e?.message || e);
+    }
+    // Notify with whatever cached data we have
+    if (Object.keys(cachedImages).length > 0) notifyListeners();
   } finally {
     syncing = false;
   }
@@ -124,10 +149,11 @@ export async function syncRecipeImages(): Promise<void> {
 
 /**
  * Force sync - bypasses the time check
- * Call this after uploading a new image
+ * Call this after uploading a new image or when screen opens
  */
 export async function forceSyncRecipeImages(): Promise<void> {
   await AsyncStorage.removeItem(LAST_SYNC_KEY);
+  lastSyncTime = 0;
   await syncRecipeImages();
 }
 
@@ -155,12 +181,25 @@ export function hasCustomImage(recipeId: string): boolean {
  * Get all cached images (for hook usage)
  */
 export function getAllCachedImages(): Record<string, string> {
-  return cachedImages;
+  return { ...cachedImages };
+}
+
+/**
+ * Get the count of cached images
+ */
+export function getCachedImageCount(): number {
+  return Object.keys(cachedImages).length;
 }
 
 /**
  * Ensure images are loaded from AsyncStorage (call before first render)
+ * Also triggers a sync if cache is empty
  */
 export async function ensureImagesLoaded(): Promise<void> {
   await loadCachedImages();
+  // If cache is empty after loading, trigger a sync
+  if (Object.keys(cachedImages).length === 0 && !syncing) {
+    // Don't await - let it happen in background
+    syncRecipeImages().catch(() => {});
+  }
 }

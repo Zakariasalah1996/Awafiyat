@@ -28,8 +28,7 @@ import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
-import { getRecipeCustomImage } from "@/lib/recipe-image-sync";
-import { useRecipeImagesVersion } from "@/hooks/use-recipe-images";
+import { useRecipeImages, getImageFromMap } from "@/hooks/use-recipe-images";
 import * as Haptics from "expo-haptics";
 
 I18nManager.forceRTL(true);
@@ -96,8 +95,8 @@ export default function RecipesLibraryScreen() {
   const colors = useColors();
   const params = useLocalSearchParams<{ category?: string; mealType?: string }>();
   const { profile, saveRecipe, unsaveRecipe } = useUser();
-  // Subscribe to recipe image sync updates for reactivity
-  const _imagesVersion = useRecipeImagesVersion();
+  // Get recipe images map (fetches from server on mount)
+  const recipeImages = useRecipeImages();
 
   const [activeFilter, setActiveFilter] = useState<FilterType>(
     (params.category as FilterType) || "all"
@@ -234,7 +233,7 @@ export default function RecipesLibraryScreen() {
             }}
           >
             <Image
-              source={getRecipeCustomImage(item.id) ? { uri: getRecipeCustomImage(item.id)! } : (item.image ? getFoodCategoryImage(item.image) : getFoodCategoryImage("iraqi-rice"))}
+              source={getImageFromMap(recipeImages, item.id) ? { uri: getImageFromMap(recipeImages, item.id)! } : (item.image ? getFoodCategoryImage(item.image) : getFoodCategoryImage("iraqi-rice"))}
               style={{ width: "100%", height: "100%" }}
               contentFit="cover"
               transition={200}

@@ -75,27 +75,46 @@ function RootLayoutInner() {
   useEffect(() => {
     if (Platform.OS === "web") return;
 
-    // Wait for guest registration to complete first, then register push token
-    // This ensures userId is available when registering the token
     const registerPushFlow = async () => {
       try {
-        // Wait a bit for guest registration to complete
+        // Wait 3 seconds for Firebase/app to fully initialize
         await new Promise((r) => setTimeout(r, 3000));
 
-        // Request permissions and register push token
+        console.log("[Push] Starting auto-registration flow...");
         const granted = await requestNotificationPermissions();
         console.log("[Push] Auto-registration result:", granted ? "granted" : "denied");
 
         if (granted) {
-          // Also re-register saved token to ensure it's in the server DB
+          // Re-register saved token to ensure it's in the server DB
           const savedToken = await getSavedPushToken();
           if (savedToken) {
             console.log("[Push] Re-registering saved token on startup...");
             await registerPushToken(savedToken);
           }
         }
+
+        // Retry registration after 10 seconds with userId (guest should be ready by then)
+        setTimeout(async () => {
+          try {
+            const savedToken2 = await getSavedPushToken();
+            if (savedToken2) {
+              console.log("[Push] Re-registering with userId after delay...");
+              await registerPushToken(savedToken2);
+            } else {
+              // If still no token, try one more time to get it
+              console.log("[Push] No saved token, retrying full flow...");
+              await requestNotificationPermissions();
+            }
+          } catch {}
+        }, 10000);
       } catch (err) {
         console.warn("[Push] Auto-registration error:", err);
+        // Retry after 15 seconds on failure
+        setTimeout(async () => {
+          try {
+            await requestNotificationPermissions();
+          } catch {}
+        }, 15000);
       }
     };
 
