@@ -17,7 +17,6 @@ import {
   ACTION_VIEW_RECIPE,
   cancelMealReminder,
 } from "@/lib/notifications";
-import { syncRecipeImages } from "@/lib/recipe-image-sync";
 import { registerGuest } from "@/lib/guest-auth";
 import { useRouter } from "expo-router";
 import { AlarmProvider } from "@/lib/alarm-context";
@@ -65,8 +64,6 @@ function RootLayoutInner() {
 
   useEffect(() => {
     initManusRuntime();
-    // Sync recipe images from server on app start
-    syncRecipeImages().catch((e) => console.warn("[RecipeImageSync] Error:", e));
     // Auto-register as guest user
     registerGuest().catch((e) => console.warn("[Guest] Error:", e));
   }, []);
