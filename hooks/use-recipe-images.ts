@@ -1,7 +1,7 @@
 /**
  * Recipe images - global cache approach.
- * Images are fetched once and stored in a module-level variable.
- * All components share the same data and re-render when it updates.
+ * Images are pre-loaded from AsyncStorage at module init time,
+ * so they are available immediately on first render.
  */
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -19,22 +19,26 @@ function notifyListeners(images: Record<string, string>) {
   _listeners.forEach((fn) => fn(images));
 }
 
+// Pre-load from AsyncStorage immediately when module is imported
+// This runs before any component renders, so images are ready on first render
+AsyncStorage.getItem(RECIPE_IMAGES_KEY)
+  .then((stored) => {
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && Object.keys(parsed).length > 0) {
+        _globalImages = parsed;
+        // Notify any already-mounted listeners
+        _listeners.forEach((fn) => fn(parsed));
+      }
+    }
+  })
+  .catch(() => {});
+
 async function fetchAndCacheImages() {
   if (_fetchState === "loading") return;
   _fetchState = "loading";
 
-  // Load from AsyncStorage first (instant display)
-  try {
-    const stored = await AsyncStorage.getItem(RECIPE_IMAGES_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed && Object.keys(parsed).length > 0) {
-        notifyListeners(parsed);
-      }
-    }
-  } catch (_e) {}
-
-  // Always fetch fresh from server
+  // Fetch fresh from server
   try {
     const response = await fetch(API_URL, {
       method: "GET",
@@ -67,7 +71,7 @@ async function fetchAndCacheImages() {
 
 /**
  * Hook that returns the current recipe images map.
- * Fetches from server on first use, then serves from cache.
+ * Images are pre-loaded from cache so they appear immediately on first render.
  */
 export function useRecipeImages(): Record<string, string> {
   const [images, setImages] = useState<Record<string, string>>(_globalImages);
@@ -79,12 +83,14 @@ export function useRecipeImages(): Record<string, string> {
     };
     _listeners.push(listener);
 
-    // Trigger fetch (only runs once globally)
+    // Sync current global state in case it was updated before this component mounted
+    if (Object.keys(_globalImages).length > 0) {
+      setImages({ ..._globalImages });
+    }
+
+    // Trigger server fetch (only runs once globally)
     if (_fetchState === "idle") {
       fetchAndCacheImages();
-    } else if (_fetchState === "done" && Object.keys(_globalImages).length > 0) {
-      // Already loaded - update state immediately
-      setImages({ ..._globalImages });
     }
 
     return () => {
