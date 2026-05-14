@@ -333,7 +333,7 @@ export default function RecipesLibraryScreen() {
         </TouchableOpacity>
       );
     },
-    [colors, profile.savedRecipes, profile.healthCondition, handleToggleSave, router]
+    [colors, profile.savedRecipes, profile.healthCondition, handleToggleSave, router, recipeImages]
   );
 
   return (

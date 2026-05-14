@@ -553,3 +553,6 @@
 ## الدفعة 65 - إصلاح مشاكل الصور والإشعارات (المحاولة الثانية)
 - [x] صور الوصفات - إعادة كتابة كاملة بنهج useRecipeImages hook مباشر (fetch من السيرفر + cache في AsyncStorage + React state)
 - [x] الإشعارات - زيادة delay إلى 3ث + retry متعدد (10ث + 15ث) + 3 طرق للحصول على token (Expo/FCM/Expo-no-id)
+
+## الدفعة 66 - إصلاح الصور في قائمة الوصفات (المحاولة الثالثة)
+- [x] إضافة recipeImages لـ dependencies في useCallback لـ renderRecipeCard - كان هذا سبب عدم تحديث بطاقات الوصفات عند وصول الصور
