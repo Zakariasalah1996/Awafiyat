@@ -131,7 +131,6 @@ const config: ExpoConfig = {
         },
       },
     ],
-    "react-native-purchases",
   ],
   extra: {
     eas: {
