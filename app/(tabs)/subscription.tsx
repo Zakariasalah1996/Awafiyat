@@ -8,13 +8,9 @@ import { trpc } from "@/lib/trpc";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import * as Haptics from "expo-haptics";
 
-// التسعير حسب الدولة (للعرض فقط - RevenueCat هو مصدر الحقيقة)
-const PRICING: Record<string, { currency: string; monthlyLabel: string; yearlyLabel: string }> = {
-  iraq: { currency: "دينار", monthlyLabel: "5,000", yearlyLabel: "50,000" },
-  saudi: { currency: "ريال", monthlyLabel: "7", yearlyLabel: "70" },
-  uae: { currency: "درهم", monthlyLabel: "7", yearlyLabel: "70" },
-  egypt: { currency: "جنيه", monthlyLabel: "30", yearlyLabel: "300" },
-  kuwait: { currency: "دينار كويتي", monthlyLabel: "2", yearlyLabel: "20" },
+// التسعير موحد بـ USD لجميع الدول
+const PRICING = {
+  default: { currency: "$", monthlyLabel: "4", yearlyLabel: "40" },
 };
 
 // الميزات المدفوعة الكاملة
@@ -48,8 +44,7 @@ export default function SubscriptionScreen() {
   const { packages, isLoading, error, isPremium, purchasePackage, restorePurchases } =
     useSubscriptions();
 
-  const userCountry = profile.country || "iraq";
-  const pricing = PRICING[userCountry] || PRICING.iraq;
+  const pricing = PRICING.default;
 
   const handleSubscribe = async (packageId: string) => {
     const pkg = packages.find((p) => p.id === packageId);
