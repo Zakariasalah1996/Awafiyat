@@ -13,6 +13,7 @@ import { ScreenContainer } from '@/components/screen-container';
 import { useColors } from '@/hooks/use-colors';
 import { useSubscriptions } from '@/hooks/use-subscriptions';
 import * as Haptics from 'expo-haptics';
+import { ImpactFeedbackStyle, NotificationFeedbackType } from 'expo-haptics';
 
 I18nManager.forceRTL(true);
 
@@ -29,17 +30,17 @@ export default function SubscriptionScreen() {
 
     try {
       setSelectedPackageId(packageId);
-      Haptics.impactAsync('medium');
+      Haptics.impactAsync(ImpactFeedbackStyle.Medium);
 
       const success = await purchasePackage(pkg);
 
       if (success) {
-        Haptics.notificationAsync('success');
+        Haptics.notificationAsync(NotificationFeedbackType.Success);
         Alert.alert('نجح الاشتراك! 🎉', 'شكراً لاشتراكك في ألف عافيات المميزة');
         router.back();
       }
     } catch (err) {
-      Haptics.notificationAsync('error');
+      Haptics.notificationAsync(NotificationFeedbackType.Error);
       Alert.alert('خطأ', 'حدث خطأ أثناء الشراء. حاول مرة أخرى.');
     } finally {
       setSelectedPackageId(null);
@@ -48,7 +49,7 @@ export default function SubscriptionScreen() {
 
   const handleRestore = async () => {
     try {
-      Haptics.impactAsync('medium');
+      Haptics.impactAsync(ImpactFeedbackStyle.Medium);
       await restorePurchases();
       Alert.alert('تم', 'تم استعادة عملياتك الشرائية');
     } catch (err) {
@@ -207,7 +208,7 @@ function PlanCard({
         </View>
       </View>
 
-      {isLoading && selectedPackageId === plan.id ? (
+      {isLoading && isSelected ? (
         <ActivityIndicator color={colors.primary} />
       ) : (
         <View

@@ -7,6 +7,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { trpc } from "@/lib/trpc";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import * as Haptics from "expo-haptics";
+import { ImpactFeedbackStyle, NotificationFeedbackType } from "expo-haptics";
 
 // التسعير موحد بـ USD لجميع الدول
 const PRICING = {
@@ -51,7 +52,7 @@ export default function SubscriptionScreen() {
     if (!pkg) return;
 
     try {
-      Haptics.impactAsync("medium");
+      Haptics.impactAsync(ImpactFeedbackStyle.Medium);
       const success = await purchasePackage(pkg);
 
       if (success) {
@@ -80,18 +81,18 @@ export default function SubscriptionScreen() {
           console.warn("[Subscription] Server save failed:", e);
         }
 
-        Haptics.notificationAsync("success");
+        Haptics.notificationAsync(NotificationFeedbackType.Success);
         Alert.alert("تم الاشتراك بنجاح! 🎉", "ألف عافية عليك، استمتع بجميع الميزات.");
       }
     } catch (err) {
-      Haptics.notificationAsync("error");
+      Haptics.notificationAsync(NotificationFeedbackType.Error);
       Alert.alert("خطأ", "حدث خطأ أثناء الشراء. حاول مرة أخرى.");
     }
   };
 
   const handleRestore = async () => {
     try {
-      Haptics.impactAsync("medium");
+      Haptics.impactAsync(ImpactFeedbackStyle.Medium);
       await restorePurchases();
       Alert.alert("تم", "تم استعادة عملياتك الشرائية");
     } catch (err) {
