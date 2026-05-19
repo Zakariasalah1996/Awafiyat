@@ -6,7 +6,7 @@ import Purchases, {
 } from 'react-native-purchases';
 import { Platform } from 'react-native';
 
-const REVENUE_CAT_API_KEY = 'test_MnETspOVlUwDVOCBjoyGWxWrtTy';
+const REVENUE_CAT_API_KEY = 'goog_hkYvXqzkoUXOZWyGdoshKWXRRIW';
 const ENTITLEMENT_ID = 'premium'; // معرّف الاشتراك المميز
 
 export interface SubscriptionPackage {
