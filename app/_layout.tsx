@@ -41,6 +41,7 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { UserProvider } from "@/lib/user-context";
+import { SubscriptionProvider } from "@/lib/subscription-context";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -259,6 +260,7 @@ function RootLayoutInner() {
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <UserProvider>
+        <SubscriptionProvider>
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
             <Stack screenOptions={{ headerShown: false }}>
@@ -282,6 +284,7 @@ function RootLayoutInner() {
             <StatusBar style="auto" />
           </QueryClientProvider>
         </trpc.Provider>
+        </SubscriptionProvider>
       </UserProvider>
     </GestureHandlerRootView>
   );

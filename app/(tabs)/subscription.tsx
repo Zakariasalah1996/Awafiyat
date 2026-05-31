@@ -56,21 +56,7 @@ export default function SubscriptionScreen() {
       const success = await purchasePackage(pkg);
 
       if (success) {
-        // تحديث حالة المستخدم المحلية
-        const expiry = new Date();
-        if (pkg.period === "monthly") {
-          expiry.setMonth(expiry.getMonth() + 1);
-        } else {
-          expiry.setFullYear(expiry.getFullYear() + 1);
-        }
-
-        await updateProfile({
-          isSubscribed: true,
-          subscriptionType: pkg.period,
-          subscriptionExpiry: expiry.toISOString(),
-        });
-
-        // حفظ في السيرفر
+        // حفظ في السيرفر (التحديث المحلي يتم في use-subscriptions)
         try {
           await createSubscription.mutateAsync({
             plan: pkg.period,
@@ -100,8 +86,8 @@ export default function SubscriptionScreen() {
     }
   };
 
-  // إذا كان المستخدم مشتركاً بالفعل
-  if (profile.isSubscribed && isPremium) {
+  // إذا كان المستخدم مشتركاً بالفعل - نعتمد على isPremium من RevenueCat كمصدر حقيقي
+  if (isPremium) {
     const expiryDate = profile.subscriptionExpiry
       ? new Date(profile.subscriptionExpiry).toLocaleDateString("ar-IQ")
       : "";

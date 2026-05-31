@@ -556,3 +556,9 @@
 
 ## الدفعة 66 - إصلاح الصور في قائمة الوصفات (المحاولة الثالثة)
 - [x] إضافة recipeImages لـ dependencies في useCallback لـ renderRecipeCard - كان هذا سبب عدم تحديث بطاقات الوصفات عند وصول الصور
+
+## الدفعة 67 - إصلاح نظام الاشتراك (RevenueCat):
+- [x] إنشاء SubscriptionContext مركزي (RevenueCat كمصدر حقيقي لحالة الاشتراك)
+- [x] تحديث use-subscriptions.ts ليستخدم SubscriptionContext بدلاً من إعادة تهيئة RevenueCat
+- [x] إصلاح شاشة الاشتراك: isPremium من RevenueCat فقط (بدلاً من profile.isSubscribed && isPremium)
+- [x] تسجيل SubscriptionProvider في _layout.tsx
