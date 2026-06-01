@@ -11,6 +11,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useUser } from "@/lib/user-context";
+import { useSubscriptionContext } from "@/lib/subscription-context";
 import {
   RECIPES,
   type Recipe,
@@ -95,6 +96,7 @@ export default function RecipesLibraryScreen() {
   const colors = useColors();
   const params = useLocalSearchParams<{ category?: string; mealType?: string }>();
   const { profile, saveRecipe, unsaveRecipe } = useUser();
+  const { isPremium } = useSubscriptionContext();
   // Get recipe images map (fetches from server on mount)
   const recipeImages = useRecipeImages();
 
@@ -188,7 +190,7 @@ export default function RecipesLibraryScreen() {
       const originFlag = item.origin ? ORIGIN_FLAG[item.origin] || "" : "";
       const originLabel = item.origin ? ORIGIN_LABEL[item.origin] || "" : "";
       const isFree = isRecipeFree(item.id);
-      const isLocked = !isFree && !profile.isSubscribed;
+      const isLocked = !isFree && !isPremium;
 
       return (
         <TouchableOpacity

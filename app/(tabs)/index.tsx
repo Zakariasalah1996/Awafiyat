@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useUser } from "@/lib/user-context";
+import { useSubscriptionContext } from "@/lib/subscription-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -35,6 +36,7 @@ const COUNTRY_LABELS: Record<string, string> = {
 export default function HomeScreen() {
   const colors = useColors();
   const { profile } = useUser();
+  const { isPremium } = useSubscriptionContext();
 
   const greeting = profile.name
     ? `أهلاً ${profile.name}`
@@ -295,7 +297,7 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* Subscription Banner (if not subscribed) */}
-        {!profile.isSubscribed && (
+        {!isPremium && (
           <Animated.View entering={FadeInDown.delay(700).duration(400)} className="px-5 mt-4">
             <TouchableOpacity
               onPress={() => router.push("/(tabs)/subscription" as any)}

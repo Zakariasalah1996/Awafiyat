@@ -562,3 +562,13 @@
 - [x] تحديث use-subscriptions.ts ليستخدم SubscriptionContext بدلاً من إعادة تهيئة RevenueCat
 - [x] إصلاح شاشة الاشتراك: isPremium من RevenueCat فقط (بدلاً من profile.isSubscribed && isPremium)
 - [x] تسجيل SubscriptionProvider في _layout.tsx
+
+## الدفعة 68 - إصلاح شامل لنظام الاشتراك (RevenueCat في كل مكان):
+- [x] إصلاح app/(tabs)/index.tsx - بانر الاشتراك يعتمد على isPremium
+- [x] إصلاح app/(tabs)/profile.tsx - شارة "عضوية ذهبية" تعتمد على isPremium
+- [x] إصلاح app/sections/fridge.tsx - حد الاستخدام المجاني يعتمد على isPremium
+- [x] إصلاح app/sections/meal-planner.tsx - قفل جدول الطبخ يعتمد على isPremium
+- [x] إصلاح app/sections/recipes-library.tsx - قفل الوصفات يعتمد على isPremium
+- [x] إصلاح app/sections/wellness/medication-home.tsx - حد الأدوية يعتمد على isPremium
+- [x] إصلاح app/sections/leftovers-renew.tsx - حد تجديد النعمة يعتمد على isPremium
+- [x] لا أخطاء TypeScript

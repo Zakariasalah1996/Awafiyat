@@ -13,6 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useUser } from "@/lib/user-context";
+import { useSubscriptionContext } from "@/lib/subscription-context";
 import { RECIPES, getRecipesByMealType } from "@/lib/data/recipes";
 import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -93,7 +94,7 @@ export default function MealPlannerScreen() {
   const colors = useColors();
   const { profile, updateProfile } = useUser();
   const recipeImages = useRecipeImages();
-  const isSubscribed = profile.isSubscribed;
+  const { isPremium: isSubscribed } = useSubscriptionContext();
 
   const [step, setStep] = useState<"times" | "plan" | "done">("times");
   const [mealTimes, setMealTimes] = useState<MealTimes>({
