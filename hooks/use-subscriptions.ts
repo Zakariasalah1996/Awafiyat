@@ -56,7 +56,13 @@ export function useSubscriptions(): UseSubscriptionsReturn {
 
         const availablePackages: SubscriptionPackage[] = [];
 
-        offerings.current.availablePackages.forEach((pkg) => {
+        // استخدم الـ Offerings المحددة بأسماء صريحة (rc_monthly$ و rc_annual$)
+        const monthlyOffering = offerings.all['rc_monthly$'];
+        const annualOffering = offerings.all['rc_annual$'];
+        
+        // أضف المنتجات من الـ Offering الشهري
+        if (monthlyOffering) {
+          monthlyOffering.availablePackages.forEach((pkg) => {
           const pricing = pkg.product.priceString;
           const period = pkg.product.subscriptionPeriod;
 
@@ -69,16 +75,44 @@ export function useSubscriptions(): UseSubscriptionsReturn {
             pricePerMonth = (yearlyPrice / 12).toFixed(2);
           }
 
-          availablePackages.push({
-            id: pkg.identifier,
-            name: pkg.product.title,
-            price: pricing,
-            pricePerMonth,
-            period: periodType,
-            offering: offerings.current!,
-            package: pkg,
+            availablePackages.push({
+              id: pkg.identifier,
+              name: pkg.product.title,
+              price: pricing,
+              pricePerMonth,
+              period: periodType,
+              offering: monthlyOffering,
+              package: pkg,
+            });
           });
-        });
+        }
+        
+        // أضف المنتجات من الـ Offering السنوي
+        if (annualOffering) {
+          annualOffering.availablePackages.forEach((pkg) => {
+            const pricing = pkg.product.priceString;
+            const period = pkg.product.subscriptionPeriod;
+
+            let periodType: 'monthly' | 'yearly' = 'monthly';
+            let pricePerMonth = pricing;
+
+            if (period?.includes('P1Y')) {
+              periodType = 'yearly';
+              const yearlyPrice = parseFloat(pkg.product.price.toString());
+              pricePerMonth = (yearlyPrice / 12).toFixed(2);
+            }
+
+            availablePackages.push({
+              id: pkg.identifier,
+              name: pkg.product.title,
+              price: pricing,
+              pricePerMonth,
+              period: periodType,
+              offering: annualOffering,
+              package: pkg,
+            });
+          });
+        }
 
         setPackages(availablePackages);
       } catch (err) {
