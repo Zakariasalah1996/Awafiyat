@@ -48,10 +48,20 @@ const CONDITION_LABELS: Record<HealthCondition, string> = {
   none: "",
 };
 
+const FEATURES = [
+  { icon: "📚", label: "مكتبة وصفات" },
+  { icon: "❄️", label: "ذكاء الثلاجة" },
+  { icon: "🛡️", label: "تحذيرات صحية" },
+  { icon: "📅", label: "جدولة وجبات" },
+  { icon: "💊", label: "رفيق الدواء" },
+  { icon: "💧", label: "رفيق الماء" },
+  { icon: "♻️", label: "تجديد النعمة" },
+  { icon: "🛒", label: "قائمة التسوق" },
+];
+
 export default function OnboardingScreen() {
   const { updateProfile } = useUser();
   const colors = useColors();
-  // مراحل التخصيص: null = مخفي | "disease" = سؤال المرض | "offer" = عرض الاشتراك
   const [customizeStep, setCustomizeStep] = useState<null | "disease" | "offer">(null);
   const [selectedCondition, setSelectedCondition] = useState<HealthCondition>("none");
 
@@ -88,16 +98,11 @@ export default function OnboardingScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* ── خلفية الشاشة ── */}
+      {/* ── خلفية تدرج لوني بسيط وأنيق ── */}
       <Animated.View entering={FadeIn.duration(800)} style={{ flex: 1 }}>
-        <Image
-          source={require("@/assets/images/welcome-hero.jpg")}
-          style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, position: "absolute" }}
-          resizeMode="cover"
-        />
         <LinearGradient
-          colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0.15)", "rgba(0,0,0,0.55)", "rgba(0,0,0,0.88)"]}
-          locations={[0, 0.25, 0.55, 0.85]}
+          colors={["#f0f7f0", "#dcedc8", "#c5e1a5", "#a5d6a7"]}
+          locations={[0, 0.35, 0.65, 1]}
           style={{ position: "absolute", top: 0, bottom: 0, left: 0, right: 0 }}
         />
       </Animated.View>
@@ -108,37 +113,41 @@ export default function OnboardingScreen() {
         paddingHorizontal: 28, justifyContent: "center", alignItems: "center",
       }}>
         {/* الشعار */}
-        <Animated.View entering={FadeInDown.delay(200).duration(600)} style={{ alignItems: "center", marginTop: -SCREEN_HEIGHT * 0.1 }}>
+        <Animated.View entering={FadeInDown.delay(200).duration(600)} style={{ alignItems: "center", marginTop: -SCREEN_HEIGHT * 0.05 }}>
           <Image
             source={require("@/assets/images/icon.png")}
-            style={{ width: 100, height: 100, borderRadius: 24, marginBottom: 20 }}
+            style={{ width: 90, height: 90, borderRadius: 22, marginBottom: 16 }}
           />
-          <Text style={{ fontSize: 40, fontWeight: "bold", color: "#fff", textAlign: "center", marginBottom: 8 }}>
+          <Text style={{ fontSize: 36, fontWeight: "bold", color: "#2e7d32", textAlign: "center", marginBottom: 6 }}>
             ألف عافيات
           </Text>
-          <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.85)", textAlign: "center", lineHeight: 26, marginBottom: 28 }}>
+          <Text style={{ fontSize: 15, color: "#4a7c59", textAlign: "center", lineHeight: 24, marginBottom: 24 }}>
             نرتب مطبخك وصحتك معاً
           </Text>
         </Animated.View>
 
-        {/* مميزات التطبيق */}
-        <Animated.View entering={FadeInDown.delay(400).duration(600)} style={{ width: "100%", marginBottom: 32 }}>
-          <View style={{ flexDirection: "row-reverse", flexWrap: "wrap", justifyContent: "center", gap: 10 }}>
-            {[
-              { icon: "📅", label: "جدولة وصفات" },
-              { icon: "📚", label: "مكتبة وصفات" },
-              { icon: "❄️", label: "ذكاء الثلاجة" },
-              { icon: "🛡️", label: "تحذيرات صحية" },
-            ].map((f) => (
+        {/* مميزات التطبيق — شبكة أيقونات صغيرة */}
+        <Animated.View entering={FadeInDown.delay(400).duration(600)} style={{ width: "100%", marginBottom: 28 }}>
+          <View style={{ flexDirection: "row-reverse", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
+            {FEATURES.map((f) => (
               <View key={f.label} style={{
-                flexDirection: "row-reverse", alignItems: "center",
-                backgroundColor: "rgba(255,255,255,0.15)",
-                paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+                alignItems: "center", justifyContent: "center",
+                backgroundColor: "rgba(255,255,255,0.75)",
+                paddingHorizontal: 10, paddingVertical: 8, borderRadius: 14,
+                minWidth: 72,
+                shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 },
+                elevation: 2,
               }}>
-                <Text style={{ fontSize: 16 }}>{f.icon}</Text>
-                <Text style={{ color: "#fff", fontSize: 14, fontWeight: "600", marginRight: 6 }}>{f.label}</Text>
+                <Text style={{ fontSize: 20, marginBottom: 2 }}>{f.icon}</Text>
+                <Text style={{ color: "#333", fontSize: 11, fontWeight: "600" }}>{f.label}</Text>
               </View>
             ))}
+          </View>
+          {/* والكثير غيرها */}
+          <View style={{ alignItems: "center", marginTop: 12 }}>
+            <Text style={{ fontSize: 13, color: "#5a8a5a", fontWeight: "600" }}>
+              ✨ والكثير غيرها...
+            </Text>
           </View>
         </Animated.View>
 
@@ -149,7 +158,9 @@ export default function OnboardingScreen() {
             onPress={handleStart}
             style={{
               width: "100%", paddingVertical: 17, borderRadius: 18,
-              alignItems: "center", backgroundColor: colors.primary,
+              alignItems: "center", backgroundColor: "#2e7d32",
+              shadowColor: "#2e7d32", shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 },
+              elevation: 4,
             }}
             activeOpacity={0.85}
           >
@@ -162,12 +173,12 @@ export default function OnboardingScreen() {
             style={{
               width: "100%", paddingVertical: 15, borderRadius: 18,
               alignItems: "center",
-              backgroundColor: "rgba(255,255,255,0.18)",
-              borderWidth: 1.5, borderColor: "rgba(255,255,255,0.5)",
+              backgroundColor: "rgba(255,255,255,0.7)",
+              borderWidth: 1.5, borderColor: "#2e7d32",
             }}
             activeOpacity={0.8}
           >
-            <Text style={{ color: "#fff", fontSize: 17, fontWeight: "600" }}>✨ تخصيص التجربة</Text>
+            <Text style={{ color: "#2e7d32", fontSize: 17, fontWeight: "600" }}>✨ تخصيص التجربة</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
