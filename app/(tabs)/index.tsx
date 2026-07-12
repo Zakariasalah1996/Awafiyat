@@ -14,15 +14,13 @@ const COUNTRY_LABELS: Record<string, string> = {
 };
 
 const SECTIONS = [
-  { id: "fridge",              emoji: "🧴", title: "ذكاء الثلاجة",     route: "/sections/fridge",              color: "#5D8A3C", bg: "#F0F7EC" },
-  { id: "recipes-library",     emoji: "📖", title: "مكتبة الوصفات",    route: "/sections/recipes-library",     color: "#E85D5D", bg: "#FFF0F0" },
-  { id: "shopping-list",       emoji: "🛒", title: "قائمة التسوق",     route: "/sections/shopping-list",       color: "#7B68EE", bg: "#F3F0FF" },
-  { id: "calorie-calculator",  emoji: "⚖️", title: "حاسبة السعرات",   route: "/sections/calorie-calculator",  color: "#4ECDC4", bg: "#EEFBFA" },
-  { id: "health-tips",         emoji: "🩺", title: "نصائح صحية",       route: "/sections/health-tips",         color: "#FF6B9D", bg: "#FFF0F5" },
-  { id: "beverages",           emoji: "☕", title: "مشروبات وعصائر",   route: "/sections/beverages",           color: "#8B4513", bg: "#FFF8F0" },
-  { id: "saved-recipes",       emoji: "💝", title: "وصفاتي المحفوظة",  route: "/sections/saved-recipes",       color: "#E8A359", bg: "#FFF8F0" },
-  { id: "medicine-reminder",   emoji: "💊", title: "رفيق الدواء",      route: "/sections/medicine-reminder",   color: "#9C27B0", bg: "#F9F0FF" },
-  { id: "water-tracker",       emoji: "💧", title: "رفيق الماء",       route: "/sections/water-tracker",       color: "#2196F3", bg: "#EFF8FF" },
+  { id: "fridge",             emoji: "❄️", title: "ذكاء الثلاجة",    route: "/sections/fridge",             color: "#5D8A3C", bg: "#F0F7EC" },
+  { id: "recipes-library",    emoji: "📖", title: "مكتبة الوصفات",   route: "/sections/recipes-library",    color: "#E85D5D", bg: "#FFF0F0" },
+  { id: "shopping-list",      emoji: "🛒", title: "قائمة التسوق",    route: "/sections/shopping-list",      color: "#7B68EE", bg: "#F3F0FF" },
+  { id: "calorie-calculator", emoji: "⚖️", title: "حاسبة السعرات",  route: "/sections/calorie-calculator", color: "#4ECDC4", bg: "#EEFBFA" },
+  { id: "health-tips",        emoji: "🩺", title: "نصائح صحية",      route: "/sections/health-tips",        color: "#FF6B9D", bg: "#FFF0F5" },
+  { id: "beverages",          emoji: "☕", title: "مشروبات وعصائر",  route: "/sections/beverages",          color: "#8B4513", bg: "#FFF8F0" },
+  { id: "saved-recipes",      emoji: "💝", title: "وصفاتي المحفوظة", route: "/sections/saved-recipes",      color: "#E8A359", bg: "#FFF8F0" },
 ];
 
 export default function HomeScreen() {
@@ -118,31 +116,31 @@ export default function HomeScreen() {
         {/* ─── شبكة الأقسام ─── */}
         <Animated.View entering={FadeInDown.delay(120).duration(350)}
           style={{ paddingHorizontal: 20 }}>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
             {SECTIONS.map((section, i) => (
               <TouchableOpacity
                 key={section.id}
                 onPress={() => router.push(section.route as any)}
                 activeOpacity={0.75}
                 style={{
-                  width: "30.5%",
-                  aspectRatio: 1,
+                  width: "47%",
+                  aspectRatio: 1.1,
                   backgroundColor: section.bg,
-                  borderRadius: 16,
+                  borderRadius: 18,
                   alignItems: "center",
                   justifyContent: "center",
                   borderWidth: 1,
                   borderColor: `${section.color}25`,
-                  padding: 8,
+                  padding: 12,
                 }}
               >
-                <Text style={{ fontSize: 28, marginBottom: 6 }}>{section.emoji}</Text>
+                <Text style={{ fontSize: 38, marginBottom: 8 }}>{section.emoji}</Text>
                 <Text style={{
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: "700",
                   color: colors.foreground,
                   textAlign: "center",
-                  lineHeight: 15,
+                  lineHeight: 18,
                 }}>
                   {section.title}
                 </Text>
