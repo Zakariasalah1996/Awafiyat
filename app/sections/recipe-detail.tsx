@@ -752,7 +752,7 @@ export default function RecipeDetailScreen() {
               </View>
             ))}
 
-            {/* زر الاشتراك */}
+            {/* زر الاشتراك مع التجربة المجانية */}
             <TouchableOpacity
               onPress={() => {
                 setShowSubscriptionModal(false);
@@ -769,7 +769,43 @@ export default function RecipeDetailScreen() {
               }}
             >
               <Text style={{ color: "#fff", fontSize: 16, fontWeight: "800" }}>
-                اشترك الآن 🚀
+                🎁 جرّب مجاناً 3 أيام
+              </Text>
+              <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, marginTop: 2 }}>
+                ثم 5,250 د.ع/شهر • إلغاء في أي وقت
+              </Text>
+            </TouchableOpacity>
+
+            {/* فاصل */}
+            <View style={{ flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 12 }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+              <Text style={{ color: colors.muted, fontSize: 12, marginHorizontal: 10 }}>أو</Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+            </View>
+
+            {/* زر مشاهدة إعلان */}
+            <TouchableOpacity
+              onPress={() => {
+                setShowSubscriptionModal(false);
+                // TODO: تشغيل إعلان AdMob هنا
+                // مؤقتاً: نفتح التحذير مباشرة
+                alert("شكراً! سيتم فتح التحذيرات بعد مشاهدة الإعلان");
+              }}
+              style={{
+                borderWidth: 1.5,
+                borderColor: colors.primary,
+                borderRadius: 16,
+                paddingVertical: 13,
+                paddingHorizontal: 32,
+                width: "100%",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "700" }}>
+                📺 شاهد إعلاناً لفتح التحذيرات
+              </Text>
+              <Text style={{ color: colors.muted, fontSize: 12, marginTop: 2 }}>
+                مجاناً • إعلان قصير 30 ثانية
               </Text>
             </TouchableOpacity>
 
