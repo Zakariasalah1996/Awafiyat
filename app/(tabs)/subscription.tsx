@@ -171,7 +171,7 @@ export default function SubscriptionScreen() {
             <View
               style={{
                 flex: 1,
-                backgroundColor: colors.surface,
+                backgroundColor: "#ffffff",
                 borderRadius: 16,
                 padding: 14,
                 borderWidth: 1.5,
@@ -207,7 +207,7 @@ export default function SubscriptionScreen() {
             <View
               style={{
                 flex: 1,
-                backgroundColor: colors.primary + "12",
+                backgroundColor: "#ffffff",
                 borderRadius: 16,
                 padding: 14,
                 borderWidth: 2,
