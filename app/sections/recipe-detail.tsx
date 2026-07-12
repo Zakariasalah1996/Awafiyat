@@ -260,10 +260,46 @@ export default function RecipeDetailScreen() {
                           color: colors.foreground,
                           textAlign: "right",
                           writingDirection: "rtl",
+                          marginBottom: 6,
                         }}
                       >
                         {warning.message}
                       </Text>
+                      {/* البدائل الصحية */}
+                      {warning.alternatives && warning.alternatives.length > 0 && (
+                        <View style={{
+                          backgroundColor: "#10B98115",
+                          borderRadius: 8,
+                          padding: 8,
+                          marginTop: 2,
+                        }}>
+                          <Text style={{
+                            fontSize: 12,
+                            fontWeight: "700",
+                            color: "#10B981",
+                            textAlign: "right",
+                            writingDirection: "rtl",
+                            marginBottom: 4,
+                          }}>
+                            ✅ البدائل الصحية:
+                          </Text>
+                          {warning.alternatives.map((alt, altIdx) => (
+                            <Text
+                              key={altIdx}
+                              style={{
+                                fontSize: 12,
+                                lineHeight: 18,
+                                color: colors.foreground,
+                                textAlign: "right",
+                                writingDirection: "rtl",
+                                paddingRight: 8,
+                              }}
+                            >
+                              • {alt}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
                     </View>
                   </View>
                 ))}
