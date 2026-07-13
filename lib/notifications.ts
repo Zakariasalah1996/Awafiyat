@@ -382,45 +382,28 @@ export async function getExpoPushToken(): Promise<string | null> {
   try {
     if (Platform.OS === "web") return null;
 
-    // Method 1: Try Expo push token (works with EAS builds)
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-    console.log("[Push] Attempting to get token, projectId:", projectId || "NOT FOUND");
-    
-    if (projectId) {
-      try {
-        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
-        if (tokenData.data) {
-          console.log("[Push] Got Expo token:", tokenData.data?.substring(0, 35) + "...");
-          return tokenData.data;
-        }
-      } catch (e1) {
-        console.warn("[Push] Expo token failed:", (e1 as Error)?.message);
-      }
-    }
-
-    // Method 2: Try native device push token (FCM on Android, APNs on iOS)
+    // PRIMARY: Get native device push token (FCM on Android, APNs on iOS)
     try {
-      console.log("[Push] Trying native device token (FCM)...");
       const deviceToken = await Notifications.getDevicePushTokenAsync();
       const fcmToken = deviceToken.data as string;
       if (fcmToken) {
-        console.log("[Push] Got native FCM token:", fcmToken?.substring(0, 35) + "...");
+        console.log("[Push] Got native FCM token:", fcmToken?.substring(0, 30) + "...");
         return `fcm:${fcmToken}`;
       }
-    } catch (e2) {
-      console.warn("[Push] Native FCM token failed:", (e2 as Error)?.message);
+    } catch (e1) {
+      console.warn("[Push] Native FCM token failed:", (e1 as Error)?.message);
     }
 
-    // Method 3: Try Expo token without projectId (last resort)
-    try {
-      console.log("[Push] Trying Expo token without projectId...");
-      const tokenData = await Notifications.getExpoPushTokenAsync();
-      if (tokenData.data) {
-        console.log("[Push] Got Expo token (no projectId):", tokenData.data?.substring(0, 35) + "...");
+    // FALLBACK: Try Expo push token
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    if (projectId) {
+      try {
+        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+        console.log("[Push] Got Expo token (fallback):", tokenData.data?.substring(0, 30) + "...");
         return tokenData.data;
+      } catch (e2) {
+        console.warn("[Push] Expo token also failed:", (e2 as Error)?.message);
       }
-    } catch (e3) {
-      console.warn("[Push] Expo token (no projectId) failed:", (e3 as Error)?.message);
     }
 
     console.error("[Push] All token methods failed");
@@ -501,49 +484,36 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-    console.log("[Push] Current permission status:", existingStatus);
 
     if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
-      console.log("[Push] After request, status:", finalStatus);
     }
 
     if (finalStatus === "granted") {
-      // Try to get token with retries (5 attempts with increasing delay)
+      // Try to get token with retries
       let token: string | null = null;
-      for (let attempt = 1; attempt <= 5; attempt++) {
-        console.log(`[Push] Getting push token, attempt ${attempt}/5...`);
-        try {
-          token = await getExpoPushToken();
-        } catch (tokenErr) {
-          console.warn(`[Push] Attempt ${attempt} threw:`, (tokenErr as Error)?.message);
-        }
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        console.log(`[Push] Getting push token, attempt ${attempt}/3...`);
+        token = await getExpoPushToken();
         if (token) break;
-        // Increasing delay: 1s, 2s, 3s, 4s, 5s
-        await new Promise((r) => setTimeout(r, 1000 * attempt));
+        await new Promise((r) => setTimeout(r, 2000 * attempt));
       }
 
       if (token) {
         try {
           await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
-          console.log("[Push] Token saved to AsyncStorage:", token.substring(0, 30) + "...");
-        } catch (saveErr) {
-          console.warn("[Push] Failed to save token to AsyncStorage:", saveErr);
-        }
+        } catch {}
         await registerPushToken(token);
-        console.log("[Push] Token registered successfully with server");
+        console.log("[Push] Token registered successfully after permissions granted");
       } else {
-        console.error("[Push] FAILED: Could not get push token after 5 attempts");
-        console.error("[Push] This means the device cannot receive push notifications");
+        console.warn("[Push] Could not get push token after 3 attempts");
       }
-    } else {
-      console.warn("[Push] Permission not granted:", finalStatus);
     }
 
     return finalStatus === "granted";
   } catch (e) {
-    console.error("[Push] requestNotificationPermissions error:", e);
+    console.warn("Notification permissions not available:", e);
     return false;
   }
 }

@@ -59,11 +59,7 @@ export async function registerGuest(): Promise<number | null> {
     let name = "مستخدم عافيات";
     let country = "iraq";
     try {
-      // Try the correct key first (@awafiyat_user_profile), then fallback to legacy key
-      let profileStr = await AsyncStorage.getItem("@awafiyat_user_profile");
-      if (!profileStr) {
-        profileStr = await AsyncStorage.getItem("user_profile");
-      }
+      const profileStr = await AsyncStorage.getItem("user_profile");
       if (profileStr) {
         const profile = JSON.parse(profileStr);
         if (profile.name) name = profile.name;

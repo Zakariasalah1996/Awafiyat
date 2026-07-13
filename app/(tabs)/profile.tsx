@@ -12,7 +12,6 @@ import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useUser, type HealthCondition } from "@/lib/user-context";
-import { useSubscriptionContext } from "@/lib/subscription-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useThemeContext } from "@/lib/theme-provider";
 import {
@@ -36,7 +35,12 @@ const HEALTH_LABELS: Record<HealthCondition, string> = {
   none: "لا أعاني من شيء",
 };
 
-
+const COUNTRY_OPTIONS: { key: string; label: string; flag: string }[] = [
+  { key: "iraq", label: "العراق", flag: "🇮🇶" },
+  { key: "saudi", label: "السعودية", flag: "🇸🇦" },
+  { key: "uae", label: "الإمارات", flag: "🇦🇪" },
+  { key: "egypt", label: "مصر", flag: "🇪🇬" },
+];
 
 // Default meal times
 const MEAL_TIMES = {
@@ -47,8 +51,7 @@ const MEAL_TIMES = {
 
 export default function ProfileScreen() {
   const colors = useColors();
-  const { profile, updateProfile, resetProfile: clearProfile } = useUser();
-  const { isPremium } = useSubscriptionContext();
+  const { profile, updateProfile, resetProfile } = useUser();
   const { colorScheme, setColorScheme } = useThemeContext();
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState("");
@@ -145,7 +148,7 @@ export default function ProfileScreen() {
           style: "destructive",
           onPress: async () => {
             await cancelAllNotifications();
-            await clearProfile();
+            await resetProfile();
             router.replace("/onboarding" as any);
           },
         },
@@ -258,7 +261,7 @@ export default function ProfileScreen() {
           <Text className="text-xl font-bold text-foreground">
             {profile.name || "مستخدم عافيات"}
           </Text>
-          {isPremium && (
+          {profile.isSubscribed && (
             <View className="flex-row items-center mt-1 px-3 py-1 rounded-full" style={{ backgroundColor: "#FFD70030" }}>
               <Text className="text-sm font-medium" style={{ color: "#B8860B" }}>عضوية ذهبية ⭐</Text>
             </View>
@@ -302,7 +305,35 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-
+        {/* Country Selection */}
+        <View className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border" style={{ borderColor: colors.border }}>
+          <View className="flex-row items-center mb-3">
+            <Text className="text-lg ml-2">🌍</Text>
+            <Text className="text-base font-bold text-foreground">الدولة</Text>
+          </View>
+          <View className="flex-row flex-wrap gap-2">
+            {COUNTRY_OPTIONS.map((c) => (
+              <TouchableOpacity
+                key={c.key}
+                onPress={() => { updateProfile({ country: c.key as any }); setHasUnsavedChanges(true); }}
+                className="px-4 py-2.5 rounded-xl flex-row items-center gap-2"
+                style={{
+                  backgroundColor: profile.country === c.key ? `${colors.primary}20` : colors.background,
+                  borderWidth: 1.5,
+                  borderColor: profile.country === c.key ? colors.primary : colors.border,
+                }}
+              >
+                <Text style={{ fontSize: 18 }}>{c.flag}</Text>
+                <Text
+                  className="text-sm font-medium"
+                  style={{ color: profile.country === c.key ? colors.primary : colors.foreground }}
+                >
+                  {c.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
         {/* Health Condition */}
         <View className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border" style={{ borderColor: colors.border }}>
@@ -371,7 +402,27 @@ export default function ProfileScreen() {
           </View>
         )}
 
-
+        {/* Family Members */}
+        <TouchableOpacity
+          onPress={() => router.push("/sections/family-members" as any)}
+          className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border flex-row items-center justify-between"
+          style={{ borderColor: colors.border }}
+          activeOpacity={0.7}
+        >
+          <View className="flex-row items-center">
+            <Text className="text-lg ml-2">👨‍👩‍👧‍👦</Text>
+            <View>
+              <Text className="text-base font-bold text-foreground">أفراد العائلة</Text>
+              <Text className="text-sm text-muted">
+                {profile.familyMembers.length + 1} فرد (أنت + {profile.familyMembers.length})
+              </Text>
+            </View>
+          </View>
+          <View className="flex-row items-center">
+            <Text className="text-sm font-medium" style={{ color: colors.primary }}>إدارة</Text>
+            <MaterialIcons name="chevron-left" size={20} color={colors.muted} />
+          </View>
+        </TouchableOpacity>
 
         {/* Notification Settings */}
         <View className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border" style={{ borderColor: colors.border }}>
