@@ -64,4 +64,3 @@ Thumbs.db
 # Webdev artifacts (checkpoint zips, migrations, etc.)
 .webdev/
 server/firebase-service-account.json
-.project-config.json

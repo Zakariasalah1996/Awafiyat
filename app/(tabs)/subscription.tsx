@@ -1,4 +1,4 @@
-import { Text, View, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useUser } from "@/lib/user-context";
@@ -8,32 +8,55 @@ import { trpc } from "@/lib/trpc";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import * as Haptics from "expo-haptics";
 import { ImpactFeedbackStyle, NotificationFeedbackType } from "expo-haptics";
-import { ScrollView } from "react-native";
 
-// الميزات المدفوعة - مختصرة
+// التسعير موحد بـ USD لجميع الدول
+const PRICING = {
+  default: { currency: "$", monthlyLabel: "4", yearlyLabel: "40" },
+};
+
+// الميزات المدفوعة الكاملة
 const PREMIUM_FEATURES = [
-  { icon: "restaurant",            text: "ذكاء الثلاجة غير محدود",           color: "#4CAF50" },
-  { icon: "health-and-safety",     text: "تحذيرات صحية مخصصة لك",           color: "#4ECDC4" },
-  { icon: "recycling",             text: "تجديد النعمة (5 مرات/يوم)",        color: "#FF9800" },
-  { icon: "medication",            text: "رفيق الدواء بصوت مخصص",           color: "#9C27B0" },
-  { icon: "water-drop",            text: "رفيق الماء مع تذكيرات",           color: "#2196F3" },
-  { icon: "menu-book",             text: "250+ وصفة عراقية وعربية",          color: "#795548" },
+  { icon: "restaurant", text: "ذكاء الثلاجة - اقتراحات وصفات غير محدودة بالذكاء الاصطناعي", color: "#4CAF50" },
+  { icon: "recycling", text: "تجديد النعمة - حوّل بقايا أكلك لوصفة جديدة (5 مرات يومياً)", color: "#FF9800" },
+  { icon: "medication", text: "رفيق الدواء - تذكيرات ذكية بمواعيد أدويتك بصوت مخصص", color: "#9C27B0" },
+  { icon: "water-drop", text: "رفيق الماء - تتبع شرب الماء حسب وزنك مع تذكيرات", color: "#2196F3" },
+  { icon: "calendar-month", text: "جدول طبخ أسبوعي تلقائي مع منبه ذكي لكل وجبة", color: "#E91E63" },
+  { icon: "shopping-cart", text: "قائمة تسوق ذكية مع تذكيرات ومشاركة عبر واتساب", color: "#00BCD4" },
+  { icon: "favorite", text: "حفظ وصفات مفضلة غير محدود + تقييم الوصفات", color: "#E85D5D" },
+  { icon: "health-and-safety", text: "تحذيرات صحية مخصصة حسب حالتك (سكر، ضغط، كوليسترول)", color: "#4ECDC4" },
+  { icon: "family-restroom", text: "إدارة أفراد العائلة مع تذكيرات لكل فرد", color: "#7B68EE" },
+  { icon: "local-fire-department", text: "ميزان السعرات الحرارية - احسب احتياجك اليومي", color: "#FF5722" },
+  { icon: "notifications-active", text: "إشعارات متقدمة وتذكيرات مخصصة لكل شيء", color: "#673AB7" },
+  { icon: "menu-book", text: "مكتبة وصفات كاملة (250+ وصفة عراقية وخليجية وعربية)", color: "#795548" },
+];
+
+const FREE_FEATURES = [
+  "عدد محدود من الوصفات",
+  "استخدام واحد يومياً لذكاء الثلاجة",
+  "بدون رفيق الدواء",
+  "بدون تجديد النعمة",
+  "بدون رفيق الماء",
 ];
 
 export default function SubscriptionScreen() {
   const colors = useColors();
-  const { profile } = useUser();
+  const { profile, updateProfile } = useUser();
   const createSubscription = trpc.subscription.create.useMutation();
   const { packages, isLoading, error, isPremium, purchasePackage, restorePurchases } =
     useSubscriptions();
 
+  const pricing = PRICING.default;
+
   const handleSubscribe = async (packageId: string) => {
     const pkg = packages.find((p) => p.id === packageId);
     if (!pkg) return;
+
     try {
       Haptics.impactAsync(ImpactFeedbackStyle.Medium);
       const success = await purchasePackage(pkg);
+
       if (success) {
+        // حفظ في السيرفر (التحديث المحلي يتم في use-subscriptions)
         try {
           await createSubscription.mutateAsync({
             plan: pkg.period,
@@ -43,10 +66,11 @@ export default function SubscriptionScreen() {
         } catch (e) {
           console.warn("[Subscription] Server save failed:", e);
         }
+
         Haptics.notificationAsync(NotificationFeedbackType.Success);
         Alert.alert("تم الاشتراك بنجاح! 🎉", "ألف عافية عليك، استمتع بجميع الميزات.");
       }
-    } catch {
+    } catch (err) {
       Haptics.notificationAsync(NotificationFeedbackType.Error);
       Alert.alert("خطأ", "حدث خطأ أثناء الشراء. حاول مرة أخرى.");
     }
@@ -57,36 +81,50 @@ export default function SubscriptionScreen() {
       Haptics.impactAsync(ImpactFeedbackStyle.Medium);
       await restorePurchases();
       Alert.alert("تم", "تم استعادة عملياتك الشرائية");
-    } catch {
+    } catch (err) {
       Alert.alert("خطأ", "حدث خطأ أثناء استعادة الشراء");
     }
   };
 
-  // ─── شاشة المشترك ───
+  // إذا كان المستخدم مشتركاً بالفعل - نعتمد على isPremium من RevenueCat كمصدر حقيقي
   if (isPremium) {
     const expiryDate = profile.subscriptionExpiry
       ? new Date(profile.subscriptionExpiry).toLocaleDateString("ar-IQ")
       : "";
+
     return (
-      <ScreenContainer className="p-5">
-        <View className="flex-1 items-center justify-center gap-6">
-          <MaterialIcons name="verified" size={80} color={colors.success} />
-          <Text className="text-3xl font-bold text-foreground">عضوية ذهبية ✨</Text>
-          <Text className="text-muted text-center">شكراً لاشتراكك في ألف عافيات المميزة</Text>
-          <View className="w-full bg-surface rounded-2xl p-5 gap-3">
-            <InfoRow label="نوع الاشتراك" value={profile.subscriptionType === "monthly" ? "شهري" : "سنوي"} />
-            <InfoRow label="تاريخ الانتهاء" value={expiryDate} />
-            <InfoRow label="الحالة" value="نشط ✓" />
+      <ScreenContainer className="p-4">
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+          <Animated.View entering={FadeInDown} className="items-center mb-8">
+            <MaterialIcons name="verified" size={80} color={colors.success} />
+            <Text className="text-3xl font-bold text-foreground mt-4">عضوية ذهبية</Text>
+            <Text className="text-muted mt-2">شكراً لاشتراكك في ألف عافيات المميزة</Text>
+          </Animated.View>
+
+          <View className="bg-surface rounded-2xl p-6 mb-8">
+            <Text className="text-lg font-semibold text-foreground mb-4">تفاصيل الاشتراك</Text>
+            <View className="gap-3">
+              <InfoRow
+                label="نوع الاشتراك"
+                value={profile.subscriptionType === "monthly" ? "شهري" : "سنوي"}
+              />
+              <InfoRow label="تاريخ الانتهاء" value={expiryDate} />
+              <InfoRow label="الحالة" value="نشط ✓" />
+            </View>
           </View>
-          <TouchableOpacity onPress={handleRestore} className="py-3 px-6 rounded-xl border border-border">
-            <Text className="text-muted font-semibold">استعادة عمليات الشراء</Text>
+
+          <TouchableOpacity
+            onPress={handleRestore}
+            className="py-3 px-4 rounded-lg border border-border mb-4"
+          >
+            <Text className="text-center text-muted font-semibold">استعادة عمليات الشراء</Text>
           </TouchableOpacity>
-        </View>
+        </ScrollView>
       </ScreenContainer>
     );
   }
 
-  // ─── تحميل ───
+  // شاشة الاشتراك للمستخدمين غير المشتركين
   if (isLoading) {
     return (
       <ScreenContainer className="items-center justify-center">
@@ -96,201 +134,90 @@ export default function SubscriptionScreen() {
     );
   }
 
-  // فصل الباقتين
-  const monthlyPkg = packages.find((p) => p.period === "monthly");
-  const yearlyPkg  = packages.find((p) => p.period === "yearly");
-
   return (
-    <ScreenContainer>
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 20, paddingBottom: 16 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ─── الرأس ─── */}
-        <Animated.View entering={FadeInDown} className="items-center pt-4 pb-3">
-          <Text
-            style={{ fontSize: 22, fontWeight: "800", color: colors.foreground, textAlign: "center" }}
-          >
-            ألف عافيات المميزة 💎
-          </Text>
-          <Text style={{ fontSize: 13, color: colors.muted, marginTop: 4, textAlign: "center" }}>
-            وصول كامل لجميع الميزات
+    <ScreenContainer className="p-4">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+        {/* الرأس */}
+        <Animated.View entering={FadeInDown} className="mb-8 items-center">
+          <Text className="text-4xl font-bold text-foreground mb-2">ألف عافيات المميزة</Text>
+          <Text className="text-center text-muted">
+            احصل على وصول كامل لجميع الوصفات والميزات المتقدمة
           </Text>
         </Animated.View>
 
-        {/* ─── الميزات - شبكة 2 عمود ─── */}
-        <Animated.View
-          entering={FadeInDown.delay(100)}
-          style={{
-            backgroundColor: colors.surface,
-            borderRadius: 16,
-            padding: 14,
-            marginBottom: 14,
-          }}
-        >
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            {PREMIUM_FEATURES.map((feature, i) => (
-              <View
-                key={i}
-                style={{
-                  width: "47%",
-                  flexDirection: "row-reverse",
-                  alignItems: "center",
-                  gap: 6,
-                  backgroundColor: colors.background,
-                  borderRadius: 10,
-                  padding: 8,
-                }}
-              >
-                <MaterialIcons name={feature.icon as any} size={18} color={feature.color} />
-                <Text
-                  style={{
-                    flex: 1,
-                    fontSize: 11,
-                    color: colors.foreground,
-                    textAlign: "right",
-                    writingDirection: "rtl",
-                    lineHeight: 16,
-                  }}
-                  numberOfLines={2}
-                >
-                  {feature.text}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </Animated.View>
-
-        {/* ─── خطط الاشتراك جنباً إلى جنب ─── */}
-        <Animated.View
-          entering={FadeInDown.delay(200)}
-          style={{ flexDirection: "row", gap: 10, marginBottom: 12 }}
-        >
-          {/* شهري */}
-          {monthlyPkg && (
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: "#ffffff",
-                borderRadius: 16,
-                padding: 14,
-                borderWidth: 1.5,
-                borderColor: colors.border,
-                alignItems: "center",
-                gap: 8,
-              }}
+        {/* الميزات */}
+        <View className="mb-8 bg-surface rounded-2xl p-6 gap-4">
+          {PREMIUM_FEATURES.map((feature, index) => (
+            <Animated.View
+              key={index}
+              entering={FadeInDown.delay(index * 50)}
+              className="flex-row gap-3"
             >
-              <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground }}>
-                شهري
-              </Text>
-              <Text style={{ fontSize: 22, fontWeight: "800", color: colors.primary }}>
-                {monthlyPkg.price}
-              </Text>
-              <Text style={{ fontSize: 11, color: colors.muted }}>{monthlyPkg.pricePerMonth}/شهر</Text>
-              <TouchableOpacity
-                onPress={() => handleSubscribe(monthlyPkg.id)}
-                style={{
-                  backgroundColor: colors.primary,
-                  borderRadius: 12,
-                  paddingVertical: 10,
-                  width: "100%",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>اشترك الآن</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* سنوي */}
-          {yearlyPkg && (
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: "#ffffff",
-                borderRadius: 16,
-                padding: 14,
-                borderWidth: 2,
-                borderColor: colors.primary,
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              {/* شارة التوفير */}
-              <View
-                style={{
-                  backgroundColor: colors.primary,
-                  borderRadius: 20,
-                  paddingHorizontal: 10,
-                  paddingVertical: 3,
-                }}
-              >
-                <Text style={{ color: "#fff", fontSize: 11, fontWeight: "700" }}>توفير 17% ⭐</Text>
+              <MaterialIcons name={feature.icon as any} size={24} color={feature.color} />
+              <View className="flex-1">
+                <Text className="font-semibold text-foreground text-sm">{feature.text}</Text>
               </View>
-              <Text style={{ fontSize: 15, fontWeight: "700", color: colors.foreground }}>
-                سنوي
-              </Text>
-              <Text style={{ fontSize: 22, fontWeight: "800", color: colors.primary }}>
-                {yearlyPkg.price}
-              </Text>
-              <Text style={{ fontSize: 11, color: colors.muted }}>{yearlyPkg.pricePerMonth}/شهر</Text>
+            </Animated.View>
+          ))}
+        </View>
+
+        {/* الخطط */}
+        <View className="mb-8 gap-4">
+          {packages.map((pkg, index) => (
+            <Animated.View
+              key={pkg.id}
+              entering={FadeInDown.delay(index * 100 + 600)}
+              className="rounded-2xl p-6 border-2 border-border bg-surface overflow-hidden"
+            >
+              <View className="flex-row justify-between items-start mb-4">
+                <View>
+                  <Text className="text-xl font-bold text-foreground">
+                    {pkg.period === "yearly" ? "سنوي" : "شهري"}
+                  </Text>
+                  {pkg.period === "yearly" && (
+                    <Text className="text-xs text-success font-semibold mt-1">توفير 17%</Text>
+                  )}
+                </View>
+                <View className="items-end">
+                  <Text className="text-3xl font-bold text-primary">{pkg.price}</Text>
+                  <Text className="text-xs text-muted mt-1">{pkg.pricePerMonth}/شهر</Text>
+                </View>
+              </View>
+
               <TouchableOpacity
-                onPress={() => handleSubscribe(yearlyPkg.id)}
+                onPress={() => handleSubscribe(pkg.id)}
+                className="bg-primary rounded-lg py-3 items-center"
                 style={{
                   backgroundColor: colors.primary,
-                  borderRadius: 12,
-                  paddingVertical: 10,
-                  width: "100%",
-                  alignItems: "center",
                 }}
               >
-                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>اشترك الآن</Text>
+                <Text className="text-white font-semibold">اشترك الآن</Text>
               </TouchableOpacity>
-            </View>
-          )}
-        </Animated.View>
+            </Animated.View>
+          ))}
+        </View>
 
-        {/* خطأ */}
         {error && (
-          <View
-            style={{
-              backgroundColor: colors.error + "15",
-              borderRadius: 10,
-              padding: 12,
-              marginBottom: 10,
-            }}
-          >
-            <Text style={{ color: colors.error, textAlign: "center", fontSize: 13 }}>{error}</Text>
+          <View className="mb-4 bg-error/10 border border-error rounded-lg p-4">
+            <Text className="text-error text-center">{error}</Text>
           </View>
         )}
 
-        {/* ─── استعادة + ملاحظة ─── */}
+        {/* زر استعادة الشراء */}
         <TouchableOpacity
           onPress={handleRestore}
-          style={{
-            paddingVertical: 10,
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: colors.border,
-            alignItems: "center",
-            marginBottom: 10,
-          }}
+          className="py-3 px-4 rounded-lg border border-border mb-4"
         >
-          <Text style={{ color: colors.muted, fontSize: 13, fontWeight: "600" }}>
-            استعادة عمليات الشراء السابقة
-          </Text>
+          <Text className="text-center text-muted font-semibold">استعادة عمليات الشراء السابقة</Text>
         </TouchableOpacity>
 
-        <Text
-          style={{
-            fontSize: 11,
-            color: colors.muted,
-            textAlign: "center",
-            lineHeight: 17,
-          }}
-        >
-          يتجدد الاشتراك تلقائياً. يمكن الإلغاء من إعدادات Google Play.
-        </Text>
+        {/* ملاحظة */}
+        <View className="mt-4 pt-4 border-t border-border">
+          <Text className="text-xs text-muted text-center leading-relaxed">
+            سيتم تحديث الاشتراك تلقائياً في نهاية كل فترة. يمكنك إلغاء الاشتراك في أي وقت من إعدادات
+            Google Play.
+          </Text>
+        </View>
       </ScrollView>
     </ScreenContainer>
   );
@@ -298,9 +225,9 @@ export default function SubscriptionScreen() {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 6 }}>
-      <Text style={{ color: "#888" }}>{label}</Text>
-      <Text style={{ fontWeight: "700" }}>{value}</Text>
+    <View className="flex-row justify-between items-center py-2 border-b border-border/50">
+      <Text className="text-muted">{label}</Text>
+      <Text className="font-semibold text-foreground">{value}</Text>
     </View>
   );
 }
