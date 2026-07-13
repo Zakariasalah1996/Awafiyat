@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import Purchases, { CustomerInfo } from "react-native-purchases";
 import { Platform } from "react-native";
 import { useUser } from "@/lib/user-context";
 
@@ -26,9 +25,26 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const [purchasesModule, setPurchasesModule] = useState<any>(null);
+
+  // تحميل RevenueCat بشكل آمن - إذا فشل لا يتوقف التطبيق
+  const loadPurchases = useCallback(async () => {
+    if (Platform.OS === "web") return null;
+    try {
+      const mod = await import("react-native-purchases");
+      return mod.default || mod;
+    } catch (err) {
+      console.warn("[Subscription] Failed to load react-native-purchases:", err);
+      return null;
+    }
+  }, []);
 
   const syncSubscriptionStatus = useCallback(
-    async (customerInfo: CustomerInfo) => {
+    async (customerInfo: any) => {
+      if (!customerInfo?.entitlements?.active) {
+        setIsPremium(false);
+        return;
+      }
       const active = !!customerInfo.entitlements.active[ENTITLEMENT_ID];
       setIsPremium(active);
 
@@ -41,10 +57,10 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   );
 
   const refreshSubscription = useCallback(async () => {
-    if (Platform.OS === "web") return;
+    if (Platform.OS === "web" || !purchasesModule) return;
     try {
       setIsLoading(true);
-      const customerInfo = await Purchases.getCustomerInfo();
+      const customerInfo = await purchasesModule.getCustomerInfo();
       await syncSubscriptionStatus(customerInfo);
     } catch (err) {
       console.warn("[Subscription] refresh error:", err);
@@ -53,7 +69,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     } finally {
       setIsLoading(false);
     }
-  }, [syncSubscriptionStatus, profile.isSubscribed]);
+  }, [syncSubscriptionStatus, profile.isSubscribed, purchasesModule]);
 
   useEffect(() => {
     if (Platform.OS === "web") {
@@ -66,6 +82,18 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     const init = async () => {
       try {
         setError(null);
+        
+        // تحميل المكتبة بشكل آمن
+        const Purchases = await loadPurchases();
+        if (!Purchases) {
+          console.warn("[Subscription] react-native-purchases not available, using local state");
+          setIsPremium(profile.isSubscribed ?? false);
+          setIsLoading(false);
+          return;
+        }
+
+        setPurchasesModule(Purchases);
+
         if (!initialized) {
           await Purchases.configure({ apiKey: REVENUE_CAT_API_KEY });
           setInitialized(true);
@@ -87,15 +115,18 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
 
   // الاستماع لتغييرات RevenueCat في الوقت الفعلي (مثل انتهاء الاشتراك أو تجديده)
   useEffect(() => {
-    if (Platform.OS === "web" || !initialized) return;
+    if (Platform.OS === "web" || !initialized || !purchasesModule) return;
 
-    Purchases.addCustomerInfoUpdateListener((info: CustomerInfo) => {
-      syncSubscriptionStatus(info).catch(() => {});
-    });
+    try {
+      purchasesModule.addCustomerInfoUpdateListener((info: any) => {
+        syncSubscriptionStatus(info).catch(() => {});
+      });
+    } catch (err) {
+      console.warn("[Subscription] Failed to add listener:", err);
+    }
 
-    // RevenueCat listener لا يدعم إزالة مباشرة في هذا الإصدار
     return () => {};
-  }, [initialized, syncSubscriptionStatus]);
+  }, [initialized, syncSubscriptionStatus, purchasesModule]);
 
   return (
     <SubscriptionContext.Provider value={{ isPremium, isLoading, error, refreshSubscription }}>

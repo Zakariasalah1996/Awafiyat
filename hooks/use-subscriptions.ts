@@ -1,8 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import Purchases, {
-  PurchasesOffering,
-  PurchasesPackage,
-} from 'react-native-purchases';
 import { Platform } from 'react-native';
 import { useSubscriptionContext } from '@/lib/subscription-context';
 import { useUser } from '@/lib/user-context';
@@ -15,8 +11,8 @@ export interface SubscriptionPackage {
   price: string;
   pricePerMonth: string;
   period: 'monthly' | 'yearly';
-  offering: PurchasesOffering;
-  package: PurchasesPackage;
+  offering: any;
+  package: any;
 }
 
 export interface UseSubscriptionsReturn {
@@ -32,6 +28,7 @@ export function useSubscriptions(): UseSubscriptionsReturn {
   const [packages, setPackages] = useState<SubscriptionPackage[]>([]);
   const [pkgLoading, setPkgLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [purchasesSDK, setPurchasesSDK] = useState<any>(null);
 
   // نستخدم SubscriptionContext كمصدر حقيقي لحالة الاشتراك
   const { isPremium, isLoading: ctxLoading, refreshSubscription } = useSubscriptionContext();
@@ -47,6 +44,20 @@ export function useSubscriptions(): UseSubscriptionsReturn {
     const fetchOfferings = async () => {
       try {
         setPkgLoading(true);
+
+        // تحميل المكتبة بشكل آمن
+        let Purchases: any;
+        try {
+          const mod = await import('react-native-purchases');
+          Purchases = mod.default || mod;
+        } catch (loadErr) {
+          console.warn('[Subscriptions] Failed to load react-native-purchases:', loadErr);
+          setPkgLoading(false);
+          return;
+        }
+
+        setPurchasesSDK(Purchases);
+
         const offerings = await Purchases.getOfferings();
 
         if (!offerings) {
@@ -57,8 +68,6 @@ export function useSubscriptions(): UseSubscriptionsReturn {
 
         const availablePackages: SubscriptionPackage[] = [];
 
-        // استخدم الـ Offerings المحددة بأسماء صريحة (rc_monthly$ و rc_annual$)
-        // لا نعتمد على الـ default لأن RevenueCat يسمح بـ offering واحد فقط كـ default
         const monthlyOffering = offerings.all?.['rc_monthly$'];
         const annualOffering = offerings.all?.['rc_annual$'];
         
@@ -70,18 +79,18 @@ export function useSubscriptions(): UseSubscriptionsReturn {
         
         // أضف المنتجات من الـ Offering الشهري
         if (monthlyOffering?.availablePackages) {
-          monthlyOffering.availablePackages.forEach((pkg) => {
+          monthlyOffering.availablePackages.forEach((pkg: any) => {
             const pricing = pkg.product.priceString;
-          const period = pkg.product.subscriptionPeriod;
+            const period = pkg.product.subscriptionPeriod;
 
-          let periodType: 'monthly' | 'yearly' = 'monthly';
-          let pricePerMonth = pricing;
+            let periodType: 'monthly' | 'yearly' = 'monthly';
+            let pricePerMonth = pricing;
 
-          if (period?.includes('P1Y')) {
-            periodType = 'yearly';
-            const yearlyPrice = parseFloat(pkg.product.price.toString());
-            pricePerMonth = (yearlyPrice / 12).toFixed(2);
-          }
+            if (period?.includes('P1Y')) {
+              periodType = 'yearly';
+              const yearlyPrice = parseFloat(pkg.product.price.toString());
+              pricePerMonth = (yearlyPrice / 12).toFixed(2);
+            }
 
             availablePackages.push({
               id: pkg.identifier,
@@ -97,7 +106,7 @@ export function useSubscriptions(): UseSubscriptionsReturn {
         
         // أضف المنتجات من الـ Offering السنوي
         if (annualOffering?.availablePackages) {
-          annualOffering.availablePackages.forEach((pkg) => {
+          annualOffering.availablePackages.forEach((pkg: any) => {
             const pricing = pkg.product.priceString;
             const period = pkg.product.subscriptionPeriod;
 
@@ -142,14 +151,17 @@ export function useSubscriptions(): UseSubscriptionsReturn {
 
   const purchasePackage = useCallback(
     async (pkg: SubscriptionPackage): Promise<boolean> => {
+      if (!purchasesSDK) {
+        setError('خدمة الاشتراك غير متاحة');
+        return false;
+      }
       try {
         setError(null);
-        const result = await Purchases.purchasePackage(pkg.package);
+        const result = await purchasesSDK.purchasePackage(pkg.package);
 
         const hasPremium = !!result.customerInfo.entitlements.active[ENTITLEMENT_ID];
 
         if (hasPremium) {
-          // تحديث حالة الاشتراك في AsyncStorage
           const expiry = new Date();
           if (pkg.period === 'monthly') {
             expiry.setMonth(expiry.getMonth() + 1);
@@ -162,7 +174,6 @@ export function useSubscriptions(): UseSubscriptionsReturn {
             subscriptionExpiry: expiry.toISOString(),
           });
 
-          // تحديث SubscriptionContext
           await refreshSubscription();
         }
 
@@ -179,13 +190,17 @@ export function useSubscriptions(): UseSubscriptionsReturn {
         return false;
       }
     },
-    [updateProfile, refreshSubscription]
+    [updateProfile, refreshSubscription, purchasesSDK]
   );
 
   const restorePurchases = useCallback(async () => {
+    if (!purchasesSDK) {
+      setError('خدمة الاشتراك غير متاحة');
+      return;
+    }
     try {
       setError(null);
-      const customerInfo = await Purchases.restorePurchases();
+      const customerInfo = await purchasesSDK.restorePurchases();
       const hasPremium = !!customerInfo.entitlements.active[ENTITLEMENT_ID];
 
       await updateProfile({ isSubscribed: hasPremium });
@@ -194,7 +209,7 @@ export function useSubscriptions(): UseSubscriptionsReturn {
       console.error('خطأ في استعادة الشراء:', err);
       setError(err instanceof Error ? err.message : 'خطأ في استعادة الشراء');
     }
-  }, [updateProfile, refreshSubscription]);
+  }, [updateProfile, refreshSubscription, purchasesSDK]);
 
   return {
     packages,
