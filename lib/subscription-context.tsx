@@ -1,10 +1,31 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import Purchases, { CustomerInfo } from "react-native-purchases";
 import { Platform } from "react-native";
 import { useUser } from "@/lib/user-context";
 
 const REVENUE_CAT_API_KEY = "goog_hkYvXqzkoUXOZWyGdoshKWXRRIW";
 const ENTITLEMENT_ID = "premium";
+
+// Lazy load react-native-purchases to avoid crash if native module is not available
+let PurchasesModule: any = null;
+let PurchasesError: Error | null = null;
+
+async function getPurchasesModule() {
+  if (PurchasesModule !== null) return PurchasesModule;
+  if (PurchasesError) throw PurchasesError;
+
+  try {
+    PurchasesModule = await import("react-native-purchases");
+    return PurchasesModule.default || PurchasesModule;
+  } catch (err) {
+    PurchasesError = err as Error;
+    console.warn("[Subscription] Failed to load react-native-purchases:", err);
+    throw err;
+  }
+}
+
+interface CustomerInfo {
+  entitlements: { active: Record<string, any> };
+}
 
 interface SubscriptionContextType {
   isPremium: boolean;
@@ -44,6 +65,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     if (Platform.OS === "web") return;
     try {
       setIsLoading(true);
+      const Purchases = await getPurchasesModule();
       const customerInfo = await Purchases.getCustomerInfo();
       await syncSubscriptionStatus(customerInfo);
     } catch (err) {
@@ -67,9 +89,11 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       try {
         setError(null);
         if (!initialized) {
+          const Purchases = await getPurchasesModule();
           await Purchases.configure({ apiKey: REVENUE_CAT_API_KEY });
           setInitialized(true);
         }
+        const Purchases = await getPurchasesModule();
         const customerInfo = await Purchases.getCustomerInfo();
         await syncSubscriptionStatus(customerInfo);
       } catch (err) {
@@ -89,9 +113,16 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (Platform.OS === "web" || !initialized) return;
 
-    Purchases.addCustomerInfoUpdateListener((info: CustomerInfo) => {
-      syncSubscriptionStatus(info).catch(() => {});
-    });
+    (async () => {
+      try {
+        const Purchases = await getPurchasesModule();
+        Purchases.addCustomerInfoUpdateListener((info: CustomerInfo) => {
+          syncSubscriptionStatus(info).catch(() => {});
+        });
+      } catch (err) {
+        console.warn("[Subscription] Failed to add listener:", err);
+      }
+    })();
 
     // RevenueCat listener لا يدعم إزالة مباشرة في هذا الإصدار
     return () => {};
