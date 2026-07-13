@@ -49,7 +49,8 @@ export function useSubscriptions(): UseSubscriptionsReturn {
         setPkgLoading(true);
         const offerings = await Purchases.getOfferings();
 
-        if (!offerings.current) {
+        if (!offerings) {
+          console.warn('لا توجد عروض متاحة');
           setPackages([]);
           return;
         }
@@ -57,13 +58,20 @@ export function useSubscriptions(): UseSubscriptionsReturn {
         const availablePackages: SubscriptionPackage[] = [];
 
         // استخدم الـ Offerings المحددة بأسماء صريحة (rc_monthly$ و rc_annual$)
-        const monthlyOffering = offerings.all['rc_monthly$'];
-        const annualOffering = offerings.all['rc_annual$'];
+        // لا نعتمد على الـ default لأن RevenueCat يسمح بـ offering واحد فقط كـ default
+        const monthlyOffering = offerings.all?.['rc_monthly$'];
+        const annualOffering = offerings.all?.['rc_annual$'];
+        
+        console.log('Offerings available:', {
+          monthly: !!monthlyOffering,
+          annual: !!annualOffering,
+          allKeys: Object.keys(offerings.all || {}),
+        });
         
         // أضف المنتجات من الـ Offering الشهري
-        if (monthlyOffering) {
+        if (monthlyOffering?.availablePackages) {
           monthlyOffering.availablePackages.forEach((pkg) => {
-          const pricing = pkg.product.priceString;
+            const pricing = pkg.product.priceString;
           const period = pkg.product.subscriptionPeriod;
 
           let periodType: 'monthly' | 'yearly' = 'monthly';
@@ -88,7 +96,7 @@ export function useSubscriptions(): UseSubscriptionsReturn {
         }
         
         // أضف المنتجات من الـ Offering السنوي
-        if (annualOffering) {
+        if (annualOffering?.availablePackages) {
           annualOffering.availablePackages.forEach((pkg) => {
             const pricing = pkg.product.priceString;
             const period = pkg.product.subscriptionPeriod;
@@ -113,6 +121,12 @@ export function useSubscriptions(): UseSubscriptionsReturn {
             });
           });
         }
+
+        console.log('Packages loaded:', availablePackages.length, availablePackages.map(p => ({
+          id: p.id,
+          period: p.period,
+          price: p.price,
+        })));
 
         setPackages(availablePackages);
       } catch (err) {
