@@ -19,9 +19,11 @@ import Animated, {
 import { useColors } from "@/hooks/use-colors";
 import { LinearGradient } from "expo-linear-gradient";
 
-// Force RTL
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
+// Force RTL - only if not already set to prevent restart loop
+if (!I18nManager.isRTL) {
+  I18nManager.allowRTL(true);
+  I18nManager.forceRTL(true);
+}
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -40,6 +42,17 @@ const HEALTH_CONDITIONS: { id: HealthCondition; label: string; emoji: string }[]
   { id: "none", label: "لا أعاني من شيء", emoji: "💪" },
 ];
 
+const FEATURES = [
+  { emoji: "📚", label: "مكتبة وصفات" },
+  { emoji: "❄️", label: "ذكاء الثلاجة" },
+  { emoji: "🛡️", label: "تحذيرات صحية" },
+  { emoji: "📅", label: "جدولة وجبات" },
+  { emoji: "💊", label: "رفيق الدواء" },
+  { emoji: "💧", label: "رفيق الماء" },
+  { emoji: "♻️", label: "تجديد النعمة" },
+  { emoji: "🛒", label: "قائمة التسوق" },
+];
+
 export default function OnboardingScreen() {
   const { updateProfile } = useUser();
   const colors = useColors();
@@ -49,6 +62,10 @@ export default function OnboardingScreen() {
   const [selectedCondition, setSelectedCondition] = useState<HealthCondition>("none");
 
   const handleStart = () => {
+    setStep(1);
+  };
+
+  const handleCustomize = () => {
     setStep(1);
   };
 
@@ -79,7 +96,6 @@ export default function OnboardingScreen() {
       healthCondition: condition,
       onboardingComplete: true,
     });
-    // إذا اختار مرضاً، نوجهه لإعداد رفيق الدواء
     if (condition !== "none") {
       router.replace("/sections/wellness/medication-setup" as any);
     } else {
@@ -87,103 +103,131 @@ export default function OnboardingScreen() {
     }
   };
 
-  // Step 0: Welcome - تصميم مبهر
+  // Step 0: Welcome - تدرج أخضر بسيط مع أيقونات الميزات
   if (step === 0) {
     return (
       <View style={{ flex: 1 }}>
-        {/* صورة الخلفية */}
-        <Animated.View entering={FadeIn.duration(800)} style={{ flex: 1 }}>
-          <Image
-            source={require("@/assets/images/welcome-hero.jpg")}
-            style={{
-              width: SCREEN_WIDTH,
-              height: SCREEN_HEIGHT,
-              position: "absolute",
-              top: 0,
-              left: 0,
-            }}
-            resizeMode="cover"
-          />
-          {/* تدرج لوني يغطي الشاشة بالكامل */}
-          <LinearGradient
-            colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.2)", "rgba(0,0,0,0.5)", "rgba(0,0,0,0.8)"]}
-            locations={[0, 0.25, 0.55, 0.85]}
-            style={{
-              position: "absolute",
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-            }}
-          />
-        </Animated.View>
-
-        {/* المحتوى فوق الصورة - يملأ الشاشة بالكامل */}
-        <View
+        <LinearGradient
+          colors={["#e8f5e9", "#c8e6c9", "#a5d6a7", "#81c784"]}
+          locations={[0, 0.3, 0.6, 1]}
           style={{
             position: "absolute",
             top: 0,
             bottom: 0,
             left: 0,
             right: 0,
-            paddingHorizontal: 32,
+          }}
+        />
+
+        <View
+          style={{
+            flex: 1,
+            paddingHorizontal: 24,
             justifyContent: "center",
             alignItems: "center",
           }}
         >
-          {/* الشعار - في الأعلى */}
-          <Animated.View entering={FadeInDown.delay(200).duration(600)} style={{ alignItems: "center", marginTop: -SCREEN_HEIGHT * 0.12 }}>
+          {/* الشعار */}
+          <Animated.View entering={FadeInDown.delay(200).duration(600)} style={{ alignItems: "center" }}>
             <Image
               source={require("@/assets/images/icon.png")}
               style={{
-                width: 110,
-                height: 110,
-                borderRadius: 26,
-                marginBottom: 24,
+                width: 100,
+                height: 100,
+                borderRadius: 22,
+                marginBottom: 16,
               }}
             />
           </Animated.View>
 
-          {/* النص - أكبر وفي الوسط */}
+          {/* اسم التطبيق */}
           <Animated.View entering={FadeInDown.delay(400).duration(600)} style={{ alignItems: "center" }}>
             <Text
               style={{
-                fontSize: 42,
+                fontSize: 36,
                 fontWeight: "bold",
-                color: "#FFFFFF",
+                color: "#2e7d32",
                 textAlign: "center",
-                marginBottom: 12,
+                marginBottom: 8,
               }}
             >
               ألف عافيات
             </Text>
             <Text
               style={{
-                fontSize: 20,
-                color: "rgba(255,255,255,0.9)",
+                fontSize: 16,
+                color: "#4a7c4f",
                 textAlign: "center",
-                lineHeight: 32,
+                marginBottom: 28,
               }}
             >
-              أهلاً وسهلاً بك{"\n"}حيث نُطعم أجسادنا بالصحة والمحبة
+              نرتب مطبخك وصحتك معاً
             </Text>
           </Animated.View>
 
-          {/* زر لنبدأ - في وسط الشاشة بالضبط */}
-          <Animated.View entering={FadeInUp.delay(700).duration(500)} style={{ marginTop: 40, width: "100%" }}>
+          {/* أيقونات الميزات - 8 أيقونات في صفين */}
+          <Animated.View entering={FadeIn.delay(600).duration(500)} style={{ width: "100%", marginBottom: 8 }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 12 }}>
+              {FEATURES.map((feature, index) => (
+                <View
+                  key={index}
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 16,
+                    backgroundColor: "rgba(255,255,255,0.85)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderWidth: 1,
+                    borderColor: "rgba(46,125,50,0.2)",
+                  }}
+                >
+                  <Text style={{ fontSize: 22, marginBottom: 2 }}>{feature.emoji}</Text>
+                  <Text style={{ fontSize: 9, color: "#2e7d32", fontWeight: "600", textAlign: "center" }}>
+                    {feature.label}
+                  </Text>
+                </View>
+              ))}
+            </View>
+            <Text style={{ textAlign: "center", color: "#4a7c4f", fontSize: 13, marginTop: 10 }}>
+              ✨ والكثير غيرها...
+            </Text>
+          </Animated.View>
+
+          {/* الأزرار */}
+          <Animated.View entering={FadeInUp.delay(800).duration(500)} style={{ width: "100%", marginTop: 24 }}>
             <TouchableOpacity
               onPress={handleStart}
               style={{
                 width: "100%",
-                paddingVertical: 18,
-                borderRadius: 20,
+                paddingVertical: 16,
+                borderRadius: 16,
                 alignItems: "center",
-                backgroundColor: colors.primary,
+                backgroundColor: "#2e7d32",
               }}
               activeOpacity={0.8}
             >
-              <Text style={{ color: "#FFFFFF", fontSize: 20, fontWeight: "bold" }}>
-                لنبدأ
+              <Text style={{ color: "#FFFFFF", fontSize: 18, fontWeight: "bold" }}>
+                ابدأ الآن
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={handleCustomize}
+              style={{
+                width: "100%",
+                paddingVertical: 14,
+                borderRadius: 16,
+                alignItems: "center",
+                backgroundColor: "rgba(255,255,255,0.8)",
+                marginTop: 12,
+                borderWidth: 1,
+                borderColor: "rgba(46,125,50,0.3)",
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={{ color: "#2e7d32", fontSize: 16, fontWeight: "600" }}>
+                ✨ تخصيص التجربة
               </Text>
             </TouchableOpacity>
           </Animated.View>
