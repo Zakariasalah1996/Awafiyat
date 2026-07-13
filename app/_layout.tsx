@@ -17,6 +17,7 @@ import {
   ACTION_VIEW_RECIPE,
   cancelMealReminder,
 } from "@/lib/notifications";
+import { syncRecipeImages } from "@/lib/recipe-image-sync";
 import { registerGuest } from "@/lib/guest-auth";
 import { useRouter } from "expo-router";
 import { AlarmProvider } from "@/lib/alarm-context";
@@ -41,7 +42,6 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { UserProvider } from "@/lib/user-context";
-import { SubscriptionProvider } from "@/lib/subscription-context";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -65,6 +65,8 @@ function RootLayoutInner() {
 
   useEffect(() => {
     initManusRuntime();
+    // Sync recipe images from server on app start
+    syncRecipeImages().catch((e) => console.warn("[RecipeImageSync] Error:", e));
     // Auto-register as guest user
     registerGuest().catch((e) => console.warn("[Guest] Error:", e));
   }, []);
@@ -73,50 +75,21 @@ function RootLayoutInner() {
   useEffect(() => {
     if (Platform.OS === "web") return;
 
-    const registerPushFlow = async () => {
-      try {
-        // Wait 3 seconds for Firebase/app to fully initialize
-        await new Promise((r) => setTimeout(r, 3000));
-
-        console.log("[Push] Starting auto-registration flow...");
-        const granted = await requestNotificationPermissions();
+    // Request permissions and register push token automatically
+    requestNotificationPermissions()
+      .then(async (granted) => {
         console.log("[Push] Auto-registration result:", granted ? "granted" : "denied");
-
         if (granted) {
-          // Re-register saved token to ensure it's in the server DB
           const savedToken = await getSavedPushToken();
           if (savedToken) {
             console.log("[Push] Re-registering saved token on startup...");
             await registerPushToken(savedToken);
           }
         }
-
-        // Retry registration after 10 seconds with userId (guest should be ready by then)
-        setTimeout(async () => {
-          try {
-            const savedToken2 = await getSavedPushToken();
-            if (savedToken2) {
-              console.log("[Push] Re-registering with userId after delay...");
-              await registerPushToken(savedToken2);
-            } else {
-              // If still no token, try one more time to get it
-              console.log("[Push] No saved token, retrying full flow...");
-              await requestNotificationPermissions();
-            }
-          } catch {}
-        }, 10000);
-      } catch (err) {
+      })
+      .catch((err) => {
         console.warn("[Push] Auto-registration error:", err);
-        // Retry after 15 seconds on failure
-        setTimeout(async () => {
-          try {
-            await requestNotificationPermissions();
-          } catch {}
-        }, 15000);
-      }
-    };
-
-    registerPushFlow();
+      });
 
     // إعادة جدولة الإشعارات بالإعدادات الحالية عند فتح التطبيق
     refreshAllAlarms().catch((e) => console.warn("[Notifications] Refresh failed:", e));
@@ -260,7 +233,6 @@ function RootLayoutInner() {
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <UserProvider>
-        <SubscriptionProvider>
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
             <Stack screenOptions={{ headerShown: false }}>
@@ -284,7 +256,6 @@ function RootLayoutInner() {
             <StatusBar style="auto" />
           </QueryClientProvider>
         </trpc.Provider>
-        </SubscriptionProvider>
       </UserProvider>
     </GestureHandlerRootView>
   );

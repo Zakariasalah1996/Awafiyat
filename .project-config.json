@@ -1,0 +1,54 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [
+    "db",
+    "server",
+    "user"
+  ],
+  "dev_command": "pnpm run dev",
+  "env_vars": {
+    "DATABASE_URL": "mysql://JPBqbo33VQPZVp4.root:6BAlS8gOA9H1g9By7CPz@gateway05.us-east-1.prod.aws.tidbcloud.com:4000/MMvdQJEHVXpvsqF4pAkPm2?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": [
+    "no_db_push"
+  ],
+  "git_remote": {
+    "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2",
+    "access_key_id": "ASIAZV3A2ECZO635ABXP",
+    "secret_access_key": "gpPR5oEjPpYNQM0cRSvXSHTAGxeKMSSupjEbdKg0",
+    "session_token": "IQoJb3JpZ2luX2VjEDAaCXVzLWVhc3QtMSJIMEYCIQDZX5FSXqnRn2qEiLyIStECvL8t7/4WLqB2ZwrXcVc2DgIhAPMX8WzsYJFeGIP4YfXwTBI1VzVSSV4sxRsy7fHkU3vSKv8DCPn//////////wEQBBoMNjY1Mzg2MDk4ODY2IgzTX6zXRvz7xMvzvEcq0wOF2gXQ7T5ek3elMEA43fSCAq+mWeHbvRUbiDjYA1jXUgDVgGyCu5wn22xPr/S1DdZAgp4WKDZIQCmT4DY4M5AIUrBcTgEZ4YI+TSmluf5J2y9+x7mmS/70FQID4Auhfq1Qmv03aSOSHdpK0G6uVFYVhsCeEujoZgfDgc0CPGUeVk0Kew5OdkTvR1IIg+uaoYrOw4rv3sUS6SRe1Filw6q6yPZfKWdnnTecEjutVhGeakscbG86ell5z4sTGfvRwb+4TSom4HSFuzAiTMPKwzetk7Y2qmzSrAZkK69k73cyy3Vhmd2Moz5jETqBGfehaGW+McxLHBPLvbC1xG4caciKeNi6LKStzanbMNkvlsvQ0E+/rmMseYCzRYGlFJOvtYzqdHIOWjjqiOsjppH+er/Kx4Y2eKnSXYhr8fUHFb+xaK5noO5JPgLERTehSST5H/TDrWMAHbBqRswX9jems/6RmJUvJfDFEIlTuaxrzl0qMxV91W5ytTdq+RIeg0y9BIb5nkxikB6IV7ngBZzPiMDUQGC//4D/Bwm7TF8sEAVXKCetu8ScEY0N0kEuj/29knn+hf06fPVODlsewYejRmcy++XXFI4LOJO9hTL4FbDD6/40aTDurtLSBjqcAWi2EEYxz4DCaGda/j0wmOMRBPRVszCkYt3+K5gqfrhfdaU/2w5V9sim+XO+oLRwsxz0G5kCjJRuXEQUf/BkLbTbBJ1348e4ObZuT75wfmrAIKil5/Hk9PwrEFPGlzo5QzBPzZ5QrMSOPonwJ3Mw3d4yUHf9WgH832LICs2v7r0PUchN85Wd/MtpxnOEauggbi2V9R9QL3oMxxpbcg==",
+    "expiration": "2026-07-13T19:44:46.000Z",
+    "backend": "GIT_BACKEND_S3"
+  },
+  "name": "awafiyat",
+  "path": "/home/ubuntu/awafiyat",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "PRojD3B9Bsgs44Ranyhkwq",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "EXPO_APP_QR_URL": "exps://8081-iblnm5fe9urocof289jeu-46bab3b8.us2.manus.computer",
+    "EXPO_PACKAGER_PROXY_URL": "https://8081-iblnm5fe9urocof289jeu-46bab3b8.us2.manus.computer",
+    "EXPO_PUBLIC_API_BASE_URL": "https://3000-iblnm5fe9urocof289jeu-46bab3b8.us2.manus.computer",
+    "JWT_SECRET": "FgjhZV4fPx335GpMRwNM24",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "زكريا صلاح",
+    "OWNER_OPEN_ID": "d5EzgpKttQ7HpNZLUPiKcx",
+    "R2_ACCESS_KEY_ID": "4b5deaea2f6355c2fa4d56443826191c",
+    "R2_ACCOUNT_ID": "4ae55b3c5dd50d13a7b4c040d31f7a1e",
+    "R2_BUCKET_NAME": "awafiyat-images",
+    "R2_PUBLIC_URL": "https://pub-88cb4a50fada407899a2ef2b456568a1.r2.dev",
+    "R2_SECRET_ACCESS_KEY": "8dbd7f3281cec9ba96f396f5a34dcffc4a99ae6c5c03a2873164c7956d4257e3",
+    "REACT_NATIVE_PACKAGER_HOSTNAME": "8081-iblnm5fe9urocof289jeu-46bab3b8.us2.manus.computer",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "605b8f72-1093-4c31-abfd-77a7ea40e6bc",
+    "VITE_APP_ID": "MMvdQJEHVXpvsqF4pAkPm2",
+    "VITE_APP_LOGO": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/DmjftojniSSrItKa.png",
+    "VITE_APP_TITLE": "ألف عافيات",
+    "VITE_FRONTEND_FORGE_API_KEY": "X7MoTZNsAtBPhkiaTAvVRc",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im",
+    "Zaki": "Zoaoaoaoaooaoaao"
+  },
+  "template_id": "app",
+  "test_command": "pnpm test"
+}

@@ -11,7 +11,6 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useUser } from "@/lib/user-context";
-import { useSubscriptionContext } from "@/lib/subscription-context";
 import {
   RECIPES,
   type Recipe,
@@ -29,7 +28,7 @@ import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
-import { useRecipeImages, getImageFromMap } from "@/hooks/use-recipe-images";
+import { getRecipeCustomImage } from "@/lib/recipe-image-sync";
 import * as Haptics from "expo-haptics";
 
 I18nManager.forceRTL(true);
@@ -96,9 +95,6 @@ export default function RecipesLibraryScreen() {
   const colors = useColors();
   const params = useLocalSearchParams<{ category?: string; mealType?: string }>();
   const { profile, saveRecipe, unsaveRecipe } = useUser();
-  const { isPremium } = useSubscriptionContext();
-  // Get recipe images map (fetches from server on mount)
-  const recipeImages = useRecipeImages();
 
   const [activeFilter, setActiveFilter] = useState<FilterType>(
     (params.category as FilterType) || "all"
@@ -190,7 +186,7 @@ export default function RecipesLibraryScreen() {
       const originFlag = item.origin ? ORIGIN_FLAG[item.origin] || "" : "";
       const originLabel = item.origin ? ORIGIN_LABEL[item.origin] || "" : "";
       const isFree = isRecipeFree(item.id);
-      const isLocked = !isFree && !isPremium;
+      const isLocked = !isFree && !profile.isSubscribed;
 
       return (
         <TouchableOpacity
@@ -235,7 +231,7 @@ export default function RecipesLibraryScreen() {
             }}
           >
             <Image
-              source={getImageFromMap(recipeImages, item.id) ? { uri: getImageFromMap(recipeImages, item.id)! } : (item.image ? getFoodCategoryImage(item.image) : getFoodCategoryImage("iraqi-rice"))}
+              source={getRecipeCustomImage(item.id) ? { uri: getRecipeCustomImage(item.id)! } : (item.image ? getFoodCategoryImage(item.image) : getFoodCategoryImage("iraqi-rice"))}
               style={{ width: "100%", height: "100%" }}
               contentFit="cover"
               transition={200}
@@ -335,7 +331,7 @@ export default function RecipesLibraryScreen() {
         </TouchableOpacity>
       );
     },
-    [colors, profile.savedRecipes, profile.healthCondition, handleToggleSave, router, recipeImages]
+    [colors, profile.savedRecipes, profile.healthCondition, handleToggleSave, router]
   );
 
   return (

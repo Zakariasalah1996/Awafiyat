@@ -12,7 +12,6 @@ import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useUser, type HealthCondition } from "@/lib/user-context";
-import { useSubscriptionContext } from "@/lib/subscription-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useThemeContext } from "@/lib/theme-provider";
 import {
@@ -47,8 +46,7 @@ const MEAL_TIMES = {
 
 export default function ProfileScreen() {
   const colors = useColors();
-  const { profile, updateProfile, resetProfile: clearProfile } = useUser();
-  const { isPremium } = useSubscriptionContext();
+  const { profile, updateProfile, resetProfile } = useUser();
   const { colorScheme, setColorScheme } = useThemeContext();
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState("");
@@ -145,7 +143,7 @@ export default function ProfileScreen() {
           style: "destructive",
           onPress: async () => {
             await cancelAllNotifications();
-            await clearProfile();
+            await resetProfile();
             router.replace("/onboarding" as any);
           },
         },
@@ -258,7 +256,7 @@ export default function ProfileScreen() {
           <Text className="text-xl font-bold text-foreground">
             {profile.name || "مستخدم عافيات"}
           </Text>
-          {isPremium && (
+          {profile.isSubscribed && (
             <View className="flex-row items-center mt-1 px-3 py-1 rounded-full" style={{ backgroundColor: "#FFD70030" }}>
               <Text className="text-sm font-medium" style={{ color: "#B8860B" }}>عضوية ذهبية ⭐</Text>
             </View>

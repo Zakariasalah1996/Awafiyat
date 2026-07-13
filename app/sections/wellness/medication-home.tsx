@@ -15,7 +15,6 @@ import {
   TIME_PERIODS,
 } from "@/lib/medication-context";
 import { useUser } from "@/lib/user-context";
-import { useSubscriptionContext } from "@/lib/subscription-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { cancelMedicationReminder } from "@/lib/medication-notifications";
@@ -40,14 +39,13 @@ export default function MedicationHomeScreen() {
   const colors = useColors();
   const { state, deleteMedication, canAddMoreMedications, recordIntake, getIntakeForDate, getWeeklyAdherence } = useMedication();
   const { profile } = useUser();
-  const { isPremium } = useSubscriptionContext();
 
   const activeMeds = state.medications.filter((m) => m.isActive);
   const hasMeds = activeMeds.length > 0;
   const today = new Date().toISOString().split("T")[0];
 
   const handleAddMedication = () => {
-    if (!canAddMoreMedications(isPremium)) {
+    if (!canAddMoreMedications(profile.isSubscribed)) {
       Alert.alert(
         "اشتراك مطلوب 👑",
         "الدواء الأول مجاني! لإضافة أدوية إضافية، يرجى الاشتراك في النسخة الكاملة.",
@@ -387,7 +385,7 @@ export default function MedicationHomeScreen() {
           </TouchableOpacity>
 
           {/* ملاحظة الاشتراك */}
-          {!isPremium && activeMeds.length >= 1 && (
+          {!profile.isSubscribed && activeMeds.length >= 1 && (
             <View className="mt-3 px-4 py-3 rounded-xl" style={{ backgroundColor: "#FFF3E0" }}>
               <Text
                 className="text-xs text-center leading-5"

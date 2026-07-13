@@ -14,7 +14,6 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { trpc } from "@/lib/trpc";
 import { useUser } from "@/lib/user-context";
-import { useSubscriptionContext } from "@/lib/subscription-context";
 import { useColors } from "@/hooks/use-colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -37,7 +36,7 @@ export default function LeftoversRenewScreen() {
   const router = useRouter();
   const colors = useColors();
   const { profile } = useUser();
-  const { isPremium: isSubscribed } = useSubscriptionContext();
+  const isSubscribed = profile.isSubscribed;
 
   const [inputText, setInputText] = useState("");
   const [storageLocation, setStorageLocation] = useState<StorageLocation | null>(null);
