@@ -529,3 +529,46 @@
 ## الدفعة 59.13 - إصلاح FCM tokens المنتهية الصلاحية
 - [x] تعديل sendPushViaFCM لحذف tokens التي تُعطي خطأ UNREGISTERED تلقائياً
 - [x] إضافة دالة deactivatePushToken في db.ts واستخدامها عند الإرسال
+
+## الدفعة 60 - رفع صور الوصفات من لوحة التحكم
+- [ ] فحص schema قاعدة البيانات لجدول recipe_images
+- [ ] إضافة API endpoint لرفع الصور إلى S3 في السيرفر
+- [ ] تحديث لوحة التحكم: إضافة زر رفع صورة لكل وصفة
+- [ ] تحديث التطبيق لعرض صورة الوصفة من قاعدة البيانات
+
+## الدفعة 61 - إصلاح رفع الصور والإشعارات
+- [ ] إصلاح خطأ "Storage proxy credentials missing" عند رفع صور الوصفات
+- [ ] فحص وإصلاح مشكلة عدم ظهور الإشعارات في التطبيق
+
+## الدفعة 62 - ربط Cloudflare R2 لرفع صور الوصفات
+- [x] تعديل storage.ts لاستخدام Cloudflare R2 S3-compatible API
+- [x] إضافة متغيرات R2 في Render (Account ID, Access Key, Secret Key, Bucket, Public URL)
+- [x] اختبار الاتصال ورفع الملفات إلى R2 - نجح بالكامل
+
+## الدفعة 64 - إصلاح مشاكل الصور والإشعارات
+- [x] الصور المرفوعة من لوحة التحكم لا تظهر في التطبيق - إصلاح: نظام تفاعلي (listener pattern) يعيد رندر الشاشات عند اكتمال المزامنة
+- [x] التطبيق لا يسجل نفسه لتلقي الإشعارات (0 أجهزة) - إصلاح: تغيير ترتيب الحصول على token (Expo أولاً ثم FCM)، انتظار تسجيل الضيف
+- [x] الإشعارات لا تعمل - إصلاح: تحسين مسار التسجيل التلقائي مع retry وانتظار guest registration
+
+## الدفعة 65 - إصلاح مشاكل الصور والإشعارات (المحاولة الثانية)
+- [x] صور الوصفات - إعادة كتابة كاملة بنهج useRecipeImages hook مباشر (fetch من السيرفر + cache في AsyncStorage + React state)
+- [x] الإشعارات - زيادة delay إلى 3ث + retry متعدد (10ث + 15ث) + 3 طرق للحصول على token (Expo/FCM/Expo-no-id)
+
+## الدفعة 66 - إصلاح الصور في قائمة الوصفات (المحاولة الثالثة)
+- [x] إضافة recipeImages لـ dependencies في useCallback لـ renderRecipeCard - كان هذا سبب عدم تحديث بطاقات الوصفات عند وصول الصور
+
+## الدفعة 67 - إصلاح نظام الاشتراك (RevenueCat):
+- [x] إنشاء SubscriptionContext مركزي (RevenueCat كمصدر حقيقي لحالة الاشتراك)
+- [x] تحديث use-subscriptions.ts ليستخدم SubscriptionContext بدلاً من إعادة تهيئة RevenueCat
+- [x] إصلاح شاشة الاشتراك: isPremium من RevenueCat فقط (بدلاً من profile.isSubscribed && isPremium)
+- [x] تسجيل SubscriptionProvider في _layout.tsx
+
+## الدفعة 68 - إصلاح شامل لنظام الاشتراك (RevenueCat في كل مكان):
+- [x] إصلاح app/(tabs)/index.tsx - بانر الاشتراك يعتمد على isPremium
+- [x] إصلاح app/(tabs)/profile.tsx - شارة "عضوية ذهبية" تعتمد على isPremium
+- [x] إصلاح app/sections/fridge.tsx - حد الاستخدام المجاني يعتمد على isPremium
+- [x] إصلاح app/sections/meal-planner.tsx - قفل جدول الطبخ يعتمد على isPremium
+- [x] إصلاح app/sections/recipes-library.tsx - قفل الوصفات يعتمد على isPremium
+- [x] إصلاح app/sections/wellness/medication-home.tsx - حد الأدوية يعتمد على isPremium
+- [x] إصلاح app/sections/leftovers-renew.tsx - حد تجديد النعمة يعتمد على isPremium
+- [x] لا أخطاء TypeScript

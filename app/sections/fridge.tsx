@@ -15,6 +15,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { searchIngredients, type Ingredient } from "@/lib/data/ingredients";
 import { trpc } from "@/lib/trpc";
 import { useUser } from "@/lib/user-context";
+import { useSubscriptionContext } from "@/lib/subscription-context";
 import { useColors } from "@/hooks/use-colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -29,7 +30,7 @@ export default function FridgeScreen() {
   const router = useRouter();
   const colors = useColors();
   const { profile } = useUser();
-  const isSubscribed = profile.isSubscribed;
+  const { isPremium: isSubscribed } = useSubscriptionContext();
   const [activeSection, setActiveSection] = useState<"choose" | "fresh" | "leftovers">("choose");
   const [inputText, setInputText] = useState("");
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
