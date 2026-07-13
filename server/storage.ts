@@ -1,41 +1,31 @@
-// Preconfigured storage helpers for Manus WebDev templates
-// Uses the Biz-provided storage proxy (Authorization: Bearer <token>)
+// Storage helpers using Cloudflare R2 (S3-compatible API)
+// Cloudflare R2 endpoint: https://<account-id>.r2.cloudflarestorage.com
 
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { ENV } from "./_core/env";
 
-type StorageConfig = { baseUrl: string; apiKey: string };
+let _client: S3Client | null = null;
 
-function getStorageConfig(): StorageConfig {
-  const baseUrl = ENV.forgeApiUrl;
-  const apiKey = ENV.forgeApiKey;
+function getR2Client(): S3Client {
+  if (_client) return _client;
 
-  if (!baseUrl || !apiKey) {
+  if (!ENV.r2AccountId || !ENV.r2AccessKeyId || !ENV.r2SecretAccessKey) {
     throw new Error(
-      "Storage proxy credentials missing: set BUILT_IN_FORGE_API_URL and BUILT_IN_FORGE_API_KEY",
+      "Cloudflare R2 credentials missing: set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY",
     );
   }
 
-  return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey };
-}
-
-function buildUploadUrl(baseUrl: string, relKey: string): URL {
-  const url = new URL("v1/storage/upload", ensureTrailingSlash(baseUrl));
-  url.searchParams.set("path", normalizeKey(relKey));
-  return url;
-}
-
-async function buildDownloadUrl(baseUrl: string, relKey: string, apiKey: string): Promise<string> {
-  const downloadApiUrl = new URL("v1/storage/downloadUrl", ensureTrailingSlash(baseUrl));
-  downloadApiUrl.searchParams.set("path", normalizeKey(relKey));
-  const response = await fetch(downloadApiUrl, {
-    method: "GET",
-    headers: buildAuthHeaders(apiKey),
+  _client = new S3Client({
+    region: "auto",
+    endpoint: `https://${ENV.r2AccountId}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: ENV.r2AccessKeyId,
+      secretAccessKey: ENV.r2SecretAccessKey,
+    },
   });
-  return (await response.json()).url;
-}
 
-function ensureTrailingSlash(value: string): string {
-  return value.endsWith("/") ? value : `${value}/`;
+  return _client;
 }
 
 function normalizeKey(relKey: string): string {
@@ -50,54 +40,53 @@ function appendHashSuffix(relKey: string): string {
   return `${relKey.slice(0, lastDot)}_${hash}${relKey.slice(lastDot)}`;
 }
 
-function toFormData(
-  data: Buffer | Uint8Array | string,
-  contentType: string,
-  fileName: string,
-): FormData {
-  const blob =
-    typeof data === "string"
-      ? new Blob([data], { type: contentType })
-      : new Blob([data as any], { type: contentType });
-  const form = new FormData();
-  form.append("file", blob, fileName || "file");
-  return form;
-}
-
-function buildAuthHeaders(apiKey: string): HeadersInit {
-  return { Authorization: `Bearer ${apiKey}` };
-}
-
 export async function storagePut(
   relKey: string,
   data: Buffer | Uint8Array | string,
   contentType = "application/octet-stream",
 ): Promise<{ key: string; url: string }> {
-  const { baseUrl, apiKey } = getStorageConfig();
+  const client = getR2Client();
   const key = appendHashSuffix(normalizeKey(relKey));
-  const uploadUrl = buildUploadUrl(baseUrl, key);
-  const formData = toFormData(data, contentType, key.split("/").pop() ?? key);
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    headers: buildAuthHeaders(apiKey),
-    body: formData,
+  const bucket = ENV.r2BucketName;
+
+  const body = typeof data === "string" ? Buffer.from(data) : data;
+
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: body,
+    ContentType: contentType,
   });
 
-  if (!response.ok) {
-    const message = await response.text().catch(() => response.statusText);
-    throw new Error(
-      `Storage upload failed (${response.status} ${response.statusText}): ${message}`,
-    );
-  }
-  const url = (await response.json()).url;
-  return { key, url };
+  await client.send(command);
+
+  // Build public URL using the R2 public domain
+  const publicUrl = ENV.r2PublicUrl
+    ? `${ENV.r2PublicUrl.replace(/\/+$/, "")}/${key}`
+    : `https://${ENV.r2AccountId}.r2.cloudflarestorage.com/${bucket}/${key}`;
+
+  return { key, url: publicUrl };
 }
 
 export async function storageGet(relKey: string): Promise<{ key: string; url: string }> {
-  const { baseUrl, apiKey } = getStorageConfig();
   const key = normalizeKey(relKey);
-  return {
-    key,
-    url: await buildDownloadUrl(baseUrl, key, apiKey),
-  };
+
+  // If public URL is configured, return it directly (no signed URL needed)
+  if (ENV.r2PublicUrl) {
+    return {
+      key,
+      url: `${ENV.r2PublicUrl.replace(/\/+$/, "")}/${key}`,
+    };
+  }
+
+  // Fallback: generate a signed URL (expires in 1 hour)
+  const client = getR2Client();
+  const command = new GetObjectCommand({
+    Bucket: ENV.r2BucketName,
+    Key: key,
+  });
+
+  const url = await getSignedUrl(client, command, { expiresIn: 3600 });
+  return { key, url };
 }
+// R2 storage integration - build fix Wed May 13 17:52:00 EDT 2026

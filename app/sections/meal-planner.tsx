@@ -13,12 +13,13 @@ import {
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useUser } from "@/lib/user-context";
+import { useSubscriptionContext } from "@/lib/subscription-context";
 import { RECIPES, getRecipesByMealType } from "@/lib/data/recipes";
 import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getFoodCategoryImage } from "@/lib/food-category-images";
-import { getRecipeCustomImage } from "@/lib/recipe-image-sync";
+import { useRecipeImages, getImageFromMap } from "@/hooks/use-recipe-images";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { scheduleAllMealReminders, scheduleMealReminder } from "@/lib/notifications";
@@ -92,7 +93,8 @@ export default function MealPlannerScreen() {
   const router = useRouter();
   const colors = useColors();
   const { profile, updateProfile } = useUser();
-  const isSubscribed = profile.isSubscribed;
+  const recipeImages = useRecipeImages();
+  const { isPremium: isSubscribed } = useSubscriptionContext();
 
   const [step, setStep] = useState<"times" | "plan" | "done">("times");
   const [mealTimes, setMealTimes] = useState<MealTimes>({
@@ -652,7 +654,7 @@ export default function MealPlannerScreen() {
             >
               <View style={{ width: 60, height: 60 }}>
                 <Image
-                  source={getRecipeCustomImage(recipe.id) ? { uri: getRecipeCustomImage(recipe.id)! } : (recipe.image ? getFoodCategoryImage(recipe.image) : getFoodCategoryImage("iraqi-rice"))}
+                  source={getImageFromMap(recipeImages, recipe.id) ? { uri: getImageFromMap(recipeImages, recipe.id)! } : (recipe.image ? getFoodCategoryImage(recipe.image) : getFoodCategoryImage("iraqi-rice"))}
                   style={{ width: 60, height: 60 }}
                   contentFit="cover"
                 />
