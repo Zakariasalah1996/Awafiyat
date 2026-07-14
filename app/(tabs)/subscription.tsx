@@ -173,9 +173,52 @@ export default function SubscriptionScreen() {
           </View>
         </Animated.View>
 
+        {/* ─── عرض التجربة المجانية 3 أيام ─── */}
+        <Animated.View
+          entering={FadeInDown.delay(150)}
+          style={{
+            backgroundColor: "#E8F5E9",
+            borderRadius: 16,
+            padding: 16,
+            marginBottom: 14,
+            borderWidth: 1.5,
+            borderColor: "#2e7d32",
+          }}
+        >
+          <View style={{ alignItems: "center", marginBottom: 10 }}>
+            <Text style={{ fontSize: 28 }}>🎁</Text>
+            <Text style={{ fontSize: 18, fontWeight: "800", color: "#2e7d32", marginTop: 4 }}>
+              جرّب مجاناً لمدة 3 أيام!
+            </Text>
+            <Text style={{ fontSize: 12, color: "#4a7c4a", marginTop: 4, textAlign: "center" }}>
+              استمتع بجميع الميزات بدون دفع • إلغاء في أي وقت
+            </Text>
+          </View>
+          <View style={{ gap: 6 }}>
+            <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 8 }}>
+              <Text style={{ fontSize: 14 }}>✅</Text>
+              <Text style={{ flex: 1, fontSize: 12, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>
+                اليوم: افتح جميع الميزات فوراً
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 8 }}>
+              <Text style={{ fontSize: 14 }}>🔔</Text>
+              <Text style={{ flex: 1, fontSize: 12, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>
+                اليوم 2: سنذكّرك قبل انتهاء التجربة
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 8 }}>
+              <Text style={{ fontSize: 14 }}>💳</Text>
+              <Text style={{ flex: 1, fontSize: 12, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>
+                اليوم 3: يبدأ الاشتراك إذا لم تلغِ
+              </Text>
+            </View>
+          </View>
+        </Animated.View>
+
         {/* ─── خطط الاشتراك جنباً إلى جنب ─── */}
         <Animated.View
-          entering={FadeInDown.delay(200)}
+          entering={FadeInDown.delay(250)}
           style={{ flexDirection: "row", gap: 10, marginBottom: 12 }}
         >
           {/* شهري */}
@@ -209,7 +252,7 @@ export default function SubscriptionScreen() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>اشترك الآن</Text>
+                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>جرّب مجاناً 3 أيام</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -256,7 +299,7 @@ export default function SubscriptionScreen() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>اشترك الآن</Text>
+                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>جرّب مجاناً 3 أيام</Text>
               </TouchableOpacity>
             </View>
           )}
