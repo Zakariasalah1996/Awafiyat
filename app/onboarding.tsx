@@ -14,6 +14,7 @@ import { useUser, type HealthCondition, type Country } from "@/lib/user-context"
 import Animated, { FadeInDown, FadeInUp, FadeIn } from "react-native-reanimated";
 import { useColors } from "@/hooks/use-colors";
 import { LinearGradient } from "expo-linear-gradient";
+import { Image as ExpoImage } from "expo-image";
 import * as Localization from "expo-localization";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -116,19 +117,15 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.container}>
-      {/* ── خلفية دافئة ── */}
-      <LinearGradient
-        colors={["#f7f3eb", "#f0ebe0", "#e8e4d8", "#f0ebe0", "#f7f3eb"]}
-        locations={[0, 0.25, 0.5, 0.75, 1]}
+      {/* ── خلفية صورة المطبخ ── */}
+      <ExpoImage
+        source={{ uri: "https://d2xsxph8kpxj0f.cloudfront.net/310519663550643615/MMvdQJEHVXpvsqF4pAkPm2/onboarding-bg-Qgx2aFCsiFwY3vkx3FkPh9.webp" }}
         style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        transition={300}
       />
-
-      {/* زخرفة أوراق خضراء أعلى */}
-      <View style={styles.topDecoration}>
-        <Text style={styles.leafDecor}>🌿</Text>
-        <Text style={[styles.leafDecor, { marginLeft: 20 }]}>🍃</Text>
-        <Text style={[styles.leafDecor, { marginLeft: -10, marginTop: 10 }]}>🌱</Text>
-      </View>
+      {/* طبقة شفافة خفيفة لتحسين قراءة النص */}
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(255,255,255,0.25)" }]} />
 
       {/* المحتوى الرئيسي */}
       <ScrollView
@@ -145,10 +142,7 @@ export default function OnboardingScreen() {
           <Text style={styles.subtitle}>🌿 نرتّب مطبخك وصحتك معاً 🌿</Text>
         </Animated.View>
 
-        {/* قلب أخضر يسار */}
-        <View style={styles.heartLeft}>
-          <Text style={styles.heartText}>💚</Text>
-        </View>
+
 
         {/* شبكة الميزات - صف أول (3) */}
         <Animated.View entering={FadeInDown.delay(300).duration(500)} style={styles.featuresRow}>
@@ -165,10 +159,7 @@ export default function OnboardingScreen() {
           {FEATURES_ROW3.map((f, i) => renderFeatureCard(f, 700 + i * 80))}
         </Animated.View>
 
-        {/* قلب أخضر يمين */}
-        <View style={styles.heartRight}>
-          <Text style={styles.heartText}>💚</Text>
-        </View>
+
 
         {/* والكثير غيرها */}
         <Animated.View entering={FadeIn.delay(800).duration(400)} style={styles.moreSection}>
@@ -223,12 +214,7 @@ export default function OnboardingScreen() {
         </Animated.View>
       </ScrollView>
 
-      {/* زخرفة أسفل */}
-      <View style={styles.bottomDecoration}>
-        <Text style={styles.bottomLeaf}>🥬</Text>
-        <Text style={[styles.bottomLeaf, { marginLeft: 15 }]}>🍅</Text>
-        <Text style={[styles.bottomLeaf, { marginLeft: 10 }]}>🫑</Text>
-      </View>
+
 
       {/* ── Modal: سؤال المرض ── */}
       <Modal visible={customizeStep === "disease"} transparent animationType="slide">
@@ -349,27 +335,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  topDecoration: {
-    position: "absolute",
-    top: 40,
-    left: 20,
-    flexDirection: "row",
-    opacity: 0.6,
-    zIndex: 1,
-  },
-  leafDecor: {
-    fontSize: 28,
-  },
-  bottomDecoration: {
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    flexDirection: "row",
-    opacity: 0.5,
-  },
-  bottomLeaf: {
-    fontSize: 24,
-  },
+
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
@@ -405,22 +371,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 24,
   },
-  heartLeft: {
-    position: "absolute",
-    top: SCREEN_HEIGHT * 0.22,
-    right: 10,
-    opacity: 0.6,
-  },
-  heartRight: {
-    alignSelf: "flex-start",
-    marginLeft: 10,
-    opacity: 0.6,
-    marginTop: -5,
-    marginBottom: 5,
-  },
-  heartText: {
-    fontSize: 18,
-  },
+
   featuresRow: {
     flexDirection: "row-reverse",
     flexWrap: "wrap",
