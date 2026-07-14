@@ -572,3 +572,7 @@
 - [x] إصلاح app/sections/wellness/medication-home.tsx - حد الأدوية يعتمد على isPremium
 - [x] إصلاح app/sections/leftovers-renew.tsx - حد تجديد النعمة يعتمد على isPremium
 - [x] لا أخطاء TypeScript
+
+## الدفعة الجديدة - إعادة تصميم شاشة البدء:
+
+- [x] إعادة تصميم شاشة البدء (Onboarding) لتكون مشابهة للتصميم المرسل من المستخدم

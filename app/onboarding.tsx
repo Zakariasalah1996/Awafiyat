@@ -7,6 +7,7 @@ import {
   Dimensions,
   Modal,
   ScrollView,
+  StyleSheet,
 } from "react-native";
 import { router } from "expo-router";
 import { useUser, type HealthCondition, type Country } from "@/lib/user-context";
@@ -48,14 +49,20 @@ const CONDITION_LABELS: Record<HealthCondition, string> = {
   none: "",
 };
 
-const FEATURES = [
+const FEATURES_ROW1 = [
   { icon: "📚", label: "مكتبة وصفات" },
   { icon: "❄️", label: "ذكاء الثلاجة" },
   { icon: "🛡️", label: "تحذيرات صحية" },
+];
+
+const FEATURES_ROW2 = [
   { icon: "📅", label: "جدولة وجبات" },
-  { icon: "💊", label: "رفيق الدواء" },
-  { icon: "💧", label: "رفيق الماء" },
+  { icon: "💊", label: "تذكير الدواء" },
+  { icon: "💧", label: "تذكير الماء" },
   { icon: "♻️", label: "تجديد النعمة" },
+];
+
+const FEATURES_ROW3 = [
   { icon: "🛒", label: "قائمة التسوق" },
 ];
 
@@ -96,104 +103,139 @@ export default function OnboardingScreen() {
     router.replace("/(tabs)");
   };
 
-  return (
-    <View style={{ flex: 1 }}>
-      {/* ── خلفية تدرج لوني بسيط وأنيق ── */}
-      <Animated.View entering={FadeIn.duration(800)} style={{ flex: 1 }}>
-        <LinearGradient
-          colors={["#f0f7f0", "#dcedc8", "#c5e1a5", "#a5d6a7"]}
-          locations={[0, 0.35, 0.65, 1]}
-          style={{ position: "absolute", top: 0, bottom: 0, left: 0, right: 0 }}
-        />
-      </Animated.View>
+  const renderFeatureCard = (feature: { icon: string; label: string }, delay: number) => (
+    <Animated.View
+      key={feature.label}
+      entering={FadeInDown.delay(delay).duration(400)}
+      style={styles.featureCard}
+    >
+      <Text style={styles.featureIcon}>{feature.icon}</Text>
+      <Text style={styles.featureLabel}>{feature.label}</Text>
+    </Animated.View>
+  );
 
-      {/* ── المحتوى ── */}
-      <View style={{
-        position: "absolute", top: 0, bottom: 0, left: 0, right: 0,
-        paddingHorizontal: 28, justifyContent: "center", alignItems: "center",
-      }}>
+  return (
+    <View style={styles.container}>
+      {/* ── خلفية دافئة ── */}
+      <LinearGradient
+        colors={["#f7f3eb", "#f0ebe0", "#e8e4d8", "#f0ebe0", "#f7f3eb"]}
+        locations={[0, 0.25, 0.5, 0.75, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+
+      {/* زخرفة أوراق خضراء أعلى */}
+      <View style={styles.topDecoration}>
+        <Text style={styles.leafDecor}>🌿</Text>
+        <Text style={[styles.leafDecor, { marginLeft: 20 }]}>🍃</Text>
+        <Text style={[styles.leafDecor, { marginLeft: -10, marginTop: 10 }]}>🌱</Text>
+      </View>
+
+      {/* المحتوى الرئيسي */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* الشعار */}
-        <Animated.View entering={FadeInDown.delay(200).duration(600)} style={{ alignItems: "center", marginTop: -SCREEN_HEIGHT * 0.05 }}>
+        <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.logoSection}>
           <Image
             source={require("@/assets/images/icon.png")}
-            style={{ width: 90, height: 90, borderRadius: 22, marginBottom: 16 }}
+            style={styles.logoImage}
           />
-          <Text style={{ fontSize: 36, fontWeight: "bold", color: "#2e7d32", textAlign: "center", marginBottom: 6 }}>
-            ألف عافيات
-          </Text>
-          <Text style={{ fontSize: 15, color: "#4a7c59", textAlign: "center", lineHeight: 24, marginBottom: 24 }}>
-            نرتب مطبخك وصحتك معاً
-          </Text>
+          <Text style={styles.mainTitle}>ألف عافيات</Text>
+          <Text style={styles.subtitle}>🌿 نرتّب مطبخك وصحتك معاً 🌿</Text>
         </Animated.View>
 
-        {/* مميزات التطبيق — شبكة أيقونات صغيرة */}
-        <Animated.View entering={FadeInDown.delay(400).duration(600)} style={{ width: "100%", marginBottom: 28 }}>
-          <View style={{ flexDirection: "row-reverse", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
-            {FEATURES.map((f) => (
-              <View key={f.label} style={{
-                alignItems: "center", justifyContent: "center",
-                backgroundColor: "rgba(255,255,255,0.75)",
-                paddingHorizontal: 10, paddingVertical: 8, borderRadius: 14,
-                minWidth: 72,
-                shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 },
-                elevation: 2,
-              }}>
-                <Text style={{ fontSize: 20, marginBottom: 2 }}>{f.icon}</Text>
-                <Text style={{ color: "#333", fontSize: 11, fontWeight: "600" }}>{f.label}</Text>
-              </View>
-            ))}
-          </View>
-          {/* والكثير غيرها */}
-          <View style={{ alignItems: "center", marginTop: 12 }}>
-            <Text style={{ fontSize: 13, color: "#5a8a5a", fontWeight: "600" }}>
-              ✨ والكثير غيرها...
-            </Text>
-          </View>
+        {/* قلب أخضر يسار */}
+        <View style={styles.heartLeft}>
+          <Text style={styles.heartText}>💚</Text>
+        </View>
+
+        {/* شبكة الميزات - صف أول (3) */}
+        <Animated.View entering={FadeInDown.delay(300).duration(500)} style={styles.featuresRow}>
+          {FEATURES_ROW1.map((f, i) => renderFeatureCard(f, 300 + i * 80))}
+        </Animated.View>
+
+        {/* شبكة الميزات - صف ثاني (4) */}
+        <Animated.View entering={FadeInDown.delay(500).duration(500)} style={styles.featuresRow}>
+          {FEATURES_ROW2.map((f, i) => renderFeatureCard(f, 500 + i * 80))}
+        </Animated.View>
+
+        {/* شبكة الميزات - صف ثالث (1) */}
+        <Animated.View entering={FadeInDown.delay(700).duration(500)} style={styles.featuresRow}>
+          {FEATURES_ROW3.map((f, i) => renderFeatureCard(f, 700 + i * 80))}
+        </Animated.View>
+
+        {/* قلب أخضر يمين */}
+        <View style={styles.heartRight}>
+          <Text style={styles.heartText}>💚</Text>
+        </View>
+
+        {/* والكثير غيرها */}
+        <Animated.View entering={FadeIn.delay(800).duration(400)} style={styles.moreSection}>
+          <Text style={styles.moreText}>💚 والكثير غيرها... 💚</Text>
         </Animated.View>
 
         {/* الأزرار */}
-        <Animated.View entering={FadeInUp.delay(600).duration(500)} style={{ width: "100%", gap: 12 }}>
+        <Animated.View entering={FadeInUp.delay(900).duration(500)} style={styles.buttonsSection}>
           {/* زر ابدأ الآن */}
           <TouchableOpacity
             onPress={handleStart}
-            style={{
-              width: "100%", paddingVertical: 17, borderRadius: 18,
-              alignItems: "center", backgroundColor: "#2e7d32",
-              shadowColor: "#2e7d32", shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 },
-              elevation: 4,
-            }}
+            style={styles.startButton}
             activeOpacity={0.85}
           >
-            <Text style={{ color: "#fff", fontSize: 19, fontWeight: "bold" }}>ابدأ الآن</Text>
+            <LinearGradient
+              colors={["#4caf50", "#2e7d32", "#1b5e20"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.startButtonGradient}
+            >
+              <Text style={styles.startButtonText}>ابدأ الآن</Text>
+              <View style={styles.buttonLeafLeft}>
+                <Text style={{ fontSize: 14 }}>🌿</Text>
+              </View>
+              <View style={styles.buttonLeafRight}>
+                <Text style={{ fontSize: 14 }}>🍃</Text>
+              </View>
+            </LinearGradient>
           </TouchableOpacity>
 
           {/* زر تخصيص التجربة */}
           <TouchableOpacity
             onPress={handleCustomize}
-            style={{
-              width: "100%", paddingVertical: 15, borderRadius: 18,
-              alignItems: "center",
-              backgroundColor: "rgba(255,255,255,0.7)",
-              borderWidth: 1.5, borderColor: "#2e7d32",
-            }}
+            style={styles.customizeButton}
             activeOpacity={0.8}
           >
-            <Text style={{ color: "#2e7d32", fontSize: 17, fontWeight: "600" }}>✨ تخصيص التجربة</Text>
+            <Text style={styles.customizeButtonText}>✨ تخصيص التجربة</Text>
           </TouchableOpacity>
+
+          {/* نص الخصوصية */}
+          <View style={styles.privacySection}>
+            <View style={styles.privacyRow}>
+              <View style={styles.shieldIcon}>
+                <Text style={{ fontSize: 28 }}>🛡️</Text>
+              </View>
+              <View style={styles.privacyTextContainer}>
+                <Text style={styles.privacyTitle}>بياناتك آمنة وسرّية 100%</Text>
+                <Text style={styles.privacySubtitle}>نحمي خصوصيتك ونضع صحتك في المقام الأول</Text>
+              </View>
+            </View>
+          </View>
         </Animated.View>
+      </ScrollView>
+
+      {/* زخرفة أسفل */}
+      <View style={styles.bottomDecoration}>
+        <Text style={styles.bottomLeaf}>🥬</Text>
+        <Text style={[styles.bottomLeaf, { marginLeft: 15 }]}>🍅</Text>
+        <Text style={[styles.bottomLeaf, { marginLeft: 10 }]}>🫑</Text>
       </View>
 
       {/* ── Modal: سؤال المرض ── */}
       <Modal visible={customizeStep === "disease"} transparent animationType="slide">
-        <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <View style={{
-            backgroundColor: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28,
-            paddingHorizontal: 24, paddingTop: 24, paddingBottom: 36,
-          }}>
-            <Text style={{ fontSize: 22, fontWeight: "bold", color: "#1a1a1a", textAlign: "center", marginBottom: 6 }}>
-              🩺 ما هي حالتك الصحية؟
-            </Text>
-            <Text style={{ fontSize: 14, color: "#666", textAlign: "center", marginBottom: 20, lineHeight: 22 }}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>🩺 ما هي حالتك الصحية؟</Text>
+            <Text style={styles.modalSubtitle}>
               سنخصص لك تحذيرات صحية دقيقة بناءً على حالتك
             </Text>
 
@@ -202,22 +244,22 @@ export default function OnboardingScreen() {
                 <TouchableOpacity
                   key={c.id}
                   onPress={() => setSelectedCondition(c.id)}
-                  style={{
-                    paddingVertical: 14, paddingHorizontal: 18, borderRadius: 16,
-                    borderWidth: 2,
-                    borderColor: selectedCondition === c.id ? colors.primary : "#e5e7eb",
-                    backgroundColor: selectedCondition === c.id ? `${colors.primary}12` : "#f9fafb",
-                    flexDirection: "row-reverse", alignItems: "center",
-                  }}
+                  style={[
+                    styles.conditionOption,
+                    {
+                      borderColor: selectedCondition === c.id ? "#2e7d32" : "#e5e7eb",
+                      backgroundColor: selectedCondition === c.id ? "#e8f5e9" : "#f9fafb",
+                    },
+                  ]}
                   activeOpacity={0.7}
                 >
                   {c.emoji !== "" && <Text style={{ fontSize: 22, marginLeft: 10 }}>{c.emoji}</Text>}
-                  <Text style={{
-                    flex: 1, fontSize: 16, fontWeight: "600", textAlign: "right",
-                    color: selectedCondition === c.id ? colors.primary : "#1a1a1a",
-                  }}>{c.label}</Text>
+                  <Text style={[
+                    styles.conditionLabel,
+                    { color: selectedCondition === c.id ? "#2e7d32" : "#1a1a1a" },
+                  ]}>{c.label}</Text>
                   {selectedCondition === c.id && (
-                    <Text style={{ color: colors.primary, fontSize: 18 }}>✓</Text>
+                    <Text style={{ color: "#2e7d32", fontSize: 18 }}>✓</Text>
                   )}
                 </TouchableOpacity>
               ))}
@@ -225,13 +267,10 @@ export default function OnboardingScreen() {
 
             <TouchableOpacity
               onPress={handleDiseaseNext}
-              style={{
-                marginTop: 20, paddingVertical: 16, borderRadius: 18,
-                alignItems: "center", backgroundColor: colors.primary,
-              }}
+              style={styles.modalButton}
               activeOpacity={0.85}
             >
-              <Text style={{ color: "#fff", fontSize: 17, fontWeight: "bold" }}>متابعة</Text>
+              <Text style={styles.modalButtonText}>متابعة</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={handleSkipOffer} style={{ marginTop: 12, alignItems: "center" }}>
@@ -241,53 +280,35 @@ export default function OnboardingScreen() {
         </View>
       </Modal>
 
-      {/* ── Modal: عرض الاشتراك مع التجربة المجانية ── */}
+      {/* ── Modal: عرض الاشتراك ── */}
       <Modal visible={customizeStep === "offer"} transparent animationType="slide">
-        <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <View style={styles.modalOverlay}>
           <ScrollView
             style={{ maxHeight: SCREEN_HEIGHT * 0.85 }}
             contentContainerStyle={{ flexGrow: 1 }}
             showsVerticalScrollIndicator={false}
           >
-            <View style={{
-              backgroundColor: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28,
-              paddingHorizontal: 24, paddingTop: 28, paddingBottom: 40,
-            }}>
-              {/* رأس العرض */}
+            <View style={styles.modalContent}>
               <View style={{ alignItems: "center", marginBottom: 20 }}>
                 <Text style={{ fontSize: 32 }}>💎</Text>
-                <Text style={{ fontSize: 22, fontWeight: "bold", color: "#1a1a1a", textAlign: "center", marginTop: 8 }}>
-                  ألف عافيات المميزة
-                </Text>
+                <Text style={styles.modalTitle}>ألف عافيات المميزة</Text>
                 {selectedCondition !== "none" && (
-                  <View style={{
-                    marginTop: 10, paddingHorizontal: 16, paddingVertical: 8,
-                    backgroundColor: "#FFF3CD", borderRadius: 12,
-                  }}>
-                    <Text style={{ color: "#856404", fontSize: 14, fontWeight: "600", textAlign: "center" }}>
+                  <View style={styles.conditionBadge}>
+                    <Text style={styles.conditionBadgeText}>
                       🛡️ لديك {CONDITION_LABELS[selectedCondition]} — تحذيراتك الصحية جاهزة!
                     </Text>
                   </View>
                 )}
               </View>
 
-              {/* التجربة المجانية */}
-              <View style={{
-                backgroundColor: "#E8F5E9", borderRadius: 16, padding: 16,
-                marginBottom: 20, borderWidth: 1.5, borderColor: colors.primary,
-              }}>
-                <Text style={{ fontSize: 18, fontWeight: "bold", color: colors.primary, textAlign: "center", marginBottom: 4 }}>
-                  🎁 3 أيام مجاناً
-                </Text>
-                <Text style={{ fontSize: 14, color: "#2d6a2d", textAlign: "center", lineHeight: 22 }}>
+              <View style={styles.trialBadge}>
+                <Text style={styles.trialTitle}>🎁 3 أيام مجاناً</Text>
+                <Text style={styles.trialSubtitle}>
                   استفد من جميع الميزات مجاناً{"\n"}يمكنك الإلغاء في أي وقت تشاء
                 </Text>
               </View>
 
-              {/* قائمة المميزات */}
-              <Text style={{ fontSize: 15, fontWeight: "700", color: "#333", textAlign: "right", marginBottom: 12 }}>
-                ما ستحصل عليه:
-              </Text>
+              <Text style={styles.offerListTitle}>ما ستحصل عليه:</Text>
               <View style={{ gap: 10, marginBottom: 24 }}>
                 {[
                   { icon: "🛡️", text: "تحذيرات صحية مخصصة لمرضك" },
@@ -297,32 +318,22 @@ export default function OnboardingScreen() {
                   { icon: "📅", text: "جدولة الوجبات الأسبوعية" },
                   { icon: "📚", text: "مكتبة وصفات كاملة +250 وصفة" },
                 ].map((f) => (
-                  <View key={f.text} style={{ flexDirection: "row-reverse", alignItems: "center", gap: 10 }}>
+                  <View key={f.text} style={styles.offerItem}>
                     <Text style={{ fontSize: 20 }}>{f.icon}</Text>
-                    <Text style={{ flex: 1, fontSize: 15, color: "#333", textAlign: "right" }}>{f.text}</Text>
+                    <Text style={styles.offerItemText}>{f.text}</Text>
                   </View>
                 ))}
               </View>
 
-              {/* زر الاشتراك */}
               <TouchableOpacity
                 onPress={handleSubscribe}
-                style={{
-                  paddingVertical: 17, borderRadius: 18,
-                  alignItems: "center", backgroundColor: colors.primary,
-                  marginBottom: 12,
-                }}
+                style={styles.subscribeButton}
                 activeOpacity={0.85}
               >
-                <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-                  ابدأ التجربة المجانية 3 أيام
-                </Text>
-                <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 3 }}>
-                  ثم 5,250 د.ع/شهر • إلغاء في أي وقت
-                </Text>
+                <Text style={styles.subscribeButtonText}>ابدأ التجربة المجانية 3 أيام</Text>
+                <Text style={styles.subscribeButtonSub}>ثم 5,250 د.ع/شهر • إلغاء في أي وقت</Text>
               </TouchableOpacity>
 
-              {/* تخطي */}
               <TouchableOpacity onPress={handleSkipOffer} style={{ alignItems: "center", paddingVertical: 8 }}>
                 <Text style={{ color: "#999", fontSize: 14 }}>ليس الآن، ابدأ مجاناً</Text>
               </TouchableOpacity>
@@ -333,3 +344,345 @@ export default function OnboardingScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  topDecoration: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    flexDirection: "row",
+    opacity: 0.6,
+    zIndex: 1,
+  },
+  leafDecor: {
+    fontSize: 28,
+  },
+  bottomDecoration: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    flexDirection: "row",
+    opacity: 0.5,
+  },
+  bottomLeaf: {
+    fontSize: 24,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: SCREEN_HEIGHT * 0.08,
+    paddingBottom: 30,
+    alignItems: "center",
+  },
+  logoSection: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  logoImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  mainTitle: {
+    fontSize: 34,
+    fontWeight: "bold",
+    color: "#2e7d32",
+    textAlign: "center",
+    marginBottom: 6,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: "#5a8a5a",
+    textAlign: "center",
+    lineHeight: 24,
+  },
+  heartLeft: {
+    position: "absolute",
+    top: SCREEN_HEIGHT * 0.22,
+    right: 10,
+    opacity: 0.6,
+  },
+  heartRight: {
+    alignSelf: "flex-start",
+    marginLeft: 10,
+    opacity: 0.6,
+    marginTop: -5,
+    marginBottom: 5,
+  },
+  heartText: {
+    fontSize: 18,
+  },
+  featuresRow: {
+    flexDirection: "row-reverse",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 10,
+    marginBottom: 10,
+    width: "100%",
+  },
+  featureCard: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRadius: 16,
+    minWidth: 76,
+    maxWidth: 86,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+    borderWidth: 0.5,
+    borderColor: "rgba(0,0,0,0.04)",
+  },
+  featureIcon: {
+    fontSize: 26,
+    marginBottom: 4,
+  },
+  featureLabel: {
+    color: "#333",
+    fontSize: 11,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  moreSection: {
+    alignItems: "center",
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  moreText: {
+    fontSize: 14,
+    color: "#5a8a5a",
+    fontWeight: "600",
+  },
+  buttonsSection: {
+    width: "100%",
+    gap: 12,
+  },
+  startButton: {
+    width: "100%",
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#2e7d32",
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 6,
+  },
+  startButtonGradient: {
+    paddingVertical: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+    position: "relative",
+  },
+  startButtonText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  buttonLeafLeft: {
+    position: "absolute",
+    left: 16,
+    top: "50%",
+    marginTop: -7,
+  },
+  buttonLeafRight: {
+    position: "absolute",
+    right: 16,
+    top: "50%",
+    marginTop: -7,
+  },
+  customizeButton: {
+    width: "100%",
+    paddingVertical: 16,
+    borderRadius: 20,
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.08)",
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  customizeButtonText: {
+    color: "#2e7d32",
+    fontSize: 17,
+    fontWeight: "600",
+  },
+  privacySection: {
+    width: "100%",
+    marginTop: 8,
+    backgroundColor: "rgba(255,255,255,0.7)",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 0.5,
+    borderColor: "rgba(0,0,0,0.05)",
+  },
+  privacyRow: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 12,
+  },
+  shieldIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#e8f5e9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  privacyTextContainer: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+  privacyTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#2e7d32",
+    textAlign: "right",
+    marginBottom: 2,
+  },
+  privacySubtitle: {
+    fontSize: 12,
+    color: "#666",
+    textAlign: "right",
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 36,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#1a1a1a",
+    textAlign: "center",
+    marginBottom: 6,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  conditionOption: {
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderRadius: 16,
+    borderWidth: 2,
+    flexDirection: "row-reverse",
+    alignItems: "center",
+  },
+  conditionLabel: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "right",
+  },
+  modalButton: {
+    marginTop: 20,
+    paddingVertical: 16,
+    borderRadius: 18,
+    alignItems: "center",
+    backgroundColor: "#2e7d32",
+  },
+  modalButtonText: {
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "bold",
+  },
+  conditionBadge: {
+    marginTop: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#FFF3CD",
+    borderRadius: 12,
+  },
+  conditionBadgeText: {
+    color: "#856404",
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  trialBadge: {
+    backgroundColor: "#E8F5E9",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1.5,
+    borderColor: "#2e7d32",
+  },
+  trialTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2e7d32",
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  trialSubtitle: {
+    fontSize: 14,
+    color: "#2d6a2d",
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  offerListTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#333",
+    textAlign: "right",
+    marginBottom: 12,
+  },
+  offerItem: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 10,
+  },
+  offerItemText: {
+    flex: 1,
+    fontSize: 15,
+    color: "#333",
+    textAlign: "right",
+  },
+  subscribeButton: {
+    paddingVertical: 17,
+    borderRadius: 18,
+    alignItems: "center",
+    backgroundColor: "#2e7d32",
+    marginBottom: 12,
+  },
+  subscribeButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  subscribeButtonSub: {
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 12,
+    marginTop: 3,
+  },
+});
