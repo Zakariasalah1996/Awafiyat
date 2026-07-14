@@ -57,54 +57,26 @@ export function useSubscriptions(): UseSubscriptionsReturn {
 
         const availablePackages: SubscriptionPackage[] = [];
 
-        // استخدم الـ Offerings المحددة بأسماء صريحة (rc_monthly$ و rc_annual$)
-        // لا نعتمد على الـ default لأن RevenueCat يسمح بـ offering واحد فقط كـ default
-        const monthlyOffering = offerings.all?.['rc_monthly$'];
-        const annualOffering = offerings.all?.['rc_annual$'];
+        // كلا المنتجين (الشهري والسنوي) داخل Offering واحد: rc_monthly$
+        const mainOffering = offerings.all?.['rc_monthly$'] || offerings.current;
         
         console.log('Offerings available:', {
-          monthly: !!monthlyOffering,
-          annual: !!annualOffering,
+          mainOffering: !!mainOffering,
           allKeys: Object.keys(offerings.all || {}),
+          currentOffering: !!offerings.current,
         });
         
-        // أضف المنتجات من الـ Offering الشهري
-        if (monthlyOffering?.availablePackages) {
-          monthlyOffering.availablePackages.forEach((pkg) => {
-            const pricing = pkg.product.priceString;
-          const period = pkg.product.subscriptionPeriod;
-
-          let periodType: 'monthly' | 'yearly' = 'monthly';
-          let pricePerMonth = pricing;
-
-          if (period?.includes('P1Y')) {
-            periodType = 'yearly';
-            const yearlyPrice = parseFloat(pkg.product.price.toString());
-            pricePerMonth = (yearlyPrice / 12).toFixed(2);
-          }
-
-            availablePackages.push({
-              id: pkg.identifier,
-              name: pkg.product.title,
-              price: pricing,
-              pricePerMonth,
-              period: periodType,
-              offering: monthlyOffering,
-              package: pkg,
-            });
-          });
-        }
-        
-        // أضف المنتجات من الـ Offering السنوي
-        if (annualOffering?.availablePackages) {
-          annualOffering.availablePackages.forEach((pkg) => {
+        if (mainOffering?.availablePackages) {
+          mainOffering.availablePackages.forEach((pkg) => {
             const pricing = pkg.product.priceString;
             const period = pkg.product.subscriptionPeriod;
+            const productId = pkg.product.identifier || '';
 
             let periodType: 'monthly' | 'yearly' = 'monthly';
             let pricePerMonth = pricing;
 
-            if (period?.includes('P1Y')) {
+            // تحديد نوع الاشتراك بناءً على subscriptionPeriod أو product ID
+            if (period?.includes('P1Y') || productId.includes('yearly')) {
               periodType = 'yearly';
               const yearlyPrice = parseFloat(pkg.product.price.toString());
               pricePerMonth = (yearlyPrice / 12).toFixed(2);
@@ -116,7 +88,7 @@ export function useSubscriptions(): UseSubscriptionsReturn {
               price: pricing,
               pricePerMonth,
               period: periodType,
-              offering: annualOffering,
+              offering: mainOffering,
               package: pkg,
             });
           });
