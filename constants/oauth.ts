@@ -33,27 +33,25 @@ export const API_BASE_URL = env.apiBaseUrl;
  * For web: derives from current hostname
  */
 export function getApiBaseUrl(): string {
-  // If API_BASE_URL is set, use it
+  // On native (iOS/Android), always use production domain directly
+  if (ReactNative.Platform.OS !== "web") {
+    return "https://alfafiyat.com";
+  }
+
+  // On web: use env var if set
   if (API_BASE_URL) {
     return API_BASE_URL.replace(/\/$/, "");
   }
 
-  // On web, derive from current hostname by replacing port 8081 with 3000
-  if (ReactNative.Platform.OS === "web" && typeof window !== "undefined" && window.location) {
+  // On web: derive from current hostname
+  if (typeof window !== "undefined" && window.location) {
     const { protocol, hostname } = window.location;
-    // Pattern: 8081-sandboxid.region.domain -> 3000-sandboxid.region.domain
     const apiHostname = hostname.replace(/^8081-/, "3000-");
     if (apiHostname !== hostname) {
       return `${protocol}//${apiHostname}`;
     }
   }
 
-  // On native (iOS/Android), use the published production domain
-  if (ReactNative.Platform.OS !== "web") {
-    return "https://alfafiyat.com";
-  }
-
-  // Fallback to empty (will use relative URL)
   return "";
 }
 
