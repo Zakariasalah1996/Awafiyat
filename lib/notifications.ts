@@ -382,36 +382,20 @@ export async function getExpoPushToken(): Promise<string | null> {
   try {
     if (Platform.OS === "web") return null;
 
-    // Method 1: Try Expo push token (works with EAS builds)
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-    console.log("[Push] Attempting to get token, projectId:", projectId || "NOT FOUND");
-    
-    if (projectId) {
-      try {
-        const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
-        if (tokenData.data) {
-          console.log("[Push] Got Expo token:", tokenData.data?.substring(0, 35) + "...");
-          return tokenData.data;
-        }
-      } catch (e1) {
-        console.warn("[Push] Expo token failed:", (e1 as Error)?.message);
-      }
-    }
-
-    // Method 2: Try native device push token (FCM on Android, APNs on iOS)
+    // Method 1: Native FCM token (أفضل طريقة - تعمل مع Google Play مباشرة)
     try {
-      console.log("[Push] Trying native device token (FCM)...");
+      console.log("[Push] Trying native FCM device token...");
       const deviceToken = await Notifications.getDevicePushTokenAsync();
       const fcmToken = deviceToken.data as string;
       if (fcmToken) {
         console.log("[Push] Got native FCM token:", fcmToken?.substring(0, 35) + "...");
         return `fcm:${fcmToken}`;
       }
-    } catch (e2) {
-      console.warn("[Push] Native FCM token failed:", (e2 as Error)?.message);
+    } catch (e1) {
+      console.warn("[Push] Native FCM token failed:", (e1 as Error)?.message);
     }
 
-    // Method 3: Try Expo token without projectId (last resort)
+    // Method 2: Expo push token fallback
     try {
       console.log("[Push] Trying Expo token without projectId...");
       const tokenData = await Notifications.getExpoPushTokenAsync();
