@@ -24,7 +24,7 @@ function generateDeviceId(): string {
 /**
  * Get or create a persistent device ID
  */
-async function getDeviceId(): Promise<string> {
+export async function getDeviceId(): Promise<string> {
   let deviceId = await AsyncStorage.getItem(GUEST_ID_KEY);
   if (!deviceId) {
     deviceId = generateDeviceId();
@@ -110,4 +110,24 @@ export async function registerGuest(): Promise<number | null> {
 export async function isGuestRegistered(): Promise<boolean> {
   const registered = await AsyncStorage.getItem(GUEST_REGISTERED_KEY);
   return registered === "true";
+}
+
+/**
+ * Send heartbeat to track active users
+ * Call this on app open and when app comes to foreground
+ */
+export async function sendHeartbeat(): Promise<void> {
+  try {
+    const baseUrl = getApiBaseUrl();
+    if (!baseUrl) return;
+    const deviceId = await getDeviceId();
+    const userId = await getGuestUserId();
+    await fetch(`${baseUrl}/api/user/heartbeat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId, userId, platform: Platform.OS }),
+    });
+  } catch (_) {
+    // Silent - heartbeat should never crash the app
+  }
 }

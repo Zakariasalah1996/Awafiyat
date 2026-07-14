@@ -1,4 +1,4 @@
-import { boolean, integer, pgEnum, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, int, mysqlEnum, mysqlTable, serial, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -6,15 +6,7 @@ import { boolean, integer, pgEnum, pgTable, serial, text, timestamp, varchar } f
  * Columns use camelCase to match both database fields and generated types.
  */
 
-export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
-export const platformEnum = pgEnum("platform", ["ios", "android", "web"]);
-export const subscriptionPlanEnum = pgEnum("subscription_plan", ["free", "monthly", "yearly", "promo"]);
-export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "expired", "cancelled"]);
-export const feedbackTypeEnum = pgEnum("feedback_type", ["bug", "suggestion", "complaint", "praise", "other"]);
-export const feedbackStatusEnum = pgEnum("feedback_status", ["new", "read", "resolved", "archived"]);
-export const notificationTargetEnum = pgEnum("notification_target", ["all", "country", "user"]);
-
-export const users = pgTable("users", {
+export const users = mysqlTable("users", {
   /**
    * Surrogate primary key. Auto-incremented numeric value managed by the database.
    * Use this for relations between tables.
@@ -25,7 +17,7 @@ export const users = pgTable("users", {
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: userRoleEnum("role").default("user").notNull(),
+  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   country: varchar("country", { length: 32 }),
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -39,11 +31,11 @@ export type InsertUser = typeof users.$inferInsert;
 /**
  * Push notification tokens for sending notifications to users.
  */
-export const pushTokens = pgTable("push_tokens", {
+export const pushTokens = mysqlTable("push_tokens", {
   id: serial("id").primaryKey(),
-  userId: integer("userId"),
+  userId: int("userId"),
   token: varchar("token", { length: 512 }).notNull(),
-  platform: platformEnum("platform").notNull(),
+  platform: mysqlEnum("platform", ["ios", "android", "web"]).notNull(),
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -55,11 +47,11 @@ export type InsertPushToken = typeof pushTokens.$inferInsert;
 /**
  * Subscriptions table for managing user subscriptions and promo codes.
  */
-export const subscriptions = pgTable("subscriptions", {
+export const subscriptions = mysqlTable("subscriptions", {
   id: serial("id").primaryKey(),
-  userId: integer("userId"),
-  plan: subscriptionPlanEnum("plan").default("free").notNull(),
-  status: subscriptionStatusEnum("status").default("active").notNull(),
+  userId: int("userId"),
+  plan: mysqlEnum("plan", ["free", "monthly", "yearly", "promo"]).default("free").notNull(),
+  status: mysqlEnum("status", ["active", "expired", "cancelled"]).default("active").notNull(),
   promoCode: varchar("promoCode", { length: 64 }),
   startDate: timestamp("startDate").defaultNow().notNull(),
   endDate: timestamp("endDate"),
@@ -73,12 +65,12 @@ export type InsertSubscription = typeof subscriptions.$inferInsert;
 /**
  * Promo codes for free trial distribution.
  */
-export const promoCodes = pgTable("promo_codes", {
+export const promoCodes = mysqlTable("promo_codes", {
   id: serial("id").primaryKey(),
   code: varchar("code", { length: 64 }).notNull().unique(),
-  maxUses: integer("maxUses").default(1).notNull(),
-  currentUses: integer("currentUses").default(0).notNull(),
-  durationDays: integer("durationDays").default(30).notNull(),
+  maxUses: int("maxUses").default(1).notNull(),
+  currentUses: int("currentUses").default(0).notNull(),
+  durationDays: int("durationDays").default(30).notNull(),
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   expiresAt: timestamp("expiresAt"),
@@ -90,14 +82,14 @@ export type InsertPromoCode = typeof promoCodes.$inferInsert;
 /**
  * User feedback and suggestions.
  */
-export const feedback = pgTable("feedback", {
+export const feedback = mysqlTable("feedback", {
   id: serial("id").primaryKey(),
-  userId: integer("userId"),
+  userId: int("userId"),
   userName: varchar("userName", { length: 255 }),
-  type: feedbackTypeEnum("type").default("suggestion").notNull(),
+  type: mysqlEnum("type", ["bug", "suggestion", "complaint", "praise", "other"]).default("suggestion").notNull(),
   message: text("message").notNull(),
-  rating: integer("rating"),
-  status: feedbackStatusEnum("status").default("new").notNull(),
+  rating: int("rating"),
+  status: mysqlEnum("status", ["new", "read", "resolved", "archived"]).default("new").notNull(),
   adminNote: text("adminNote"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -109,16 +101,16 @@ export type InsertFeedback = typeof feedback.$inferInsert;
 /**
  * Notification history - tracks all sent notifications.
  */
-export const notifications = pgTable("notifications", {
+export const notifications = mysqlTable("notifications", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   body: text("body").notNull(),
-  targetType: notificationTargetEnum("targetType").default("all").notNull(),
+  targetType: mysqlEnum("targetType", ["all", "country", "user"]).default("all").notNull(),
   targetValue: varchar("targetValue", { length: 255 }),
-  sentBy: integer("sentBy"),
-  sentCount: integer("sentCount").default(0).notNull(),
-  successCount: integer("successCount").default(0).notNull(),
-  failCount: integer("failCount").default(0).notNull(),
+  sentBy: int("sentBy"),
+  sentCount: int("sentCount").default(0).notNull(),
+  successCount: int("successCount").default(0).notNull(),
+  failCount: int("failCount").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -128,13 +120,13 @@ export type InsertNotification = typeof notifications.$inferInsert;
 /**
  * App analytics - daily stats.
  */
-export const dailyStats = pgTable("daily_stats", {
+export const dailyStats = mysqlTable("daily_stats", {
   id: serial("id").primaryKey(),
   date: varchar("date", { length: 10 }).notNull(),
-  newUsers: integer("newUsers").default(0).notNull(),
-  activeUsers: integer("activeUsers").default(0).notNull(),
-  newSubscriptions: integer("newSubscriptions").default(0).notNull(),
-  feedbackCount: integer("feedbackCount").default(0).notNull(),
+  newUsers: int("newUsers").default(0).notNull(),
+  activeUsers: int("activeUsers").default(0).notNull(),
+  newSubscriptions: int("newSubscriptions").default(0).notNull(),
+  feedbackCount: int("feedbackCount").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -145,7 +137,7 @@ export type InsertDailyStat = typeof dailyStats.$inferInsert;
  * Recipe images - stores image URLs for recipes (persisted in DB, not in code files).
  * This ensures images survive deployments and code updates.
  */
-export const recipeImages = pgTable("recipe_images", {
+export const recipeImages = mysqlTable("recipe_images", {
   id: serial("id").primaryKey(),
   recipeId: varchar("recipeId", { length: 64 }).notNull().unique(),
   imageUrl: text("imageUrl").notNull(),
@@ -155,3 +147,34 @@ export const recipeImages = pgTable("recipe_images", {
 
 export type RecipeImage = typeof recipeImages.$inferSelect;
 export type InsertRecipeImage = typeof recipeImages.$inferInsert;
+
+/**
+ * Subscription click tracking - tracks when users tap the subscribe button.
+ */
+export const subscriptionClicks = mysqlTable("subscription_clicks", {
+  id: serial("id").primaryKey(),
+  userId: int("userId"),
+  deviceId: varchar("deviceId", { length: 128 }),
+  country: varchar("country", { length: 32 }),
+  plan: varchar("plan", { length: 32 }),
+  source: varchar("source", { length: 64 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SubscriptionClick = typeof subscriptionClicks.$inferSelect;
+export type InsertSubscriptionClick = typeof subscriptionClicks.$inferInsert;
+
+/**
+ * Active users tracking - records user activity for real-time active user counts.
+ */
+export const activeUserSessions = mysqlTable("active_user_sessions", {
+  id: serial("id").primaryKey(),
+  userId: int("userId"),
+  deviceId: varchar("deviceId", { length: 128 }),
+  platform: mysqlEnum("platform", ["ios", "android", "web"]).notNull(),
+  lastActiveAt: timestamp("lastActiveAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ActiveUserSession = typeof activeUserSessions.$inferSelect;
+export type InsertActiveUserSession = typeof activeUserSessions.$inferInsert;

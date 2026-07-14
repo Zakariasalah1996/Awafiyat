@@ -17,7 +17,7 @@ import {
   ACTION_VIEW_RECIPE,
   cancelMealReminder,
 } from "@/lib/notifications";
-import { registerGuest } from "@/lib/guest-auth";
+import { registerGuest, sendHeartbeat } from "@/lib/guest-auth";
 import { useRouter } from "expo-router";
 import { AlarmProvider } from "@/lib/alarm-context";
 import { MedicationProvider } from "@/lib/medication-context";
@@ -67,6 +67,8 @@ function RootLayoutInner() {
     initManusRuntime();
     // Auto-register as guest user
     registerGuest().catch((e) => console.warn("[Guest] Error:", e));
+    // Track active user on app open
+    sendHeartbeat().catch(() => {});
   }, []);
 
   // Auto-register push notifications on app start (native only)

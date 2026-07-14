@@ -9,7 +9,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { savePushToken, getDb, deactivatePushToken } from "../db";
+import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks } from "../db";
 import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
@@ -815,6 +815,59 @@ async function startServer() {
       );
       const remaining = await adminDb.getActivePushTokens();
       res.json({ success: true, message: 'Cleaned up invalid and old Expo tokens', remaining: remaining.length });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==================== SUBSCRIPTION CLICK TRACKING ====================
+  // Called from app when user taps subscribe button
+  app.post('/api/user/subscription-click', async (req, res) => {
+    try {
+      const { userId, deviceId, country, plan, source } = req.body;
+      await trackSubscriptionClick({ userId, deviceId, country, plan, source });
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==================== ACTIVE USER TRACKING ====================
+  // Called from app on app open/foreground
+  app.post('/api/user/heartbeat', async (req, res) => {
+    try {
+      const { userId, deviceId, platform: clientPlatform } = req.body;
+      if (!deviceId) return res.status(400).json({ error: 'deviceId is required' });
+      const ua = req.headers['user-agent'] || '';
+      let detectedPlatform: 'ios' | 'android' | 'web' = 'android';
+      if (clientPlatform === 'ios' || ua.includes('iPhone') || ua.includes('iPad')) detectedPlatform = 'ios';
+      else if (clientPlatform === 'web') detectedPlatform = 'web';
+      await trackActiveUser({ userId, deviceId, platform: detectedPlatform });
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Admin: Get active user stats
+  app.get('/api/admin/active-users', adminAuth, async (_req, res) => {
+    try {
+      const last15min = await getActiveUserCount(15);
+      const last60min = await getActiveUserCount(60);
+      const today = await getDailyActiveUserCount();
+      res.json({ last15min, last60min, today });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Admin: Get subscription click stats
+  app.get('/api/admin/subscription-clicks', adminAuth, async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 30;
+      const count = await getSubscriptionClickCount(days);
+      const clicks = await getSubscriptionClicks(days);
+      res.json({ count, clicks });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }

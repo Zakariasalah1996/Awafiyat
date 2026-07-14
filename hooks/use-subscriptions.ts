@@ -6,6 +6,24 @@ import Purchases, {
 import { Platform } from 'react-native';
 import { useSubscriptionContext } from '@/lib/subscription-context';
 import { useUser } from '@/lib/user-context';
+import { getDeviceId, getGuestUserId } from '@/lib/guest-auth';
+import { getApiBaseUrl } from '@/constants/oauth';
+
+// Track subscription button click silently
+async function trackSubscriptionClick(plan: string, source: string) {
+  try {
+    const deviceId = await getDeviceId();
+    const userId = await getGuestUserId();
+    const baseUrl = getApiBaseUrl();
+    await fetch(`${baseUrl}/api/user/subscription-click`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, deviceId, plan, source, country: 'iraq' }),
+    });
+  } catch (_) {
+    // Silent - tracking should never break the purchase flow
+  }
+}
 
 const ENTITLEMENT_ID = 'premium';
 
@@ -116,6 +134,8 @@ export function useSubscriptions(): UseSubscriptionsReturn {
     async (pkg: SubscriptionPackage): Promise<boolean> => {
       try {
         setError(null);
+        // Track subscription click event
+        trackSubscriptionClick(pkg.period, 'subscription_screen');
         const result = await Purchases.purchasePackage(pkg.package);
 
         const hasPremium = !!result.customerInfo.entitlements.active[ENTITLEMENT_ID];

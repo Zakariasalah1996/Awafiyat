@@ -1,10 +1,9 @@
-// Fix SSL self-signed certificate issue with Render PostgreSQL
-// Must be set before any pg connection is created
+// Fix SSL self-signed certificate issue
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 import { eq, desc, sql, and, count } from "drizzle-orm";
-import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import { drizzle, MySql2Database } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
 import {
   InsertUser, users,
   pushTokens, InsertPushToken,
@@ -13,35 +12,33 @@ import {
   feedback, InsertFeedback,
   notifications, InsertNotification,
   dailyStats, InsertDailyStat,
+  subscriptionClicks, InsertSubscriptionClick,
+  activeUserSessions, InsertActiveUserSession,
 } from "../drizzle/schema";
 
 // ==================== DATABASE CONNECTION ====================
-// Create connection at module load time (not lazy) to avoid esbuild ESM issues
 
-function createDbConnection(): NodePgDatabase | null {
+function createDbConnection(): MySql2Database | null {
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
     console.warn("[Database] DATABASE_URL not set - database features disabled");
     return null;
   }
   try {
-    const useSSL = dbUrl.includes('render.com') ||
-      dbUrl.includes('sslmode=require') ||
-      dbUrl.includes('dpg-') ||
-      dbUrl.includes('postgres.render.com') ||
-      dbUrl.includes('neon.tech') ||
-      dbUrl.includes('supabase');
-    console.log(`[Database] Initializing PostgreSQL connection (SSL: ${useSSL}, host: ${dbUrl.split('@')[1]?.split('/')[0] ?? 'unknown'})`);
-    const pool = new Pool({
-      connectionString: dbUrl,
-      ssl: useSSL ? { rejectUnauthorized: false } : false,
-      max: 5,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
+    // Parse the URL to extract host info for logging
+    const hostMatch = dbUrl.match(/@([^/]+)/);
+    const host = hostMatch?.[1] ?? 'unknown';
+    console.log(`[Database] Initializing MySQL connection (host: ${host})`);
+    
+    const pool = mysql.createPool({
+      uri: dbUrl,
+      ssl: { rejectUnauthorized: false },
+      waitForConnections: true,
+      connectionLimit: 5,
+      queueLimit: 0,
+      connectTimeout: 10000,
     });
-    pool.on('error', (err) => {
-      console.error('[Database] Pool error:', err.message);
-    });
+    
     return drizzle(pool);
   } catch (error: any) {
     console.error("[Database] Failed to initialize:", error.message);
@@ -50,9 +47,9 @@ function createDbConnection(): NodePgDatabase | null {
 }
 
 // Single shared instance - created once at module load
-const _db: NodePgDatabase | null = createDbConnection();
+const _db: MySql2Database | null = createDbConnection();
 
-export function getDb(): NodePgDatabase | null {
+export function getDb(): MySql2Database | null {
   return _db;
 }
 
@@ -97,8 +94,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     if (Object.keys(updateSet).length === 0) {
       updateSet.lastSignedIn = new Date();
     }
-    await _db.insert(users).values(values).onConflictDoUpdate({
-      target: users.openId,
+    await _db.insert(users).values(values).onDuplicateKeyUpdate({
       set: updateSet,
     });
   } catch (error) {
@@ -181,8 +177,7 @@ export async function deactivatePushToken(token: string) {
 
 export async function createSubscription(data: InsertSubscription) {
   if (!_db) throw new Error("Database not available");
-  const result = await _db.insert(subscriptions).values(data).returning({ id: subscriptions.id });
-  return result[0]?.id;
+  await _db.insert(subscriptions).values(data);
 }
 
 export async function getAllSubscriptions(limit = 100, offset = 0) {
@@ -266,10 +261,10 @@ export async function updateFeedbackStatus(id: number, status: "new" | "read" | 
 
 // ==================== NOTIFICATIONS ====================
 
-export async function createNotification(data: InsertNotification) {
+export async function createNotification(data: InsertNotification): Promise<number | undefined> {
   if (!_db) throw new Error("Database not available");
-  const result = await _db.insert(notifications).values(data).returning({ id: notifications.id });
-  return result[0]?.id;
+  const result = await _db.insert(notifications).values(data);
+  return result[0]?.insertId;
 }
 
 export async function getAllNotifications(limit = 50, offset = 0) {
@@ -319,4 +314,73 @@ export async function getDashboardStats() {
     yearlySubscriptions: Number(yearlyCount?.count ?? 0),
     promoSubscriptions: Number(promoCount?.count ?? 0),
   };
+}
+
+// ==================== SUBSCRIPTION CLICKS ====================
+
+export async function trackSubscriptionClick(data: InsertSubscriptionClick) {
+  if (!_db) return;
+  try {
+    await _db.insert(subscriptionClicks).values(data);
+  } catch (error) {
+    console.error("[Database] Failed to track subscription click:", error);
+  }
+}
+
+export async function getSubscriptionClicks(days = 30) {
+  if (!_db) return [];
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+  return _db.select().from(subscriptionClicks).where(
+    sql`${subscriptionClicks.createdAt} >= ${since}`
+  ).orderBy(desc(subscriptionClicks.createdAt));
+}
+
+export async function getSubscriptionClickCount(days = 30) {
+  if (!_db) return 0;
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+  const result = await _db.select({ count: count() }).from(subscriptionClicks).where(
+    sql`${subscriptionClicks.createdAt} >= ${since}`
+  );
+  return Number(result[0]?.count ?? 0);
+}
+
+// ==================== ACTIVE USERS ====================
+
+export async function trackActiveUser(data: InsertActiveUserSession) {
+  if (!_db) return;
+  try {
+    // Upsert based on deviceId
+    if (data.deviceId) {
+      const existing = await _db.select().from(activeUserSessions).where(eq(activeUserSessions.deviceId, data.deviceId!)).limit(1);
+      if (existing.length > 0) {
+        await _db.update(activeUserSessions).set({ lastActiveAt: new Date(), userId: data.userId }).where(eq(activeUserSessions.deviceId, data.deviceId!));
+        return;
+      }
+    }
+    await _db.insert(activeUserSessions).values(data);
+  } catch (error) {
+    console.error("[Database] Failed to track active user:", error);
+  }
+}
+
+export async function getActiveUserCount(minutes = 15) {
+  if (!_db) return 0;
+  const since = new Date();
+  since.setMinutes(since.getMinutes() - minutes);
+  const result = await _db.select({ count: count() }).from(activeUserSessions).where(
+    sql`${activeUserSessions.lastActiveAt} >= ${since}`
+  );
+  return Number(result[0]?.count ?? 0);
+}
+
+export async function getDailyActiveUserCount() {
+  if (!_db) return 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const result = await _db.select({ count: count() }).from(activeUserSessions).where(
+    sql`${activeUserSessions.lastActiveAt} >= ${today}`
+  );
+  return Number(result[0]?.count ?? 0);
 }

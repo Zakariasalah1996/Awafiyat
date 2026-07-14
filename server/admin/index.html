@@ -329,6 +329,28 @@
         <div class="stat-card"><div class="stat-icon feedback">💬</div><div class="stat-info"><h3 id="statFeedback">0</h3><p>ملاحظات جديدة</p></div></div>
         <div class="stat-card"><div class="stat-icon notifs">🔔</div><div class="stat-info"><h3 id="statNotifs">0</h3><p>إشعارات مرسلة</p></div></div>
       </div>
+      <!-- Active Users & Subscription Clicks -->
+      <div style="margin-bottom:20px;">
+        <h3 style="margin-bottom:14px;font-size:16px;color:var(--text-secondary);">🟢 المستخدمون النشطون</h3>
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+          <div class="stat-card" style="border-top:3px solid #10b981;">
+            <div class="stat-icon" style="background:#d1fae5;color:#059669;">⚡</div>
+            <div class="stat-info"><h3 id="statActive15">0</h3><p>نشط (آخر 15 دقيقة)</p></div>
+          </div>
+          <div class="stat-card" style="border-top:3px solid #06b6d4;">
+            <div class="stat-icon" style="background:#cffafe;color:#0891b2;">🕐</div>
+            <div class="stat-info"><h3 id="statActive60">0</h3><p>نشط (آخر ساعة)</p></div>
+          </div>
+          <div class="stat-card" style="border-top:3px solid #8b5cf6;">
+            <div class="stat-icon" style="background:#ede9fe;color:#7c3aed;">📅</div>
+            <div class="stat-info"><h3 id="statActiveToday">0</h3><p>نشط اليوم</p></div>
+          </div>
+          <div class="stat-card" style="border-top:3px solid #f97316;">
+            <div class="stat-icon" style="background:#ffedd5;color:#ea580c;">👆</div>
+            <div class="stat-info"><h3 id="statSubClicks">0</h3><p>ضغطات زر الاشتراك (30 يوم)</p></div>
+          </div>
+        </div>
+      </div>
       <!-- Subscription breakdown -->
       <div style="margin-bottom:20px;">
         <h3 style="margin-bottom:14px;font-size:16px;color:var(--text-secondary);">📊 تفصيل الاشتراكات</h3>
@@ -767,6 +789,22 @@ async function loadDashboard() {
     renderUsersChart([]);
     renderCountryChart([]);
   }
+  // Load active users
+  try {
+    const activeData = await api('active-users');
+    if (activeData && !activeData.error) {
+      document.getElementById('statActive15').textContent = activeData.last15min || 0;
+      document.getElementById('statActive60').textContent = activeData.last60min || 0;
+      document.getElementById('statActiveToday').textContent = activeData.today || 0;
+    }
+  } catch(e) { console.warn('Failed to load active users:', e); }
+  // Load subscription clicks
+  try {
+    const clickData = await api('subscription-clicks?days=30');
+    if (clickData && !clickData.error) {
+      document.getElementById('statSubClicks').textContent = clickData.count || 0;
+    }
+  } catch(e) { console.warn('Failed to load subscription clicks:', e); }
   loadRecentUsers();
 }
 
