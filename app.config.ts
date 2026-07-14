@@ -131,6 +131,15 @@ const config: ExpoConfig = {
         },
       },
     ],
+    [
+      "react-native-google-mobile-ads",
+      {
+        androidAppId: "ca-app-pub-9147941153313979~6652750828",
+        iosAppId: "ca-app-pub-9147941153313979~6652750828",
+        userTrackingUsageDescription: "يستخدم هذا التطبيق إعلانات لدعم المحتوى المجاني",
+        skAdNetworkItems: [],
+      },
+    ],
   ],
   extra: {
     eas: {

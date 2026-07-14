@@ -1,4 +1,6 @@
 import { useState, useCallback } from "react";
+import { showRewardedAd, unlockWarning } from "@/lib/admob";
+import { Alert } from "react-native";
 import {
   View,
   Text,
@@ -44,6 +46,8 @@ export default function RecipeDetailScreen() {
 
   // حالة نافذة الاشتراك
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  // حالة فتح التحذير بالإعلان
+  const [warningUnlockedByAd, setWarningUnlockedByAd] = useState(false);
 
   const isSaved = profile.savedRecipes.includes(id || "");
 
@@ -74,8 +78,30 @@ export default function RecipeDetailScreen() {
     if (Platform.OS !== "web") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     }
-    setShowSubscriptionModal(true);
-  }, []);
+    Alert.alert(
+      "⚠️ تحذير صحي مقفل",
+      "افتح التحذير الصحي مجاناً بمشاهدة إعلان قصير",
+      [
+        { text: "إلغاء", style: "cancel" },
+        {
+          text: "▶️ شاهد إعلاناً",
+          onPress: async () => {
+            const rewarded = await showRewardedAd();
+            if (rewarded) {
+              await unlockWarning(id || "");
+              setWarningUnlockedByAd(true);
+            } else {
+              Alert.alert("تنبيه", "يجب مشاهدة الإعلان كاملاً لفتح التحذير");
+            }
+          },
+        },
+        {
+          text: "اشترك للوصول الكامل",
+          onPress: () => setShowSubscriptionModal(true),
+        },
+      ]
+    );
+  }, [id]);
 
   if (!recipe) {
     return (

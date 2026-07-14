@@ -69,6 +69,10 @@ function RootLayoutInner() {
     registerGuest().catch((e) => console.warn("[Guest] Error:", e));
     // Track active user on app open
     sendHeartbeat().catch(() => {});
+    // Preload AdMob rewarded ad in background
+    if (Platform.OS !== "web") {
+      import("@/lib/admob").then(({ preloadRewardedAd }) => preloadRewardedAd()).catch(() => {});
+    }
   }, []);
 
   // Auto-register push notifications on app start (native only)

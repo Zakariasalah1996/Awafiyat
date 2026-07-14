@@ -25,6 +25,7 @@ import {
   isRecipeFree,
 } from "@/lib/data/recipes";
 import { Alert } from "react-native";
+import { showRewardedAd, getUnlockedRecipes, unlockRecipe } from "@/lib/admob";
 import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
@@ -97,8 +98,13 @@ export default function RecipesLibraryScreen() {
   const params = useLocalSearchParams<{ category?: string; mealType?: string }>();
   const { profile, saveRecipe, unsaveRecipe } = useUser();
   const { isPremium } = useSubscriptionContext();
-  // Get recipe images map (fetches from server on mount)
   const recipeImages = useRecipeImages();
+  const [unlockedByAd, setUnlockedByAd] = useState<Set<string>>(new Set());
+
+  // تحميل الوصفات المفتوحة بالإعلانات
+  useState(() => {
+    getUnlockedRecipes().then((ids) => setUnlockedByAd(new Set(ids)));
+  });
 
   const [activeFilter, setActiveFilter] = useState<FilterType>(
     (params.category as FilterType) || "all"
@@ -190,7 +196,7 @@ export default function RecipesLibraryScreen() {
       const originFlag = item.origin ? ORIGIN_FLAG[item.origin] || "" : "";
       const originLabel = item.origin ? ORIGIN_LABEL[item.origin] || "" : "";
       const isFree = isRecipeFree(item.id);
-      const isLocked = !isFree && !isPremium;
+      const isLocked = !isFree && !isPremium && !unlockedByAd.has(item.id);
 
       return (
         <TouchableOpacity
@@ -200,12 +206,28 @@ export default function RecipesLibraryScreen() {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
               }
               Alert.alert(
-                "وصفة حصرية \uD83D\uDD12",
-                "هذه الوصفة متاحة للمشتركين فقط.\nاشترك الآن لفتح أكثر من 200 وصفة حصرية!",
+                "🔒 وصفة مقفلة",
+                `افتح "${item.name}" مجاناً بمشاهدة إعلان قصير`,
                 [
-                  { text: "لاحقاً", style: "cancel" },
+                  { text: "إلغاء", style: "cancel" },
                   {
-                    text: "اشترك الآن",
+                    text: "▶️ شاهد إعلاناً",
+                    onPress: async () => {
+                      const rewarded = await showRewardedAd();
+                      if (rewarded) {
+                        await unlockRecipe(item.id);
+                        setUnlockedByAd((prev) => new Set([...prev, item.id]));
+                        router.push({
+                          pathname: "/sections/recipe-detail" as any,
+                          params: { id: item.id },
+                        });
+                      } else {
+                        Alert.alert("تنبيه", "يجب مشاهدة الإعلان كاملاً لفتح الوصفة");
+                      }
+                    },
+                  },
+                  {
+                    text: "اشترك للوصول الكامل",
                     onPress: () => router.push("/(tabs)/subscription" as any),
                   },
                 ]
@@ -335,7 +357,7 @@ export default function RecipesLibraryScreen() {
         </TouchableOpacity>
       );
     },
-    [colors, profile.savedRecipes, profile.healthCondition, handleToggleSave, router, recipeImages]
+    [colors, profile.savedRecipes, profile.healthCondition, handleToggleSave, router, recipeImages, unlockedByAd, isPremium]
   );
 
   return (
