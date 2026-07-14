@@ -151,53 +151,42 @@ export default function SubscriptionScreen() {
       {/* ─── Modal التجربة المجانية 3 أيام ─── */}
       <Modal visible={showTrialModal} transparent animationType="slide">
         <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <View style={{ backgroundColor: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, paddingBottom: 36 }}>
-            {/* الرأس */}
-            <View style={{ alignItems: "center", marginBottom: 20 }}>
-              <Text style={{ fontSize: 40 }}>🎁</Text>
-              <Text style={{ fontSize: 24, fontWeight: "bold", color: "#1a1a1a", marginTop: 8 }}>
+          <View style={{ backgroundColor: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingHorizontal: 22, paddingTop: 18, paddingBottom: 28 }}>
+            {/* الرأس - مضغوط */}
+            <View style={{ alignItems: "center", marginBottom: 14 }}>
+              <Text style={{ fontSize: 32 }}>🎁</Text>
+              <Text style={{ fontSize: 20, fontWeight: "bold", color: "#1a1a1a", marginTop: 6 }}>
                 3 أيام مجاناً!
               </Text>
-              <Text style={{ fontSize: 14, color: "#666", marginTop: 6, textAlign: "center", lineHeight: 22 }}>
-                جرّب جميع ميزات ألف عافيات المميزة مجاناً{"\n"}
-                لمدة 3 أيام بدون أي رسوم
+              <Text style={{ fontSize: 13, color: "#666", marginTop: 4, textAlign: "center" }}>
+                جرّب جميع الميزات مجاناً بدون أي رسوم
               </Text>
             </View>
 
-            {/* الخطوات */}
-            <View style={{ backgroundColor: "#E8F5E9", borderRadius: 16, padding: 16, marginBottom: 20, borderWidth: 1.5, borderColor: "#2e7d32" }}>
-              <View style={{ gap: 12 }}>
-                <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 10 }}>
-                  <Text style={{ fontSize: 18 }}>✅</Text>
-                  <Text style={{ flex: 1, fontSize: 14, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>
-                    اليوم: افتح جميع الميزات فوراً
-                  </Text>
-                </View>
-                <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 10 }}>
-                  <Text style={{ fontSize: 18 }}>🔔</Text>
-                  <Text style={{ flex: 1, fontSize: 14, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>
-                    اليوم 2: سنذكّرك قبل انتهاء التجربة
-                  </Text>
-                </View>
-                <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 10 }}>
-                  <Text style={{ fontSize: 18 }}>💳</Text>
-                  <Text style={{ flex: 1, fontSize: 14, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>
-                    اليوم 3: يبدأ الاشتراك إذا لم تلغِ
-                  </Text>
-                </View>
+            {/* الخطوات - مضغوطة */}
+            <View style={{ backgroundColor: "#E8F5E9", borderRadius: 14, padding: 12, marginBottom: 14, borderWidth: 1.5, borderColor: "#2e7d32", gap: 8 }}>
+              <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 8 }}>
+                <Text style={{ fontSize: 16 }}>✅</Text>
+                <Text style={{ flex: 1, fontSize: 13, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>اليوم: افتح جميع الميزات فوراً</Text>
+              </View>
+              <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 8 }}>
+                <Text style={{ fontSize: 16 }}>🔔</Text>
+                <Text style={{ flex: 1, fontSize: 13, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>اليوم 2: سنذكّرك قبل انتهاء التجربة</Text>
+              </View>
+              <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 8 }}>
+                <Text style={{ fontSize: 16 }}>💳</Text>
+                <Text style={{ flex: 1, fontSize: 13, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>اليوم 3: يبدأ الاشتراك إذا لم تلغِ</Text>
               </View>
             </View>
 
             {/* زر بدء التجربة */}
             <TouchableOpacity
               onPress={confirmTrialPurchase}
-              style={{ backgroundColor: "#2e7d32", borderRadius: 18, paddingVertical: 17, alignItems: "center", marginBottom: 12 }}
+              style={{ backgroundColor: "#2e7d32", borderRadius: 16, paddingVertical: 15, alignItems: "center", marginBottom: 10 }}
               activeOpacity={0.85}
             >
-              <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-                ابدأ التجربة المجانية 3 أيام
-              </Text>
-              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 3 }}>
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>ابدأ التجربة المجانية 3 أيام</Text>
+              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11, marginTop: 2 }}>
                 ثم {pendingPkgId && packages.find(p => p.id === pendingPkgId)?.price || ""}/
                 {pendingPkgId && packages.find(p => p.id === pendingPkgId)?.period === "yearly" ? "سنة" : "شهر"}
                 {" "}• إلغاء في أي وقت
@@ -213,9 +202,8 @@ export default function SubscriptionScreen() {
             </TouchableOpacity>
 
             {/* ملاحظة */}
-            <Text style={{ fontSize: 11, color: "#999", textAlign: "center", marginTop: 12, lineHeight: 17 }}>
-              لن يتم خصم أي مبلغ خلال فترة التجربة.{"\n"}
-              يمكنك الإلغاء في أي وقت من إعدادات Google Play.
+            <Text style={{ fontSize: 11, color: "#bbb", textAlign: "center", marginTop: 8 }}>
+              لن يتم خصم أي مبلغ خلال فترة التجربة • إلغاء من إعدادات Google Play
             </Text>
           </View>
         </View>
