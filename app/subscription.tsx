@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   I18nManager,
+  Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from '@/components/screen-container';
@@ -24,16 +25,23 @@ export default function SubscriptionScreen() {
     useSubscriptions();
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
 
-  const handlePurchase = async (packageId: string) => {
-    const pkg = packages.find((p) => p.id === packageId);
+  const [showTrialModal, setShowTrialModal] = useState(false);
+  const [pendingPkgId, setPendingPkgId] = useState<string | null>(null);
+
+  const handlePurchase = (packageId: string) => {
+    setPendingPkgId(packageId);
+    setShowTrialModal(true);
+  };
+
+  const confirmTrialPurchase = async () => {
+    if (!pendingPkgId) return;
+    const pkg = packages.find((p) => p.id === pendingPkgId);
     if (!pkg) return;
-
+    setShowTrialModal(false);
     try {
-      setSelectedPackageId(packageId);
+      setSelectedPackageId(pendingPkgId);
       Haptics.impactAsync(ImpactFeedbackStyle.Medium);
-
       const success = await purchasePackage(pkg);
-
       if (success) {
         Haptics.notificationAsync(NotificationFeedbackType.Success);
         Alert.alert('نجح الاشتراك! 🎉', 'شكراً لاشتراكك في ألف عافيات المميزة');
@@ -44,6 +52,7 @@ export default function SubscriptionScreen() {
       Alert.alert('خطأ', 'حدث خطأ أثناء الشراء. حاول مرة أخرى.');
     } finally {
       setSelectedPackageId(null);
+      setPendingPkgId(null);
     }
   };
 
@@ -138,6 +147,79 @@ export default function SubscriptionScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* ─── Modal التجربة المجانية 3 أيام ─── */}
+      <Modal visible={showTrialModal} transparent animationType="slide">
+        <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <View style={{ backgroundColor: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, paddingBottom: 36 }}>
+            {/* الرأس */}
+            <View style={{ alignItems: "center", marginBottom: 20 }}>
+              <Text style={{ fontSize: 40 }}>🎁</Text>
+              <Text style={{ fontSize: 24, fontWeight: "bold", color: "#1a1a1a", marginTop: 8 }}>
+                3 أيام مجاناً!
+              </Text>
+              <Text style={{ fontSize: 14, color: "#666", marginTop: 6, textAlign: "center", lineHeight: 22 }}>
+                جرّب جميع ميزات ألف عافيات المميزة مجاناً{"\n"}
+                لمدة 3 أيام بدون أي رسوم
+              </Text>
+            </View>
+
+            {/* الخطوات */}
+            <View style={{ backgroundColor: "#E8F5E9", borderRadius: 16, padding: 16, marginBottom: 20, borderWidth: 1.5, borderColor: "#2e7d32" }}>
+              <View style={{ gap: 12 }}>
+                <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 10 }}>
+                  <Text style={{ fontSize: 18 }}>✅</Text>
+                  <Text style={{ flex: 1, fontSize: 14, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>
+                    اليوم: افتح جميع الميزات فوراً
+                  </Text>
+                </View>
+                <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 10 }}>
+                  <Text style={{ fontSize: 18 }}>🔔</Text>
+                  <Text style={{ flex: 1, fontSize: 14, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>
+                    اليوم 2: سنذكّرك قبل انتهاء التجربة
+                  </Text>
+                </View>
+                <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 10 }}>
+                  <Text style={{ fontSize: 18 }}>💳</Text>
+                  <Text style={{ flex: 1, fontSize: 14, color: "#2d6a2d", textAlign: "right", fontWeight: "600" }}>
+                    اليوم 3: يبدأ الاشتراك إذا لم تلغِ
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* زر بدء التجربة */}
+            <TouchableOpacity
+              onPress={confirmTrialPurchase}
+              style={{ backgroundColor: "#2e7d32", borderRadius: 18, paddingVertical: 17, alignItems: "center", marginBottom: 12 }}
+              activeOpacity={0.85}
+            >
+              <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
+                ابدأ التجربة المجانية 3 أيام
+              </Text>
+              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 3 }}>
+                ثم {pendingPkgId && packages.find(p => p.id === pendingPkgId)?.price || ""}/
+                {pendingPkgId && packages.find(p => p.id === pendingPkgId)?.period === "yearly" ? "سنة" : "شهر"}
+                {" "}• إلغاء في أي وقت
+              </Text>
+            </TouchableOpacity>
+
+            {/* زر إلغاء */}
+            <TouchableOpacity
+              onPress={() => { setShowTrialModal(false); setPendingPkgId(null); }}
+              style={{ alignItems: "center", paddingVertical: 8 }}
+            >
+              <Text style={{ color: "#999", fontSize: 14 }}>ليس الآن</Text>
+            </TouchableOpacity>
+
+            {/* ملاحظة */}
+            <Text style={{ fontSize: 11, color: "#999", textAlign: "center", marginTop: 12, lineHeight: 17 }}>
+              لن يتم خصم أي مبلغ خلال فترة التجربة.{"\n"}
+              يمكنك الإلغاء في أي وقت من إعدادات Google Play.
+            </Text>
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }
