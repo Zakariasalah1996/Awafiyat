@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import { showRewardedAd, unlockWarning } from "@/lib/admob";
-import { Alert } from "react-native";
+import { showRewardedAd } from "@/lib/admob";
+import { AdLockModal } from "@/components/ad-lock-modal";
 import {
   View,
   Text,
@@ -46,8 +46,9 @@ export default function RecipeDetailScreen() {
 
   // حالة نافذة الاشتراك
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  // حالة فتح التحذير بالإعلان
+  // حالة فتح التحذير بالإعلان (مؤقت - كل مرة يحتاج إعلان جديد)
   const [warningUnlockedByAd, setWarningUnlockedByAd] = useState(false);
+  const [warningLockModalVisible, setWarningLockModalVisible] = useState(false);
 
   const isSaved = profile.savedRecipes.includes(id || "");
 
@@ -78,30 +79,8 @@ export default function RecipeDetailScreen() {
     if (Platform.OS !== "web") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     }
-    Alert.alert(
-      "⚠️ تحذير صحي مقفل",
-      "افتح التحذير الصحي مجاناً بمشاهدة إعلان قصير",
-      [
-        { text: "إلغاء", style: "cancel" },
-        {
-          text: "▶️ شاهد إعلاناً",
-          onPress: async () => {
-            const rewarded = await showRewardedAd();
-            if (rewarded) {
-              await unlockWarning(id || "");
-              setWarningUnlockedByAd(true);
-            } else {
-              Alert.alert("تنبيه", "يجب مشاهدة الإعلان كاملاً لفتح التحذير");
-            }
-          },
-        },
-        {
-          text: "اشترك للوصول الكامل",
-          onPress: () => setShowSubscriptionModal(true),
-        },
-      ]
-    );
-  }, [id]);
+    setWarningLockModalVisible(true);
+  }, []);
 
   if (!recipe) {
     return (
@@ -845,6 +824,21 @@ export default function RecipeDetailScreen() {
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
+      {/* نافذة قفل التحذير الصحي */}
+      <AdLockModal
+        visible={warningLockModalVisible}
+        contentType="warning"
+        contentName="التحذير الصحي"
+        onUnlocked={() => {
+          setWarningLockModalVisible(false);
+          setWarningUnlockedByAd(true);
+        }}
+        onClose={() => setWarningLockModalVisible(false)}
+        onSubscribe={() => {
+          setWarningLockModalVisible(false);
+          setShowSubscriptionModal(true);
+        }}
+      />
     </ScreenContainer>
   );
 }
