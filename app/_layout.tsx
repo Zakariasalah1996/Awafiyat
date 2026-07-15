@@ -69,9 +69,16 @@ function RootLayoutInner() {
     registerGuest().catch((e) => console.warn("[Guest] Error:", e));
     // Track active user on app open
     sendHeartbeat().catch(() => {});
-    // Preload AdMob rewarded ad in background
+    // تهيئة AdMob SDK وتحميل الإعلان مسبقاً في الخلفية
     if (Platform.OS !== "web") {
-      import("@/lib/admob").then(({ preloadRewardedAd }) => preloadRewardedAd()).catch(() => {});
+      import("react-native-google-mobile-ads")
+        .then(({ default: mobileAds }) => mobileAds().initialize())
+        .then(() => import("@/lib/admob"))
+        .then(({ preloadRewardedAd }) => preloadRewardedAd())
+        .catch(() => {
+          // في حالة فشل التهيئة، نحاول تحميل الإعلان مباشرة
+          import("@/lib/admob").then(({ preloadRewardedAd }) => preloadRewardedAd()).catch(() => {});
+        });
     }
   }, []);
 
