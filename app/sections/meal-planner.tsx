@@ -214,7 +214,7 @@ export default function MealPlannerScreen() {
         return 0;
       });
     }
-    return recipes.slice(0, 20);
+    return recipes;
   }, [showRecipePicker, profile.healthCondition]);
 
   const handleAutoFill = useCallback(() => {
