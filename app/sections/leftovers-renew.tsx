@@ -20,6 +20,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { showRewardedAd } from "@/lib/admob";
+import { AdLockModal } from "@/components/ad-lock-modal";
 
 I18nManager.forceRTL(true);
 
@@ -48,6 +49,7 @@ export default function LeftoversRenewScreen() {
   const [loadingUsage, setLoadingUsage] = useState(false);
   const [unsafeWarning, setUnsafeWarning] = useState("");
   const inputRef = useRef<TextInput>(null);
+  const [showAdModal, setShowAdModal] = useState(false);
 
   const suggestMutation = trpc.leftovers.suggest.useMutation();
 
@@ -75,19 +77,10 @@ export default function LeftoversRenewScreen() {
     return true;
   }, [storageLocation, timeSince]);
 
-  // طلب اقتراح من الذكاء الاصطناعي
-  const askAI = useCallback(async () => {
+  // طلب اقتراح من الذكاء الاصطناعي (يعمل بعد مشاهدة الإعلان أو للمشتركين)
+  const doAskAI = useCallback(async () => {
     if (inputText.trim().length === 0) return;
     if (!storageLocation || !timeSince) return;
-
-    // فحص الأمان
-    if (!checkFoodSafety()) return;
-
-    // غير المشترك يجب أن يشاهد إعلان لكل محاولة
-    if (!isSubscribed) {
-      const rewarded = await showRewardedAd();
-      if (!rewarded) return; // أغلق الإعلان بدون مشاهدة
-    }
 
     setIsLoading(true);
     setShowResult(true);
@@ -108,7 +101,20 @@ export default function LeftoversRenewScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [inputText, storageLocation, timeSince, profile?.healthCondition, suggestMutation, isSubscribed, checkFoodSafety]);
+  }, [inputText, storageLocation, timeSince, profile?.healthCondition, suggestMutation]);
+
+  const canSubmit = inputText.trim().length > 0 && storageLocation !== null && timeSince !== null;
+
+  // زر الاقتراح: فحص الأمان أولاً، ثم إذا مشترك يعمل مباشرة، وإلا يفتح نافذة الإعلان
+  const handleSuggestPress = useCallback(() => {
+    if (!canSubmit) return;
+    if (!checkFoodSafety()) return;
+    if (isSubscribed) {
+      doAskAI();
+    } else {
+      setShowAdModal(true);
+    }
+  }, [canSubmit, checkFoodSafety, isSubscribed, doAskAI]);
 
   // إعادة تعيين
   const resetAll = useCallback(() => {
@@ -120,8 +126,6 @@ export default function LeftoversRenewScreen() {
     setUnsafeWarning("");
   }, []);
 
-
-  const canSubmit = inputText.trim().length > 0 && storageLocation !== null && timeSince !== null;
 
   return (
     <ScreenContainer edges={["top", "left", "right", "bottom"]}>
@@ -140,37 +144,7 @@ export default function LeftoversRenewScreen() {
           <View style={{ width: 40 }} />
         </View>
 
-        {/* ملاحظة للمستخدم غير المشترك */}
-        {!isSubscribed && (
-          <View
-            style={{
-              backgroundColor: "#FFF3E0",
-              borderRadius: 12,
-              paddingHorizontal: 16,
-              paddingVertical: 10,
-              marginHorizontal: 20,
-              marginBottom: 4,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              borderWidth: 1,
-              borderColor: "#FFE0B2",
-            }}
-          >
-            <MaterialIcons name="play-circle-outline" size={18} color="#E65100" />
-            <Text
-              style={{
-                fontSize: 13,
-                fontWeight: "600",
-                color: "#E65100",
-                textAlign: "center",
-              }}
-            >
-              شاهد إعلاناً قصيراً لكل محاولة
-            </Text>
-          </View>
-        )}
+
 
         <ScrollView
           className="flex-1 px-5"
@@ -347,31 +321,33 @@ export default function LeftoversRenewScreen() {
                 </View>
               )}
 
-              {/* زر اقتراح الوصفة */}
-              {canSubmit && unsafeWarning.length === 0 && (
+              {/* زر اقتراح الوصفة - يظهر دائماً */}
+              {unsafeWarning.length === 0 && (
                 <TouchableOpacity
                   onPress={() => {
                     if (Platform.OS !== "web") {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     }
-                    askAI();
+                    handleSuggestPress();
                   }}
+                  disabled={!canSubmit}
                   style={{
-                    backgroundColor: "#2D5A3D",
+                    backgroundColor: canSubmit ? "#2D5A3D" : "#B0BEC5",
                     borderRadius: 16,
                     paddingVertical: 16,
                     marginTop: 24,
                     alignItems: "center",
                     shadowColor: "#000",
                     shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.15,
+                    shadowOpacity: canSubmit ? 0.15 : 0,
                     shadowRadius: 4,
-                    elevation: 3,
+                    elevation: canSubmit ? 3 : 0,
+                    opacity: canSubmit ? 1 : 0.6,
                   }}
                   activeOpacity={0.8}
                 >
                   <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-                    اقترح لي وصفة! 🪄
+                    اقترح عليّ وصفة 🪄
                   </Text>
                 </TouchableOpacity>
               )}
@@ -491,7 +467,7 @@ export default function LeftoversRenewScreen() {
                           if (Platform.OS !== "web") {
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           }
-                          askAI();
+                          handleSuggestPress();
                         }}
                         style={{
                           flex: 1,
@@ -534,6 +510,16 @@ export default function LeftoversRenewScreen() {
           <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* نافذة الإعلان الأنيقة */}
+      <AdLockModal
+        visible={showAdModal}
+        onClose={() => setShowAdModal(false)}
+        variant="leftovers"
+        onAdWatched={() => {
+          doAskAI();
+        }}
+      />
     </ScreenContainer>
   );
 }

@@ -21,6 +21,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { showRewardedAd } from "@/lib/admob";
+import { AdLockModal } from "@/components/ad-lock-modal";
 
 I18nManager.forceRTL(true);
 
@@ -40,6 +41,7 @@ export default function FridgeScreen() {
   const [showResult, setShowResult] = useState(false);
   const [loadingUsage, setLoadingUsage] = useState(false);
   const inputRef = useRef<TextInput>(null);
+  const [showAdModal, setShowAdModal] = useState(false);
 
   const suggestMutation = trpc.fridge.suggest.useMutation();
 
@@ -84,15 +86,9 @@ export default function FridgeScreen() {
     setSelectedIngredients((prev) => prev.filter((i) => i !== name));
   }, []);
 
-  // طلب اقتراح من الذكاء الاصطناعي
-  const askAI = useCallback(async () => {
+  // طلب اقتراح من الذكاء الاصطناعي (يعمل بعد مشاهدة الإعلان أو للمشتركين)
+  const doAskAI = useCallback(async () => {
     if (selectedIngredients.length === 0) return;
-
-    // غير المشترك يجب أن يشاهد إعلان لكل محاولة
-    if (!isSubscribed) {
-      const rewarded = await showRewardedAd();
-      if (!rewarded) return; // أغلق الإعلان بدون مشاهدة
-    }
 
     setIsLoading(true);
     setShowResult(true);
@@ -112,7 +108,17 @@ export default function FridgeScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedIngredients, profile?.healthCondition, suggestMutation, isSubscribed]);
+  }, [selectedIngredients, profile?.healthCondition, suggestMutation]);
+
+  // زر الاقتراح: إذا مشترك يعمل مباشرة، وإلا يفتح نافذة الإعلان
+  const handleSuggestPress = useCallback(() => {
+    if (selectedIngredients.length === 0) return;
+    if (isSubscribed) {
+      doAskAI();
+    } else {
+      setShowAdModal(true);
+    }
+  }, [selectedIngredients, isSubscribed, doAskAI]);
 
   // إعادة تعيين
   const resetAll = useCallback(() => {
@@ -251,37 +257,7 @@ export default function FridgeScreen() {
           <View style={{ width: 40 }} />
         </View>
 
-        {/* ملاحظة للمستخدم غير المشترك */}
-        {!isSubscribed && (
-          <View
-            style={{
-              backgroundColor: "#FFF3E0",
-              borderRadius: 12,
-              paddingHorizontal: 16,
-              paddingVertical: 10,
-              marginHorizontal: 20,
-              marginBottom: 4,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              borderWidth: 1,
-              borderColor: "#FFE0B2",
-            }}
-          >
-            <MaterialIcons name="play-circle-outline" size={18} color="#E65100" />
-            <Text
-              style={{
-                fontSize: 13,
-                fontWeight: "600",
-                color: "#E65100",
-                textAlign: "center",
-              }}
-            >
-              شاهد إعلاناً قصيراً لكل محاولة
-            </Text>
-          </View>
-        )}
+
 
         <ScrollView
           className="flex-1 px-5"
@@ -481,28 +457,28 @@ export default function FridgeScreen() {
                 </View>
               )}
 
-              {/* زر اقتراح الأكلة */}
-              {selectedIngredients.length > 0 && (
-                <TouchableOpacity
-                  onPress={askAI}
-                  style={{
-                    backgroundColor: "#2D5A3D",
-                    borderRadius: 16,
-                    paddingVertical: 16,
-                    marginTop: 24,
-                    alignItems: "center",
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.15,
-                    shadowRadius: 4,
-                    elevation: 3,
-                  }}
-                >
-                  <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-                    اقترحي عليّ أكلة! 🍽️
-                  </Text>
-                </TouchableOpacity>
-              )}
+              {/* زر اقتراح الأكلة - يظهر دائماً */}
+              <TouchableOpacity
+                onPress={handleSuggestPress}
+                disabled={selectedIngredients.length === 0}
+                style={{
+                  backgroundColor: selectedIngredients.length > 0 ? "#2D5A3D" : "#B0BEC5",
+                  borderRadius: 16,
+                  paddingVertical: 16,
+                  marginTop: 24,
+                  alignItems: "center",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: selectedIngredients.length > 0 ? 0.15 : 0,
+                  shadowRadius: 4,
+                  elevation: selectedIngredients.length > 0 ? 3 : 0,
+                  opacity: selectedIngredients.length > 0 ? 1 : 0.6,
+                }}
+              >
+                <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
+                  اقترح عليّ وصفة 🍽️
+                </Text>
+              </TouchableOpacity>
 
               {/* عدد المكونات */}
               {selectedIngredients.length > 0 && (
@@ -601,9 +577,7 @@ export default function FridgeScreen() {
                     {/* أزرار الإجراءات */}
                     <View style={{ flexDirection: "row", gap: 12, marginTop: 20 }}>
                       <TouchableOpacity
-                        onPress={() => {
-                          askAI();
-                        }}
+                        onPress={handleSuggestPress}
                         style={{
                           flex: 1,
                           backgroundColor: "#FFF3E0",
@@ -645,6 +619,16 @@ export default function FridgeScreen() {
           <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* نافذة الإعلان الأنيقة */}
+      <AdLockModal
+        visible={showAdModal}
+        onClose={() => setShowAdModal(false)}
+        variant="fridge"
+        onAdWatched={() => {
+          doAskAI();
+        }}
+      />
     </ScreenContainer>
   );
 }

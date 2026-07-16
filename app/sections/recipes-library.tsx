@@ -24,8 +24,8 @@ import {
   searchRecipes,
   isRecipeFree,
 } from "@/lib/data/recipes";
-import { Alert } from "react-native";
-import { showRewardedAd, getUnlockedRecipes, unlockRecipe } from "@/lib/admob";
+import { getUnlockedRecipes, unlockRecipe, showRewardedAd } from "@/lib/admob";
+import { AdLockModal } from "@/components/ad-lock-modal";
 import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
@@ -100,6 +100,9 @@ export default function RecipesLibraryScreen() {
   const { isPremium } = useSubscriptionContext();
   const recipeImages = useRecipeImages();
   const [unlockedByAd, setUnlockedByAd] = useState<Set<string>>(new Set());
+  const [lockModalVisible, setLockModalVisible] = useState(false);
+  const [lockedRecipeId, setLockedRecipeId] = useState<string | null>(null);
+  const [lockedRecipeName, setLockedRecipeName] = useState<string>("");
 
   // تحميل الوصفات المفتوحة بالإعلانات
   useState(() => {
@@ -205,33 +208,9 @@ export default function RecipesLibraryScreen() {
               if (Platform.OS !== "web") {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
               }
-              Alert.alert(
-                "🔒 وصفة مقفلة",
-                `افتح "${item.name}" مجاناً بمشاهدة إعلان قصير`,
-                [
-                  { text: "إلغاء", style: "cancel" },
-                  {
-                    text: "▶️ شاهد إعلاناً",
-                    onPress: async () => {
-                      const rewarded = await showRewardedAd();
-                      if (rewarded) {
-                        await unlockRecipe(item.id);
-                        setUnlockedByAd((prev) => new Set([...prev, item.id]));
-                        router.push({
-                          pathname: "/sections/recipe-detail" as any,
-                          params: { id: item.id },
-                        });
-                      } else {
-                        Alert.alert("تنبيه", "يجب مشاهدة الإعلان كاملاً لفتح الوصفة");
-                      }
-                    },
-                  },
-                  {
-                    text: "اشترك للوصول الكامل",
-                    onPress: () => router.push("/(tabs)/subscription" as any),
-                  },
-                ]
-              );
+              setLockedRecipeId(item.id);
+              setLockedRecipeName(item.name);
+              setLockModalVisible(true);
               return;
             }
             router.push({
@@ -545,6 +524,24 @@ export default function RecipesLibraryScreen() {
             </Text>
           </View>
         }
+      />
+
+      {/* نافذة القفل الأنيقة */}
+      <AdLockModal
+        visible={lockModalVisible}
+        onClose={() => setLockModalVisible(false)}
+        variant="recipe"
+        contentName={lockedRecipeName}
+        onAdWatched={async () => {
+          if (lockedRecipeId) {
+            await unlockRecipe(lockedRecipeId);
+            setUnlockedByAd((prev) => new Set([...prev, lockedRecipeId]));
+            router.push({
+              pathname: "/sections/recipe-detail" as any,
+              params: { id: lockedRecipeId },
+            });
+          }
+        }}
       />
     </ScreenContainer>
   );
