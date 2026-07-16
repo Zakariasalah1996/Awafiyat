@@ -96,6 +96,50 @@ export default function MedicationHomeScreen() {
     return `${h}:${String(minute).padStart(2, "0")} ${period}`;
   };
 
+  // قفل تذكير الدواء بالكامل للمشتركين فقط
+  if (!isPremium) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+        <View className="flex-1 items-center justify-center px-6">
+          <Animated.View entering={FadeInDown.duration(500)} className="items-center w-full">
+            <Text style={{ fontSize: 64, marginBottom: 16 }}>💊</Text>
+            <Text
+              className="text-foreground font-bold"
+              style={{ fontSize: 24, textAlign: "center", marginBottom: 12 }}
+            >
+              تذكير الدواء للمشتركين
+            </Text>
+            <Text
+              className="text-muted"
+              style={{ fontSize: 16, textAlign: "center", lineHeight: 26, marginBottom: 24 }}
+            >
+              سجّل أدويتك ونذكّرك بمواعيدها{"\n"}
+              بصوت مخصص ومتابعة الالتزام{"\n"}
+              اشترك الآن للوصول الكامل!
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/subscription" as any)}
+              className="w-full py-4 rounded-2xl items-center"
+              style={{ backgroundColor: colors.primary }}
+              activeOpacity={0.8}
+            >
+              <Text className="text-white text-lg font-bold">اشترك الآن</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="mt-4 py-2"
+              activeOpacity={0.7}
+            >
+              <Text className="text-base text-muted">رجوع</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </ScreenContainer>
+    );
+  }
+
   // إذا لم يكمل الإعداد بعد
   if (!state.setupComplete) {
     return (

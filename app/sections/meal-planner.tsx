@@ -327,25 +327,25 @@ export default function MealPlannerScreen() {
 
   // شاشة المنبه الآن تُعرض عبر AlarmScreen في _layout.tsx (فوق كل شيء)
 
-  // شاشة انتهاء الفترة التجريبية
-  if (trialExpired && !isSubscribed) {
+  // قفل جدولة الطبخ بالكامل للمشتركين فقط
+  if (!isSubscribed) {
     return (
       <ScreenContainer edges={["top", "bottom", "left", "right"]}>
         <View className="flex-1 items-center justify-center px-6">
-          <Text style={{ fontSize: 64, marginBottom: 16 }}>🔒</Text>
+          <Text style={{ fontSize: 64, marginBottom: 16 }}>📅</Text>
           <Text
             className="text-foreground font-bold"
             style={{ fontSize: 24, textAlign: "center", marginBottom: 12 }}
           >
-            انتهت الفترة التجريبية
+            جدولة الطبخ للمشتركين
           </Text>
           <Text
             className="text-muted"
             style={{ fontSize: 16, textAlign: "center", lineHeight: 26, marginBottom: 24 }}
           >
-            لقد استمتعت بجدول الطبخ لمدة 5 أيام مجاناً.{"\n"}
-            اشترك الآن للاستمرار في تخطيط وجباتك الأسبوعية{"\n"}
-            مع منبهات ذكية ووصفات متجددة!
+            خطّط وجباتك الأسبوعية مع منبهات ذكية{"\n"}
+            ووصفات متجددة تناسب حالتك الصحية{"\n"}
+            اشترك الآن للوصول الكامل!
           </Text>
           <TouchableOpacity
             onPress={() => {
