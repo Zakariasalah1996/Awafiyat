@@ -72,9 +72,14 @@ function RootLayoutInner() {
     registerGuest().catch((e) => console.warn("[Guest] Error:", e));
     // Track active user on app open
     sendHeartbeat().catch(() => {});
-    // Preload AdMob rewarded ad in background
+    // Initialize AdMob SDK then preload rewarded ad
     if (Platform.OS !== "web") {
-      import("@/lib/admob").then(({ preloadRewardedAd }) => preloadRewardedAd()).catch(() => {});
+      import("react-native-google-mobile-ads").then(({ default: mobileAds }) => {
+        mobileAds().initialize().then(() => {
+          console.log("[AdMob] SDK initialized successfully");
+          import("@/lib/admob").then(({ preloadRewardedAd }) => preloadRewardedAd()).catch(() => {});
+        }).catch((e: any) => console.warn("[AdMob] Init failed:", e));
+      }).catch(() => {});
     }
     // ربط العرض الترويجي بعد 3 إعلانات
     if (Platform.OS !== "web") {
