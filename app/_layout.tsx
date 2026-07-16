@@ -43,7 +43,6 @@ import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-run
 import { UserProvider } from "@/lib/user-context";
 import { SubscriptionProvider } from "@/lib/subscription-context";
 import { PromoRemoveAdsModal } from "@/components/promo-remove-ads-modal";
-import { setOnShowPromo } from "@/lib/admob";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -78,8 +77,18 @@ function RootLayoutInner() {
       import("@/lib/admob").then(({ preloadRewardedAd }) => preloadRewardedAd()).catch(() => {});
     }
     // ربط العرض الترويجي بعد 3 إعلانات
-    setOnShowPromo(() => setShowPromo(true));
-    return () => setOnShowPromo(null);
+    if (Platform.OS !== "web") {
+      import("@/lib/admob").then(({ setOnShowPromo }) => {
+        setOnShowPromo(() => setShowPromo(true));
+      }).catch(() => {});
+    }
+    return () => {
+      if (Platform.OS !== "web") {
+        import("@/lib/admob").then(({ setOnShowPromo }) => {
+          setOnShowPromo(null);
+        }).catch(() => {});
+      }
+    };
   }, []);
 
   // Auto-register push notifications on app start (native only)
