@@ -42,6 +42,8 @@ import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { UserProvider } from "@/lib/user-context";
 import { SubscriptionProvider } from "@/lib/subscription-context";
+import { PromoRemoveAdsModal } from "@/components/promo-remove-ads-modal";
+import { setOnShowPromo } from "@/lib/admob";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -63,6 +65,8 @@ function RootLayoutInner() {
   const [insets, setInsets] = useState<EdgeInsets>(initialInsets);
   const [frame, setFrame] = useState<Rect>(initialFrame);
 
+  const [showPromo, setShowPromo] = useState(false);
+
   useEffect(() => {
     initManusRuntime();
     // Auto-register as guest user
@@ -73,6 +77,9 @@ function RootLayoutInner() {
     if (Platform.OS !== "web") {
       import("@/lib/admob").then(({ preloadRewardedAd }) => preloadRewardedAd()).catch(() => {});
     }
+    // ربط العرض الترويجي بعد 3 إعلانات
+    setOnShowPromo(() => setShowPromo(true));
+    return () => setOnShowPromo(null);
   }, []);
 
   // Auto-register push notifications on app start (native only)
@@ -288,6 +295,7 @@ function RootLayoutInner() {
               <Stack.Screen name="sections/family-members" options={{ gestureEnabled: true }} />
             </Stack>
             <StatusBar style="auto" />
+            <PromoRemoveAdsModal visible={showPromo} onClose={() => setShowPromo(false)} />
           </QueryClientProvider>
         </trpc.Provider>
         </SubscriptionProvider>

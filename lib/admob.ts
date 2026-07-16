@@ -16,6 +16,53 @@ const AD_UNIT_ID = Platform.select({
 // مفاتيح التخزين
 const UNLOCKED_RECIPES_KEY = "@unlocked_recipes";
 const UNLOCKED_WARNINGS_KEY = "@unlocked_warnings";
+const AD_WATCH_COUNT_KEY = "@ad_watch_count";
+const PROMO_SHOWN_DATE_KEY = "@promo_shown_date";
+
+// عدد الإعلانات قبل عرض الترويج
+const ADS_BEFORE_PROMO = 3;
+
+// Callback لعرض النافذة الترويجية
+let onShowPromoCallback: (() => void) | null = null;
+
+export function setOnShowPromo(callback: (() => void) | null): void {
+  onShowPromoCallback = callback;
+}
+
+/**
+ * زيادة عداد الإعلانات المشاهدة والتحقق من العرض الترويجي
+ */
+async function incrementAdWatchCount(): Promise<void> {
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    
+    // التحقق هل عرضنا الترويج اليوم
+    const promoDate = await AsyncStorage.getItem(PROMO_SHOWN_DATE_KEY);
+    if (promoDate === today) return; // عرضناه اليوم بالفعل
+    
+    // قراءة العداد
+    const stored = await AsyncStorage.getItem(AD_WATCH_COUNT_KEY);
+    let data = stored ? JSON.parse(stored) : { date: today, count: 0 };
+    
+    // إعادة تعيين إذا يوم جديد
+    if (data.date !== today) {
+      data = { date: today, count: 0 };
+    }
+    
+    data.count += 1;
+    await AsyncStorage.setItem(AD_WATCH_COUNT_KEY, JSON.stringify(data));
+    
+    // عرض الترويج بعد 3 إعلانات
+    if (data.count >= ADS_BEFORE_PROMO && onShowPromoCallback) {
+      await AsyncStorage.setItem(PROMO_SHOWN_DATE_KEY, today);
+      setTimeout(() => {
+        if (onShowPromoCallback) onShowPromoCallback();
+      }, 500);
+    }
+  } catch (e) {
+    console.warn("[AdMob] Failed to track ad count:", e);
+  }
+}
 
 // عدد الوصفات المجانية قبل القفل
 export const FREE_RECIPES_COUNT = 5;
@@ -173,6 +220,10 @@ export async function showRewardedAd(): Promise<boolean> {
           unsubscribeClosed();
           // تحميل إعلان جديد للمرة القادمة
           setTimeout(() => loadRewardedAd(), 1000);
+          // زيادة عداد الإعلانات إذا شاهد الإعلان كاملاً
+          if (rewarded) {
+            incrementAdWatchCount();
+          }
           resolve(rewarded);
         }
       );
