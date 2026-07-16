@@ -171,7 +171,7 @@ export default function OnboardingScreen() {
               سنخصص لك تحذيرات صحية دقيقة بناءً على حالتك
             </Text>
 
-            <View style={{ gap: 8 }}>
+            <View style={{ gap: 6 }}>
               {HEALTH_CONDITIONS.map((c) => (
                 <TouchableOpacity
                   key={c.id}
@@ -272,8 +272,8 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: SCREEN_HEIGHT * 0.06,
-    paddingBottom: SCREEN_HEIGHT * 0.04,
+    paddingTop: SCREEN_HEIGHT * 0.04,
+    paddingBottom: SCREEN_HEIGHT * 0.02,
     justifyContent: "space-between",
   },
   logoSection: {
@@ -404,8 +404,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 36,
+    paddingTop: 20,
+    paddingBottom: 24,
   },
   offerModalContent: {
     backgroundColor: "#fff",
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   conditionOption: {
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 14,
     borderWidth: 2,
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   modalButton: {
-    marginTop: 16,
+    marginTop: 12,
     paddingVertical: 14,
     borderRadius: 16,
     alignItems: "center",

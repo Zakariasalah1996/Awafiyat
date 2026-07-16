@@ -78,24 +78,6 @@ export async function isWarningUnlocked(warningId: string, warningIndex: number)
 }
 
 // ============================================================
-// تهيئة AdMob SDK - يجب استدعاؤها مرة واحدة عند بدء التطبيق
-// ============================================================
-
-let isInitialized = false;
-
-async function initializeAdMob(): Promise<void> {
-  if (Platform.OS === "web" || isInitialized) return;
-  try {
-    const { default: mobileAds } = await import("react-native-google-mobile-ads");
-    await mobileAds().initialize();
-    isInitialized = true;
-    console.log("[AdMob] SDK initialized successfully");
-  } catch (e) {
-    console.warn("[AdMob] Failed to initialize SDK:", e);
-  }
-}
-
-// ============================================================
 // تحميل وعرض الإعلان
 // ============================================================
 
@@ -108,11 +90,6 @@ async function loadRewardedAd(): Promise<void> {
   if (isAdLoading || isAdLoaded) return;
 
   try {
-    // تأكد من تهيئة SDK أولاً
-    if (!isInitialized) {
-      await initializeAdMob();
-    }
-
     isAdLoading = true;
     // Dynamic import to avoid web bundling issues
     const admobModule = await import("react-native-google-mobile-ads");
@@ -142,7 +119,6 @@ async function loadRewardedAd(): Promise<void> {
         (error: any) => {
           isAdLoaded = false;
           isAdLoading = false;
-          rewardedAd = null;
           unsubscribeError();
           reject(error);
         }
@@ -153,7 +129,6 @@ async function loadRewardedAd(): Promise<void> {
   } catch (e) {
     isAdLoading = false;
     isAdLoaded = false;
-    rewardedAd = null;
     console.warn("[AdMob] Failed to load rewarded ad:", e);
   }
 }
@@ -210,17 +185,9 @@ export async function showRewardedAd(): Promise<boolean> {
   }
 }
 
-/**
- * تهيئة AdMob وتحميل الإعلان مسبقاً عند بدء التطبيق
- */
+// تحميل الإعلان مسبقاً عند بدء التطبيق
 export function preloadRewardedAd(): void {
   if (Platform.OS !== "web") {
-    // تهيئة SDK أولاً ثم تحميل الإعلان
-    initializeAdMob().then(() => {
-      setTimeout(() => loadRewardedAd(), 1000);
-    }).catch(() => {
-      // محاولة تحميل الإعلان حتى لو فشلت التهيئة
-      setTimeout(() => loadRewardedAd(), 3000);
-    });
+    setTimeout(() => loadRewardedAd(), 3000);
   }
 }
