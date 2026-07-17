@@ -1,11 +1,12 @@
 import { useState, useCallback } from "react";
 import { showRewardedAd, unlockWarning } from "@/lib/admob";
-import { AdLockModal } from "@/components/ad-lock-modal";
+import { Alert } from "react-native";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
+  Modal,
   I18nManager,
   Platform,
 } from "react-native";
@@ -43,7 +44,8 @@ export default function RecipeDetailScreen() {
     return existing?.rating || 0;
   });
 
-
+  // حالة نافذة الاشتراك
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   // حالة فتح التحذير بالإعلان
   const [warningUnlockedByAd, setWarningUnlockedByAd] = useState(false);
 
@@ -71,16 +73,35 @@ export default function RecipeDetailScreen() {
     [id, rateRecipe]
   );
 
-  // حالة نافذة قفل التحذير
-  const [warningLockModalVisible, setWarningLockModalVisible] = useState(false);
-
   // عند الضغط على التحذير المقفل
   const handleLockedWarningPress = useCallback(() => {
     if (Platform.OS !== "web") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     }
-    setWarningLockModalVisible(true);
-  }, []);
+    Alert.alert(
+      "⚠️ تحذير صحي مقفل",
+      "افتح التحذير الصحي مجاناً بمشاهدة إعلان قصير",
+      [
+        { text: "إلغاء", style: "cancel" },
+        {
+          text: "▶️ شاهد إعلاناً",
+          onPress: async () => {
+            const rewarded = await showRewardedAd();
+            if (rewarded) {
+              await unlockWarning(id || "");
+              setWarningUnlockedByAd(true);
+            } else {
+              Alert.alert("تنبيه", "يجب مشاهدة الإعلان كاملاً لفتح التحذير");
+            }
+          },
+        },
+        {
+          text: "اشترك للوصول الكامل",
+          onPress: () => setShowSubscriptionModal(true),
+        },
+      ]
+    );
+  }, [id]);
 
   if (!recipe) {
     return (
@@ -639,16 +660,191 @@ export default function RecipeDetailScreen() {
         </View>
       </ScrollView>
 
-      {/* نافذة قفل التحذيرات الصحية */}
-      <AdLockModal
-        visible={warningLockModalVisible}
-        onClose={() => setWarningLockModalVisible(false)}
-        variant="warning"
-        onAdWatched={async () => {
-          await unlockWarning(id || "");
-          setWarningUnlockedByAd(true);
-        }}
-      />
+      {/* ─── نافذة الاشتراك المنبثقة ─── */}
+      <Modal
+        visible={showSubscriptionModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSubscriptionModal(false)}
+      >
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+          }}
+          activeOpacity={1}
+          onPress={() => setShowSubscriptionModal(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => {}}
+            style={{
+              backgroundColor: colors.background,
+              borderRadius: 24,
+              padding: 28,
+              width: "100%",
+              maxWidth: 360,
+              alignItems: "center",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.3,
+              shadowRadius: 20,
+              elevation: 10,
+            }}
+          >
+            {/* أيقونة القفل */}
+            <View
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 36,
+                backgroundColor: colors.error + "15",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 16,
+              }}
+            >
+              <Text style={{ fontSize: 36 }}>🔒</Text>
+            </View>
+
+            {/* العنوان */}
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "800",
+                color: colors.foreground,
+                textAlign: "center",
+                marginBottom: 10,
+              }}
+            >
+              التحذيرات الصحية حصرية
+            </Text>
+
+            {/* الوصف */}
+            <Text
+              style={{
+                fontSize: 14,
+                lineHeight: 22,
+                color: colors.muted,
+                textAlign: "center",
+                writingDirection: "rtl",
+                marginBottom: 8,
+              }}
+            >
+              التحذيرات الصحية المخصصة لحالتك ({conditionLabel}) متاحة فقط للمشتركين في عافيات.
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                lineHeight: 22,
+                color: colors.muted,
+                textAlign: "center",
+                writingDirection: "rtl",
+                marginBottom: 24,
+              }}
+            >
+              اشترك الآن لتعرف بالضبط ما يضر بصحتك في كل وصفة! 💚
+            </Text>
+
+            {/* مميزات الاشتراك */}
+            {[
+              "⚠️ تحذيرات صحية مخصصة لك",
+              "🔍 تحليل دقيق لكل مكون",
+              "💡 نصائح بديلة صحية",
+              "🌟 الوصول لجميع الوصفات",
+            ].map((feature, i) => (
+              <View
+                key={i}
+                style={{
+                  flexDirection: "row-reverse",
+                  alignItems: "center",
+                  width: "100%",
+                  marginBottom: 8,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: colors.foreground,
+                    textAlign: "right",
+                    writingDirection: "rtl",
+                  }}
+                >
+                  {feature}
+                </Text>
+              </View>
+            ))}
+
+            {/* زر الاشتراك مع التجربة المجانية */}
+            <TouchableOpacity
+              onPress={() => {
+                setShowSubscriptionModal(false);
+                router.push("/(tabs)/subscription" as any);
+              }}
+              style={{
+                backgroundColor: colors.primary,
+                borderRadius: 16,
+                paddingVertical: 14,
+                paddingHorizontal: 32,
+                width: "100%",
+                alignItems: "center",
+                marginTop: 16,
+              }}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "800" }}>
+                🎁 جرّب مجاناً 3 أيام
+              </Text>
+              <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, marginTop: 2 }}>
+                ثم 5,250 د.ع/شهر • إلغاء في أي وقت
+              </Text>
+            </TouchableOpacity>
+
+            {/* فاصل */}
+            <View style={{ flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 12 }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+              <Text style={{ color: colors.muted, fontSize: 12, marginHorizontal: 10 }}>أو</Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+            </View>
+
+            {/* زر مشاهدة إعلان */}
+            <TouchableOpacity
+              onPress={() => {
+                setShowSubscriptionModal(false);
+                // TODO: تشغيل إعلان AdMob هنا
+                // مؤقتاً: نفتح التحذير مباشرة
+                alert("شكراً! سيتم فتح التحذيرات بعد مشاهدة الإعلان");
+              }}
+              style={{
+                borderWidth: 1.5,
+                borderColor: colors.primary,
+                borderRadius: 16,
+                paddingVertical: 13,
+                paddingHorizontal: 32,
+                width: "100%",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "700" }}>
+                📺 شاهد إعلاناً لفتح التحذيرات
+              </Text>
+              <Text style={{ color: colors.muted, fontSize: 12, marginTop: 2 }}>
+                مجاناً • إعلان قصير 30 ثانية
+              </Text>
+            </TouchableOpacity>
+
+            {/* زر الإغلاق */}
+            <TouchableOpacity
+              onPress={() => setShowSubscriptionModal(false)}
+              style={{ marginTop: 12 }}
+            >
+              <Text style={{ color: colors.muted, fontSize: 14 }}>ليس الآن</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </ScreenContainer>
   );
 }

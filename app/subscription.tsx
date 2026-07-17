@@ -151,7 +151,7 @@ export default function SubscriptionScreen() {
       {/* ─── Modal التجربة المجانية 3 أيام ─── */}
       <Modal visible={showTrialModal} transparent animationType="slide">
         <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <View style={{ backgroundColor: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingHorizontal: 22, paddingTop: 18, paddingBottom: 28 }}>
+          <View style={{ backgroundColor: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingHorizontal: 22, paddingTop: 18, paddingBottom: 60 }}>
             {/* الرأس - مضغوط */}
             <View style={{ alignItems: "center", marginBottom: 14 }}>
               <Text style={{ fontSize: 32 }}>🎁</Text>

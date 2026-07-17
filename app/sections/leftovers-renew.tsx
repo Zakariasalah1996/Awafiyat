@@ -19,12 +19,11 @@ import { useColors } from "@/hooks/use-colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
-import { showRewardedAd } from "@/lib/admob";
-import { AdLockModal } from "@/components/ad-lock-modal";
 
 I18nManager.forceRTL(true);
 
 const LEFTOVERS_USAGE_KEY = "@awafiyat_leftovers_usage";
+const DAILY_LIMIT = 5;
 
 type StorageLocation = "fridge" | "freezer" | "outside";
 type TimeSince = "today" | "yesterday" | "two_plus";
@@ -46,14 +45,40 @@ export default function LeftoversRenewScreen() {
   const [aiResponse, setAiResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [loadingUsage, setLoadingUsage] = useState(false);
+  const [usageCount, setUsageCount] = useState(0);
+  const [limitReached, setLimitReached] = useState(false);
+  const [loadingUsage, setLoadingUsage] = useState(true);
   const [unsafeWarning, setUnsafeWarning] = useState("");
   const inputRef = useRef<TextInput>(null);
-  const [showAdModal, setShowAdModal] = useState(false);
 
   const suggestMutation = trpc.leftovers.suggest.useMutation();
 
-
+  // تحميل عداد الاستخدام اليومي
+  useEffect(() => {
+    const loadUsage = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(LEFTOVERS_USAGE_KEY);
+        if (stored) {
+          const data = JSON.parse(stored);
+          const today = getTodayKey();
+          if (data.date === today) {
+            setUsageCount(data.count);
+            if (data.count >= DAILY_LIMIT) {
+              setLimitReached(true);
+            }
+          } else {
+            // يوم جديد - إعادة تعيين
+            await AsyncStorage.setItem(LEFTOVERS_USAGE_KEY, JSON.stringify({ date: today, count: 0 }));
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load leftovers usage:", e);
+      } finally {
+        setLoadingUsage(false);
+      }
+    };
+    loadUsage();
+  }, []);
 
   // التحقق من أمان الطعام
   const checkFoodSafety = useCallback((): boolean => {
@@ -77,10 +102,19 @@ export default function LeftoversRenewScreen() {
     return true;
   }, [storageLocation, timeSince]);
 
-  // طلب اقتراح من الذكاء الاصطناعي (يعمل بعد مشاهدة الإعلان أو للمشتركين)
-  const doAskAI = useCallback(async () => {
+  // طلب اقتراح من الذكاء الاصطناعي
+  const askAI = useCallback(async () => {
     if (inputText.trim().length === 0) return;
     if (!storageLocation || !timeSince) return;
+
+    // فحص الأمان
+    if (!checkFoodSafety()) return;
+
+    // التحقق من الحد اليومي
+    if (usageCount >= DAILY_LIMIT) {
+      setLimitReached(true);
+      return;
+    }
 
     setIsLoading(true);
     setShowResult(true);
@@ -96,25 +130,23 @@ export default function LeftoversRenewScreen() {
       });
       const text = result.suggestion;
       setAiResponse(typeof text === "string" ? text : "");
+
+      // زيادة العداد
+      const newCount = usageCount + 1;
+      setUsageCount(newCount);
+      await AsyncStorage.setItem(
+        LEFTOVERS_USAGE_KEY,
+        JSON.stringify({ date: getTodayKey(), count: newCount })
+      );
+      if (newCount >= DAILY_LIMIT) {
+        // لا نعرض القفل فوراً - ندع المستخدم يرى النتيجة
+      }
     } catch (error) {
       setAiResponse("عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى بعد قليل!");
     } finally {
       setIsLoading(false);
     }
-  }, [inputText, storageLocation, timeSince, profile?.healthCondition, suggestMutation]);
-
-  const canSubmit = inputText.trim().length > 0 && storageLocation !== null && timeSince !== null;
-
-  // زر الاقتراح: فحص الأمان أولاً، ثم إذا مشترك يعمل مباشرة، وإلا يفتح نافذة الإعلان
-  const handleSuggestPress = useCallback(() => {
-    if (!canSubmit) return;
-    if (!checkFoodSafety()) return;
-    if (isSubscribed) {
-      doAskAI();
-    } else {
-      setShowAdModal(true);
-    }
-  }, [canSubmit, checkFoodSafety, isSubscribed, doAskAI]);
+  }, [inputText, storageLocation, timeSince, profile?.healthCondition, suggestMutation, usageCount, checkFoodSafety]);
 
   // إعادة تعيين
   const resetAll = useCallback(() => {
@@ -126,6 +158,106 @@ export default function LeftoversRenewScreen() {
     setUnsafeWarning("");
   }, []);
 
+  // شاشة التحميل
+  if (loadingUsage) {
+    return (
+      <ScreenContainer edges={["top", "left", "right", "bottom"]}>
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#2D5A3D" />
+        </View>
+      </ScreenContainer>
+    );
+  }
+
+  // شاشة غير المشترك
+  if (!isSubscribed) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+        <View className="flex-1 items-center justify-center px-6">
+          <Text style={{ fontSize: 64, marginBottom: 16 }}>🍲</Text>
+          <Text
+            className="text-foreground font-bold"
+            style={{ fontSize: 24, textAlign: "center", marginBottom: 12 }}
+          >
+            تجديد النعمة
+          </Text>
+          <Text
+            className="text-muted"
+            style={{ fontSize: 16, textAlign: "center", lineHeight: 28, marginBottom: 8 }}
+          >
+            حوّل بقايا أكلك لوصفات جديدة ولذيذة{"\n"}
+            بدلاً من رميها!
+          </Text>
+          <Text
+            className="text-muted"
+            style={{ fontSize: 14, textAlign: "center", lineHeight: 24, marginBottom: 24 }}
+          >
+            هذه الميزة متاحة للمشتركين فقط.{"\n"}
+            وفّر أكلك وفلوسك مع الذكاء الاصطناعي!
+          </Text>
+          <TouchableOpacity
+            onPress={() => {
+              if (Platform.OS !== "web") {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }
+              router.push("/(tabs)/subscription" as any);
+            }}
+            className="rounded-2xl px-8 py-4"
+            style={{ backgroundColor: colors.primary }}
+            activeOpacity={0.8}
+          >
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>
+              اشترك الآن
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="mt-4 py-2"
+            activeOpacity={0.6}
+          >
+            <Text className="text-muted" style={{ fontSize: 14 }}>رجوع</Text>
+          </TouchableOpacity>
+        </View>
+      </ScreenContainer>
+    );
+  }
+
+  // شاشة انتهاء الحد اليومي
+  if (limitReached) {
+    return (
+      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+        <View className="flex-1 items-center justify-center px-6">
+          <Text style={{ fontSize: 64, marginBottom: 16 }}>⏰</Text>
+          <Text
+            className="text-foreground font-bold"
+            style={{ fontSize: 22, textAlign: "center", marginBottom: 12 }}
+          >
+            انتهت محاولاتك اليوم
+          </Text>
+          <Text
+            className="text-muted"
+            style={{ fontSize: 16, textAlign: "center", lineHeight: 26, marginBottom: 24 }}
+          >
+            لقد استخدمت {DAILY_LIMIT} محاولات اليوم.{"\n"}
+            عد غداً لتجديد المحاولات!
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="rounded-2xl px-8 py-4"
+            style={{ backgroundColor: colors.primary }}
+            activeOpacity={0.8}
+          >
+            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+              حسناً، رجوع
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScreenContainer>
+    );
+  }
+
+  const remainingUses = DAILY_LIMIT - usageCount;
+  const canSubmit = inputText.trim().length > 0 && storageLocation !== null && timeSince !== null;
 
   return (
     <ScreenContainer edges={["top", "left", "right", "bottom"]}>
@@ -144,7 +276,39 @@ export default function LeftoversRenewScreen() {
           <View style={{ width: 40 }} />
         </View>
 
-
+        {/* عداد المرات المتبقية */}
+        <View
+          style={{
+            backgroundColor: remainingUses <= 1 ? "#FFF3E0" : "#E8F5E9",
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 10,
+            marginHorizontal: 20,
+            marginBottom: 4,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            borderWidth: 1,
+            borderColor: remainingUses <= 1 ? "#FFE0B2" : "#C8E6C9",
+          }}
+        >
+          <MaterialIcons
+            name={remainingUses <= 1 ? "warning" : "info-outline"}
+            size={18}
+            color={remainingUses <= 1 ? "#E65100" : "#2D5A3D"}
+          />
+          <Text
+            style={{
+              fontSize: 13,
+              fontWeight: "600",
+              color: remainingUses <= 1 ? "#E65100" : "#2D5A3D",
+              textAlign: "center",
+            }}
+          >
+            متبقي {remainingUses} {remainingUses === 1 ? "محاولة" : remainingUses === 2 ? "محاولتان" : "محاولات"} اليوم
+          </Text>
+        </View>
 
         <ScrollView
           className="flex-1 px-5"
@@ -321,33 +485,31 @@ export default function LeftoversRenewScreen() {
                 </View>
               )}
 
-              {/* زر اقتراح الوصفة - يظهر دائماً */}
-              {unsafeWarning.length === 0 && (
+              {/* زر اقتراح الوصفة */}
+              {canSubmit && unsafeWarning.length === 0 && (
                 <TouchableOpacity
                   onPress={() => {
                     if (Platform.OS !== "web") {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     }
-                    handleSuggestPress();
+                    askAI();
                   }}
-                  disabled={!canSubmit}
                   style={{
-                    backgroundColor: canSubmit ? "#2D5A3D" : "#B0BEC5",
+                    backgroundColor: "#2D5A3D",
                     borderRadius: 16,
                     paddingVertical: 16,
                     marginTop: 24,
                     alignItems: "center",
                     shadowColor: "#000",
                     shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: canSubmit ? 0.15 : 0,
+                    shadowOpacity: 0.15,
                     shadowRadius: 4,
-                    elevation: canSubmit ? 3 : 0,
-                    opacity: canSubmit ? 1 : 0.6,
+                    elevation: 3,
                   }}
                   activeOpacity={0.8}
                 >
                   <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-                    اقترح عليّ وصفة 🪄
+                    اقترح لي وصفة! 🪄
                   </Text>
                 </TouchableOpacity>
               )}
@@ -464,10 +626,14 @@ export default function LeftoversRenewScreen() {
                     <View style={{ flexDirection: "row", gap: 12, marginTop: 20 }}>
                       <TouchableOpacity
                         onPress={() => {
+                          if (usageCount >= DAILY_LIMIT) {
+                            setLimitReached(true);
+                            return;
+                          }
                           if (Platform.OS !== "web") {
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           }
-                          handleSuggestPress();
+                          askAI();
                         }}
                         style={{
                           flex: 1,
@@ -510,16 +676,6 @@ export default function LeftoversRenewScreen() {
           <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
-
-      {/* نافذة الإعلان الأنيقة */}
-      <AdLockModal
-        visible={showAdModal}
-        onClose={() => setShowAdModal(false)}
-        variant="leftovers"
-        onAdWatched={() => {
-          doAskAI();
-        }}
-      />
     </ScreenContainer>
   );
 }

@@ -171,7 +171,7 @@ export default function OnboardingScreen() {
               سنخصص لك تحذيرات صحية دقيقة بناءً على حالتك
             </Text>
 
-            <View style={{ gap: 6 }}>
+            <View style={{ gap: 8 }}>
               {HEALTH_CONDITIONS.map((c) => (
                 <TouchableOpacity
                   key={c.id}
@@ -272,8 +272,8 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: SCREEN_HEIGHT * 0.04,
-    paddingBottom: SCREEN_HEIGHT * 0.02,
+    paddingTop: SCREEN_HEIGHT * 0.05,
+    paddingBottom: SCREEN_HEIGHT * 0.08,
     justifyContent: "space-between",
   },
   logoSection: {
@@ -404,8 +404,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 24,
+    paddingTop: 24,
+    paddingBottom: 60,
   },
   offerModalContent: {
     backgroundColor: "#fff",
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 28,
     paddingHorizontal: 22,
     paddingTop: 20,
-    paddingBottom: 28,
+    paddingBottom: 60,
   },
   modalTitle: {
     fontSize: 20,
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   conditionOption: {
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 14,
     borderWidth: 2,
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   modalButton: {
-    marginTop: 12,
+    marginTop: 16,
     paddingVertical: 14,
     borderRadius: 16,
     alignItems: "center",

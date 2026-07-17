@@ -13,10 +13,9 @@ import { ScrollView } from "react-native";
 
 // الميزات المدفوعة - مختصرة
 const PREMIUM_FEATURES = [
-  { icon: "block",                  text: "بدون إعلانات نهائياً",              color: "#E91E63" },
   { icon: "restaurant",            text: "ذكاء الثلاجة غير محدود",           color: "#4CAF50" },
   { icon: "health-and-safety",     text: "تحذيرات صحية مخصصة لك",           color: "#4ECDC4" },
-  { icon: "recycling",             text: "تجديد النعمة بلا حدود",            color: "#FF9800" },
+  { icon: "recycling",             text: "تجديد النعمة (5 مرات/يوم)",        color: "#FF9800" },
   { icon: "medication",            text: "رفيق الدواء بصوت مخصص",           color: "#9C27B0" },
   { icon: "water-drop",            text: "رفيق الماء مع تذكيرات",           color: "#2196F3" },
   { icon: "menu-book",             text: "250+ وصفة عراقية وعربية",          color: "#795548" },

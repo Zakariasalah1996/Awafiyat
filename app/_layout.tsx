@@ -42,7 +42,6 @@ import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { UserProvider } from "@/lib/user-context";
 import { SubscriptionProvider } from "@/lib/subscription-context";
-import { PromoRemoveAdsModal } from "@/components/promo-remove-ads-modal";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -64,36 +63,16 @@ function RootLayoutInner() {
   const [insets, setInsets] = useState<EdgeInsets>(initialInsets);
   const [frame, setFrame] = useState<Rect>(initialFrame);
 
-  const [showPromo, setShowPromo] = useState(false);
-
   useEffect(() => {
     initManusRuntime();
     // Auto-register as guest user
     registerGuest().catch((e) => console.warn("[Guest] Error:", e));
     // Track active user on app open
     sendHeartbeat().catch(() => {});
-    // Initialize AdMob SDK then preload rewarded ad
+    // Preload AdMob rewarded ad in background
     if (Platform.OS !== "web") {
-      import("react-native-google-mobile-ads").then(({ default: mobileAds }) => {
-        mobileAds().initialize().then(() => {
-          console.log("[AdMob] SDK initialized successfully");
-          import("@/lib/admob").then(({ preloadRewardedAd }) => preloadRewardedAd()).catch(() => {});
-        }).catch((e: any) => console.warn("[AdMob] Init failed:", e));
-      }).catch(() => {});
+      import("@/lib/admob").then(({ preloadRewardedAd }) => preloadRewardedAd()).catch(() => {});
     }
-    // ربط العرض الترويجي بعد 3 إعلانات
-    if (Platform.OS !== "web") {
-      import("@/lib/admob").then(({ setOnShowPromo }) => {
-        setOnShowPromo(() => setShowPromo(true));
-      }).catch(() => {});
-    }
-    return () => {
-      if (Platform.OS !== "web") {
-        import("@/lib/admob").then(({ setOnShowPromo }) => {
-          setOnShowPromo(null);
-        }).catch(() => {});
-      }
-    };
   }, []);
 
   // Auto-register push notifications on app start (native only)
@@ -309,7 +288,6 @@ function RootLayoutInner() {
               <Stack.Screen name="sections/family-members" options={{ gestureEnabled: true }} />
             </Stack>
             <StatusBar style="auto" />
-            <PromoRemoveAdsModal visible={showPromo} onClose={() => setShowPromo(false)} />
           </QueryClientProvider>
         </trpc.Provider>
         </SubscriptionProvider>
