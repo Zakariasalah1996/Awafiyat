@@ -272,8 +272,8 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: SCREEN_HEIGHT * 0.05,
-    paddingBottom: SCREEN_HEIGHT * 0.08,
+    paddingTop: SCREEN_HEIGHT * 0.06,
+    paddingBottom: SCREEN_HEIGHT * 0.04,
     justifyContent: "space-between",
   },
   logoSection: {
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 28,
     paddingHorizontal: 24,
     paddingTop: 24,
-    paddingBottom: 60,
+    paddingBottom: 36,
   },
   offerModalContent: {
     backgroundColor: "#fff",
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 28,
     paddingHorizontal: 22,
     paddingTop: 20,
-    paddingBottom: 60,
+    paddingBottom: 28,
   },
   modalTitle: {
     fontSize: 20,
