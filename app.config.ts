@@ -32,7 +32,7 @@ const env = {
   appSlug: "awafiyat",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "/manus-storage/awafiyat-icon_997994dc.png",
+  logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/DmjftojniSSrItKa.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -41,7 +41,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: "1.0.77",
+  version: "1.0.78",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -64,6 +64,7 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
+    versionCode: 78,
     googleServicesFile: "./google-services.json",
     permissions: [
       "POST_NOTIFICATIONS",

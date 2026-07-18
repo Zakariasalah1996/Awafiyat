@@ -6,7 +6,8 @@
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const RECIPE_IMAGES_KEY = "recipe_custom_images_v4";
+const RECIPE_IMAGES_KEY = "recipe_custom_images_v5";
+const LEGACY_RECIPE_IMAGES_KEYS = ["recipe_custom_images_v4", "recipe_custom_images_v3"];
 const API_URL = "https://alfafiyat.com/api/recipes/images";
 
 // Module-level cache - shared across all component instances
@@ -19,8 +20,11 @@ function notifyListeners(images: Record<string, string>) {
   _listeners.forEach((fn) => fn(images));
 }
 
-// Pre-load from AsyncStorage immediately when module is imported
-// This runs before any component renders, so images are ready on first render
+// Remove caches produced by the old API, which mixed built-in images with admin overrides.
+AsyncStorage.multiRemove(LEGACY_RECIPE_IMAGES_KEYS).catch(() => {});
+
+// Pre-load from AsyncStorage immediately when module is imported.
+// This runs before any component renders, so valid overrides are ready on first render.
 AsyncStorage.getItem(RECIPE_IMAGES_KEY)
   .then((stored) => {
     if (stored) {
@@ -46,21 +50,22 @@ async function fetchAndCacheImages() {
     });
 
     if (response.ok) {
-      const data: Record<string, string> = await response.json();
+      const data: unknown = await response.json();
 
-      // Keep only HTTP URLs (uploaded images, not category names)
+      // The v5 endpoint returns admin overrides only. Accept HTTPS URLs and reject all other values.
       const httpImages: Record<string, string> = {};
-      for (const [id, val] of Object.entries(data)) {
-        if (val && (val.startsWith("http://") || val.startsWith("https://"))) {
-          httpImages[id] = val;
+      if (data && typeof data === "object" && !Array.isArray(data)) {
+        for (const [id, val] of Object.entries(data)) {
+          if (typeof val === "string" && val.startsWith("https://")) {
+            httpImages[id] = val;
+          }
         }
       }
 
-      if (Object.keys(httpImages).length > 0) {
-        notifyListeners(httpImages);
-        await AsyncStorage.setItem(RECIPE_IMAGES_KEY, JSON.stringify(httpImages));
-        console.log(`[RecipeImages] Loaded ${Object.keys(httpImages).length} images`);
-      }
+      // An empty map is meaningful: it removes stale overrides and restores built-in images.
+      notifyListeners(httpImages);
+      await AsyncStorage.setItem(RECIPE_IMAGES_KEY, JSON.stringify(httpImages));
+      console.log(`[RecipeImages] Loaded ${Object.keys(httpImages).length} admin overrides`);
     }
   } catch (e: any) {
     console.warn("[RecipeImages] Fetch error:", e?.message);

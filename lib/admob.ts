@@ -112,10 +112,8 @@ async function loadRewardedAd(): Promise<void> {
     const admobModule = await import("react-native-google-mobile-ads");
     const { RewardedAd, RewardedAdEventType, TestIds } = admobModule;
 
-    // استخدام إعلان تجريبي دائماً للتأكد من عمل الكود
-    // TODO: بعد التأكد من ظهور الإعلان، أعد هذا السطر:
-    // const adUnitId = __DEV__ ? TestIds.REWARDED : (AD_UNIT_ID ?? TestIds.REWARDED);
-    const adUnitId = TestIds.REWARDED;
+    // بعد نجاح الاختبار على الجهاز: Test ID في التطوير والوحدة الحقيقية في APK الإنتاجي.
+    const adUnitId = __DEV__ ? TestIds.REWARDED : (AD_UNIT_ID ?? TestIds.REWARDED);
 
     rewardedAd = RewardedAd.createForAdRequest(adUnitId, {
       requestNonPersonalizedAdsOnly: false,

@@ -14,6 +14,8 @@ import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
 import * as fs from "fs";
+import * as pushStore from "../push-store";
+import * as recipeImageStore from "../recipe-image-store";
 
 // ===== FCM V1 API Direct Send =====
 let _fcmAccessToken: string | null = null;
@@ -60,8 +62,8 @@ async function getFCMAccessToken(): Promise<string | null> {
 }
 
 async function sendPushViaFCM(tokens: string[], title: string, body: string, dbDeactivate?: (token: string) => Promise<void>) {
-  const expoTokens = tokens.filter(t => t.startsWith('ExponentPushToken'));
-  const fcmTokens = tokens.filter(t => !t.startsWith('ExponentPushToken'));
+  const expoTokens = tokens.filter((token) => /^(Exponent|Expo)PushToken\[/.test(token));
+  const fcmTokens = tokens.filter((token) => token.startsWith('fcm:'));
   let successCount = 0;
   let failCount = 0;
 
@@ -69,7 +71,7 @@ async function sendPushViaFCM(tokens: string[], title: string, body: string, dbD
   if (expoTokens.length > 0) {
     const messages = expoTokens.map((token: string) => ({
       to: token, sound: 'default', title, body,
-      priority: 'high', channelId: 'meals',
+      priority: 'default', channelId: 'admin_updates',
       data: { type: 'admin_notification' },
     }));
     try {
@@ -125,10 +127,10 @@ async function sendPushViaFCM(tokens: string[], title: string, body: string, dbD
                   token: rawToken,
                   notification: { title, body },
                   android: {
-                    priority: 'high',
+                    priority: 'normal',
                     notification: {
                       sound: 'default',
-                      channel_id: 'meals',
+                      channel_id: 'admin_updates',
                     },
                   },
                   data: { type: 'admin_notification' },
@@ -213,20 +215,25 @@ async function startServer() {
   registerOAuthRoutes(app);
 
   app.get("/api/health", (_req, res) => {
-    const dbUrl = process.env.DATABASE_URL || 'NOT SET';
-    res.json({ ok: true, timestamp: Date.now(), db_prefix: dbUrl.substring(0, 20), db_type: dbUrl.startsWith('postgresql') ? 'postgres' : dbUrl.startsWith('mysql') ? 'mysql' : 'unknown' });
+    const dbUrl = process.env.DATABASE_URL || "";
+    const dbType = dbUrl.startsWith("postgresql://") || dbUrl.startsWith("postgres://")
+      ? "postgres"
+      : dbUrl.startsWith("mysql://")
+        ? "mysql"
+        : "unknown";
+    res.json({ ok: true, timestamp: Date.now(), db_type: dbType });
   });
   app.get("/api/db-test", async (_req, res) => {
     try {
-      const { Pool } = await import('pg');
-      const dbUrl = process.env.DATABASE_URL || '';
-      const useSSL = dbUrl.includes('dpg-') || dbUrl.includes('render.com') || dbUrl.includes('sslmode=require');
+      const { Pool } = await import("pg");
+      const dbUrl = process.env.DATABASE_URL || "";
+      const useSSL = dbUrl.includes("dpg-") || dbUrl.includes("render.com") || dbUrl.includes("sslmode=require");
       const pool = new Pool({ connectionString: dbUrl, ssl: useSSL ? { rejectUnauthorized: false } : false, connectionTimeoutMillis: 8000 });
-      const result = await pool.query('SELECT NOW() as now, current_database() as db');
+      const result = await pool.query("SELECT current_database() AS db");
       await pool.end();
-      res.json({ ok: true, time: result.rows[0].now, db: result.rows[0].db, ssl: useSSL, url_prefix: dbUrl.substring(0, 40) });
+      res.json({ ok: true, database: result.rows[0].db, ssl: useSSL });
     } catch (err: any) {
-      res.json({ ok: false, error: err.message, code: err.code, url_prefix: (process.env.DATABASE_URL || '').substring(0, 40) });
+      res.status(503).json({ ok: false, error: "Database connection failed", code: err.code || "DB_CONNECTION_FAILED" });
     }
   });
 
@@ -443,7 +450,9 @@ async function startServer() {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
-      const notifs = await adminDb.getAllNotifications(limit, offset);
+      const notifs = pushStore.isPostgresPushStoreEnabled()
+        ? await pushStore.getPostgresAdminNotifications(limit, offset)
+        : await adminDb.getAllNotifications(limit, offset);
       res.json(notifs);
     } catch (e: any) {
       res.status(500).json({ error: e.message });
@@ -453,29 +462,52 @@ async function startServer() {
   app.post('/api/admin/notifications/send', adminAuth, async (req, res) => {
     try {
       const { title, body, targetType, targetValue } = req.body;
-      let tokens: string[] = [];
-
-      if (targetType === 'all') {
-        const allTokens = await adminDb.getActivePushTokens();
-        tokens = allTokens.map((t: any) => t.token);
-      } else if (targetType === 'country' && targetValue) {
-        const countryTokens = await adminDb.getPushTokensByCountry(targetValue);
-        tokens = countryTokens.map((t: any) => t.token);
+      if (typeof title !== "string" || !title.trim() || typeof body !== "string" || !body.trim()) {
+        return res.status(400).json({ error: "title and body are required" });
       }
 
-      const notifId = await adminDb.createNotification({
-        title, body, targetType: targetType || 'all', targetValue, sentCount: tokens.length,
-      });
+      const normalizedTargetType: "all" | "country" = targetType === "country" ? "country" : "all";
+      let tokenRows: Array<{ token: string }> = [];
 
-      // Send via FCM V1 API (direct) + Expo Push API (fallback for ExponentPushToken)
-      let successCount = 0, failCount = 0;
+      if (pushStore.isPostgresPushStoreEnabled()) {
+        tokenRows = normalizedTargetType === "country" && targetValue
+          ? await pushStore.getPostgresPushTokensByCountry(String(targetValue))
+          : await pushStore.getPostgresActivePushTokens();
+      } else {
+        tokenRows = normalizedTargetType === "country" && targetValue
+          ? await adminDb.getPushTokensByCountry(String(targetValue))
+          : await adminDb.getActivePushTokens();
+      }
+
+      const tokens = [...new Set(tokenRows.map((row) => row.token))];
+      const notificationInput = {
+        title: title.trim(),
+        body: body.trim(),
+        targetType: normalizedTargetType,
+        targetValue: targetValue ? String(targetValue) : null,
+        sentCount: tokens.length,
+      };
+      const notifId = pushStore.isPostgresPushStoreEnabled()
+        ? await pushStore.createPostgresAdminNotification(notificationInput)
+        : await adminDb.createNotification(notificationInput);
+
+      // Expo/FCM ينفذان التسليم في الخلفية؛ التطبيق لا يطلب Full Screen Intent لهذا النوع.
+      let successCount = 0;
+      let failCount = 0;
       if (tokens.length > 0) {
-        console.log('[Push] Sending to', tokens.length, 'tokens:', tokens.map(t => t.substring(0, 25) + '...'));
-        const result = await sendPushViaFCM(tokens, title, body, deactivatePushToken);
+        console.log('[Push] Sending to', tokens.length, 'registered devices');
+        const deactivateToken = pushStore.isPostgresPushStoreEnabled()
+          ? pushStore.deactivatePostgresPushToken
+          : deactivatePushToken;
+        const result = await sendPushViaFCM(tokens, notificationInput.title, notificationInput.body, deactivateToken);
         successCount = result.successCount;
         failCount = result.failCount;
         if (notifId) {
-          await adminDb.updateNotificationCounts(notifId, tokens.length, successCount, failCount);
+          if (pushStore.isPostgresPushStoreEnabled()) {
+            await pushStore.updatePostgresNotificationCounts(notifId, tokens.length, successCount, failCount);
+          } else {
+            await adminDb.updateNotificationCounts(notifId, tokens.length, successCount, failCount);
+          }
         }
       }
 
@@ -487,6 +519,29 @@ async function startServer() {
 
   // ==================== RECIPES API ====================
   const recipesApi = await import('../admin/recipes-api');
+
+  const loadRecipeImageOverrides = async (): Promise<Record<string, string>> => {
+    if (recipeImageStore.isPostgresRecipeImageStoreEnabled()) {
+      // Preserve images uploaded by older releases before they used a durable table.
+      const legacyUploadedImages = Object.fromEntries(
+        recipesApi
+          .getAllRecipes()
+          .filter((recipe) =>
+            typeof recipe.image === 'string' &&
+            recipe.image.startsWith('https://') &&
+            recipe.image.includes('/recipe-images/'),
+          )
+          .map((recipe) => [recipe.id, recipe.image as string]),
+      );
+      await recipeImageStore.seedPostgresRecipeImages(legacyUploadedImages);
+      return recipeImageStore.getPostgresRecipeImages();
+    }
+
+    const db = await getDb();
+    if (!db) return {};
+    const dbImages = await db.select().from(recipeImages);
+    return Object.fromEntries(dbImages.map((image) => [image.recipeId, image.imageUrl]));
+  };
 
   app.get('/api/admin/recipes', adminAuth, async (req, res) => {
     try {
@@ -501,7 +556,12 @@ async function startServer() {
       if (origin) recipes = recipes.filter(r => (r.origin || 'general') === origin);
       const total = recipes.length;
       const offset = (page - 1) * limit;
-      const paginated = recipes.slice(offset, offset + limit);
+      const imageOverrides = await loadRecipeImageOverrides();
+      const paginated = recipes.slice(offset, offset + limit).map((recipe) => ({
+        ...recipe,
+        image: imageOverrides[recipe.id] ?? recipe.image,
+        customImageUrl: imageOverrides[recipe.id] ?? null,
+      }));
       res.json({ recipes: paginated, total, page, totalPages: Math.ceil(total / limit) });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
@@ -522,7 +582,13 @@ async function startServer() {
       const recipes = recipesApi.getAllRecipes();
       const recipe = recipes.find(r => r.id === req.params.id);
       if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
-      res.json(recipe);
+      const imageOverrides = await loadRecipeImageOverrides();
+      const customImageUrl = imageOverrides[recipe.id] ?? null;
+      res.json({
+        ...recipe,
+        image: customImageUrl ?? recipe.image,
+        customImageUrl,
+      });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
@@ -572,22 +638,21 @@ async function startServer() {
       const { url } = await storagePut(fileKey, buffer, contentType || 'image/jpeg');
       console.log('[Upload] Image uploaded successfully:', url);
       
-      // Also save to DB if recipeId is provided
+      // Save the override atomically when the dashboard sends a recipeId.
       if (recipeId) {
-        try {
+        if (recipeImageStore.isPostgresRecipeImageStoreEnabled()) {
+          await recipeImageStore.savePostgresRecipeImage(String(recipeId), url);
+        } else {
           const db = await getDb();
-          if (db) {
-            const existing = await db.select().from(recipeImages).where(eq(recipeImages.recipeId, recipeId));
-            if (existing.length > 0) {
-              await db.update(recipeImages).set({ imageUrl: url }).where(eq(recipeImages.recipeId, recipeId));
-            } else {
-              await db.insert(recipeImages).values({ recipeId, imageUrl: url });
-            }
-            console.log('[Upload] Image URL saved to DB for recipe:', recipeId);
+          if (!db) throw new Error('Database not available');
+          const existing = await db.select().from(recipeImages).where(eq(recipeImages.recipeId, String(recipeId)));
+          if (existing.length > 0) {
+            await db.update(recipeImages).set({ imageUrl: url }).where(eq(recipeImages.recipeId, String(recipeId)));
+          } else {
+            await db.insert(recipeImages).values({ recipeId: String(recipeId), imageUrl: url });
           }
-        } catch (dbErr) {
-          console.error('[Upload] Failed to save image URL to DB:', dbErr);
         }
+        console.log('[Upload] Recipe image override saved for:', recipeId);
       }
       
       res.json({ success: true, url });
@@ -604,51 +669,36 @@ async function startServer() {
       if (!recipeId || !imageUrl) {
         return res.status(400).json({ error: 'recipeId and imageUrl are required' });
       }
-      const db = await getDb();
-      if (!db) return res.status(500).json({ error: 'Database not available' });
-      
-      const existing = await db.select().from(recipeImages).where(eq(recipeImages.recipeId, recipeId));
-      if (existing.length > 0) {
-        await db.update(recipeImages).set({ imageUrl }).where(eq(recipeImages.recipeId, recipeId));
+      if (recipeImageStore.isPostgresRecipeImageStoreEnabled()) {
+        await recipeImageStore.savePostgresRecipeImage(String(recipeId), String(imageUrl));
       } else {
-        await db.insert(recipeImages).values({ recipeId, imageUrl });
+        const db = await getDb();
+        if (!db) return res.status(500).json({ error: 'Database not available' });
+        const existing = await db.select().from(recipeImages).where(eq(recipeImages.recipeId, String(recipeId)));
+        if (existing.length > 0) {
+          await db.update(recipeImages).set({ imageUrl: String(imageUrl) }).where(eq(recipeImages.recipeId, String(recipeId)));
+        } else {
+          await db.insert(recipeImages).values({ recipeId: String(recipeId), imageUrl: String(imageUrl) });
+        }
       }
-      res.json({ success: true });
+      res.json({ success: true, recipeId, imageUrl });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
   });
 
   // ==================== PUBLIC RECIPE IMAGES API ====================
-  // Public endpoint - returns recipe image URLs from DB first, then fallback to code file
+  // Returns admin-uploaded overrides only. Built-in/category images stay inside the app.
   app.get('/api/recipes/images', async (_req, res) => {
     try {
-      const imageMap: Record<string, string> = {};
-      
-      // 1. Get images from code file (fallback/default)
-      const recipes = recipesApi.getAllRecipes();
-      for (const r of recipes) {
-        if (r.image && r.image.trim()) {
-          imageMap[r.id] = r.image;
-        }
-      }
-      
-      // 2. Override with DB images (these are the user-uploaded ones that persist)
-      try {
-        const db = await getDb();
-        if (db) {
-          const dbImages = await db.select().from(recipeImages);
-          for (const img of dbImages) {
-            imageMap[img.recipeId] = img.imageUrl;
-          }
-        }
-      } catch (dbErr) {
-        console.error('[Images] Failed to load DB images:', dbErr);
-      }
-      
+      const imageMap = await loadRecipeImageOverrides();
+
+      res.setHeader('Cache-Control', 'no-store, max-age=0');
+      res.setHeader('X-Awafiyat-Recipe-Images-Version', '5');
       res.json(imageMap);
     } catch (e: any) {
-      res.status(500).json({ error: e.message });
+      console.error('[Images] Failed to load recipe image overrides:', e);
+      res.status(500).json({ error: 'Failed to load recipe image overrides' });
     }
   });
 
@@ -765,10 +815,16 @@ async function startServer() {
   // Register push token
   app.post('/api/user/push-token', async (req, res) => {
     try {
-      const { token, userId, platform: clientPlatform } = req.body;
-      console.log('[Push] Received push-token registration request:', { token: token?.substring(0, 30) + '...', userId, platform: clientPlatform });
-      if (!token) {
-        return res.status(400).json({ error: 'Token is required' });
+      const { token, userId, platform: clientPlatform, country, deviceId } = req.body;
+      if (typeof token !== "string" || !token.trim()) {
+        return res.status(400).json({ error: "Token is required" });
+      }
+
+      const normalizedToken = token.trim();
+      const isExpoToken = /^(Exponent|Expo)PushToken\[[^\]]+\]$/.test(normalizedToken);
+      const isFcmToken = normalizedToken.startsWith("fcm:") && normalizedToken.length > 8;
+      if (!isExpoToken && !isFcmToken) {
+        return res.status(400).json({ error: "Unsupported push token format" });
       }
 
       // Detect platform from user-agent or client param
@@ -777,44 +833,71 @@ async function startServer() {
       if (clientPlatform === 'ios' || ua.includes('iPhone') || ua.includes('iPad')) detectedPlatform = 'ios';
       else if (clientPlatform === 'web') detectedPlatform = 'web';
 
-      // Register push token in database (userId is now optional)
-      await savePushToken({
-        token,
-        userId: userId || null,
-        platform: detectedPlatform,
-      });
+      const parsedUserId = Number(userId);
+      const normalizedUserId = Number.isSafeInteger(parsedUserId) && parsedUserId > 0 ? parsedUserId : null;
+      if (pushStore.isPostgresPushStoreEnabled()) {
+        await pushStore.savePostgresPushToken({
+          token: normalizedToken,
+          userId: normalizedUserId,
+          platform: detectedPlatform,
+          country: typeof country === "string" ? country.slice(0, 64) : null,
+          deviceId: typeof deviceId === "string" ? deviceId.slice(0, 255) : null,
+        });
+      } else {
+        await savePushToken({
+          token: normalizedToken,
+          userId: normalizedUserId,
+          platform: detectedPlatform,
+        });
+      }
 
-      console.log('[Push] Token registered successfully:', token.substring(0, 30) + '...', 'platform:', detectedPlatform);
+      console.log('[Push] Token registered successfully for platform:', detectedPlatform);
       res.json({ success: true, message: 'Push token registered' });
     } catch (e: any) {
       console.error('[Push] Failed to register push token:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: "Failed to register push token" });
     }
   });
 
   // Admin: List all push tokens (for debugging)
   app.get('/api/admin/push-tokens-list', adminAuth, async (_req, res) => {
     try {
-      const tokens = await adminDb.getActivePushTokens();
+      const tokens = pushStore.isPostgresPushStoreEnabled()
+        ? await pushStore.getPostgresActivePushTokens()
+        : await adminDb.getActivePushTokens();
       res.json({ tokens, count: tokens.length });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
   });
 
-  // Admin: Delete invalid/test push tokens
+  app.get('/api/admin/push-health', adminAuth, async (_req, res) => {
+    try {
+      if (!pushStore.isPostgresPushStoreEnabled()) {
+        return res.json({ ok: true, database: "mysql" });
+      }
+      res.json(await pushStore.getPostgresPushStoreStatus());
+    } catch (e: any) {
+      res.status(503).json({ ok: false, error: "Push store unavailable" });
+    }
+  });
+
+  // Admin: Delete test push tokens while preserving valid Expo/FCM registrations.
   app.delete('/api/admin/push-tokens-cleanup', adminAuth, async (_req, res) => {
     try {
+      if (pushStore.isPostgresPushStoreEnabled()) {
+        const deleted = await pushStore.cleanupPostgresPushTokens();
+        const remaining = await pushStore.getPostgresActivePushTokens();
+        return res.json({ success: true, deleted, remaining: remaining.length });
+      }
+
       const db = (await import('../db')).getDb;
       const dbInstance = await db();
       if (!dbInstance) return res.status(500).json({ error: 'DB not available' });
       const { sql } = await import('drizzle-orm');
-      // Delete test tokens AND old ExponentPushToken entries (they no longer work)
-      const deleteResult = await dbInstance.execute(
-        sql`DELETE FROM push_tokens WHERE token LIKE 'test%' OR token LIKE 'ExponentPushToken%'`
-      );
+      await dbInstance.execute(sql`DELETE FROM push_tokens WHERE token LIKE 'test%'`);
       const remaining = await adminDb.getActivePushTokens();
-      res.json({ success: true, message: 'Cleaned up invalid and old Expo tokens', remaining: remaining.length });
+      res.json({ success: true, remaining: remaining.length });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }

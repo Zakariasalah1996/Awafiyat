@@ -11,13 +11,17 @@ const checks = {
   androidPackage: configText.includes('const rawBundleId = "io.awafiyat.health"'),
   easProject: configText.includes("ac8a9414-c049-43f6-aa26-4647b61e4d28"),
   firebaseConfig: configText.includes('googleServicesFile: "./google-services.json"'),
+  versionName: configText.includes('version: "1.0.78"'),
+  androidVersionCode: configText.includes("versionCode: 78"),
   admobAndroidAppId: configText.includes(
     'androidAppId: "ca-app-pub-9147941153313979~2249498498"',
   ),
   rewardedProductionUnit: admobText.includes(
     "ca-app-pub-9147941153313979/3701631347",
   ),
-  rewardedTestMode: admobText.includes("const adUnitId = TestIds.REWARDED"),
+  rewardedEnvironmentPolicy: admobText.includes(
+    "const adUnitId = __DEV__ ? TestIds.REWARDED : (AD_UNIT_ID ?? TestIds.REWARDED)",
+  ),
   previewBuildsApk: easConfig.build?.preview?.android?.buildType === "apk",
   productionBuildsApk: easConfig.build?.production?.android?.buildType === "apk",
 };

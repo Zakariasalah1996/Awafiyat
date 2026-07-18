@@ -1043,6 +1043,7 @@ async function saveFeedbackUpdate() {
 // ==================== RECIPES ====================
 let recipeCurrentPage = 1;
 let editingRecipeId = null;
+let editingCustomImageUrl = '';
 let searchTimeout = null;
 
 function searchRecipesDebounced() {
@@ -1096,6 +1097,7 @@ async function loadRecipes() {
 
 function openAddRecipeModal() {
   editingRecipeId = null;
+  editingCustomImageUrl = '';
   document.getElementById('recipeModalTitle').textContent = '➕ إضافة وصفة جديدة';
   document.getElementById('rmId').value = '';
   document.getElementById('rmId').disabled = false;
@@ -1144,14 +1146,15 @@ async function editRecipe(id) {
   // Set mealType multi-select
   const mealSel = document.getElementById('rmMealType');
   Array.from(mealSel.options).forEach(o => o.selected = recipe.mealType.includes(o.value));
-  // Show image if recipe has one
-  if (recipe.image && recipe.image.startsWith('http')) {
-    document.getElementById('rmImageUrl').value = recipe.image;
-    document.getElementById('imagePreview').src = recipe.image;
+  // Show only the dashboard override; never treat the built-in recipe image as an admin change.
+  editingCustomImageUrl = recipe.customImageUrl || '';
+  if (editingCustomImageUrl.startsWith('https://')) {
+    document.getElementById('rmImageUrl').value = editingCustomImageUrl;
+    document.getElementById('imagePreview').src = editingCustomImageUrl;
     document.getElementById('imagePreview').style.display = 'block';
     document.getElementById('imagePreviewPlaceholder').style.display = 'none';
   } else {
-    document.getElementById('rmImageUrl').value = recipe.image || '';
+    document.getElementById('rmImageUrl').value = '';
     document.getElementById('imagePreview').style.display = 'none';
     document.getElementById('imagePreviewPlaceholder').style.display = 'block';
   }
@@ -1161,6 +1164,7 @@ async function editRecipe(id) {
 function closeRecipeModal() {
   document.getElementById('recipeModal').classList.remove('show');
   editingRecipeId = null;
+  editingCustomImageUrl = '';
   // Reset image fields
   document.getElementById('rmImageFile').value = '';
   document.getElementById('rmImageUrl').value = '';
@@ -1220,7 +1224,8 @@ async function uploadRecipeImage() {
     const result = await api('upload-image', 'POST', {
       imageData: base64,
       fileName: fileName,
-      contentType: file.type || 'image/jpeg'
+      contentType: file.type || 'image/jpeg',
+      recipeId: document.getElementById('rmId').value.trim()
     });
     
     if (result && result.success && result.url) {
@@ -1247,9 +1252,11 @@ async function saveRecipe() {
   // Upload image first if selected
   document.getElementById('saveRecipeBtn').disabled = true;
   document.getElementById('saveRecipeBtn').textContent = 'جاري الحفظ...';
+  const selectedImageFile = document.getElementById('rmImageFile').files?.[0];
   const imageUrl = await uploadRecipeImage();
   document.getElementById('saveRecipeBtn').disabled = false;
   document.getElementById('saveRecipeBtn').textContent = '💾 حفظ الوصفة';
+  if (selectedImageFile && !imageUrl) return;
   
   const mealSel = document.getElementById('rmMealType');
   const mealType = Array.from(mealSel.selectedOptions).map(o => o.value);
@@ -1280,7 +1287,6 @@ async function saveRecipe() {
     tips: document.getElementById('rmTips').value.trim(),
     isIraqi: origin === 'iraqi',
     origin,
-    image: imageUrl || document.getElementById('rmImageUrl').value.trim() || undefined,
   };
   let result;
   if (editingRecipeId) {
@@ -1289,14 +1295,12 @@ async function saveRecipe() {
     result = await api('recipes', 'POST', recipe);
   }
   if (result && result.success) {
-    // Save image to DB for persistence across deployments
+    // Save a manual HTTPS URL; uploaded files were already saved atomically with recipeId.
     const finalImageUrl = imageUrl || document.getElementById('rmImageUrl').value.trim();
-    if (finalImageUrl) {
-      try {
-        await api('recipe-image', 'POST', { recipeId: id, imageUrl: finalImageUrl });
-        console.log('Image saved to DB for recipe:', id);
-      } catch (e) {
-        console.error('Failed to save image to DB:', e);
+    if (finalImageUrl.startsWith('https://')) {
+      const imageResult = await api('recipe-image', 'POST', { recipeId: id, imageUrl: finalImageUrl });
+      if (!imageResult?.success) {
+        showToast(imageResult?.error || 'تم حفظ الوصفة لكن تعذر حفظ صورتها', 'error');
       }
     }
     showToast(editingRecipeId ? 'تم تعديل الوصفة بنجاح' : 'تم إضافة الوصفة بنجاح');
