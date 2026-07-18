@@ -9,19 +9,21 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { SubscriptionFeatureGate } from "@/components/subscription-feature-gate";
 import { useColors } from "@/hooks/use-colors";
 import {
   useMedication,
   type MedicationFrequency,
   type DayOfWeek,
   type MedicationTime,
-  type TimePeriod,
   TIME_PERIODS,
 } from "@/lib/medication-context";
 import {
   cancelMedicationReminder,
   scheduleMedicationReminder,
 } from "@/lib/medication-notifications";
+import { useSubscriptionContext } from "@/lib/subscription-context";
+import { canUseMedicationReminders } from "@/lib/feature-access";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const DAYS_OF_WEEK: { id: DayOfWeek; label: string; short: string }[] = [
@@ -57,6 +59,7 @@ const NOTE_OPTIONS = [
 export default function EditMedicationScreen() {
   const colors = useColors();
   const { state, updateMedication, deleteMedication } = useMedication();
+  const { isPremium } = useSubscriptionContext();
   const params = useLocalSearchParams<{ id: string }>();
   const medId = params.id;
 
@@ -68,7 +71,7 @@ export default function EditMedicationScreen() {
   const [note, setNote] = useState(medication?.note || "");
   const [customNote, setCustomNote] = useState("");
   const [frequency, setFrequency] = useState<MedicationFrequency>(medication?.frequency || "daily");
-  const [timesPerDay, setTimesPerDay] = useState(medication?.timesPerDay || 1);
+  const timesPerDay = medication?.timesPerDay || 1;
   const [dayOfWeek, setDayOfWeek] = useState<DayOfWeek>(medication?.dayOfWeek || "sat");
   const [dayOfMonth, setDayOfMonth] = useState(medication?.dayOfMonth || 1);
   const [times, setTimes] = useState<MedicationTime[]>(medication?.times || []);
@@ -89,7 +92,18 @@ export default function EditMedicationScreen() {
       setNote("custom");
       setCustomNote(medication.note);
     }
-  }, []);
+  }, [medication?.dosage, medication?.note]);
+
+  if (!canUseMedicationReminders(isPremium)) {
+    return (
+      <SubscriptionFeatureGate
+        emoji="🔒"
+        title="تعديل الدواء للمشتركين"
+        description="تعديل الأدوية والمواعيد وإعادة جدولة التنبيهات متاح حصراً لمشتركي ألف عافيات المميزة."
+        buttonLabel="اشترك لتعديل الدواء"
+      />
+    );
+  }
 
   if (!medication) {
     return (
@@ -125,6 +139,7 @@ export default function EditMedicationScreen() {
   };
 
   const startEditTime = (index: number) => {
+    if (!canUseMedicationReminders(isPremium)) return;
     const t = times[index];
     const h12 = t.hour > 12 ? t.hour - 12 : t.hour === 0 ? 12 : t.hour;
     setPickerHour(h12);
@@ -134,7 +149,7 @@ export default function EditMedicationScreen() {
   };
 
   const confirmEditTime = () => {
-    if (editingTimeIndex === null) return;
+    if (!canUseMedicationReminders(isPremium) || editingTimeIndex === null) return;
     const hour24 = get24Hour();
     const updatedTimes = [...times];
     updatedTimes[editingTimeIndex] = {
@@ -147,6 +162,8 @@ export default function EditMedicationScreen() {
   };
 
   const handleSave = async () => {
+    if (!canUseMedicationReminders(isPremium)) return;
+
     const finalDosage = dosage === "custom" ? customDosage : dosage;
     const finalNote = note === "custom" ? customNote : note;
 
@@ -175,6 +192,8 @@ export default function EditMedicationScreen() {
   };
 
   const handleDelete = () => {
+    if (!canUseMedicationReminders(isPremium)) return;
+
     Alert.alert(
       "حذف الدواء",
       `هل أنت متأكد من حذف "${medication.name}"؟ سيتم إلغاء جميع التذكيرات.`,
@@ -184,6 +203,7 @@ export default function EditMedicationScreen() {
           text: "حذف",
           style: "destructive",
           onPress: async () => {
+            if (!canUseMedicationReminders(isPremium)) return;
             await cancelMedicationReminder(medication);
             await deleteMedication(medId);
             router.back();

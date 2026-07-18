@@ -19,3 +19,11 @@ export function canViewHealthWarnings({
 export function canUseMealPlanner(isSubscribed: boolean): boolean {
   return isSubscribed;
 }
+
+/**
+ * Medication reminders are a paid-only feature, including creation, editing,
+ * activation, and local notification scheduling.
+ */
+export function canUseMedicationReminders(isSubscribed: boolean): boolean {
+  return isSubscribed;
+}

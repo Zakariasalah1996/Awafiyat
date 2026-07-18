@@ -1,6 +1,6 @@
 import "@/global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -18,7 +18,6 @@ import {
   cancelMealReminder,
 } from "@/lib/notifications";
 import { registerGuest, sendHeartbeat } from "@/lib/guest-auth";
-import { useRouter } from "expo-router";
 import { AlarmProvider } from "@/lib/alarm-context";
 import { MedicationProvider } from "@/lib/medication-context";
 import { WaterProvider } from "@/lib/water-context";
@@ -27,6 +26,7 @@ import {
   setupMedicationChannel,
   setupMedicationNotificationActions,
   handleMedicationNotificationResponse,
+  cancelAllMedicationReminders,
 } from "@/lib/medication-notifications";
 import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -41,7 +41,8 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { UserProvider } from "@/lib/user-context";
-import { SubscriptionProvider } from "@/lib/subscription-context";
+import { SubscriptionProvider, useSubscriptionContext } from "@/lib/subscription-context";
+import { canUseMedicationReminders } from "@/lib/feature-access";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -53,6 +54,20 @@ const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
 export const unstable_settings = {
   anchor: "(tabs)",
 };
+
+function MedicationSubscriptionGuard() {
+  const { isPremium, isLoading } = useSubscriptionContext();
+
+  useEffect(() => {
+    if (Platform.OS === "web" || isLoading || canUseMedicationReminders(isPremium)) return;
+
+    cancelAllMedicationReminders().catch((error) =>
+      console.warn("[MedNotif] Failed to cancel reminders for non-premium user:", error),
+    );
+  }, [isLoading, isPremium]);
+
+  return null;
+}
 
 function RootLayoutInner() {
   const router = useRouter();
@@ -154,6 +169,8 @@ function RootLayoutInner() {
     });
 
     return cleanup;
+    // تُسجّل المستمعات مرة واحدة فقط لتجنب تكرارها عند إعادة التصيير.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // معالجة استجابة الإشعار
@@ -267,6 +284,7 @@ function RootLayoutInner() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <UserProvider>
         <SubscriptionProvider>
+          <MedicationSubscriptionGuard />
         <trpc.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
             <Stack screenOptions={{ headerShown: false }}>

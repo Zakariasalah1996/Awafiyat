@@ -2,7 +2,10 @@ import { useEffect } from "react";
 import { Text, View } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { SubscriptionFeatureGate } from "@/components/subscription-feature-gate";
 import { useMedication } from "@/lib/medication-context";
+import { useSubscriptionContext } from "@/lib/subscription-context";
+import { canUseMedicationReminders } from "@/lib/feature-access";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 /**
@@ -11,15 +14,29 @@ import Animated, { FadeIn } from "react-native-reanimated";
  */
 export default function MedicationSetupScreen() {
   const { setSetupComplete, setTakesMedication } = useMedication();
+  const { isPremium } = useSubscriptionContext();
 
   useEffect(() => {
+    if (!canUseMedicationReminders(isPremium)) return;
+
     const init = async () => {
       setTakesMedication(true);
       await setSetupComplete(true);
       router.replace("/sections/wellness/add-medication" as any);
     };
     init();
-  }, []);
+  }, [isPremium, setSetupComplete, setTakesMedication]);
+
+  if (!canUseMedicationReminders(isPremium)) {
+    return (
+      <SubscriptionFeatureGate
+        emoji="🔒"
+        title="تذكير الدواء للمشتركين"
+        description="يتطلب إعداد الدواء وجدولة تنبيهاته اشتراك ألف عافيات المميزة."
+        buttonLabel="اشترك لبدء الإعداد"
+      />
+    );
+  }
 
   return (
     <ScreenContainer edges={["top", "bottom", "left", "right"]}>

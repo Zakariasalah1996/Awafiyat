@@ -5,10 +5,10 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Platform,
 } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { SubscriptionFeatureGate } from "@/components/subscription-feature-gate";
 import { useColors } from "@/hooks/use-colors";
 import {
   useMedication,
@@ -19,6 +19,8 @@ import {
   TIME_PERIODS,
 } from "@/lib/medication-context";
 import { scheduleMedicationReminder } from "@/lib/medication-notifications";
+import { useSubscriptionContext } from "@/lib/subscription-context";
+import { canUseMedicationReminders } from "@/lib/feature-access";
 import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -57,6 +59,7 @@ type Step = "name" | "dosage" | "note" | "frequency" | "times_per_day" | "day_of
 export default function AddMedicationScreen() {
   const colors = useColors();
   const { addMedication } = useMedication();
+  const { isPremium } = useSubscriptionContext();
 
   const [step, setStep] = useState<Step>("name");
   const [medName, setMedName] = useState("");
@@ -134,6 +137,8 @@ export default function AddMedicationScreen() {
   };
 
   const handleTimeConfirm = async () => {
+    if (!canUseMedicationReminders(isPremium)) return;
+
     const hour24 = get24Hour();
     const period = selectedPeriods[currentTimeIndex];
     const newTime: MedicationTime = { hour: hour24, minute: pickerMinute, period };
@@ -176,6 +181,17 @@ export default function AddMedicationScreen() {
     const ampm = hour >= 12 ? "م" : "ص";
     return `${h}:${String(minute).padStart(2, "0")} ${ampm}`;
   };
+
+  if (!canUseMedicationReminders(isPremium)) {
+    return (
+      <SubscriptionFeatureGate
+        emoji="🔒"
+        title="إضافة الدواء للمشتركين"
+        description="اشترك في ألف عافيات المميزة لإضافة الدواء وتحديد الجرعات وجدولة التنبيهات المحلية."
+        buttonLabel="اشترك لإضافة الدواء"
+      />
+    );
+  }
 
   // === شاشة اسم الدواء ===
   if (step === "name") {

@@ -4,7 +4,8 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useMedication } from "@/lib/medication-context";
 import { useWater } from "@/lib/water-context";
-import { useUser } from "@/lib/user-context";
+import { useSubscriptionContext } from "@/lib/subscription-context";
+import { canUseMedicationReminders } from "@/lib/feature-access";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -12,8 +13,9 @@ export default function WellnessScreen() {
   const colors = useColors();
   const { state } = useMedication();
   const { state: waterState } = useWater();
-  const { profile } = useUser();
+  const { isPremium } = useSubscriptionContext();
 
+  const canUseMedication = canUseMedicationReminders(isPremium);
   const activeMeds = state.medications.filter((m) => m.isActive);
   const hasMeds = activeMeds.length > 0;
 
@@ -51,7 +53,13 @@ export default function WellnessScreen() {
         {/* قسم رفيق الدواء */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)} className="px-5 mb-4">
           <TouchableOpacity
-            onPress={() => router.push("/sections/wellness/medication-home" as any)}
+            onPress={() =>
+              router.push(
+                canUseMedication
+                  ? ("/sections/wellness/medication-home" as any)
+                  : ("/(tabs)/subscription" as any),
+              )
+            }
             className="rounded-2xl p-5 border"
             style={{
               backgroundColor: "#F0F7EC",
@@ -81,17 +89,23 @@ export default function WellnessScreen() {
                     className="text-sm text-muted mt-1"
                     style={{ textAlign: "right", writingDirection: "rtl" }}
                   >
-                    {hasMeds
-                      ? `${activeMeds.length} ${activeMeds.length === 1 ? "دواء" : "أدوية"} مسجلة`
-                      : "سجّل أدويتك ونذكّرك بمواعيدها"}
+                    {!canUseMedication
+                      ? "متاح حصراً للمشتركين"
+                      : hasMeds
+                        ? `${activeMeds.length} ${activeMeds.length === 1 ? "دواء" : "أدوية"} مسجلة`
+                        : "سجّل أدويتك ونذكّرك بمواعيدها"}
                   </Text>
                 </View>
               </View>
-              <MaterialIcons name="chevron-left" size={24} color={colors.muted} />
+              <MaterialIcons
+                name={canUseMedication ? "chevron-left" : "lock"}
+                size={24}
+                color={canUseMedication ? colors.muted : colors.primary}
+              />
             </View>
 
-            {/* عرض ملخص الأدوية إذا وجدت */}
-            {hasMeds && (
+            {/* عرض ملخص الأدوية للمشترك فقط */}
+            {canUseMedication && hasMeds && (
               <View className="mt-4 pt-4" style={{ borderTopWidth: 1, borderTopColor: `${colors.primary}15` }}>
                 {activeMeds.slice(0, 3).map((med, idx) => (
                   <View
