@@ -32,7 +32,7 @@ const env = {
   appSlug: "awafiyat",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/DmjftojniSSrItKa.png",
+  logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/dcsFJGGHCktKMQSj.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -41,7 +41,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: "1.0.79",
+  version: "1.0.80",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -56,7 +56,7 @@ const config: ExpoConfig = {
   },
   android: {
     adaptiveIcon: {
-      backgroundColor: "#5D8A3C",
+      backgroundColor: "#FFF1DC",
       foregroundImage: "./assets/images/android-icon-foreground.png",
       backgroundImage: "./assets/images/android-icon-background.png",
       monochromeImage: "./assets/images/android-icon-monochrome.png",
@@ -64,7 +64,7 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    versionCode: 79,
+    versionCode: 80,
     googleServicesFile: "./google-services.json",
     permissions: [
       "POST_NOTIFICATIONS",
@@ -116,9 +116,9 @@ const config: ExpoConfig = {
         image: "./assets/images/splash-icon.png",
         imageWidth: 200,
         resizeMode: "contain",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#FFF1DC",
         dark: {
-          backgroundColor: "#000000",
+          backgroundColor: "#FFF1DC",
         },
       },
     ],
