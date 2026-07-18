@@ -41,7 +41,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: "1.0.78",
+  version: "1.0.79",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -64,12 +64,11 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    versionCode: 78,
+    versionCode: 79,
     googleServicesFile: "./google-services.json",
     permissions: [
       "POST_NOTIFICATIONS",
       "VIBRATE",
-      "USE_FULL_SCREEN_INTENT",
     ],
     intentFilters: [
       {
@@ -135,7 +134,7 @@ const config: ExpoConfig = {
     [
       "react-native-google-mobile-ads",
       {
-        androidAppId: "ca-app-pub-9147941153313979~2249498498",
+        androidAppId: "ca-app-pub-9147941153313979~6652750828",
         iosAppId: "ca-app-pub-9147941153313979~6652750828",
         userTrackingUsageDescription: "يستخدم هذا التطبيق إعلانات لدعم المحتوى المجاني",
         skAdNetworkItems: [],

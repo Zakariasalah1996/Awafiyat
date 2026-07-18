@@ -37,8 +37,12 @@ describe("FCM and Expo push notification setup", () => {
 
   it("routes Expo and FCM tokens through their matching providers", () => {
     const server = readProjectFile("server", "_core", "index.ts");
+    const expoPush = readProjectFile("server", "expo-push.ts");
+
     expect(server).toContain("fcm.googleapis.com/v1/projects/");
-    expect(server).toContain("exp.host/--/api/v2/push/send");
+    expect(expoPush).toContain("exp.host/--/api/v2/push/send");
+    expect(expoPush).toContain("exp.host/--/api/v2/push/getReceipts");
+    expect(server).toContain("sendExpoPushNotifications");
     expect(server).toContain("sendPushViaFCM");
     expect(server).toContain("token.startsWith('fcm:')");
     expect(server).toContain("token.substring(4)");

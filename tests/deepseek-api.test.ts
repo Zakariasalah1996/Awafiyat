@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 
-describe("DeepSeek API Key Validation", () => {
+const hasDeepSeekApiKey = Boolean(process.env.DEEPSEEK_API_KEY);
+
+describe.skipIf(!hasDeepSeekApiKey)("DeepSeek API Key Validation", () => {
   it("should successfully call DeepSeek API with the provided key", async () => {
     const apiKey = process.env.DEEPSEEK_API_KEY;
     expect(apiKey).toBeTruthy();

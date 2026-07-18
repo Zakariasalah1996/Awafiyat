@@ -16,6 +16,7 @@ import { GoogleAuth } from "google-auth-library";
 import * as fs from "fs";
 import * as pushStore from "../push-store";
 import * as recipeImageStore from "../recipe-image-store";
+import { sendExpoPushNotifications } from "../expo-push";
 
 // ===== FCM V1 API Direct Send =====
 let _fcmAccessToken: string | null = null;
@@ -67,38 +68,19 @@ async function sendPushViaFCM(tokens: string[], title: string, body: string, dbD
   let successCount = 0;
   let failCount = 0;
 
-  // Send ExponentPushToken via Expo Push API (legacy fallback)
+  // Send Expo tokens, then inspect tickets and receipts instead of treating HTTP acceptance as delivery.
   if (expoTokens.length > 0) {
-    const messages = expoTokens.map((token: string) => ({
-      to: token, sound: 'default', title, body,
-      priority: 'default', channelId: 'admin_updates',
-      data: { type: 'admin_notification' },
-    }));
     try {
-      const pushRes = await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(messages),
+      const expoResult = await sendExpoPushNotifications({
+        tokens: expoTokens,
+        title,
+        body,
+        deactivate: dbDeactivate,
       });
-      const pushData = await pushRes.json();
-      if (pushData.data) {
-        for (let i = 0; i < pushData.data.length; i++) {
-          const ticket = pushData.data[i];
-          if (ticket.status === 'ok') {
-            successCount++;
-          } else {
-            failCount++;
-            console.warn('[Push] Expo ticket error:', ticket);
-            // Deactivate invalid tokens
-            if (ticket.details?.error === 'DeviceNotRegistered' && dbDeactivate) {
-              await dbDeactivate(expoTokens[i]);
-              console.log('[Push] Deactivated unregistered Expo token:', expoTokens[i].substring(0, 25));
-            }
-          }
-        }
-      }
+      successCount += expoResult.successCount;
+      failCount += expoResult.failCount;
     } catch (err) {
-      console.error('[Push] Expo fetch error:', err);
+      console.error('[Push] Expo send failed:', err);
       failCount += expoTokens.length;
     }
   }
