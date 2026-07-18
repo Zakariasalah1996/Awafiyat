@@ -15,13 +15,16 @@ import { useColors } from '@/hooks/use-colors';
 import { useSubscriptions } from '@/hooks/use-subscriptions';
 import * as Haptics from 'expo-haptics';
 import { ImpactFeedbackStyle, NotificationFeedbackType } from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getSafeBottomPadding } from '@/lib/safe-area-spacing';
 
 I18nManager.forceRTL(true);
 
 export default function SubscriptionScreen() {
   const router = useRouter();
   const colors = useColors();
-  const { packages, isLoading, error, isPremium, purchasePackage, restorePurchases } =
+  const insets = useSafeAreaInsets();
+  const { packages, isLoading, error, purchasePackage, restorePurchases } =
     useSubscriptions();
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
 
@@ -47,7 +50,7 @@ export default function SubscriptionScreen() {
         Alert.alert('نجح الاشتراك! 🎉', 'شكراً لاشتراكك في ألف عافيات المميزة');
         router.back();
       }
-    } catch (err) {
+    } catch {
       Haptics.notificationAsync(NotificationFeedbackType.Error);
       Alert.alert('خطأ', 'حدث خطأ أثناء الشراء. حاول مرة أخرى.');
     } finally {
@@ -61,7 +64,7 @@ export default function SubscriptionScreen() {
       Haptics.impactAsync(ImpactFeedbackStyle.Medium);
       await restorePurchases();
       Alert.alert('تم', 'تم استعادة عملياتك الشرائية');
-    } catch (err) {
+    } catch {
       Alert.alert('خطأ', 'حدث خطأ أثناء استعادة الشراء');
     }
   };
@@ -77,7 +80,13 @@ export default function SubscriptionScreen() {
 
   return (
     <ScreenContainer className="p-4">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingBottom: getSafeBottomPadding(insets.bottom, 16),
+        }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* الرأس */}
         <View className="mb-8 items-center">
           <Text className="text-4xl font-bold text-foreground mb-2">ألف عافيات المميزة</Text>
@@ -151,7 +160,16 @@ export default function SubscriptionScreen() {
       {/* ─── Modal التجربة المجانية 3 أيام ─── */}
       <Modal visible={showTrialModal} transparent animationType="slide">
         <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <View style={{ backgroundColor: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingHorizontal: 22, paddingTop: 18, paddingBottom: 28 }}>
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderTopLeftRadius: 28,
+              borderTopRightRadius: 28,
+              paddingHorizontal: 22,
+              paddingTop: 18,
+              paddingBottom: getSafeBottomPadding(insets.bottom, 28),
+            }}
+          >
             {/* الرأس - مضغوط */}
             <View style={{ alignItems: "center", marginBottom: 14 }}>
               <Text style={{ fontSize: 32 }}>🎁</Text>

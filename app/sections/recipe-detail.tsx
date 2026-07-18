@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { showRewardedAd, unlockWarning } from "@/lib/admob";
+import { useState, useCallback, useEffect } from "react";
+import { getUnlockedWarnings, showRewardedAd, unlockWarning } from "@/lib/admob";
 import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
 
 import {
@@ -29,6 +29,7 @@ import {
   getSeverityColor,
   type HealthWarning,
 } from "@/lib/health-warnings-engine";
+import { canViewHealthWarnings } from "@/lib/feature-access";
 
 I18nManager.forceRTL(true);
 
@@ -48,8 +49,30 @@ export default function RecipeDetailScreen() {
 
   // حالة نافذة الاشتراك
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  // حالة فتح التحذير بالإعلان
+  // حالة فتح التحذير بالإعلان، مع استعادة الفتح المحفوظ لهذه الوصفة
   const [warningUnlockedByAd, setWarningUnlockedByAd] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const warningId = id || "";
+
+    setWarningUnlockedByAd(false);
+    if (!warningId) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    void getUnlockedWarnings().then((unlockedWarnings) => {
+      if (isMounted && unlockedWarnings.includes(warningId)) {
+        setWarningUnlockedByAd(true);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
 
   const isSaved = profile.savedRecipes.includes(id || "");
 
@@ -204,8 +227,11 @@ export default function RecipeDetailScreen() {
         {/* ─── التحذيرات الصحية - حصرية للمشتركين ─── */}
         {hasWarnings && (
           <View className="mx-5 mt-3">
-            {isPremium ? (
-              /* ✅ مشترك: يرى التحذيرات الكاملة */
+            {canViewHealthWarnings({
+              isPremium,
+              unlockedByReward: warningUnlockedByAd,
+            }) ? (
+              /* ✅ مشترك أو شاهد الإعلان: يرى التحذيرات الكاملة */
               <View
                 style={{
                   backgroundColor: colors.error + "10",

@@ -14,7 +14,11 @@ import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useUser } from "@/lib/user-context";
 import { useSubscriptionContext } from "@/lib/subscription-context";
-import { RECIPES, getRecipesByMealType } from "@/lib/data/recipes";
+import { canUseMealPlanner } from "@/lib/feature-access";
+import {
+  getMealPlannerAutofillPools,
+  getMealPlannerPickerRecipes,
+} from "@/lib/meal-planner-recipes";
 import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
@@ -23,7 +27,6 @@ import { useRecipeImages, getImageFromMap } from "@/hooks/use-recipe-images";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { scheduleAllMealReminders, scheduleMealReminder } from "@/lib/notifications";
-import { useAlarm } from "@/lib/alarm-context";
 
 I18nManager.forceRTL(true);
 
@@ -32,8 +35,6 @@ const DAYS = ["السبت", "الأحد", "الإثنين", "الثلاثاء", 
 const MEAL_PLAN_STORAGE_KEY = "@awafiyat_meal_plan";
 const MEAL_TIMES_STORAGE_KEY = "@awafiyat_meal_times";
 const TIMES_SET_KEY = "@awafiyat_times_set";
-const MEAL_PLANNER_FIRST_USE_KEY = "@awafiyat_meal_planner_first_use";
-const FREE_TRIAL_DAYS = 5;
 
 // تحويل الفترة إلى عربي
 const getPeriodLabel = (hour: number): string => {
@@ -92,7 +93,7 @@ interface MealTimes {
 export default function MealPlannerScreen() {
   const router = useRouter();
   const colors = useColors();
-  const { profile, updateProfile } = useUser();
+  const { profile } = useUser();
   const recipeImages = useRecipeImages();
   const { isPremium: isSubscribed } = useSubscriptionContext();
 
@@ -117,22 +118,15 @@ export default function MealPlannerScreen() {
   const [showTimePicker, setShowTimePicker] = useState<"breakfast" | "lunch" | "dinner" | null>(null);
   const [timesAlreadySet, setTimesAlreadySet] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [trialExpired, setTrialExpired] = useState(false);
-  const [trialDaysLeft, setTrialDaysLeft] = useState(FREE_TRIAL_DAYS);
-  const [showLockedDayModal, setShowLockedDayModal] = useState(false);
-
-  // إعدادات التذكير
-  const { settings: alarmSettings } = useAlarm();
 
   // تحميل البيانات المحفوظة
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [savedTimes, savedPlan, savedTimesSet, firstUse] = await Promise.all([
+        const [savedTimes, savedPlan, savedTimesSet] = await Promise.all([
           AsyncStorage.getItem(MEAL_TIMES_STORAGE_KEY),
           AsyncStorage.getItem(MEAL_PLAN_STORAGE_KEY),
           AsyncStorage.getItem(TIMES_SET_KEY),
-          AsyncStorage.getItem(MEAL_PLANNER_FIRST_USE_KEY),
         ]);
         if (savedTimes) {
           setMealTimes(JSON.parse(savedTimes));
@@ -143,26 +137,6 @@ export default function MealPlannerScreen() {
         if (savedTimesSet === "true") {
           setTimesAlreadySet(true);
           setStep("plan");
-        }
-        // تتبع الفترة التجريبية (5 أيام)
-        if (!isSubscribed) {
-          if (firstUse) {
-            const firstDate = new Date(firstUse);
-            const now = new Date();
-            const diffMs = now.getTime() - firstDate.getTime();
-            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-            const remaining = FREE_TRIAL_DAYS - diffDays;
-            if (remaining <= 0) {
-              setTrialExpired(true);
-              setTrialDaysLeft(0);
-            } else {
-              setTrialDaysLeft(remaining);
-            }
-          } else {
-            // أول استخدام - حفظ التاريخ
-            await AsyncStorage.setItem(MEAL_PLANNER_FIRST_USE_KEY, new Date().toISOString());
-            setTrialDaysLeft(FREE_TRIAL_DAYS);
-          }
         }
       } catch (e) {
         console.error("Failed to load meal data:", e);
@@ -193,38 +167,32 @@ export default function MealPlannerScreen() {
 
 
 
-  // 5 أيام مجانية فقط - الأيام 6 و 7 مقفلة للمشتركين
-  const FREE_DAYS_COUNT = 5;
-  const availableDays = isSubscribed ? DAYS : (trialExpired ? [] : DAYS.slice(0, FREE_DAYS_COUNT));
+  // الجدولة كاملة وحصرية للمشتركين؛ لا توجد أيام مجانية لغير المشترك
+  const availableDays = useMemo(
+    () => (canUseMealPlanner(isSubscribed) ? DAYS : []),
+    [isSubscribed],
+  );
 
   const suggestedRecipes = useMemo(() => {
     if (!showRecipePicker) return [];
-    const mealType = showRecipePicker.meal;
-    let recipes = getRecipesByMealType(mealType);
-    if (profile.healthCondition !== "none") {
-      recipes.sort((a, b) => {
-        const aMatch =
-          a.healthTags.includes(profile.healthCondition as any) ||
-          a.healthTags.includes("all");
-        const bMatch =
-          b.healthTags.includes(profile.healthCondition as any) ||
-          b.healthTags.includes("all");
-        if (aMatch && !bMatch) return -1;
-        if (!aMatch && bMatch) return 1;
-        return 0;
-      });
-    }
-    return recipes.slice(0, 20);
+    return getMealPlannerPickerRecipes(
+      showRecipePicker.meal,
+      profile.healthCondition,
+    );
   }, [showRecipePicker, profile.healthCondition]);
 
   const handleAutoFill = useCallback(() => {
+    if (!canUseMealPlanner(isSubscribed)) return;
+
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     const newPlan: MealPlan = {};
-    const breakfastRecipes = getRecipesByMealType("breakfast");
-    const lunchRecipes = getRecipesByMealType("lunch");
-    const dinnerRecipes = getRecipesByMealType("dinner");
+    const {
+      breakfast: breakfastRecipes,
+      lunch: lunchRecipes,
+      dinner: dinnerRecipes,
+    } = getMealPlannerAutofillPools();
 
     // خلط الوصفات عشوائياً لمنع التكرار
     const shuffled = <T,>(arr: T[]): T[] => {
@@ -276,10 +244,10 @@ export default function MealPlannerScreen() {
     });
     setMealPlan(newPlan);
     saveMealPlan(newPlan);
-  }, [availableDays, profile.healthCondition]);
+  }, [availableDays, isSubscribed]);
 
   const selectRecipe = (recipeId: string, recipeName: string) => {
-    if (!showRecipePicker) return;
+    if (!canUseMealPlanner(isSubscribed) || !showRecipePicker) return;
     const updated = {
       ...mealPlan,
       [showRecipePicker.day]: {
@@ -327,8 +295,8 @@ export default function MealPlannerScreen() {
 
   // شاشة المنبه الآن تُعرض عبر AlarmScreen في _layout.tsx (فوق كل شيء)
 
-  // شاشة انتهاء الفترة التجريبية
-  if (trialExpired && !isSubscribed) {
+  // جدولة الوجبات ميزة مدفوعة بالكامل ولا تعرض أي إجراء لغير المشترك
+  if (!canUseMealPlanner(isSubscribed)) {
     return (
       <ScreenContainer edges={["top", "bottom", "left", "right"]}>
         <View className="flex-1 items-center justify-center px-6">
@@ -337,15 +305,20 @@ export default function MealPlannerScreen() {
             className="text-foreground font-bold"
             style={{ fontSize: 24, textAlign: "center", marginBottom: 12 }}
           >
-            انتهت الفترة التجريبية
+            جدولة الوجبات للمشتركين
           </Text>
           <Text
             className="text-muted"
-            style={{ fontSize: 16, textAlign: "center", lineHeight: 26, marginBottom: 24 }}
+            style={{
+              fontSize: 16,
+              textAlign: "center",
+              lineHeight: 26,
+              marginBottom: 24,
+              writingDirection: "rtl",
+            }}
           >
-            لقد استمتعت بجدول الطبخ لمدة 5 أيام مجاناً.{"\n"}
-            اشترك الآن للاستمرار في تخطيط وجباتك الأسبوعية{"\n"}
-            مع منبهات ذكية ووصفات متجددة!
+            اشترك في ألف عافيات المميزة لتخطيط وجبات الأسبوع بالكامل،{"\n"}
+            والاختيار من أكثر من 250 وصفة، وتفعيل تذكيرات الطبخ.
           </Text>
           <TouchableOpacity
             onPress={() => {
@@ -359,7 +332,7 @@ export default function MealPlannerScreen() {
             activeOpacity={0.8}
           >
             <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>
-              اشترك الآن
+              اشترك لفتح الجدولة
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -628,12 +601,20 @@ export default function MealPlannerScreen() {
           className="px-5 pt-4 pb-2 flex-row items-center justify-between"
           style={{ flexDirection: "row-reverse" }}
         >
-          <Text
-            className="text-foreground font-bold"
-            style={{ fontSize: 18, textAlign: "right" }}
-          >
-            اختاري وصفة لـ{showRecipePicker.meal === "breakfast" ? "الفطور" : showRecipePicker.meal === "lunch" ? "الغداء" : "العشاء"}
-          </Text>
+          <View style={{ flex: 1, alignItems: "flex-end" }}>
+            <Text
+              className="text-foreground font-bold"
+              style={{ fontSize: 18, textAlign: "right" }}
+            >
+              اختاري وصفة لـ{showRecipePicker.meal === "breakfast" ? "الفطور" : showRecipePicker.meal === "lunch" ? "الغداء" : "العشاء"}
+            </Text>
+            <Text
+              className="text-muted"
+              style={{ fontSize: 12, textAlign: "right", marginTop: 2 }}
+            >
+              {suggestedRecipes.length} وصفة متاحة — الأنسب للوجبة أولاً
+            </Text>
+          </View>
           <TouchableOpacity onPress={() => setShowRecipePicker(null)}>
             <IconSymbol name="xmark.circle.fill" size={28} color={colors.muted} />
           </TouchableOpacity>
@@ -776,9 +757,6 @@ export default function MealPlannerScreen() {
                 onPress={() => {
                   if (isAvailable) {
                     setSelectedDay(index);
-                  } else {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setShowLockedDayModal(true);
                   }
                 }}
                 className="rounded-xl px-4 py-2 items-center"
@@ -808,25 +786,6 @@ export default function MealPlannerScreen() {
             );
           })}
         </ScrollView>
-
-        {/* Subscription Notice */}
-        {!isSubscribed && (
-          <View
-            className="mx-5 mb-4 rounded-xl p-3"
-            style={{ backgroundColor: colors.warning + "15" }}
-          >
-            <Text
-              className="text-foreground"
-              style={{
-                fontSize: 12,
-                textAlign: "right",
-                writingDirection: "rtl",
-              }}
-            >
-              النسخة المجانية تشمل 5 أيام فقط. اشترك للحصول على جدول أسبوعي كامل!
-            </Text>
-          </View>
-        )}
 
         {/* Meal Cards for Selected Day */}
         <View className="px-5">
@@ -975,113 +934,6 @@ export default function MealPlannerScreen() {
         </View>
       </ScrollView>
 
-      {/* Locked Day Modal */}
-      <Modal
-        visible={showLockedDayModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowLockedDayModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.55)",
-            justifyContent: "center",
-            alignItems: "center",
-            paddingHorizontal: 28,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: colors.background,
-              borderRadius: 24,
-              padding: 28,
-              alignItems: "center",
-              width: "100%",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.18,
-              shadowRadius: 20,
-              elevation: 10,
-            }}
-          >
-            {/* Icon */}
-            <View
-              style={{
-                width: 72,
-                height: 72,
-                borderRadius: 36,
-                backgroundColor: colors.primary + "18",
-                justifyContent: "center",
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
-              <Text style={{ fontSize: 36 }}>🔒</Text>
-            </View>
-
-            {/* Title */}
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "800",
-                color: colors.foreground,
-                textAlign: "center",
-                marginBottom: 10,
-                writingDirection: "rtl",
-              }}
-            >
-              هذا اليوم حصري للمشتركين
-            </Text>
-
-            {/* Description */}
-            <Text
-              style={{
-                fontSize: 14,
-                color: colors.muted,
-                textAlign: "center",
-                lineHeight: 22,
-                writingDirection: "rtl",
-                marginBottom: 24,
-              }}
-            >
-              النسخة المجانية تتيح لك التخطيط لـ 5 أيام فقط.{"\n"}
-              اشترك الآن للحصول على جدول طبخ أسبوعي كامل وميزات حصرية أخرى!
-            </Text>
-
-            {/* Subscribe Button */}
-            <TouchableOpacity
-              onPress={() => {
-                setShowLockedDayModal(false);
-                router.push("/(tabs)/subscription" as any);
-              }}
-              style={{
-                backgroundColor: colors.primary,
-                borderRadius: 14,
-                paddingVertical: 14,
-                paddingHorizontal: 32,
-                width: "100%",
-                alignItems: "center",
-                marginBottom: 12,
-              }}
-              activeOpacity={0.85}
-            >
-              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
-                اشترك الآن ✨
-              </Text>
-            </TouchableOpacity>
-
-            {/* Dismiss */}
-            <TouchableOpacity
-              onPress={() => setShowLockedDayModal(false)}
-              style={{ paddingVertical: 8 }}
-              activeOpacity={0.7}
-            >
-              <Text style={{ color: colors.muted, fontSize: 14 }}>ربما لاحقاً</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </ScreenContainer>
   );
 }
