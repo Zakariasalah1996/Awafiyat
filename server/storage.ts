@@ -1,20 +1,31 @@
-// Preconfigured storage helpers for Manus WebDev templates
-// Uploads via Forge Server presigned URL to S3 (PUT direct).
-// Downloads return /manus-storage/{key} paths served via 307 redirect.
+// Storage helpers using Cloudflare R2 (S3-compatible API)
+// Cloudflare R2 endpoint: https://<account-id>.r2.cloudflarestorage.com
 
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { ENV } from "./_core/env";
 
-function getForgeConfig() {
-  const forgeUrl = ENV.forgeApiUrl;
-  const forgeKey = ENV.forgeApiKey;
+let _client: S3Client | null = null;
 
-  if (!forgeUrl || !forgeKey) {
+function getR2Client(): S3Client {
+  if (_client) return _client;
+
+  if (!ENV.r2AccountId || !ENV.r2AccessKeyId || !ENV.r2SecretAccessKey) {
     throw new Error(
-      "Storage config missing: set BUILT_IN_FORGE_API_URL and BUILT_IN_FORGE_API_KEY",
+      "Cloudflare R2 credentials missing: set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY",
     );
   }
 
-  return { forgeUrl: forgeUrl.replace(/\/+$/, ""), forgeKey };
+  _client = new S3Client({
+    region: "auto",
+    endpoint: `https://${ENV.r2AccountId}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: ENV.r2AccessKeyId,
+      secretAccessKey: ENV.r2SecretAccessKey,
+    },
+  });
+
+  return _client;
 }
 
 function normalizeKey(relKey: string): string {
@@ -23,8 +34,9 @@ function normalizeKey(relKey: string): string {
 
 function appendHashSuffix(relKey: string): string {
   const hash = crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+  const segmentStart = relKey.lastIndexOf("/");
   const lastDot = relKey.lastIndexOf(".");
-  if (lastDot === -1) return `${relKey}_${hash}`;
+  if (lastDot === -1 || lastDot <= segmentStart) return `${relKey}_${hash}`;
   return `${relKey.slice(0, lastDot)}_${hash}${relKey.slice(lastDot)}`;
 }
 
@@ -33,65 +45,48 @@ export async function storagePut(
   data: Buffer | Uint8Array | string,
   contentType = "application/octet-stream",
 ): Promise<{ key: string; url: string }> {
-  const { forgeUrl, forgeKey } = getForgeConfig();
+  const client = getR2Client();
   const key = appendHashSuffix(normalizeKey(relKey));
+  const bucket = ENV.r2BucketName;
 
-  // 1. Get presigned PUT URL from Forge
-  const presignUrl = new URL("v1/storage/presign/put", forgeUrl + "/");
-  presignUrl.searchParams.set("path", key);
+  const body = typeof data === "string" ? Buffer.from(data) : data;
 
-  const presignResp = await fetch(presignUrl, {
-    headers: { Authorization: `Bearer ${forgeKey}` },
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: body,
+    ContentType: contentType,
   });
 
-  if (!presignResp.ok) {
-    const msg = await presignResp.text().catch(() => presignResp.statusText);
-    throw new Error(`Storage presign failed (${presignResp.status}): ${msg}`);
-  }
+  await client.send(command);
 
-  const { url: s3Url } = (await presignResp.json()) as { url: string };
-  if (!s3Url) throw new Error("Forge returned empty presign URL");
+  // Build public URL using the R2 public domain
+  const publicUrl = ENV.r2PublicUrl
+    ? `${ENV.r2PublicUrl.replace(/\/+$/, "")}/${key}`
+    : `https://${ENV.r2AccountId}.r2.cloudflarestorage.com/${bucket}/${key}`;
 
-  // 2. PUT file directly to S3
-  const blob =
-    typeof data === "string"
-      ? new Blob([data], { type: contentType })
-      : new Blob([data as any], { type: contentType });
-
-  const uploadResp = await fetch(s3Url, {
-    method: "PUT",
-    headers: { "Content-Type": contentType },
-    body: blob,
-  });
-
-  if (!uploadResp.ok) {
-    throw new Error(`Storage upload to S3 failed (${uploadResp.status})`);
-  }
-
-  return { key, url: `/manus-storage/${key}` };
+  return { key, url: publicUrl };
 }
 
 export async function storageGet(relKey: string): Promise<{ key: string; url: string }> {
   const key = normalizeKey(relKey);
-  return { key, url: `/manus-storage/${key}` };
-}
 
-export async function storageGetSignedUrl(relKey: string): Promise<string> {
-  const { forgeUrl, forgeKey } = getForgeConfig();
-  const key = normalizeKey(relKey);
-
-  const getUrl = new URL("v1/storage/presign/get", forgeUrl + "/");
-  getUrl.searchParams.set("path", key);
-
-  const resp = await fetch(getUrl, {
-    headers: { Authorization: `Bearer ${forgeKey}` },
-  });
-
-  if (!resp.ok) {
-    const msg = await resp.text().catch(() => resp.statusText);
-    throw new Error(`Storage signed URL failed (${resp.status}): ${msg}`);
+  // If public URL is configured, return it directly (no signed URL needed)
+  if (ENV.r2PublicUrl) {
+    return {
+      key,
+      url: `${ENV.r2PublicUrl.replace(/\/+$/, "")}/${key}`,
+    };
   }
 
-  const { url } = (await resp.json()) as { url: string };
-  return url;
+  // Fallback: generate a signed URL (expires in 1 hour)
+  const client = getR2Client();
+  const command = new GetObjectCommand({
+    Bucket: ENV.r2BucketName,
+    Key: key,
+  });
+
+  const url = await getSignedUrl(client, command, { expiresIn: 3600 });
+  return { key, url };
 }
+// R2 storage integration - build fix Wed May 13 17:52:00 EDT 2026

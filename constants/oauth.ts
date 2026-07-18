@@ -3,7 +3,7 @@ import * as ReactNative from "react-native";
 
 // Extract scheme from bundle ID (last segment timestamp, prefixed with "manus")
 // e.g., "space.manus.my.app.t20240115103045" -> "manus20240115103045"
-const bundleId = "com.app.awafiyatmobile";
+const bundleId = "space.manus.awafiyat.t20260413170437";
 const timestamp = bundleId.split(".").pop()?.replace(/^t/, "") ?? "";
 const schemeFromBundleId = `manus${timestamp}`;
 
@@ -28,24 +28,30 @@ export const API_BASE_URL = env.apiBaseUrl;
  * Get the API base URL, deriving from current hostname if not set.
  * Metro runs on 8081, API server runs on 3000.
  * URL pattern: https://PORT-sandboxid.region.domain
+ * 
+ * For native (iOS/Android): uses the published domain
+ * For web: derives from current hostname
  */
 export function getApiBaseUrl(): string {
-  // If API_BASE_URL is set, use it
+  // On native (iOS/Android), always use production domain directly
+  if (ReactNative.Platform.OS !== "web") {
+    return "https://alfafiyat.com";
+  }
+
+  // On web: use env var if set
   if (API_BASE_URL) {
     return API_BASE_URL.replace(/\/$/, "");
   }
 
-  // On web, derive from current hostname by replacing port 8081 with 3000
-  if (ReactNative.Platform.OS === "web" && typeof window !== "undefined" && window.location) {
+  // On web: derive from current hostname
+  if (typeof window !== "undefined" && window.location) {
     const { protocol, hostname } = window.location;
-    // Pattern: 8081-sandboxid.region.domain -> 3000-sandboxid.region.domain
     const apiHostname = hostname.replace(/^8081-/, "3000-");
     if (apiHostname !== hostname) {
       return `${protocol}//${apiHostname}`;
     }
   }
 
-  // Fallback to empty (will use relative URL)
   return "";
 }
 

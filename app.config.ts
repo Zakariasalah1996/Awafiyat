@@ -6,7 +6,7 @@ import type { ExpoConfig } from "expo/config";
 // e.g., "my-app" created at 2024-01-15 10:30:45 -> "space.manus.my.app.t20240115103045"
 // Bundle ID can only contain letters, numbers, and dots
 // Android requires each dot-separated segment to start with a letter
-const rawBundleId = "com.app.awafiyatmobile";
+const rawBundleId = "io.awafiyat.health";
 const bundleId =
   rawBundleId
     .replace(/[-_]/g, ".") // Replace hyphens/underscores with dots
@@ -29,10 +29,10 @@ const schemeFromBundleId = `manus${timestamp}`;
 const env = {
   // App branding - update these values directly (do not use env vars)
   appName: "ألف عافيات",
-  appSlug: "awafiyat-mobile",
+  appSlug: "awafiyat",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "",
+  logoUrl: "/manus-storage/awafiyat-icon_997994dc.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -41,7 +41,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: "1.0.0",
+  version: "1.0.77",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -56,7 +56,7 @@ const config: ExpoConfig = {
   },
   android: {
     adaptiveIcon: {
-      backgroundColor: "#E6F4FE",
+      backgroundColor: "#5D8A3C",
       foregroundImage: "./assets/images/android-icon-foreground.png",
       backgroundImage: "./assets/images/android-icon-background.png",
       monochromeImage: "./assets/images/android-icon-monochrome.png",
@@ -64,7 +64,12 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    permissions: ["POST_NOTIFICATIONS"],
+    googleServicesFile: "./google-services.json",
+    permissions: [
+      "POST_NOTIFICATIONS",
+      "VIBRATE",
+      "USE_FULL_SCREEN_INTENT",
+    ],
     intentFilters: [
       {
         action: "VIEW",
@@ -86,6 +91,12 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
+    [
+      "expo-notifications",
+      {
+        "sounds": ["./assets/notification_female.mp3", "./assets/notification_male.mp3", "./assets/medication_reminder.mp3", "./assets/water_reminder.mp3"]
+      }
+    ],
     [
       "expo-audio",
       {
@@ -120,7 +131,21 @@ const config: ExpoConfig = {
         },
       },
     ],
+    [
+      "react-native-google-mobile-ads",
+      {
+        androidAppId: "ca-app-pub-9147941153313979~2249498498",
+        iosAppId: "ca-app-pub-9147941153313979~6652750828",
+        userTrackingUsageDescription: "يستخدم هذا التطبيق إعلانات لدعم المحتوى المجاني",
+        skAdNetworkItems: [],
+      },
+    ],
   ],
+  extra: {
+    eas: {
+      projectId: "ac8a9414-c049-43f6-aa26-4647b61e4d28",
+    },
+  },
   experiments: {
     typedRoutes: true,
     reactCompiler: true,

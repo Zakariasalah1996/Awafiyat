@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* تحسين تحميل الخطوط العربية */
+@font-face {
+  font-family: 'System';
+  src: local(-apple-system), local(BlinkMacSystemFont), local('Segoe UI'), local(Roboto);
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* استخدام خطوط النظام بدلاً من تحميل خطوط خارجية */
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  direction: rtl;
+  text-align: right;
+}
+
+/* تحسين الأداء */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* تحسين الخطوط على الويب */
+@supports (font-variation-settings: normal) {
+  body {
+    font-variation-settings: 'wght' 400;
+  }
+}
