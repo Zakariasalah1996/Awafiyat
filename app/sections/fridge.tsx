@@ -21,6 +21,7 @@ import { useColors } from "@/hooks/use-colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Haptics from "expo-haptics";
 import { showRewardedAd } from "@/lib/admob";
+import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
 
 I18nManager.forceRTL(true);
 
@@ -38,6 +39,7 @@ export default function FridgeScreen() {
   const [showResult, setShowResult] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
   const [adLoading, setAdLoading] = useState(false);
+  const [adError, setAdError] = useState<string | null>(null);
   const inputRef = useRef<TextInput>(null);
 
   const suggestMutation = trpc.fridge.suggest.useMutation();
@@ -114,6 +116,7 @@ export default function FridgeScreen() {
       await performAIRequest();
     } else {
       // غير المشترك يظهر له نافذة الإعلان
+      setAdError(null);
       setShowAdModal(true);
     }
   }, [selectedIngredients, isSubscribed, performAIRequest]);
@@ -121,16 +124,23 @@ export default function FridgeScreen() {
   // مشاهدة الإعلان ثم تنفيذ الطلب
   const handleWatchAd = useCallback(async () => {
     setAdLoading(true);
+    setAdError(null);
     try {
-      const rewarded = await showRewardedAd();
-      if (rewarded) {
+      const result = await showRewardedAd();
+      if (result.status === "rewarded") {
         setShowAdModal(false);
         await performAIRequest();
+        return;
       }
+
+      if (result.status === "dismissed") {
+        setAdError("أُغلق الإعلان قبل اكتماله. شاهد الإعلان حتى النهاية للحصول على الاقتراح.");
+        return;
+      }
+
+      setAdError(formatRewardedAdErrorForUser(result.error, result.sdkHealthy));
     } catch {
-      // في حالة فشل الإعلان، نفتح مباشرة
-      setShowAdModal(false);
-      await performAIRequest();
+      setAdError("تعذر تحميل الإعلان الآن. حاول مرة أخرى بعد قليل.\nرمز التشخيص: admob/unexpected");
     } finally {
       setAdLoading(false);
     }
@@ -617,7 +627,10 @@ export default function FridgeScreen() {
         visible={showAdModal}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowAdModal(false)}
+        onRequestClose={() => {
+          setAdError(null);
+          setShowAdModal(false);
+        }}
       >
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 24 }}>
           <View style={{ backgroundColor: "#fff", borderRadius: 24, padding: 28, width: "100%", maxWidth: 340, alignItems: "center" }}>
@@ -636,9 +649,28 @@ export default function FridgeScreen() {
               شاهد إعلاناً قصيراً للحصول على اقتراح وصفة من الذكاء الاصطناعي
             </Text>
 
+            {adError ? (
+              <View
+                style={{
+                  backgroundColor: "#FFF3F2",
+                  borderColor: "#F5B7B1",
+                  borderWidth: 1,
+                  borderRadius: 12,
+                  padding: 12,
+                  width: "100%",
+                  marginBottom: 14,
+                }}
+              >
+                <Text style={{ color: "#9B2C2C", fontSize: 13, lineHeight: 20, textAlign: "right" }}>
+                  {adError}
+                </Text>
+              </View>
+            ) : null}
+
             {/* زر الاشتراك */}
             <TouchableOpacity
               onPress={() => {
+                setAdError(null);
                 setShowAdModal(false);
                 router.push("/(tabs)/subscription" as any);
               }}
@@ -684,14 +716,17 @@ export default function FridgeScreen() {
                 <ActivityIndicator color="#E65100" size="small" />
               ) : (
                 <Text style={{ color: "#E65100", fontSize: 15, fontWeight: "600" }}>
-                  ▶️ شاهد إعلاناً قصيراً
+                  {adError ? "إعادة محاولة عرض الإعلان" : "▶️ شاهد إعلاناً قصيراً"}
                 </Text>
               )}
             </TouchableOpacity>
 
             {/* زر إغلاق */}
             <TouchableOpacity
-              onPress={() => setShowAdModal(false)}
+              onPress={() => {
+                setAdError(null);
+                setShowAdModal(false);
+              }}
               style={{ marginTop: 16, padding: 8 }}
             >
               <Text style={{ color: "#999", fontSize: 13 }}>إلغاء</Text>

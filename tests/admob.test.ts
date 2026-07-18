@@ -12,7 +12,7 @@ function readProjectFile(...parts: string[]) {
 }
 
 describe("AdMob rewarded ads", () => {
-  it("uses the verified Android App ID and real rewarded unit in release builds", () => {
+  it("uses the verified Android App ID and matching rewarded-interstitial unit", () => {
     const appConfig = readProjectFile("app.config.ts");
     const admob = readProjectFile("lib", "admob.ts");
 
@@ -21,11 +21,11 @@ describe("AdMob rewarded ads", () => {
     );
     expect(appConfig).not.toContain("ca-app-pub-9147941153313979~2249498498");
     expect(admob).toContain(
-      'const LIVE_REWARDED_AD_UNIT_ID = "ca-app-pub-9147941153313979/3701631347"',
+      'const LIVE_REWARDED_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-9147941153313979/3701631347"',
     );
-    expect(admob).toContain(
-      "const adUnitId = __DEV__ ? TestIds.REWARDED : LIVE_REWARDED_AD_UNIT_ID",
-    );
+    expect(admob).toContain("RewardedInterstitialAd.createForAdRequest");
+    expect(admob).toContain("TestIds.REWARDED_INTERSTITIAL");
+    expect(admob).not.toContain("TestIds.REWARDED :");
   });
 
   it("does not request Android full-screen intent permission", () => {
@@ -58,7 +58,7 @@ describe("AdMob rewarded ads", () => {
     ).toBe("configuration");
   });
 
-  it("unlocks content only for the rewarded result", () => {
+  it("unlocks content only for the rewarded result in every consumer", () => {
     const component = readProjectFile("components", "watch-ad-to-unlock.tsx");
     const handler = component.slice(component.indexOf("async function handleWatchAd"));
     const rewardedBranch = handler.indexOf('if (result.status === "rewarded")');
@@ -68,7 +68,23 @@ describe("AdMob rewarded ads", () => {
     expect(rewardedBranch).toBeGreaterThanOrEqual(0);
     expect(unlockCall).toBeGreaterThan(rewardedBranch);
     expect(unlockCall).toBeLessThan(dismissedBranch);
-    expect(handler).not.toContain("if (rewarded)");
+
+    const consumers = [
+      ["app", "sections", "fridge.tsx"],
+      ["app", "sections", "leftovers-renew.tsx"],
+      ["app", "sections", "recipe-detail.tsx"],
+      ["app", "sections", "recipes-library.tsx"],
+      ["components", "watch-ad-to-unlock.tsx"],
+    ];
+
+    for (const file of consumers) {
+      const source = readProjectFile(...file);
+      expect(source).toContain('result.status === "rewarded"');
+      expect(source).not.toContain("const rewarded = await showRewardedAd()");
+      expect(source).not.toContain("if (rewarded)");
+      expect(source).not.toContain("في حالة فشل الإعلان، نفتح مباشرة");
+    }
+
     expect(readProjectFile("lib", "admob.ts")).not.toContain(
       "Ad not ready, opening content directly",
     );

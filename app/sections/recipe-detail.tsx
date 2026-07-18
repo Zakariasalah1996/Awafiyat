@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { showRewardedAd, unlockWarning } from "@/lib/admob";
+import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
 
 import {
   View,
@@ -9,6 +10,7 @@ import {
   Modal,
   I18nManager,
   Platform,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -790,11 +792,32 @@ export default function RecipeDetailScreen() {
             {/* زر مشاهدة إعلان */}
             <TouchableOpacity
               onPress={async () => {
-                setShowSubscriptionModal(false);
-                const rewarded = await showRewardedAd();
-                if (rewarded) {
-                  await unlockWarning(id || "");
-                  setWarningUnlockedByAd(true);
+                try {
+                  const result = await showRewardedAd();
+                  if (result.status === "rewarded") {
+                    await unlockWarning(id || "");
+                    setWarningUnlockedByAd(true);
+                    setShowSubscriptionModal(false);
+                    return;
+                  }
+
+                  if (result.status === "dismissed") {
+                    Alert.alert(
+                      "لم يكتمل الإعلان",
+                      "شاهد الإعلان حتى النهاية لفتح التحذيرات الصحية.",
+                    );
+                    return;
+                  }
+
+                  Alert.alert(
+                    "تعذر عرض الإعلان",
+                    formatRewardedAdErrorForUser(result.error, result.sdkHealthy),
+                  );
+                } catch {
+                  Alert.alert(
+                    "تعذر عرض الإعلان",
+                    "حاول مرة أخرى بعد قليل.\nرمز التشخيص: admob/unexpected",
+                  );
                 }
               }}
               style={{

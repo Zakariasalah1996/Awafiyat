@@ -8,11 +8,11 @@ import {
 } from "@/lib/admob-result";
 
 // ============================================================
-// نظام الإعلانات - Google AdMob Rewarded Ads
+// نظام الإعلانات - Google AdMob Rewarded Interstitial Ads
 // المستخدم يشاهد إعلاناً مقابل فتح محتوى مقفل
 // ============================================================
 
-const LIVE_REWARDED_AD_UNIT_ID = "ca-app-pub-9147941153313979/3701631347";
+const LIVE_REWARDED_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-9147941153313979/3701631347";
 const LOAD_TIMEOUT_MS = 20_000;
 const CONTROL_LOAD_TIMEOUT_MS = 12_000;
 const SHOW_TIMEOUT_MS = 180_000;
@@ -108,12 +108,12 @@ async function initializeAdMob(): Promise<void> {
   isAdMobInitialized = true;
 }
 
-async function createAndLoadRewardedAd(adUnitId: string, timeoutMs: number): Promise<any> {
+async function createAndLoadRewardedInterstitialAd(adUnitId: string, timeoutMs: number): Promise<any> {
   await initializeAdMob();
 
   const admobModule = await import("react-native-google-mobile-ads");
-  const { RewardedAd, RewardedAdEventType, AdEventType } = admobModule;
-  const ad = RewardedAd.createForAdRequest(adUnitId, {
+  const { RewardedInterstitialAd, RewardedAdEventType, AdEventType } = admobModule;
+  const ad = RewardedInterstitialAd.createForAdRequest(adUnitId, {
     requestNonPersonalizedAdsOnly: false,
   });
 
@@ -136,7 +136,14 @@ async function createAndLoadRewardedAd(adUnitId: string, timeoutMs: number): Pro
     };
 
     const timeout = setTimeout(() => {
-      finish(() => reject(createTimeoutError("admob/load-timeout", "Rewarded ad load timed out")));
+      finish(() =>
+        reject(
+          createTimeoutError(
+            "admob/load-timeout",
+            "Rewarded interstitial ad load timed out",
+          ),
+        ),
+      );
     }, timeoutMs);
 
     unsubscribeLoaded = ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
@@ -175,9 +182,11 @@ async function loadRewardedAd(): Promise<void> {
     try {
       const admobModule = await import("react-native-google-mobile-ads");
       const { TestIds } = admobModule;
-      const adUnitId = __DEV__ ? TestIds.REWARDED : LIVE_REWARDED_AD_UNIT_ID;
+      const adUnitId = __DEV__
+        ? TestIds.REWARDED_INTERSTITIAL
+        : LIVE_REWARDED_INTERSTITIAL_AD_UNIT_ID;
 
-      rewardedAd = await createAndLoadRewardedAd(adUnitId, LOAD_TIMEOUT_MS);
+      rewardedAd = await createAndLoadRewardedInterstitialAd(adUnitId, LOAD_TIMEOUT_MS);
       isAdLoaded = true;
       lastLoadError = null;
       retryAttempt = 0;
@@ -189,7 +198,7 @@ async function loadRewardedAd(): Promise<void> {
       rewardedAd = null;
       isAdLoaded = false;
       lastLoadError = normalizeRewardedAdError(error);
-      console.warn("[AdMob] Rewarded ad unavailable", {
+      console.warn("[AdMob] Rewarded interstitial unavailable", {
         category: lastLoadError.category,
         code: lastLoadError.code,
       });
@@ -212,7 +221,10 @@ async function checkSdkWithGoogleTestInventory(): Promise<boolean> {
 
   try {
     const admobModule = await import("react-native-google-mobile-ads");
-    await createAndLoadRewardedAd(admobModule.TestIds.REWARDED, CONTROL_LOAD_TIMEOUT_MS);
+    await createAndLoadRewardedInterstitialAd(
+      admobModule.TestIds.REWARDED_INTERSTITIAL,
+      CONTROL_LOAD_TIMEOUT_MS,
+    );
     controlResultCache = { healthy: true, expiresAt: Date.now() + 10 * 60_000 };
     return true;
   } catch {
@@ -236,7 +248,7 @@ function prepareNextRewardedAd(): void {
 }
 
 /**
- * يعرض إعلان Rewarded ولا يفتح المحتوى إلا بعد حدث EARNED_REWARD.
+ * يعرض إعلان Rewarded Interstitial ولا يفتح المحتوى إلا بعد حدث EARNED_REWARD.
  */
 export async function showRewardedAd(): Promise<RewardedAdResult> {
   if (Platform.OS === "web") return { status: "rewarded" };
@@ -248,7 +260,8 @@ export async function showRewardedAd(): Promise<RewardedAdResult> {
 
     if (!rewardedAd || !isAdLoaded) {
       return unavailableResult(
-        lastLoadError ?? createTimeoutError("admob/not-ready", "Rewarded ad is not ready"),
+        lastLoadError ??
+          createTimeoutError("admob/not-ready", "Rewarded interstitial ad is not ready"),
       );
     }
 
@@ -283,7 +296,10 @@ export async function showRewardedAd(): Promise<RewardedAdResult> {
 
       const showTimeout = setTimeout(() => {
         void finishWithError(
-          createTimeoutError("admob/show-timeout", "Rewarded ad did not close in time"),
+          createTimeoutError(
+            "admob/show-timeout",
+            "Rewarded interstitial ad did not close in time",
+          ),
         );
       }, SHOW_TIMEOUT_MS);
 

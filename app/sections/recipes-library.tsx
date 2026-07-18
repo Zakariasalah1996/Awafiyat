@@ -28,6 +28,7 @@ import {
 } from "@/lib/data/recipes";
 
 import { showRewardedAd, getUnlockedRecipes, unlockRecipe } from "@/lib/admob";
+import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
 import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
@@ -105,6 +106,7 @@ export default function RecipesLibraryScreen() {
   const [showLockModal, setShowLockModal] = useState(false);
   const [lockedRecipe, setLockedRecipe] = useState<Recipe | null>(null);
   const [adLoading, setAdLoading] = useState(false);
+  const [adError, setAdError] = useState<string | null>(null);
 
   // تحميل الوصفات المفتوحة بالإعلانات
   useState(() => {
@@ -211,6 +213,7 @@ export default function RecipesLibraryScreen() {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
               }
               setLockedRecipe(item);
+              setAdError(null);
               setShowLockModal(true);
               return;
             }
@@ -531,12 +534,18 @@ export default function RecipesLibraryScreen() {
         visible={showLockModal}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowLockModal(false)}
+        onRequestClose={() => {
+          setAdError(null);
+          setShowLockModal(false);
+        }}
       >
         <TouchableOpacity
           style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center", padding: 24 }}
           activeOpacity={1}
-          onPress={() => setShowLockModal(false)}
+          onPress={() => {
+            setAdError(null);
+            setShowLockModal(false);
+          }}
         >
           <TouchableOpacity activeOpacity={1} onPress={() => {}} style={{ backgroundColor: "#ffffff", borderRadius: 24, padding: 28, width: "100%", maxWidth: 340, alignItems: "center" }}>
             {/* أيقونة */}
@@ -561,9 +570,28 @@ export default function RecipesLibraryScreen() {
               افتح هذه الوصفة مجاناً بمشاهدة إعلان قصير، أو اشترك للوصول لجميع الوصفات
             </Text>
 
+            {adError ? (
+              <View
+                style={{
+                  backgroundColor: "#FFF3F2",
+                  borderColor: "#F5B7B1",
+                  borderWidth: 1,
+                  borderRadius: 12,
+                  padding: 12,
+                  width: "100%",
+                  marginBottom: 14,
+                }}
+              >
+                <Text style={{ color: "#9B2C2C", fontSize: 13, lineHeight: 20, textAlign: "right" }}>
+                  {adError}
+                </Text>
+              </View>
+            ) : null}
+
             {/* زر الاشتراك */}
             <TouchableOpacity
               onPress={() => {
+                setAdError(null);
                 setShowLockModal(false);
                 router.push("/(tabs)/subscription" as any);
               }}
@@ -585,9 +613,10 @@ export default function RecipesLibraryScreen() {
             <TouchableOpacity
               onPress={async () => {
                 setAdLoading(true);
+                setAdError(null);
                 try {
-                  const rewarded = await showRewardedAd();
-                  if (rewarded && lockedRecipe) {
+                  const result = await showRewardedAd();
+                  if (result.status === "rewarded" && lockedRecipe) {
                     await unlockRecipe(lockedRecipe.id);
                     setUnlockedByAd((prev) => new Set([...prev, lockedRecipe.id]));
                     setShowLockModal(false);
@@ -595,9 +624,22 @@ export default function RecipesLibraryScreen() {
                       pathname: "/sections/recipe-detail" as any,
                       params: { id: lockedRecipe.id },
                     });
+                    return;
                   }
-                } catch {}
-                setAdLoading(false);
+
+                  if (result.status === "dismissed") {
+                    setAdError("أُغلق الإعلان قبل اكتماله. شاهد الإعلان حتى النهاية لفتح الوصفة.");
+                    return;
+                  }
+
+                  if (result.status === "unavailable") {
+                    setAdError(formatRewardedAdErrorForUser(result.error, result.sdkHealthy));
+                  }
+                } catch {
+                  setAdError("تعذر تحميل الإعلان الآن. حاول مرة أخرى بعد قليل.\nرمز التشخيص: admob/unexpected");
+                } finally {
+                  setAdLoading(false);
+                }
               }}
               disabled={adLoading}
               style={{ backgroundColor: "#FFF3E0", borderRadius: 14, paddingVertical: 14, paddingHorizontal: 24, width: "100%", alignItems: "center", borderWidth: 1, borderColor: "#FFE0B2", opacity: adLoading ? 0.7 : 1 }}
@@ -606,14 +648,17 @@ export default function RecipesLibraryScreen() {
                 <ActivityIndicator color="#E65100" size="small" />
               ) : (
                 <Text style={{ color: "#E65100", fontSize: 15, fontWeight: "600" }}>
-                  ▶️ شاهد إعلاناً قصيراً
+                  {adError ? "إعادة محاولة عرض الإعلان" : "▶️ شاهد إعلاناً قصيراً"}
                 </Text>
               )}
             </TouchableOpacity>
 
             {/* زر إغلاق */}
             <TouchableOpacity
-              onPress={() => setShowLockModal(false)}
+              onPress={() => {
+                setAdError(null);
+                setShowLockModal(false);
+              }}
               style={{ marginTop: 16, padding: 8 }}
             >
               <Text style={{ color: "#999", fontSize: 13 }}>إلغاء</Text>
