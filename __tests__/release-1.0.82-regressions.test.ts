@@ -63,12 +63,16 @@ describe("Android bottom safe-area regression", () => {
     expect(source).toContain("بياناتك آمنة وسرّية 100%");
   });
 
-  it("keeps subscription notes and the dismiss action above Android navigation", () => {
-    const source = readProjectFile("app/subscription.tsx");
+  it("keeps the unified paywall and purchase dismiss actions clear of system navigation", () => {
+    const route = readProjectFile("app/subscription.tsx");
+    const source = readProjectFile("components/storekit-subscription-screen.tsx");
 
-    expect(source).toContain("getSafeBottomPadding(insets.bottom, 16)");
-    expect(source).toContain("getSafeBottomPadding(insets.bottom, 28)");
-    expect(source).toContain("ليس الآن");
+    expect(route).toContain("storekit-subscription-screen");
+    expect(source).toContain("useSafeAreaInsets");
+    expect(source).toContain("Math.max(insets.bottom, 18) + 18");
+    expect(source).toContain("bottomInset={insets.bottom}");
+    expect(source).toContain('accessibilityLabel="العودة"');
+    expect(source).toContain('accessibilityLabel="إغلاق"');
   });
 });
 

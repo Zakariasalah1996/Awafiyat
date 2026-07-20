@@ -38,33 +38,45 @@ describe("Subscriber-only medication reminders", () => {
     expect(rootLayout).toContain(
       "isLoading || canUseMedicationReminders(isPremium)",
     );
-    expect(rootLayout).toContain("cancelAllMedicationReminders()")
+    expect(rootLayout).toContain("cancelAllMedicationReminders()");
   });
 });
 
-describe("RevenueCat working contract", () => {
-  it("keeps the verified premium entitlement and Android SDK configuration", () => {
+describe("RevenueCat StoreKit contract", () => {
+  it("selects the public RevenueCat key for the active native store", () => {
     const context = readProjectFile("lib/subscription-context.tsx");
 
+    expect(context).toContain('ios: "appl_');
+    expect(context).toContain('android: "goog_');
+    expect(context).toContain('Platform.OS === "ios"');
+    expect(context).toContain('Platform.OS === "android"');
+    expect(context).toContain("Purchases.configure({ apiKey })");
     expect(context).toContain('const ENTITLEMENT_ID = "premium"');
-    expect(context).toContain(
-      "Purchases.configure({ apiKey: REVENUE_CAT_API_KEY })",
-    );
     expect(context).toContain(
       "customerInfo.entitlements.active[ENTITLEMENT_ID]",
     );
     expect(context).toContain("addCustomerInfoUpdateListener");
+    expect(context).toContain("removeCustomerInfoUpdateListener");
   });
 
-  it("keeps the verified offering plus purchase and restore flows", () => {
+  it("loads localized StoreKit products and uses verified purchase and restore results", () => {
     const subscriptions = readProjectFile("hooks/use-subscriptions.ts");
 
-    expect(subscriptions).toContain("offerings.all?.['rc_monthly$']");
-    expect(subscriptions).toContain("Purchases.purchasePackage(pkg.package)");
-    expect(subscriptions).toContain("Purchases.restorePurchases()");
+    expect(subscriptions).toContain("await getConfiguredPurchases()");
+    expect(subscriptions).toContain("offerings.current");
+    expect(subscriptions).toContain("product.priceString");
+    expect(subscriptions).toContain(
+      "checkTrialOrIntroductoryPriceEligibility",
+    );
+    expect(subscriptions).toContain(
+      "configuredPurchases.purchasePackage(pkg.package)",
+    );
+    expect(subscriptions).toContain(
+      "configuredPurchases.restorePurchases()",
+    );
     expect(subscriptions).toContain(
       "customerInfo.entitlements.active[ENTITLEMENT_ID]",
     );
-    expect(subscriptions).toContain("refreshSubscription()")
+    expect(subscriptions).toContain("refreshSubscription()");
   });
 });

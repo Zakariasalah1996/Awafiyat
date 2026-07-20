@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ألف عافيات – وصفاتك العراقية الصحية</title>
-  <meta name="description" content="تطبيق الوصفات العراقية الصحية. وصفات لذيذة مناسبة لحالتك الصحية، مع ميزة ثلاجتي الذكية وجدول الطبخ الأسبوعي." />
+  <meta name="description" content="تطبيق وصفات عراقية ومعلومات غذائية عامة، مع ميزة ثلاجتي الذكية وجدول الطبخ الأسبوعي." />
   <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -434,6 +434,81 @@
       margin: 0 auto;
     }
 
+    /* ===== LEGAL PAGES ===== */
+    .legal-page {
+      min-height: 100vh;
+      padding: 48px 20px 72px;
+      background: var(--bg);
+    }
+
+    .legal-shell {
+      width: min(900px, 100%);
+      margin: 0 auto;
+      background: var(--white);
+      border: 1px solid rgba(45, 122, 79, 0.14);
+      border-radius: 24px;
+      padding: clamp(24px, 5vw, 52px);
+      box-shadow: 0 18px 55px rgba(25, 75, 45, 0.08);
+    }
+
+    .legal-home {
+      display: inline-flex;
+      color: var(--green);
+      font-weight: 700;
+      text-decoration: none;
+      margin-bottom: 26px;
+    }
+
+    .legal-page h1 {
+      color: var(--text);
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .legal-updated {
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    .legal-page h2 {
+      color: var(--green);
+      font-size: 1.25rem;
+      margin: 30px 0 10px;
+    }
+
+    .legal-page p,
+    .legal-page li {
+      color: #365440;
+      line-height: 1.9;
+    }
+
+    .legal-page ul {
+      padding-right: 24px;
+      margin-top: 8px;
+    }
+
+    .legal-note {
+      background: var(--green-light);
+      border-right: 4px solid var(--green);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 20px 0;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: underline;
+    }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 600px) {
       nav { padding: 12px 20px; }
@@ -443,6 +518,7 @@
   </style>
 </head>
 <body>
+  <div id="landing-view">
 
   <!-- NAV -->
   <nav>
@@ -459,7 +535,7 @@
       🍲 وصفات عراقية صحية
     </div>
     <h1>أكل صحي <span>يناسبك</span><br/>ويشبع شهيتك</h1>
-    <p>وصفات عراقية لذيذة مصممة خصيصاً لحالتك الصحية، مع ذكاء اصطناعي يقترح لك الأكل من مكونات ثلاجتك</p>
+    <p>وصفات عراقية لذيذة تراعي تفضيلاتك الغذائية، مع أدوات تساعدك على الاستفادة من مكونات ثلاجتك وتنظيم وجباتك</p>
     <div class="hero-buttons">
       <a href="#features" class="btn-primary">اكتشف التطبيق</a>
       <a href="#about" class="btn-secondary">من نحن</a>
@@ -522,8 +598,8 @@
       </div>
       <div class="feature-card">
         <span class="feature-icon">💚</span>
-        <div class="feature-title">مناسب لحالتك الصحية</div>
-        <p class="feature-desc">وصفات مصنفة للسكري وضغط الدم والسمنة والكوليسترول، أكل لذيذ وصحي في آنٍ واحد</p>
+        <div class="feature-title">معلومات غذائية واضحة</div>
+        <p class="feature-desc">تصنيفات ومعلومات عامة تساعدك على اختيار ما يلائم تفضيلاتك، دون تشخيص أو بديل عن رأي المختص</p>
       </div>
       <div class="feature-card">
         <span class="feature-icon">🛒</span>
@@ -542,7 +618,7 @@
       <h2 class="section-title">فكرة وُلدت من المطبخ العراقي</h2>
       <p>
         ألف عافيات تطبيق عراقي يؤمن بأن الأكل الصحي لا يعني التخلي عن النكهة الأصيلة.
-        جمعنا أشهى الوصفات العراقية وكيّفناها لتناسب مختلف الحالات الصحية.
+        جمعنا أشهى الوصفات العراقية وأضفنا معلومات عامة تساعد على اتخاذ خيارات غذائية أوضح.
       </p>
       <p>
         هدفنا بسيط: كل عراقي يستحق أن يأكل وجبة لذيذة تناسب صحته، بدون تعقيد ولا حرمان.
@@ -573,8 +649,102 @@
 
   <!-- FOOTER -->
   <footer>
-    <p>© 2025 <span>ألف عافيات</span> · جميع الحقوق محفوظة</p>
+    <p>© 2026 <span>ألف عافيات</span> · جميع الحقوق محفوظة</p>
+    <div class="footer-links">
+      <a href="/?legal=privacy">سياسة الخصوصية</a>
+      <a href="/?legal=terms">شروط الاستخدام</a>
+      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">اتفاقية Apple القياسية</a>
+    </div>
   </footer>
+  </div>
 
+  <main id="privacy-view" class="legal-page" hidden>
+    <article class="legal-shell">
+      <a class="legal-home" href="/">العودة إلى ألف عافيات</a>
+      <h1>سياسة الخصوصية</h1>
+      <p class="legal-updated">آخر تحديث: 20 يوليو 2026</p>
+      <p>توضح هذه السياسة كيف يتعامل تطبيق «ألف عافيات» مع البيانات اللازمة لتقديم ميزات الوصفات والتنظيم والتذكيرات والاشتراكات. لا نبيع بياناتك الشخصية.</p>
+
+      <h2>البيانات التي قد نعالجها</h2>
+      <ul>
+        <li>بيانات الملف التي تختار إدخالها، مثل الاسم والعمر والبلد والتفضيلات الغذائية والحساسيات.</li>
+        <li>البيانات التي تحفظها في ميزات التنظيم، مثل المفضلة وخطط الوجبات وتذكيرات الماء أو الدواء.</li>
+        <li>بيانات تقنية محدودة، مثل معرّف الجهاز ونظام التشغيل وإصدار التطبيق وسجل الأعطال والاستخدام.</li>
+        <li>حالة الاشتراك ومعرّف منتج المتجر. لا يستلم التطبيق رقم بطاقتك المصرفية؛ تعالج Apple أو Google عملية الدفع.</li>
+      </ul>
+
+      <h2>أغراض الاستخدام</h2>
+      <p>نستخدم البيانات لتشغيل الميزات التي تطلبها، حفظ تفضيلاتك، إرسال التذكيرات المحلية، التحقق من حالة الاشتراك، منع إساءة الاستخدام، دعم المستخدم وتحسين الثبات والأداء.</p>
+
+      <h2>الخدمات المساندة</h2>
+      <p>قد تُعالج بيانات محدودة لدى Apple App Store أو Google Play لإتمام المشتريات، ولدى RevenueCat للتحقق من الاستحقاق، ولدى مزودي الاستضافة والتحليلات الضرورية لتشغيل الخدمة. تقتصر المشاركة على ما يلزم للغرض المحدد.</p>
+
+      <h2>البيانات الصحية والتذكيرات</h2>
+      <div class="legal-note">يعرض التطبيق معلومات غذائية عامة وأدوات تنظيم، ولا يقدم تشخيصاً أو علاجاً طبياً. لا يغير التطبيق جرعات الدواء ولا يتخذ قراراً طبياً نيابة عن المستخدم.</div>
+      <p>تظل إدخالات التذكير والخيارات الصحية تحت تحكمك. يمكنك تعديلها أو حذفها من التطبيق، وقد تعتمد بعض الميزات على التخزين المحلي للجهاز.</p>
+
+      <h2>الاحتفاظ والأمان</h2>
+      <p>نحتفظ بالبيانات للمدة اللازمة لتقديم الخدمة والوفاء بالالتزامات النظامية، ونستخدم اتصالاً مشفراً وإجراءات وصول محدودة. لا توجد وسيلة إلكترونية تضمن أماناً مطلقاً.</p>
+
+      <h2>حقوقك</h2>
+      <p>يمكنك طلب الوصول إلى بياناتك أو تصحيحها أو حذفها، وسحب الأذونات من إعدادات الجهاز. قد نطلب معلومات للتحقق من صاحب الطلب.</p>
+
+      <h2>الأطفال</h2>
+      <p>التطبيق غير موجه للأطفال دون 13 عاماً، ولا نجمع عن قصد بيانات طفل دون السن المسموح.</p>
+
+      <h2>التواصل</h2>
+      <p>للاستفسار أو طلب متعلق بالخصوصية: <a href="mailto:support@awafiyat.manus.space">support@awafiyat.manus.space</a>. الجهة المسؤولة: عافيات للتطبيقات، المالك زكريا صلاح.</p>
+    </article>
+  </main>
+
+  <main id="terms-view" class="legal-page" hidden>
+    <article class="legal-shell">
+      <a class="legal-home" href="/">العودة إلى ألف عافيات</a>
+      <h1>شروط الاستخدام والاشتراك</h1>
+      <p class="legal-updated">آخر تحديث: 20 يوليو 2026</p>
+      <p>باستخدام «ألف عافيات» فإنك توافق على هذه الشروط. يمنحك التطبيق ترخيصاً شخصياً محدوداً وغير قابل للنقل، ولا يجوز نسخ الخدمة أو إساءة استخدامها.</p>
+
+      <h2>طبيعة المحتوى</h2>
+      <div class="legal-note">الوصفات والمعلومات الغذائية لأغراض عامة وتعليمية ولا تعد تشخيصاً أو وصفة علاجية أو بديلاً عن الطبيب أو الصيدلي. استشر مختصاً عند وجود حالة صحية أو حساسية أو تغيير في الدواء أو النظام الغذائي.</div>
+
+      <h2>الاشتراكات المتجددة تلقائياً</h2>
+      <ul>
+        <li>يعرض التطبيق اسم كل اشتراك ومدته وسعره المحلي قبل الشراء، ويظهر التأكيد النهائي من متجر جهازك.</li>
+        <li>تُحمّل الدفعة على حساب App Store أو Google Play عند تأكيد الشراء.</li>
+        <li>يتجدد الاشتراك تلقائياً للفترة نفسها ما لم توقف التجديد من إعدادات حساب المتجر قبل نهاية الفترة الحالية.</li>
+        <li>إذا عرض المتجر تجربة مجانية وكنت مؤهلاً لها، يظهر وصفها ومدتها داخل التطبيق قبل الشراء. لا نفترض الأهلية دون تأكيد المتجر.</li>
+        <li>يمكن استعادة المشتريات من شاشة الاشتراك باستخدام حساب المتجر الذي أتم الشراء.</li>
+      </ul>
+
+      <h2>الإلغاء والاسترداد</h2>
+      <p>تُدار عمليات الإلغاء والاسترداد وفق سياسة المتجر الذي تم الشراء من خلاله. لا يستطيع التطبيق إلغاء اشتراك متجر أو إصدار استرداد مباشرة. يمكنك إدارة اشتراك Apple من صفحة اشتراكات حساب App Store.</p>
+
+      <h2>اتفاقية الترخيص</h2>
+      <p>على أجهزة Apple، تخضع رخصة التطبيق أيضاً لـ<a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">اتفاقية ترخيص المستخدم النهائي القياسية من Apple</a>.</p>
+
+      <h2>توفر الخدمة والمسؤولية</h2>
+      <p>قد تتغير بعض الميزات أو تتوقف مؤقتاً للصيانة. نقدم الخدمة كما هي ضمن الحدود التي يسمح بها القانون، ولا نضمن نتيجة صحية أو غذائية محددة.</p>
+
+      <h2>الملكية الفكرية والسلوك المقبول</h2>
+      <p>النصوص والتصميمات والبرمجيات مملوكة لأصحابها. يُحظر محاولة اختراق التطبيق أو تعطيله أو استخدام محتواه بطريقة تنتهك حقوق الآخرين.</p>
+
+      <h2>التواصل</h2>
+      <p>للدعم: <a href="mailto:support@awafiyat.manus.space">support@awafiyat.manus.space</a>.</p>
+    </article>
+  </main>
+
+  <script>
+    (function () {
+      var legal = new URLSearchParams(window.location.search).get('legal');
+      if (legal !== 'privacy' && legal !== 'terms') return;
+
+      var landing = document.getElementById('landing-view');
+      var target = document.getElementById(legal === 'privacy' ? 'privacy-view' : 'terms-view');
+      if (landing) landing.hidden = true;
+      if (target) target.hidden = false;
+      document.title = legal === 'privacy' ? 'سياسة الخصوصية – ألف عافيات' : 'شروط الاستخدام – ألف عافيات';
+      window.scrollTo(0, 0);
+    })();
+  </script>
 </body>
 </html>
