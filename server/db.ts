@@ -1,9 +1,8 @@
 // Fix SSL self-signed certificate issue
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 import { eq, desc, sql, and, count } from "drizzle-orm";
-import { drizzle, MySql2Database } from "drizzle-orm/mysql2";
-import mysql from "mysql2/promise";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import {
   InsertUser, users,
   pushTokens, InsertPushToken,
@@ -18,27 +17,25 @@ import {
 
 // ==================== DATABASE CONNECTION ====================
 
-function createDbConnection(): MySql2Database | null {
+function createDbConnection(): NodePgDatabase | null {
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
     console.warn("[Database] DATABASE_URL not set - database features disabled");
     return null;
   }
   try {
-    // Parse the URL to extract host info for logging
     const hostMatch = dbUrl.match(/@([^/]+)/);
     const host = hostMatch?.[1] ?? 'unknown';
-    console.log(`[Database] Initializing MySQL connection (host: ${host})`);
-    
-    const pool = mysql.createPool({
-      uri: dbUrl,
-      ssl: { rejectUnauthorized: false },
-      waitForConnections: true,
-      connectionLimit: 5,
-      queueLimit: 0,
-      connectTimeout: 10000,
+    console.log(`[Database] Initializing PostgreSQL connection (host: ${host})`);
+
+    const useSSL = dbUrl.includes('dpg-') || dbUrl.includes('render.com') || dbUrl.includes('sslmode=require');
+    const pool = new Pool({
+      connectionString: dbUrl,
+      ssl: useSSL ? { rejectUnauthorized: false } : false,
+      max: 5,
+      connectionTimeoutMillis: 10000,
     });
-    
+
     return drizzle(pool);
   } catch (error: any) {
     console.error("[Database] Failed to initialize:", error.message);
@@ -47,9 +44,9 @@ function createDbConnection(): MySql2Database | null {
 }
 
 // Single shared instance - created once at module load
-const _db: MySql2Database | null = createDbConnection();
+const _db: NodePgDatabase | null = createDbConnection();
 
-export function getDb(): MySql2Database | null {
+export function getDb(): NodePgDatabase | null {
   return _db;
 }
 
@@ -67,152 +64,154 @@ export async function ensureDatabaseSchema(): Promise<void> {
       console.log('[Database] Ensuring schema tables exist...');
       const dbUrl = process.env.DATABASE_URL;
       if (!dbUrl) return;
-      const conn = await mysql.createConnection({ uri: dbUrl, ssl: { rejectUnauthorized: false } });
-      
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS \`users\` (
-          \`id\` int AUTO_INCREMENT NOT NULL,
-          \`openId\` varchar(64) NOT NULL,
-          \`name\` text,
-          \`email\` varchar(320),
-          \`loginMethod\` varchar(64),
-          \`role\` enum('user','admin') NOT NULL DEFAULT 'user',
-          \`country\` varchar(32),
-          \`isActive\` boolean NOT NULL DEFAULT true,
-          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
-          \`updatedAt\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
-          \`lastSignedIn\` timestamp NOT NULL DEFAULT (now()),
-          CONSTRAINT \`users_id\` PRIMARY KEY (\`id\`),
-          CONSTRAINT \`users_openId_unique\` UNIQUE (\`openId\`)
+      const useSSL = dbUrl.includes('dpg-') || dbUrl.includes('render.com') || dbUrl.includes('sslmode=require');
+      const pool = new Pool({
+        connectionString: dbUrl,
+        ssl: useSSL ? { rejectUnauthorized: false } : false,
+        connectionTimeoutMillis: 15000,
+      });
+
+      // Create enums first (IF NOT EXISTS via DO $$)
+      await pool.query(`DO $$ BEGIN CREATE TYPE user_role AS ENUM ('user', 'admin'); EXCEPTION WHEN duplicate_object THEN null; END $$`);
+      await pool.query(`DO $$ BEGIN CREATE TYPE platform_type AS ENUM ('ios', 'android', 'web'); EXCEPTION WHEN duplicate_object THEN null; END $$`);
+      await pool.query(`DO $$ BEGIN CREATE TYPE subscription_plan AS ENUM ('free', 'monthly', 'yearly', 'promo'); EXCEPTION WHEN duplicate_object THEN null; END $$`);
+      await pool.query(`DO $$ BEGIN CREATE TYPE subscription_status AS ENUM ('active', 'expired', 'cancelled'); EXCEPTION WHEN duplicate_object THEN null; END $$`);
+      await pool.query(`DO $$ BEGIN CREATE TYPE feedback_type AS ENUM ('bug', 'suggestion', 'complaint', 'praise', 'other'); EXCEPTION WHEN duplicate_object THEN null; END $$`);
+      await pool.query(`DO $$ BEGIN CREATE TYPE feedback_status AS ENUM ('new', 'read', 'resolved', 'archived'); EXCEPTION WHEN duplicate_object THEN null; END $$`);
+      await pool.query(`DO $$ BEGIN CREATE TYPE notification_target AS ENUM ('all', 'country', 'user'); EXCEPTION WHEN duplicate_object THEN null; END $$`);
+
+      // Create tables
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "users" (
+          "id" SERIAL PRIMARY KEY,
+          "openId" varchar(64) NOT NULL UNIQUE,
+          "name" text,
+          "email" varchar(320),
+          "loginMethod" varchar(64),
+          "role" user_role NOT NULL DEFAULT 'user',
+          "country" varchar(32),
+          "isActive" boolean NOT NULL DEFAULT true,
+          "createdAt" timestamp NOT NULL DEFAULT now(),
+          "updatedAt" timestamp NOT NULL DEFAULT now(),
+          "lastSignedIn" timestamp NOT NULL DEFAULT now()
         )
       `);
-      
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS \`push_tokens\` (
-          \`id\` int AUTO_INCREMENT NOT NULL,
-          \`userId\` int,
-          \`token\` varchar(512) NOT NULL,
-          \`platform\` enum('ios','android','web') NOT NULL,
-          \`isActive\` boolean NOT NULL DEFAULT true,
-          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
-          \`updatedAt\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
-          CONSTRAINT \`push_tokens_id\` PRIMARY KEY (\`id\`)
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "push_tokens" (
+          "id" SERIAL PRIMARY KEY,
+          "userId" integer,
+          "token" varchar(512) NOT NULL,
+          "platform" platform_type NOT NULL,
+          "isActive" boolean NOT NULL DEFAULT true,
+          "createdAt" timestamp NOT NULL DEFAULT now(),
+          "updatedAt" timestamp NOT NULL DEFAULT now()
         )
       `);
-      
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS \`subscriptions\` (
-          \`id\` int AUTO_INCREMENT NOT NULL,
-          \`userId\` int,
-          \`plan\` enum('free','monthly','yearly','promo') NOT NULL DEFAULT 'free',
-          \`status\` enum('active','expired','cancelled') NOT NULL DEFAULT 'active',
-          \`promoCode\` varchar(64),
-          \`startDate\` timestamp NOT NULL DEFAULT (now()),
-          \`endDate\` timestamp,
-          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
-          \`updatedAt\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
-          CONSTRAINT \`subscriptions_id\` PRIMARY KEY (\`id\`)
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "subscriptions" (
+          "id" SERIAL PRIMARY KEY,
+          "userId" integer,
+          "plan" subscription_plan NOT NULL DEFAULT 'free',
+          "status" subscription_status NOT NULL DEFAULT 'active',
+          "promoCode" varchar(64),
+          "startDate" timestamp NOT NULL DEFAULT now(),
+          "endDate" timestamp,
+          "createdAt" timestamp NOT NULL DEFAULT now(),
+          "updatedAt" timestamp NOT NULL DEFAULT now()
         )
       `);
-      
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS \`promo_codes\` (
-          \`id\` int AUTO_INCREMENT NOT NULL,
-          \`code\` varchar(64) NOT NULL,
-          \`maxUses\` int NOT NULL DEFAULT 1,
-          \`currentUses\` int NOT NULL DEFAULT 0,
-          \`durationDays\` int NOT NULL DEFAULT 30,
-          \`isActive\` boolean NOT NULL DEFAULT true,
-          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
-          \`expiresAt\` timestamp,
-          CONSTRAINT \`promo_codes_id\` PRIMARY KEY (\`id\`),
-          CONSTRAINT \`promo_codes_code_unique\` UNIQUE (\`code\`)
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "promo_codes" (
+          "id" SERIAL PRIMARY KEY,
+          "code" varchar(64) NOT NULL UNIQUE,
+          "maxUses" integer NOT NULL DEFAULT 1,
+          "currentUses" integer NOT NULL DEFAULT 0,
+          "durationDays" integer NOT NULL DEFAULT 30,
+          "isActive" boolean NOT NULL DEFAULT true,
+          "createdAt" timestamp NOT NULL DEFAULT now(),
+          "expiresAt" timestamp
         )
       `);
-      
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS \`feedback\` (
-          \`id\` int AUTO_INCREMENT NOT NULL,
-          \`userId\` int,
-          \`userName\` varchar(255),
-          \`type\` enum('bug','suggestion','complaint','praise','other') NOT NULL DEFAULT 'suggestion',
-          \`message\` text NOT NULL,
-          \`rating\` int,
-          \`status\` enum('new','read','resolved','archived') NOT NULL DEFAULT 'new',
-          \`adminNote\` text,
-          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
-          \`updatedAt\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
-          CONSTRAINT \`feedback_id\` PRIMARY KEY (\`id\`)
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "feedback" (
+          "id" SERIAL PRIMARY KEY,
+          "userId" integer,
+          "userName" varchar(255),
+          "type" feedback_type NOT NULL DEFAULT 'suggestion',
+          "message" text NOT NULL,
+          "rating" integer,
+          "status" feedback_status NOT NULL DEFAULT 'new',
+          "adminNote" text,
+          "createdAt" timestamp NOT NULL DEFAULT now(),
+          "updatedAt" timestamp NOT NULL DEFAULT now()
         )
       `);
-      
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS \`notifications\` (
-          \`id\` int AUTO_INCREMENT NOT NULL,
-          \`title\` varchar(255) NOT NULL,
-          \`body\` text NOT NULL,
-          \`targetType\` enum('all','country','user') NOT NULL DEFAULT 'all',
-          \`targetValue\` varchar(255),
-          \`sentBy\` int,
-          \`sentCount\` int NOT NULL DEFAULT 0,
-          \`successCount\` int NOT NULL DEFAULT 0,
-          \`failCount\` int NOT NULL DEFAULT 0,
-          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
-          CONSTRAINT \`notifications_id\` PRIMARY KEY (\`id\`)
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "notifications" (
+          "id" SERIAL PRIMARY KEY,
+          "title" varchar(255) NOT NULL,
+          "body" text NOT NULL,
+          "targetType" notification_target NOT NULL DEFAULT 'all',
+          "targetValue" varchar(255),
+          "sentBy" integer,
+          "sentCount" integer NOT NULL DEFAULT 0,
+          "successCount" integer NOT NULL DEFAULT 0,
+          "failCount" integer NOT NULL DEFAULT 0,
+          "createdAt" timestamp NOT NULL DEFAULT now()
         )
       `);
-      
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS \`daily_stats\` (
-          \`id\` int AUTO_INCREMENT NOT NULL,
-          \`date\` varchar(10) NOT NULL,
-          \`newUsers\` int NOT NULL DEFAULT 0,
-          \`activeUsers\` int NOT NULL DEFAULT 0,
-          \`newSubscriptions\` int NOT NULL DEFAULT 0,
-          \`feedbackCount\` int NOT NULL DEFAULT 0,
-          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
-          CONSTRAINT \`daily_stats_id\` PRIMARY KEY (\`id\`)
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "daily_stats" (
+          "id" SERIAL PRIMARY KEY,
+          "date" varchar(10) NOT NULL,
+          "newUsers" integer NOT NULL DEFAULT 0,
+          "activeUsers" integer NOT NULL DEFAULT 0,
+          "newSubscriptions" integer NOT NULL DEFAULT 0,
+          "feedbackCount" integer NOT NULL DEFAULT 0,
+          "createdAt" timestamp NOT NULL DEFAULT now()
         )
       `);
-      
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS \`recipe_images\` (
-          \`id\` int AUTO_INCREMENT NOT NULL,
-          \`recipeId\` varchar(64) NOT NULL,
-          \`imageUrl\` text NOT NULL,
-          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
-          \`updatedAt\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
-          CONSTRAINT \`recipe_images_id\` PRIMARY KEY (\`id\`),
-          CONSTRAINT \`recipe_images_recipeId_unique\` UNIQUE (\`recipeId\`)
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "recipe_images" (
+          "id" SERIAL PRIMARY KEY,
+          "recipeId" varchar(64) NOT NULL UNIQUE,
+          "imageUrl" text NOT NULL,
+          "createdAt" timestamp NOT NULL DEFAULT now(),
+          "updatedAt" timestamp NOT NULL DEFAULT now()
         )
       `);
-      
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS \`subscription_clicks\` (
-          \`id\` int AUTO_INCREMENT NOT NULL,
-          \`userId\` int,
-          \`deviceId\` varchar(128),
-          \`country\` varchar(32),
-          \`plan\` varchar(32),
-          \`source\` varchar(64),
-          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
-          CONSTRAINT \`subscription_clicks_id\` PRIMARY KEY (\`id\`)
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "subscription_clicks" (
+          "id" SERIAL PRIMARY KEY,
+          "userId" integer,
+          "deviceId" varchar(128),
+          "country" varchar(32),
+          "plan" varchar(32),
+          "source" varchar(64),
+          "createdAt" timestamp NOT NULL DEFAULT now()
         )
       `);
-      
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS \`active_user_sessions\` (
-          \`id\` int AUTO_INCREMENT NOT NULL,
-          \`userId\` int,
-          \`deviceId\` varchar(128),
-          \`platform\` enum('ios','android','web') NOT NULL,
-          \`lastActiveAt\` timestamp NOT NULL DEFAULT (now()),
-          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
-          CONSTRAINT \`active_user_sessions_id\` PRIMARY KEY (\`id\`)
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "active_user_sessions" (
+          "id" SERIAL PRIMARY KEY,
+          "userId" integer,
+          "deviceId" varchar(128),
+          "platform" platform_type NOT NULL,
+          "lastActiveAt" timestamp NOT NULL DEFAULT now(),
+          "createdAt" timestamp NOT NULL DEFAULT now()
         )
       `);
-      
-      await conn.end();
+
+      await pool.end();
       _schemaEnsured = true;
       console.log('[Database] Schema tables ensured successfully');
     } catch (error: any) {
@@ -264,7 +263,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     if (Object.keys(updateSet).length === 0) {
       updateSet.lastSignedIn = new Date();
     }
-    await _db.insert(users).values(values).onDuplicateKeyUpdate({
+    await _db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
@@ -433,8 +433,8 @@ export async function updateFeedbackStatus(id: number, status: "new" | "read" | 
 
 export async function createNotification(data: InsertNotification): Promise<number | undefined> {
   if (!_db) throw new Error("Database not available");
-  const result = await _db.insert(notifications).values(data);
-  return result[0]?.insertId;
+  const result = await _db.insert(notifications).values(data).returning({ id: notifications.id });
+  return result[0]?.id;
 }
 
 export async function getAllNotifications(limit = 50, offset = 0) {
@@ -521,7 +521,6 @@ export async function getSubscriptionClickCount(days = 30) {
 export async function trackActiveUser(data: InsertActiveUserSession) {
   if (!_db) return;
   try {
-    // Upsert based on deviceId
     if (data.deviceId) {
       const existing = await _db.select().from(activeUserSessions).where(eq(activeUserSessions.deviceId, data.deviceId!)).limit(1);
       if (existing.length > 0) {

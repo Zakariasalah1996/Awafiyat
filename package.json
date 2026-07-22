@@ -62,7 +62,7 @@
     "google-auth-library": "^10.6.2",
     "jose": "6.1.0",
     "nativewind": "^4.2.1",
-    "pg": "^8.20.0",
+    "pg": "^8.22.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
