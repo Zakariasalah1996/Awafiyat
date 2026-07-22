@@ -7,7 +7,7 @@ import { boolean, integer, pgEnum, pgTable, serial, text, timestamp, varchar } f
  */
 
 export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
-export const platformEnum = pgEnum("platform", ["ios", "android", "web"]);
+export const platformEnum = pgEnum("platform_type", ["ios", "android", "web"]);
 export const subscriptionPlanEnum = pgEnum("subscription_plan", ["free", "monthly", "yearly", "promo"]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "expired", "cancelled"]);
 export const feedbackTypeEnum = pgEnum("feedback_type", ["bug", "suggestion", "complaint", "praise", "other"]);
@@ -20,7 +20,7 @@ export const users = pgTable("users", {
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: userRoleEnum.default("user").notNull(),
+  role: userRoleEnum("role").default("user").notNull(),
   country: varchar("country", { length: 32 }),
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -38,7 +38,7 @@ export const pushTokens = pgTable("push_tokens", {
   id: serial("id").primaryKey(),
   userId: integer("userId"),
   token: varchar("token", { length: 512 }).notNull(),
-  platform: platformEnum.notNull(),
+  platform: platformEnum("platform").notNull(),
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -53,8 +53,8 @@ export type InsertPushToken = typeof pushTokens.$inferInsert;
 export const subscriptions = pgTable("subscriptions", {
   id: serial("id").primaryKey(),
   userId: integer("userId"),
-  plan: subscriptionPlanEnum.default("free").notNull(),
-  status: subscriptionStatusEnum.default("active").notNull(),
+  plan: subscriptionPlanEnum("plan").default("free").notNull(),
+  status: subscriptionStatusEnum("status").default("active").notNull(),
   promoCode: varchar("promoCode", { length: 64 }),
   startDate: timestamp("startDate").defaultNow().notNull(),
   endDate: timestamp("endDate"),
@@ -89,10 +89,10 @@ export const feedback = pgTable("feedback", {
   id: serial("id").primaryKey(),
   userId: integer("userId"),
   userName: varchar("userName", { length: 255 }),
-  type: feedbackTypeEnum.default("suggestion").notNull(),
+  type: feedbackTypeEnum("type").default("suggestion").notNull(),
   message: text("message").notNull(),
   rating: integer("rating"),
-  status: feedbackStatusEnum.default("new").notNull(),
+  status: feedbackStatusEnum("status").default("new").notNull(),
   adminNote: text("adminNote"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -108,7 +108,7 @@ export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   body: text("body").notNull(),
-  targetType: notificationTargetEnum.default("all").notNull(),
+  targetType: notificationTargetEnum("targetType").default("all").notNull(),
   targetValue: varchar("targetValue", { length: 255 }),
   sentBy: integer("sentBy"),
   sentCount: integer("sentCount").default(0).notNull(),
@@ -174,7 +174,7 @@ export const activeUserSessions = pgTable("active_user_sessions", {
   id: serial("id").primaryKey(),
   userId: integer("userId"),
   deviceId: varchar("deviceId", { length: 128 }),
-  platform: platformEnum.notNull(),
+  platform: platformEnum("platform").notNull(),
   lastActiveAt: timestamp("lastActiveAt").defaultNow().notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
