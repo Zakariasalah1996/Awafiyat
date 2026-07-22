@@ -781,9 +781,9 @@ async function startServer() {
         role: 'user',
         country: country || 'iraq',
         isActive: true,
-      });
+      }).returning({ id: users.id });
 
-      const newUserId = (result as any)[0].insertId;
+      const newUserId = result[0]?.id;
       console.log('[Guest] New guest registered:', { deviceId, userId: newUserId });
       res.json({ success: true, userId: newUserId, isNew: true });
     } catch (e: any) {
