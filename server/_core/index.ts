@@ -252,6 +252,34 @@ async function startServer() {
     app.get("/index.html", (_req, res) => res.type("html").send(landingHtml));
   }
 
+  // Serve app-ads.txt for AdMob verification
+  const publicCandidates = [
+    path.resolve(__dirname_local, "../public"),
+    path.resolve(process.cwd(), "dist/public"),
+    path.resolve(process.cwd(), "server/public"),
+  ];
+  for (const candidate of publicCandidates) {
+    const adsPath = path.join(candidate, "app-ads.txt");
+    if (fs.existsSync(adsPath)) {
+      const adsContent = fs.readFileSync(adsPath, "utf-8");
+      app.get("/app-ads.txt", (_req, res) => res.type("text/plain").send(adsContent));
+      console.log(`[app-ads.txt] Serving from: ${candidate}`);
+      break;
+    }
+  }
+
+  // Serve privacy.html
+  for (const candidate of publicCandidates) {
+    const privacyPath = path.join(candidate, "privacy.html");
+    if (fs.existsSync(privacyPath)) {
+      const privacyContent = fs.readFileSync(privacyPath, "utf-8");
+      app.get("/privacy", (_req, res) => res.type("html").send(privacyContent));
+      app.get("/privacy.html", (_req, res) => res.type("html").send(privacyContent));
+      console.log(`[Privacy] Serving from: ${candidate}`);
+      break;
+    }
+  }
+
   // Serve admin panel - read HTML into memory and serve directly
   const fs2 = fs;
   const __filename_local2 = __filename_local;
