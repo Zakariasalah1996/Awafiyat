@@ -53,6 +53,176 @@ export function getDb(): MySql2Database | null {
   return _db;
 }
 
+// ==================== AUTO SCHEMA CREATION ====================
+// Ensures all required tables exist on startup (for Render deployments where migrations may not have been run)
+let _schemaEnsured = false;
+let _schemaPromise: Promise<void> | null = null;
+
+export async function ensureDatabaseSchema(): Promise<void> {
+  if (_schemaEnsured) return;
+  if (!_db) return;
+  if (_schemaPromise) return _schemaPromise;
+  _schemaPromise = (async () => {
+    try {
+      console.log('[Database] Ensuring schema tables exist...');
+      const dbUrl = process.env.DATABASE_URL;
+      if (!dbUrl) return;
+      const conn = await mysql.createConnection({ uri: dbUrl, ssl: { rejectUnauthorized: false } });
+      
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS \`users\` (
+          \`id\` int AUTO_INCREMENT NOT NULL,
+          \`openId\` varchar(64) NOT NULL,
+          \`name\` text,
+          \`email\` varchar(320),
+          \`loginMethod\` varchar(64),
+          \`role\` enum('user','admin') NOT NULL DEFAULT 'user',
+          \`country\` varchar(32),
+          \`isActive\` boolean NOT NULL DEFAULT true,
+          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
+          \`updatedAt\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+          \`lastSignedIn\` timestamp NOT NULL DEFAULT (now()),
+          CONSTRAINT \`users_id\` PRIMARY KEY (\`id\`),
+          CONSTRAINT \`users_openId_unique\` UNIQUE (\`openId\`)
+        )
+      `);
+      
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS \`push_tokens\` (
+          \`id\` int AUTO_INCREMENT NOT NULL,
+          \`userId\` int,
+          \`token\` varchar(512) NOT NULL,
+          \`platform\` enum('ios','android','web') NOT NULL,
+          \`isActive\` boolean NOT NULL DEFAULT true,
+          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
+          \`updatedAt\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+          CONSTRAINT \`push_tokens_id\` PRIMARY KEY (\`id\`)
+        )
+      `);
+      
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS \`subscriptions\` (
+          \`id\` int AUTO_INCREMENT NOT NULL,
+          \`userId\` int,
+          \`plan\` enum('free','monthly','yearly','promo') NOT NULL DEFAULT 'free',
+          \`status\` enum('active','expired','cancelled') NOT NULL DEFAULT 'active',
+          \`promoCode\` varchar(64),
+          \`startDate\` timestamp NOT NULL DEFAULT (now()),
+          \`endDate\` timestamp,
+          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
+          \`updatedAt\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+          CONSTRAINT \`subscriptions_id\` PRIMARY KEY (\`id\`)
+        )
+      `);
+      
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS \`promo_codes\` (
+          \`id\` int AUTO_INCREMENT NOT NULL,
+          \`code\` varchar(64) NOT NULL,
+          \`maxUses\` int NOT NULL DEFAULT 1,
+          \`currentUses\` int NOT NULL DEFAULT 0,
+          \`durationDays\` int NOT NULL DEFAULT 30,
+          \`isActive\` boolean NOT NULL DEFAULT true,
+          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
+          \`expiresAt\` timestamp,
+          CONSTRAINT \`promo_codes_id\` PRIMARY KEY (\`id\`),
+          CONSTRAINT \`promo_codes_code_unique\` UNIQUE (\`code\`)
+        )
+      `);
+      
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS \`feedback\` (
+          \`id\` int AUTO_INCREMENT NOT NULL,
+          \`userId\` int,
+          \`userName\` varchar(255),
+          \`type\` enum('bug','suggestion','complaint','praise','other') NOT NULL DEFAULT 'suggestion',
+          \`message\` text NOT NULL,
+          \`rating\` int,
+          \`status\` enum('new','read','resolved','archived') NOT NULL DEFAULT 'new',
+          \`adminNote\` text,
+          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
+          \`updatedAt\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+          CONSTRAINT \`feedback_id\` PRIMARY KEY (\`id\`)
+        )
+      `);
+      
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS \`notifications\` (
+          \`id\` int AUTO_INCREMENT NOT NULL,
+          \`title\` varchar(255) NOT NULL,
+          \`body\` text NOT NULL,
+          \`targetType\` enum('all','country','user') NOT NULL DEFAULT 'all',
+          \`targetValue\` varchar(255),
+          \`sentBy\` int,
+          \`sentCount\` int NOT NULL DEFAULT 0,
+          \`successCount\` int NOT NULL DEFAULT 0,
+          \`failCount\` int NOT NULL DEFAULT 0,
+          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
+          CONSTRAINT \`notifications_id\` PRIMARY KEY (\`id\`)
+        )
+      `);
+      
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS \`daily_stats\` (
+          \`id\` int AUTO_INCREMENT NOT NULL,
+          \`date\` varchar(10) NOT NULL,
+          \`newUsers\` int NOT NULL DEFAULT 0,
+          \`activeUsers\` int NOT NULL DEFAULT 0,
+          \`newSubscriptions\` int NOT NULL DEFAULT 0,
+          \`feedbackCount\` int NOT NULL DEFAULT 0,
+          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
+          CONSTRAINT \`daily_stats_id\` PRIMARY KEY (\`id\`)
+        )
+      `);
+      
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS \`recipe_images\` (
+          \`id\` int AUTO_INCREMENT NOT NULL,
+          \`recipeId\` varchar(64) NOT NULL,
+          \`imageUrl\` text NOT NULL,
+          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
+          \`updatedAt\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+          CONSTRAINT \`recipe_images_id\` PRIMARY KEY (\`id\`),
+          CONSTRAINT \`recipe_images_recipeId_unique\` UNIQUE (\`recipeId\`)
+        )
+      `);
+      
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS \`subscription_clicks\` (
+          \`id\` int AUTO_INCREMENT NOT NULL,
+          \`userId\` int,
+          \`deviceId\` varchar(128),
+          \`country\` varchar(32),
+          \`plan\` varchar(32),
+          \`source\` varchar(64),
+          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
+          CONSTRAINT \`subscription_clicks_id\` PRIMARY KEY (\`id\`)
+        )
+      `);
+      
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS \`active_user_sessions\` (
+          \`id\` int AUTO_INCREMENT NOT NULL,
+          \`userId\` int,
+          \`deviceId\` varchar(128),
+          \`platform\` enum('ios','android','web') NOT NULL,
+          \`lastActiveAt\` timestamp NOT NULL DEFAULT (now()),
+          \`createdAt\` timestamp NOT NULL DEFAULT (now()),
+          CONSTRAINT \`active_user_sessions_id\` PRIMARY KEY (\`id\`)
+        )
+      `);
+      
+      await conn.end();
+      _schemaEnsured = true;
+      console.log('[Database] Schema tables ensured successfully');
+    } catch (error: any) {
+      _schemaPromise = null;
+      console.error('[Database] Failed to ensure schema:', error.message);
+    }
+  })();
+  return _schemaPromise;
+}
+
 // ==================== USERS ====================
 
 export async function upsertUser(user: InsertUser): Promise<void> {

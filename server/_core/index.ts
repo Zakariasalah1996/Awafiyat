@@ -9,7 +9,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks } from "../db";
+import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema } from "../db";
 import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
@@ -182,6 +182,8 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  // Ensure database tables exist before accepting requests (for Render deployments where migrations may not have been run)
+  await ensureDatabaseSchema();
   const app = express();
   const server = createServer(app);
 
