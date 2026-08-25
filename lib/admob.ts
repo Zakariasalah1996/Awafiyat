@@ -8,8 +8,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Ad Unit IDs
 const AD_UNIT_ID = Platform.select({
-  android: "ca-app-pub-9147941153313979/3701631347",
-  ios: "ca-app-pub-9147941153313979/3701631347",
+  android: "ca-app-pub-9147941153313979/4919884210",
+  ios: "ca-app-pub-9147941153313979/4919884210",
   default: "ca-app-pub-3940256099942544/5224354917", // test fallback
 });
 
