@@ -291,6 +291,10 @@
       <span class="icon">💬</span> الملاحظات
       <span class="badge" id="feedbackBadge" style="display:none">0</span>
     </div>
+    <div class="nav-item" data-page="community-moderation" onclick="navigateTo('community-moderation')">
+      <span class="icon">🚩</span> بلاغات المجتمع
+      <span class="badge" id="communityReportsBadge" style="display:none">0</span>
+    </div>
     <div class="nav-item" data-page="recipes" onclick="navigateTo('recipes')">
       <span class="icon">📖</span> الوصفات
     </div>
@@ -486,6 +490,32 @@
           <thead><tr><th>المستخدم</th><th>النوع</th><th>الرسالة</th><th>التقييم</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
           <tbody id="feedbackTableBody"><tr><td colspan="7" class="loading"><div class="spinner"></div>جاري التحميل...</td></tr></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- COMMUNITY MODERATION -->
+    <div class="page" id="page-community-moderation">
+      <div class="table-card">
+        <div class="table-header">
+          <div>
+            <h3>🚩 بلاغات المنشورات والتعليقات</h3>
+            <p style="color:var(--text-muted);font-size:13px;margin-top:4px">راجع السبب والمحتوى ثم أغلق البلاغ أو أخفِ المحتوى المخالف.</p>
+          </div>
+          <select class="form-control" id="communityReportStatus" onchange="loadCommunityReports()" style="width:180px">
+            <option value="all">جميع الحالات</option>
+            <option value="new">جديدة</option>
+            <option value="reviewed">قيد المراجعة</option>
+            <option value="resolved">محلولة</option>
+            <option value="dismissed">مرفوضة</option>
+          </select>
+        </div>
+        <div style="padding:12px 24px;color:var(--text-muted);font-size:14px" id="communityReportsSummary">جاري تحميل البلاغات...</div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>النوع</th><th>المحتوى وصاحبه</th><th>سبب البلاغ</th><th>الوقت</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+            <tbody id="communityReportsTableBody"><tr><td colspan="6" class="loading"><div class="spinner"></div>جاري التحميل...</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -714,7 +744,7 @@ function navigateTo(page) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
-  const titles = { dashboard:'الرئيسية', users:'المستخدمون', subscriptions:'الاشتراكات', promo:'أكواد الترويج', notifications:'الإشعارات', feedback:'الملاحظات', recipes:'الوصفات', content:'إدارة المحتوى', reports:'التقارير', export:'تصدير البيانات' };
+  const titles = { dashboard:'الرئيسية', users:'المستخدمون', subscriptions:'الاشتراكات', promo:'أكواد الترويج', notifications:'الإشعارات', feedback:'الملاحظات', 'community-moderation':'بلاغات المجتمع', recipes:'الوصفات', content:'إدارة المحتوى', reports:'التقارير', export:'تصدير البيانات' };
   document.getElementById('pageTitle').textContent = titles[page] || page;
   switch(page) {
     case 'dashboard': loadDashboard(); break;
@@ -723,6 +753,7 @@ function navigateTo(page) {
     case 'promo': loadPromoCodes(); break;
     case 'notifications': loadNotifications(); loadPushTokenStats(); break;
     case 'feedback': loadFeedback(); break;
+    case 'community-moderation': loadCommunityReports(); break;
     case 'recipes': loadRecipes(); loadRecipeStats(); break;
     case 'content': loadContent(); break;
     case 'reports': loadReports(); break;
@@ -743,6 +774,93 @@ async function api(endpoint, method = 'GET', body = null) {
   } catch (e) {
     console.error('API Error:', e);
     return null;
+  }
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  })[char]);
+}
+
+function formatAdminDate(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('ar-IQ');
+}
+
+function communityReportStatusLabel(status) {
+  return ({ new:'جديد', reviewed:'قيد المراجعة', resolved:'محلول', dismissed:'مرفوض' })[status] || status;
+}
+
+async function loadCommunityReports() {
+  const status = document.getElementById('communityReportStatus')?.value || 'all';
+  const data = await api(`community-reports?status=${encodeURIComponent(status)}&limit=200`);
+  const tbody = document.getElementById('communityReportsTableBody');
+  const summary = document.getElementById('communityReportsSummary');
+  const badge = document.getElementById('communityReportsBadge');
+  if (!tbody || !summary || !badge) return;
+
+  if (!data || data.error) {
+    summary.textContent = 'تعذر تحميل بلاغات المجتمع';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">تعذر تحميل البلاغات</td></tr>';
+    return;
+  }
+
+  const newCount = Number(data.newCount || 0);
+  badge.textContent = newCount > 99 ? '99+' : String(newCount);
+  badge.style.display = newCount > 0 ? 'inline-block' : 'none';
+  summary.textContent = `إجمالي النتائج: ${Number(data.total || 0)} — البلاغات الجديدة: ${newCount}`;
+
+  if (!Array.isArray(data.reports) || data.reports.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">لا توجد بلاغات ضمن هذا التصنيف</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.reports.map(report => {
+    const isComment = Boolean(report.commentId);
+    const body = isComment ? report.commentBody : report.postBody;
+    const author = isComment ? report.commentAuthorName : report.postAuthorName;
+    const hidden = isComment ? report.commentHidden : report.postHidden;
+    const typeLabel = isComment ? 'تعليق' : 'منشور';
+    const statusClass = report.status === 'resolved' ? 'badge-resolved' : report.status === 'new' ? 'badge-new' : 'badge-read';
+    const image = !isComment && report.postImageUrl
+      ? `<div><a href="${escapeHtml(report.postImageUrl)}" target="_blank" rel="noopener">عرض صورة المنشور</a></div>`
+      : '';
+    return `<tr>
+      <td><strong>${typeLabel}</strong><br><small>#${isComment ? Number(report.commentId) : Number(report.postId)}</small></td>
+      <td><strong>${escapeHtml(author || 'غير معروف')}</strong><div style="max-width:360px;white-space:pre-wrap">${escapeHtml(body || 'محتوى بلا نص')}</div>${image}${hidden ? '<span class="badge-status badge-inactive">مخفي</span>' : ''}</td>
+      <td><div style="max-width:260px;white-space:pre-wrap">${escapeHtml(report.reason)}</div></td>
+      <td>${formatAdminDate(report.createdAt)}</td>
+      <td><span class="badge-status ${statusClass}">${escapeHtml(communityReportStatusLabel(report.status))}</span></td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        ${report.status === 'new' ? `<button class="btn btn-warning btn-sm" onclick="setCommunityReportStatus(${Number(report.id)}, 'reviewed')">مراجعة</button>` : ''}
+        ${!hidden ? `<button class="btn btn-danger btn-sm" onclick="hideCommunityReportTarget(${Number(report.id)})">إخفاء المحتوى</button>` : ''}
+        <button class="btn btn-success btn-sm" onclick="setCommunityReportStatus(${Number(report.id)}, 'resolved')">إغلاق</button>
+        <button class="btn btn-outline btn-sm" onclick="setCommunityReportStatus(${Number(report.id)}, 'dismissed')">رفض البلاغ</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function setCommunityReportStatus(id, status) {
+  const result = await api(`community-reports/${id}`, 'PATCH', { status });
+  if (result?.success) {
+    showToast('تم تحديث حالة البلاغ');
+    loadCommunityReports();
+  } else {
+    showToast(result?.error || 'تعذر تحديث البلاغ', 'error');
+  }
+}
+
+async function hideCommunityReportTarget(id) {
+  if (!confirm('سيتم إخفاء المحتوى المبلّغ عنه من المجتمع. هل تريد المتابعة؟')) return;
+  const result = await api(`community-reports/${id}/hide`, 'POST');
+  if (result?.success) {
+    showToast('تم إخفاء المحتوى وإغلاق البلاغ');
+    loadCommunityReports();
+  } else {
+    showToast(result?.error || 'تعذر إخفاء المحتوى', 'error');
   }
 }
 

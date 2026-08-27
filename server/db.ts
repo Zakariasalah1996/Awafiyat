@@ -746,3 +746,80 @@ export async function createCommunityReport(data: InsertCommunityReport) {
   const result = await _db.insert(communityReports).values(data).returning();
   return result[0];
 }
+
+export async function getCommunityReportsForAdmin(limit = 100, offset = 0, status = "all") {
+  if (!_db) throw new Error("Database not available");
+  const whereClause = status && status !== "all"
+    ? eq(communityReports.status, status)
+    : sql`TRUE`;
+  return _db
+    .select({
+      id: communityReports.id,
+      postId: communityReports.postId,
+      commentId: communityReports.commentId,
+      reporterDeviceId: communityReports.reporterDeviceId,
+      reason: communityReports.reason,
+      status: communityReports.status,
+      createdAt: communityReports.createdAt,
+      postBody: communityPosts.body,
+      postImageUrl: communityPosts.imageUrl,
+      postAuthorName: communityPosts.authorName,
+      postHidden: communityPosts.isHidden,
+      commentBody: communityComments.body,
+      commentAuthorName: communityComments.authorName,
+      commentHidden: communityComments.isHidden,
+    })
+    .from(communityReports)
+    .leftJoin(communityPosts, eq(communityReports.postId, communityPosts.id))
+    .leftJoin(communityComments, eq(communityReports.commentId, communityComments.id))
+    .where(whereClause)
+    .orderBy(desc(communityReports.createdAt))
+    .limit(Math.min(Math.max(limit, 1), 200))
+    .offset(Math.max(offset, 0));
+}
+
+export async function getCommunityReportCount(status = "all"): Promise<number> {
+  if (!_db) throw new Error("Database not available");
+  const whereClause = status && status !== "all"
+    ? eq(communityReports.status, status)
+    : sql`TRUE`;
+  const result = await _db
+    .select({ value: count() })
+    .from(communityReports)
+    .where(whereClause);
+  return Number(result[0]?.value ?? 0);
+}
+
+export async function updateCommunityReportStatus(reportId: number, status: string): Promise<boolean> {
+  if (!_db) throw new Error("Database not available");
+  const allowed = new Set(["new", "reviewed", "resolved", "dismissed"]);
+  if (!allowed.has(status)) return false;
+  const result = await _db
+    .update(communityReports)
+    .set({ status })
+    .where(eq(communityReports.id, reportId))
+    .returning({ id: communityReports.id });
+  return result.length > 0;
+}
+
+export async function hideCommunityReportTarget(reportId: number): Promise<boolean> {
+  if (!_db) throw new Error("Database not available");
+  const reports = await _db
+    .select({ postId: communityReports.postId, commentId: communityReports.commentId })
+    .from(communityReports)
+    .where(eq(communityReports.id, reportId))
+    .limit(1);
+  const report = reports[0];
+  if (!report) return false;
+
+  if (report.postId) {
+    await _db.update(communityPosts).set({ isHidden: true, updatedAt: new Date() }).where(eq(communityPosts.id, report.postId));
+  } else if (report.commentId) {
+    await _db.update(communityComments).set({ isHidden: true }).where(eq(communityComments.id, report.commentId));
+  } else {
+    return false;
+  }
+
+  await _db.update(communityReports).set({ status: "resolved" }).where(eq(communityReports.id, reportId));
+  return true;
+}

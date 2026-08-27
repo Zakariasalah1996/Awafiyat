@@ -393,20 +393,8 @@ export async function getExpoPushToken(): Promise<string | null> {
   try {
     if (Platform.OS === "web") return null;
 
-    // Method 1: Native FCM token (أفضل طريقة - تعمل مع Google Play مباشرة)
-    try {
-      console.log("[Push] Trying native FCM device token...");
-      const deviceToken = await Notifications.getDevicePushTokenAsync();
-      const fcmToken = deviceToken.data as string;
-      if (fcmToken) {
-        console.log("[Push] Got native FCM token:", fcmToken?.substring(0, 35) + "...");
-        return `fcm:${fcmToken}`;
-      }
-    } catch (e1) {
-      console.warn("[Push] Native FCM token failed:", (e1 as Error)?.message);
-    }
-
-    // Method 2: Expo push token fallback using the immutable EAS project ID.
+    // Method 1: Expo Push token tied to the immutable EAS project.
+    // This avoids requiring a Firebase service-account secret on our server.
     try {
       const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
       if (!projectId) {
@@ -418,8 +406,21 @@ export async function getExpoPushToken(): Promise<string | null> {
         console.log("[Push] Got Expo token:", tokenData.data?.substring(0, 35) + "...");
         return tokenData.data;
       }
-    } catch (e3) {
-      console.warn("[Push] Expo token failed:", (e3 as Error)?.message);
+    } catch (e1) {
+      console.warn("[Push] Expo token failed:", (e1 as Error)?.message);
+    }
+
+    // Method 2: native token fallback when Expo Push is unavailable.
+    try {
+      console.log("[Push] Trying native device token fallback...");
+      const deviceToken = await Notifications.getDevicePushTokenAsync();
+      const nativeToken = deviceToken.data as string;
+      if (nativeToken) {
+        console.log("[Push] Got native token:", nativeToken.substring(0, 35) + "...");
+        return Platform.OS === "android" ? `fcm:${nativeToken}` : nativeToken;
+      }
+    } catch (e2) {
+      console.warn("[Push] Native token failed:", (e2 as Error)?.message);
     }
 
     console.error("[Push] All token methods failed");

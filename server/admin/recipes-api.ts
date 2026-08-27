@@ -4,6 +4,7 @@
  */
 import fs from "fs";
 import path from "path";
+import { RECIPES } from "../../lib/data/recipes";
 
 const RECIPES_FILE = path.resolve(process.cwd(), "lib/data/recipes.ts");
 
@@ -33,116 +34,11 @@ export interface RecipeData {
 
 // Read all recipes by dynamically importing the file
 export function getAllRecipes(): RecipeData[] {
-  try {
-    // Read the raw file and extract recipe objects using regex
-    const content = fs.readFileSync(RECIPES_FILE, "utf-8");
-    // Find the RECIPES array
-    const match = content.match(/export const RECIPES:\s*Recipe\[\]\s*=\s*\[([\s\S]*)\];?\s*$/m);
-    if (!match) return [];
-    
-    // Count recipes by counting id fields
-    const idMatches = content.match(/id:\s*"/g);
-    const count = idMatches ? idMatches.length : 0;
-    
-    // Extract basic info for each recipe using regex
-    const recipes: RecipeData[] = [];
-    const recipeBlocks = content.split(/\n\s*\{[\s\n]*id:/);
-    
-    for (let i = 1; i < recipeBlocks.length; i++) {
-      const block = '{id:' + recipeBlocks[i];
-      try {
-        const getId = block.match(/id:\s*"([^"]+)"/);
-        const getName = block.match(/name:\s*"([^"]+)"/);
-        const getDesc = block.match(/description:\s*"([^"]+)"/);
-        const getCat = block.match(/category:\s*"([^"]+)"/);
-        const getDiff = block.match(/difficulty:\s*"([^"]+)"/);
-        const getPrep = block.match(/prepTime:\s*(\d+)/);
-        const getCook = block.match(/cookTime:\s*(\d+)/);
-        const getServ = block.match(/servings:\s*(\d+)/);
-        const getCal = block.match(/calories:\s*(\d+)/);
-        const getProt = block.match(/protein:\s*(\d+)/);
-        const getCarbs = block.match(/carbs:\s*(\d+)/);
-        const getFat = block.match(/fat:\s*(\d+)/);
-        const getFiber = block.match(/fiber:\s*(\d+)/);
-        const getOrigin = block.match(/origin:\s*"([^"]+)"/);
-        const getImage = block.match(/image:\s*"([^"]+)"/);
-        const getIsIraqi = block.match(/isIraqi:\s*(true|false)/);
-        const getTips = block.match(/tips:\s*"([^"]+)"/);
-
-        // Extract mealType array
-        const mealMatch = block.match(/mealType:\s*\[([^\]]+)\]/);
-        const mealType = mealMatch ? mealMatch[1].match(/"([^"]+)"/g)?.map(s => s.replace(/"/g, '')) || [] : [];
-
-        // Extract healthTags array
-        const healthMatch = block.match(/healthTags:\s*\[([^\]]+)\]/);
-        const healthTags = healthMatch ? healthMatch[1].match(/"([^"]+)"/g)?.map(s => s.replace(/"/g, '')) || [] : [];
-
-        // Extract ingredients
-        const ingredientsMatch = block.match(/ingredients:\s*\[([\s\S]*?)\],/);
-        const ingredients: { name: string; amount: string }[] = [];
-        if (ingredientsMatch) {
-          const ingStr = ingredientsMatch[1];
-          const ingItems = ingStr.match(/\{[^}]+\}/g) || [];
-          for (const item of ingItems) {
-            const n = item.match(/name:\s*"([^"]+)"/);
-            const a = item.match(/amount:\s*"([^"]+)"/);
-            if (n && a) ingredients.push({ name: n[1], amount: a[1] });
-          }
-        }
-
-        // Extract steps
-        const stepsMatch = block.match(/steps:\s*\[([\s\S]*?)\],/);
-        const steps: string[] = [];
-        if (stepsMatch) {
-          const stepItems = stepsMatch[1].match(/"([^"]+)"/g) || [];
-          for (const s of stepItems) steps.push(s.replace(/"/g, ''));
-        }
-
-        if (getId) {
-          recipes.push({
-            id: getId[1],
-            name: getName?.[1] || '',
-            description: getDesc?.[1] || '',
-            category: getCat?.[1] || 'quick',
-            mealType,
-            healthTags,
-            difficulty: getDiff?.[1] || 'easy',
-            prepTime: parseInt(getPrep?.[1] || '0'),
-            cookTime: parseInt(getCook?.[1] || '0'),
-            servings: parseInt(getServ?.[1] || '1'),
-            calories: parseInt(getCal?.[1] || '0'),
-            protein: parseInt(getProt?.[1] || '0'),
-            carbs: parseInt(getCarbs?.[1] || '0'),
-            fat: parseInt(getFat?.[1] || '0'),
-            fiber: parseInt(getFiber?.[1] || '0'),
-            ingredients,
-            steps,
-            tips: getTips?.[1] || '',
-            isIraqi: getIsIraqi?.[1] === 'true',
-            origin: getOrigin?.[1],
-            image: getImage?.[1],
-          });
-        }
-      } catch (e) {
-        // Skip malformed recipe blocks
-      }
-    }
-    
-    return recipes;
-  } catch (e) {
-    console.error("Error reading recipes:", e);
-    return [];
-  }
+  return RECIPES.map((recipe) => ({ ...recipe })) as unknown as RecipeData[];
 }
 
 export function getRecipeCount(): number {
-  try {
-    const content = fs.readFileSync(RECIPES_FILE, "utf-8");
-    const idMatches = content.match(/id:\s*"/g);
-    return idMatches ? idMatches.length : 0;
-  } catch {
-    return 0;
-  }
+  return RECIPES.length;
 }
 
 export function getRecipeStats() {

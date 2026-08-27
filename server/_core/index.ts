@@ -532,6 +532,45 @@ async function startServer() {
     }
   });
 
+  app.get('/api/admin/community-reports', adminAuth, async (req, res) => {
+    try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 100, 200);
+      const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
+      const status = typeof req.query.status === 'string' ? req.query.status : 'all';
+      const reports = await adminDb.getCommunityReportsForAdmin(limit, offset, status);
+      const total = await adminDb.getCommunityReportCount(status);
+      const newCount = await adminDb.getCommunityReportCount('new');
+      res.json({ reports, total, newCount });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.patch('/api/admin/community-reports/:id', adminAuth, async (req, res) => {
+    try {
+      const reportId = parseInt(req.params.id);
+      if (!Number.isFinite(reportId)) return res.status(400).json({ error: 'Invalid report id' });
+      const status = typeof req.body.status === 'string' ? req.body.status : '';
+      const updated = await adminDb.updateCommunityReportStatus(reportId, status);
+      if (!updated) return res.status(400).json({ error: 'Invalid report or status' });
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post('/api/admin/community-reports/:id/hide', adminAuth, async (req, res) => {
+    try {
+      const reportId = parseInt(req.params.id);
+      if (!Number.isFinite(reportId)) return res.status(400).json({ error: 'Invalid report id' });
+      const hidden = await adminDb.hideCommunityReportTarget(reportId);
+      if (!hidden) return res.status(404).json({ error: 'Report or target not found' });
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // Notifications
   app.get('/api/admin/notifications', adminAuth, async (req, res) => {
     try {

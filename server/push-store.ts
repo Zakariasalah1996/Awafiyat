@@ -119,8 +119,19 @@ export async function ensurePushStoreSchema(): Promise<void> {
 
 export async function savePostgresPushToken(data: PushTokenRegistration): Promise<void> {
   await ensurePushStoreSchema();
-  await getPool().query(
-    `
+  const client = await getPool().connect();
+  try {
+    await client.query("BEGIN");
+    if (data.deviceId) {
+      await client.query(
+        `UPDATE ${PUSH_TOKEN_TABLE}
+         SET "isActive" = FALSE, "updatedAt" = NOW()
+         WHERE "deviceId" = $1 AND token <> $2`,
+        [data.deviceId, data.token],
+      );
+    }
+    await client.query(
+      `
       INSERT INTO ${PUSH_TOKEN_TABLE}
         ("userId", token, platform, country, "deviceId", "isActive", "updatedAt")
       VALUES ($1, $2, $3, $4, $5, TRUE, NOW())
@@ -132,8 +143,15 @@ export async function savePostgresPushToken(data: PushTokenRegistration): Promis
         "isActive" = TRUE,
         "updatedAt" = NOW()
     `,
-    [data.userId ?? null, data.token, data.platform, data.country ?? null, data.deviceId ?? null],
-  );
+      [data.userId ?? null, data.token, data.platform, data.country ?? null, data.deviceId ?? null],
+    );
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 export async function getPostgresActivePushTokens(): Promise<StoredPushToken[]> {

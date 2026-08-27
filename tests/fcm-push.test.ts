@@ -17,16 +17,17 @@ describe("FCM and Expo push notification setup", () => {
     )).toBe(true);
   });
 
-  it("uses the immutable EAS project id when requesting an Expo token", () => {
+  it("uses the immutable EAS project id and requests Expo before the native fallback", () => {
     const notifications = readProjectFile("lib", "notifications.ts");
 
     const deviceTokenIndex = notifications.indexOf("getDevicePushTokenAsync");
     const expoTokenIndex = notifications.indexOf("getExpoPushTokenAsync");
     expect(deviceTokenIndex).toBeGreaterThan(-1);
-    expect(expoTokenIndex).toBeGreaterThan(deviceTokenIndex);
+    expect(expoTokenIndex).toBeGreaterThan(-1);
+    expect(expoTokenIndex).toBeLessThan(deviceTokenIndex);
     expect(notifications).toContain("Constants.expoConfig?.extra?.eas?.projectId");
     expect(notifications).toContain("getExpoPushTokenAsync({ projectId })");
-    expect(notifications).toContain('`fcm:${fcmToken}`');
+    expect(notifications).toContain('`fcm:${nativeToken}`');
   });
 
   it("registers device and country metadata with the push token", () => {
