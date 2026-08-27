@@ -14,6 +14,9 @@ import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
 import * as fs from "fs";
+import * as pushStore from "../push-store";
+import { sendExpoPushNotifications } from "../expo-push";
+import * as recipeImageStore from "../recipe-image-store";
 
 // ===== FCM V1 API Direct Send =====
 let _fcmAccessToken: string | null = null;
@@ -60,43 +63,24 @@ async function getFCMAccessToken(): Promise<string | null> {
 }
 
 async function sendPushViaFCM(tokens: string[], title: string, body: string, dbDeactivate?: (token: string) => Promise<void>) {
-  const expoTokens = tokens.filter(t => t.startsWith('ExponentPushToken'));
-  const fcmTokens = tokens.filter(t => !t.startsWith('ExponentPushToken'));
+  const expoTokens = tokens.filter((token) => /^(Exponent|Expo)PushToken\[/.test(token));
+  const fcmTokens = tokens.filter((token) => token.startsWith('fcm:'));
   let successCount = 0;
   let failCount = 0;
 
-  // Send ExponentPushToken via Expo Push API (legacy fallback)
+  // Send Expo tokens through Expo tickets and receipts.
   if (expoTokens.length > 0) {
-    const messages = expoTokens.map((token: string) => ({
-      to: token, sound: 'default', title, body,
-      priority: 'high', channelId: 'meals',
-      data: { type: 'admin_notification' },
-    }));
     try {
-      const pushRes = await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(messages),
+      const expoResult = await sendExpoPushNotifications({
+        tokens: expoTokens,
+        title,
+        body,
+        deactivate: dbDeactivate,
       });
-      const pushData = await pushRes.json();
-      if (pushData.data) {
-        for (let i = 0; i < pushData.data.length; i++) {
-          const ticket = pushData.data[i];
-          if (ticket.status === 'ok') {
-            successCount++;
-          } else {
-            failCount++;
-            console.warn('[Push] Expo ticket error:', ticket);
-            // Deactivate invalid tokens
-            if (ticket.details?.error === 'DeviceNotRegistered' && dbDeactivate) {
-              await dbDeactivate(expoTokens[i]);
-              console.log('[Push] Deactivated unregistered Expo token:', expoTokens[i].substring(0, 25));
-            }
-          }
-        }
-      }
+      successCount += expoResult.successCount;
+      failCount += expoResult.failCount;
     } catch (err) {
-      console.error('[Push] Expo fetch error:', err);
+      console.error('[Push] Expo send failed:', err);
       failCount += expoTokens.length;
     }
   }
@@ -125,10 +109,10 @@ async function sendPushViaFCM(tokens: string[], title: string, body: string, dbD
                   token: rawToken,
                   notification: { title, body },
                   android: {
-                    priority: 'high',
+                    priority: 'normal',
                     notification: {
                       sound: 'default',
-                      channel_id: 'meals',
+                      channel_id: 'admin_updates',
                     },
                   },
                   data: { type: 'admin_notification' },
@@ -296,7 +280,7 @@ async function startServer() {
 
   app.get("/api/health", (_req, res) => {
     const dbUrl = process.env.DATABASE_URL || 'NOT SET';
-    res.json({ ok: true, timestamp: Date.now(), db_prefix: dbUrl.substring(0, 20), db_type: dbUrl.startsWith('postgresql') ? 'postgres' : dbUrl.startsWith('mysql') ? 'mysql' : 'unknown' });
+    res.json({ ok: true, timestamp: Date.now(), db_type: dbUrl.startsWith('postgresql') ? 'postgres' : dbUrl.startsWith('mysql') ? 'mysql' : 'unknown' });
   });
   app.get("/api/db-test", async (_req, res) => {
     try {
@@ -306,9 +290,9 @@ async function startServer() {
       const pool = new Pool({ connectionString: dbUrl, ssl: useSSL ? { rejectUnauthorized: false } : false, connectionTimeoutMillis: 8000 });
       const result = await pool.query('SELECT NOW() as now, current_database() as db');
       await pool.end();
-      res.json({ ok: true, time: result.rows[0].now, db: result.rows[0].db, ssl: useSSL, url_prefix: dbUrl.substring(0, 40) });
+      res.json({ ok: true, time: result.rows[0].now, db: result.rows[0].db, ssl: useSSL });
     } catch (err: any) {
-      res.json({ ok: false, error: err.message, code: err.code, url_prefix: (process.env.DATABASE_URL || '').substring(0, 40) });
+      res.json({ ok: false, error: 'Database health check failed', code: err.code });
     }
   });
 
@@ -553,7 +537,9 @@ async function startServer() {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
-      const notifs = await adminDb.getAllNotifications(limit, offset);
+      const notifs = pushStore.isPostgresPushStoreEnabled()
+        ? await pushStore.getPostgresAdminNotifications(limit, offset)
+        : await adminDb.getAllNotifications(limit, offset);
       res.json(notifs);
     } catch (e: any) {
       res.status(500).json({ error: e.message });
@@ -563,29 +549,28 @@ async function startServer() {
   app.post('/api/admin/notifications/send', adminAuth, async (req, res) => {
     try {
       const { title, body, targetType, targetValue } = req.body;
-      let tokens: string[] = [];
-
-      if (targetType === 'all') {
-        const allTokens = await adminDb.getActivePushTokens();
-        tokens = allTokens.map((t: any) => t.token);
-      } else if (targetType === 'country' && targetValue) {
-        const countryTokens = await adminDb.getPushTokensByCountry(targetValue);
-        tokens = countryTokens.map((t: any) => t.token);
-      }
-
-      const notifId = await adminDb.createNotification({
-        title, body, targetType: targetType || 'all', targetValue, sentCount: tokens.length,
-      });
+      if (typeof title !== "string" || !title.trim() || typeof body !== "string" || !body.trim()) return res.status(400).json({ error: "title and body are required" });
+      const normalizedTargetType: "all" | "country" = targetType === "country" ? "country" : "all";
+      const tokenRows = pushStore.isPostgresPushStoreEnabled()
+        ? (normalizedTargetType === "country" && targetValue ? await pushStore.getPostgresPushTokensByCountry(String(targetValue)) : await pushStore.getPostgresActivePushTokens())
+        : (normalizedTargetType === "country" && targetValue ? await adminDb.getPushTokensByCountry(String(targetValue)) : await adminDb.getActivePushTokens());
+      const tokens = [...new Set(tokenRows.map((row: any) => row.token as string))];
+      const notificationInput = { title: title.trim(), body: body.trim(), targetType: normalizedTargetType, targetValue: targetValue ? String(targetValue) : null, sentCount: tokens.length };
+      const notifId = pushStore.isPostgresPushStoreEnabled()
+        ? await pushStore.createPostgresAdminNotification(notificationInput)
+        : await adminDb.createNotification(notificationInput);
 
       // Send via FCM V1 API (direct) + Expo Push API (fallback for ExponentPushToken)
       let successCount = 0, failCount = 0;
       if (tokens.length > 0) {
         console.log('[Push] Sending to', tokens.length, 'tokens:', tokens.map(t => t.substring(0, 25) + '...'));
-        const result = await sendPushViaFCM(tokens, title, body, deactivatePushToken);
+        const deactivateToken = pushStore.isPostgresPushStoreEnabled() ? pushStore.deactivatePostgresPushToken : deactivatePushToken;
+        const result = await sendPushViaFCM(tokens, notificationInput.title, notificationInput.body, deactivateToken);
         successCount = result.successCount;
         failCount = result.failCount;
         if (notifId) {
-          await adminDb.updateNotificationCounts(notifId, tokens.length, successCount, failCount);
+          if (pushStore.isPostgresPushStoreEnabled()) await pushStore.updatePostgresNotificationCounts(notifId, tokens.length, successCount, failCount);
+          else await adminDb.updateNotificationCounts(notifId, tokens.length, successCount, failCount);
         }
       }
 
@@ -597,6 +582,17 @@ async function startServer() {
 
   // ==================== RECIPES API ====================
   const recipesApi = await import('../admin/recipes-api');
+  const loadRecipeImageOverrides = async (): Promise<Record<string, string>> => {
+    if (recipeImageStore.isPostgresRecipeImageStoreEnabled()) {
+      return recipeImageStore.getPostgresRecipeImages();
+    }
+    const imageMap: Record<string, string> = {};
+    const db = await getDb();
+    if (!db) return imageMap;
+    const dbImages = await db.select().from(recipeImages);
+    for (const image of dbImages) imageMap[image.recipeId] = image.imageUrl;
+    return imageMap;
+  };
 
   app.get('/api/admin/recipes', adminAuth, async (req, res) => {
     try {
@@ -730,35 +726,16 @@ async function startServer() {
   });
 
   // ==================== PUBLIC RECIPE IMAGES API ====================
-  // Public endpoint - returns recipe image URLs from DB first, then fallback to code file
+  // Returns admin-uploaded overrides only. Built-in/category images stay inside the app.
   app.get('/api/recipes/images', async (_req, res) => {
     try {
-      const imageMap: Record<string, string> = {};
-      
-      // 1. Get images from code file (fallback/default)
-      const recipes = recipesApi.getAllRecipes();
-      for (const r of recipes) {
-        if (r.image && r.image.trim()) {
-          imageMap[r.id] = r.image;
-        }
-      }
-      
-      // 2. Override with DB images (these are the user-uploaded ones that persist)
-      try {
-        const db = await getDb();
-        if (db) {
-          const dbImages = await db.select().from(recipeImages);
-          for (const img of dbImages) {
-            imageMap[img.recipeId] = img.imageUrl;
-          }
-        }
-      } catch (dbErr) {
-        console.error('[Images] Failed to load DB images:', dbErr);
-      }
-      
+      const imageMap = await loadRecipeImageOverrides();
+      res.setHeader('Cache-Control', 'no-store, max-age=0');
+      res.setHeader('X-Awafiyat-Recipe-Images-Version', '5');
       res.json(imageMap);
     } catch (e: any) {
-      res.status(500).json({ error: e.message });
+      console.error('[Images] Failed to load recipe image overrides:', e);
+      res.status(500).json({ error: 'Failed to load recipe image overrides' });
     }
   });
 
@@ -1026,7 +1003,7 @@ async function startServer() {
   // Register push token
   app.post('/api/user/push-token', async (req, res) => {
     try {
-      const { token, userId, platform: clientPlatform } = req.body;
+      const { token, userId, platform: clientPlatform, deviceId, country } = req.body;
       console.log('[Push] Received push-token registration request:', { token: token?.substring(0, 30) + '...', userId, platform: clientPlatform });
       if (!token) {
         return res.status(400).json({ error: 'Token is required' });
@@ -1039,11 +1016,11 @@ async function startServer() {
       else if (clientPlatform === 'web') detectedPlatform = 'web';
 
       // Register push token in database (userId is now optional)
-      await savePushToken({
-        token,
-        userId: userId || null,
-        platform: detectedPlatform,
-      });
+      if (pushStore.isPostgresPushStoreEnabled()) {
+        await pushStore.savePostgresPushToken({ token, userId: userId || null, platform: detectedPlatform, deviceId, country });
+      } else {
+        await savePushToken({ token, userId: userId || null, platform: detectedPlatform });
+      }
 
       console.log('[Push] Token registered successfully:', token.substring(0, 30) + '...', 'platform:', detectedPlatform);
       res.json({ success: true, message: 'Push token registered' });
@@ -1056,7 +1033,7 @@ async function startServer() {
   // Admin: List all push tokens (for debugging)
   app.get('/api/admin/push-tokens-list', adminAuth, async (_req, res) => {
     try {
-      const tokens = await adminDb.getActivePushTokens();
+      const tokens = pushStore.isPostgresPushStoreEnabled() ? await pushStore.getPostgresActivePushTokens() : await adminDb.getActivePushTokens();
       res.json({ tokens, count: tokens.length });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
@@ -1066,16 +1043,13 @@ async function startServer() {
   // Admin: Delete invalid/test push tokens
   app.delete('/api/admin/push-tokens-cleanup', adminAuth, async (_req, res) => {
     try {
-      const db = (await import('../db')).getDb;
-      const dbInstance = await db();
-      if (!dbInstance) return res.status(500).json({ error: 'DB not available' });
-      const { sql } = await import('drizzle-orm');
-      // Delete test tokens AND old ExponentPushToken entries (they no longer work)
-      const deleteResult = await dbInstance.execute(
-        sql`DELETE FROM push_tokens WHERE token LIKE 'test%' OR token LIKE 'ExponentPushToken%'`
-      );
+      if (pushStore.isPostgresPushStoreEnabled()) {
+        const deleted = await pushStore.cleanupPostgresPushTokens();
+        const remaining = await pushStore.getPostgresActivePushTokens();
+        return res.json({ success: true, deleted, remaining: remaining.length });
+      }
       const remaining = await adminDb.getActivePushTokens();
-      res.json({ success: true, message: 'Cleaned up invalid and old Expo tokens', remaining: remaining.length });
+      res.json({ success: true, deleted: 0, remaining: remaining.length });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
