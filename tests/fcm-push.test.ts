@@ -45,7 +45,8 @@ describe("FCM and Expo push notification setup", () => {
     expect(expoPush).toContain("exp.host/--/api/v2/push/getReceipts");
     expect(server).toContain("sendExpoPushNotifications");
     expect(server).toContain("sendPushViaFCM");
-    expect(server).toContain("token.startsWith('fcm:')");
+    expect(server).toContain("!expoTokenPattern.test(token)");
+    expect(server).toContain("legacy Android tokens");
     expect(server).toContain("token.substring(4)");
     expect(server).toContain("/^(Exponent|Expo)PushToken");
   });

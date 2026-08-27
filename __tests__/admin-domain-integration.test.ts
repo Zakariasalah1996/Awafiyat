@@ -40,5 +40,7 @@ describe("Production admin and API integration", () => {
     expect(expoIndex).toBeGreaterThan(-1);
     expect(nativeIndex).toBeGreaterThan(expoIndex);
     expect(notifications).toContain('`fcm:${nativeToken}`');
+    const server = read("server", "_core", "index.ts");
+    expect(server).toContain("!expoTokenPattern.test(token)");
   });
 });

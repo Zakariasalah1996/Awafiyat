@@ -63,8 +63,11 @@ async function getFCMAccessToken(): Promise<string | null> {
 }
 
 async function sendPushViaFCM(tokens: string[], title: string, body: string, dbDeactivate?: (token: string) => Promise<void>) {
-  const expoTokens = tokens.filter((token) => /^(Exponent|Expo)PushToken\[/.test(token));
-  const fcmTokens = tokens.filter((token) => token.startsWith('fcm:'));
+  const expoTokenPattern = /^(Exponent|Expo)PushToken\[/;
+  const expoTokens = tokens.filter((token) => expoTokenPattern.test(token));
+  // Keep supporting legacy Android tokens registered by older app builds
+  // before the explicit `fcm:` prefix was introduced.
+  const fcmTokens = tokens.filter((token) => !expoTokenPattern.test(token));
   let successCount = 0;
   let failCount = 0;
 
