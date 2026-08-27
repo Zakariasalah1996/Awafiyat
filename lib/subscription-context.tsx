@@ -1,30 +1,71 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { Platform } from "react-native";
+
 import { useUser } from "@/lib/user-context";
 
-const REVENUE_CAT_API_KEY = "goog_hkYvXqzkoUXOZWyGdoshKWXRRIW";
+const REVENUECAT_PUBLIC_API_KEYS = {
+  ios: "appl_biJjDFnvutsNdCynbpWLEXLRMLP",
+  android: "goog_hkYvXqzkoUXOZWyGdoshKWXRRIW",
+} as const;
+
 const ENTITLEMENT_ID = "premium";
 
-// Lazy load react-native-purchases to avoid crash if native module is not available
 let PurchasesModule: any = null;
 let PurchasesError: Error | null = null;
+let configurationPromise: Promise<any> | null = null;
 
 async function getPurchasesModule() {
   if (PurchasesModule !== null) return PurchasesModule;
   if (PurchasesError) throw PurchasesError;
 
   try {
-    PurchasesModule = await import("react-native-purchases");
-    return PurchasesModule.default || PurchasesModule;
-  } catch (err) {
-    PurchasesError = err as Error;
-    console.warn("[Subscription] Failed to load react-native-purchases:", err);
-    throw err;
+    const importedModule = await import("react-native-purchases");
+    PurchasesModule = importedModule.default || importedModule;
+    return PurchasesModule;
+  } catch (error) {
+    PurchasesError = error as Error;
+    console.warn("[Subscription] Failed to load react-native-purchases:", error);
+    throw error;
   }
 }
 
+function getRevenueCatApiKey() {
+  if (Platform.OS === "ios") return REVENUECAT_PUBLIC_API_KEYS.ios;
+  if (Platform.OS === "android") return REVENUECAT_PUBLIC_API_KEYS.android;
+  return null;
+}
+
+export async function getConfiguredPurchases() {
+  if (Platform.OS === "web") {
+    throw new Error("RevenueCat is unavailable on web.");
+  }
+
+  if (!configurationPromise) {
+    configurationPromise = (async () => {
+      const Purchases = await getPurchasesModule();
+      const apiKey = getRevenueCatApiKey();
+
+      if (!apiKey) {
+        throw new Error(`RevenueCat is not configured for ${Platform.OS}.`);
+      }
+
+      const isConfigured = await Purchases.isConfigured();
+      if (!isConfigured) {
+        await Purchases.configure({ apiKey });
+      }
+
+      return Purchases;
+    })().catch((error) => {
+      configurationPromise = null;
+      throw error;
+    });
+  }
+
+  return configurationPromise;
+}
+
 interface CustomerInfo {
-  entitlements: { active: Record<string, any> };
+  entitlements: { active: Record<string, unknown> };
 }
 
 interface SubscriptionContextType {
@@ -50,82 +91,98 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
 
   const syncSubscriptionStatus = useCallback(
     async (customerInfo: CustomerInfo) => {
-      const active = !!customerInfo.entitlements.active[ENTITLEMENT_ID];
+      const active = Boolean(customerInfo.entitlements.active[ENTITLEMENT_ID]);
       setIsPremium(active);
 
-      // RevenueCat هو المصدر الحقيقي — نحدّث AsyncStorage ليتطابق معه
       if (profile.isSubscribed !== active) {
         await updateProfile({ isSubscribed: active }).catch(() => {});
       }
     },
-    [profile.isSubscribed, updateProfile]
+    [profile.isSubscribed, updateProfile],
   );
 
   const refreshSubscription = useCallback(async () => {
     if (Platform.OS === "web") return;
+
     try {
       setIsLoading(true);
-      const Purchases = await getPurchasesModule();
+      setError(null);
+      const Purchases = await getConfiguredPurchases();
       const customerInfo = await Purchases.getCustomerInfo();
       await syncSubscriptionStatus(customerInfo);
-    } catch (err) {
-      console.warn("[Subscription] refresh error:", err);
-      // في حالة الخطأ، نعتمد على القيمة المحلية
-      setIsPremium(profile.isSubscribed ?? false);
+    } catch (caughtError) {
+      console.warn("[Subscription] refresh error:", caughtError);
+      setError(caughtError instanceof Error ? caughtError.message : "تعذر تحديث حالة الاشتراك");
+      setIsPremium(false);
     } finally {
       setIsLoading(false);
     }
-  }, [syncSubscriptionStatus, profile.isSubscribed]);
+  }, [profile.isSubscribed, syncSubscriptionStatus]);
 
   useEffect(() => {
     if (Platform.OS === "web") {
-      // على الويب نعتمد على القيمة المحلية فقط
       setIsPremium(profile.isSubscribed ?? false);
       setIsLoading(false);
       return;
     }
 
-    const init = async () => {
+    let active = true;
+
+    const initialize = async () => {
       try {
         setError(null);
-        if (!initialized) {
-          const Purchases = await getPurchasesModule();
-          await Purchases.configure({ apiKey: REVENUE_CAT_API_KEY });
-          setInitialized(true);
-        }
-        const Purchases = await getPurchasesModule();
+        const Purchases = await getConfiguredPurchases();
         const customerInfo = await Purchases.getCustomerInfo();
+        if (!active) return;
+        setInitialized(true);
         await syncSubscriptionStatus(customerInfo);
-      } catch (err) {
-        console.warn("[Subscription] init error:", err);
-        setError(err instanceof Error ? err.message : "خطأ في تهيئة الاشتراك");
-        // في حالة الخطأ، نعتمد على القيمة المحلية
-        setIsPremium(profile.isSubscribed ?? false);
+      } catch (caughtError) {
+        if (!active) return;
+        console.warn("[Subscription] init error:", caughtError);
+        setError(caughtError instanceof Error ? caughtError.message : "خطأ في تهيئة الاشتراك");
+        setIsPremium(false);
       } finally {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       }
     };
 
-    init();
-  }, []);
+    initialize();
 
-  // الاستماع لتغييرات RevenueCat في الوقت الفعلي (مثل انتهاء الاشتراك أو تجديده)
+    return () => {
+      active = false;
+    };
+  }, [profile.isSubscribed, syncSubscriptionStatus]);
+
   useEffect(() => {
     if (Platform.OS === "web" || !initialized) return;
 
-    (async () => {
-      try {
-        const Purchases = await getPurchasesModule();
-        Purchases.addCustomerInfoUpdateListener((info: CustomerInfo) => {
-          syncSubscriptionStatus(info).catch(() => {});
-        });
-      } catch (err) {
-        console.warn("[Subscription] Failed to add listener:", err);
-      }
-    })();
+    let listener: ((info: CustomerInfo) => void) | null = null;
+    let active = true;
 
-    // RevenueCat listener لا يدعم إزالة مباشرة في هذا الإصدار
-    return () => {};
+    const registerListener = async () => {
+      try {
+        const Purchases = await getConfiguredPurchases();
+        if (!active) return;
+
+        listener = (customerInfo: CustomerInfo) => {
+          syncSubscriptionStatus(customerInfo).catch(() => {});
+        };
+        Purchases.addCustomerInfoUpdateListener(listener);
+      } catch (caughtError) {
+        console.warn("[Subscription] Failed to add listener:", caughtError);
+      }
+    };
+
+    registerListener();
+
+    return () => {
+      active = false;
+      if (listener) {
+        void getConfiguredPurchases()
+          .then((Purchases) => Purchases.removeCustomerInfoUpdateListener(listener))
+          .catch(() => {});
+      }
+    };
   }, [initialized, syncSubscriptionStatus]);
 
   return (
@@ -136,6 +193,5 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
 }
 
 export function useSubscriptionContext() {
-  const context = useContext(SubscriptionContext);
-  return context;
+  return useContext(SubscriptionContext);
 }

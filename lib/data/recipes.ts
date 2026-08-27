@@ -1,4 +1,12 @@
 // قاعدة بيانات الوصفات العراقية والعربية والخليجية
+import { GLOBAL_RECIPE_EXPANSION } from "./global-recipe-expansion";
+import { GLOBAL_RECIPE_BATCH_FOUR } from "./global-recipe-batch-4";
+import { GLOBAL_RECIPE_BATCH_FIVE } from "./global-recipe-batch-5";
+import { GLOBAL_RECIPE_BATCH_SIX } from "./global-recipe-batch-6";
+import { GLOBAL_RECIPE_BATCH_SEVEN } from "./global-recipe-batch-7";
+import { GLOBAL_RECIPE_BATCH_EIGHT } from "./global-recipe-batch-8";
+import { ORIGINAL_RECIPE_IMAGES } from "./original-recipe-images";
+
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 export type RecipeCategory = "quick" | "hearty" | "healthy" | "dessert" | "appetizer" | "snack";
 export type HealthTag = "diabetes" | "hypertension" | "obesity" | "cholesterol" | "all";
@@ -8,6 +16,8 @@ export interface Recipe {
   id: string;
   name: string;
   description: string;
+  /** بلد المنشأ الدقيق للوصفات العالمية. */
+  country?: string;
   category: RecipeCategory;
   mealType: MealType[];
   healthTags: HealthTag[];
@@ -28,7 +38,7 @@ export interface Recipe {
   image?: string;
 }
 
-export const RECIPES: Recipe[] = [
+const BASE_RECIPES: Recipe[] = [
 
   {
     id: "lunch_1",
@@ -9434,6 +9444,19 @@ export const RECIPES: Recipe[] = [
     isIraqi: true,
     origin: "iraqi" as CountryOrigin,
   },
+];
+
+export const RECIPES: Recipe[] = [
+  ...BASE_RECIPES.map((recipe) => ({
+    ...recipe,
+    image: ORIGINAL_RECIPE_IMAGES[recipe.id] ?? recipe.image,
+  })),
+  ...GLOBAL_RECIPE_EXPANSION,
+  ...GLOBAL_RECIPE_BATCH_FOUR,
+  ...GLOBAL_RECIPE_BATCH_FIVE,
+  ...GLOBAL_RECIPE_BATCH_SIX,
+  ...GLOBAL_RECIPE_BATCH_SEVEN,
+  ...GLOBAL_RECIPE_BATCH_EIGHT,
 ];
 
 // دوال البحث والفلترة

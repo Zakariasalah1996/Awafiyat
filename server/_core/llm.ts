@@ -201,14 +201,37 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-    : "https://forge.manus.im/v1/chat/completions";
+const resolveApiConfig = (): { url: string; key: string } => {
+  // أولاً: استخدام DeepSeek API إذا كان المفتاح متوفراً
+  if (ENV.deepseekApiKey && ENV.deepseekApiKey.trim().length > 0) {
+    return {
+      url: "https://api.deepseek.com/chat/completions",
+      key: ENV.deepseekApiKey,
+    };
+  }
+  // ثانياً: استخدام Gemini API
+  if (ENV.geminiApiKey && ENV.geminiApiKey.trim().length > 0) {
+    return {
+      url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+      key: ENV.geminiApiKey,
+    };
+  }
+  // ثالثاً: استخدام Forge API
+  if (ENV.forgeApiKey && ENV.forgeApiKey.trim().length > 0) {
+    const baseUrl = ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+      ? ENV.forgeApiUrl.replace(/\/$/, "")
+      : "https://forge.manus.im";
+    return {
+      url: `${baseUrl}/v1/chat/completions`,
+      key: ENV.forgeApiKey,
+    };
+  }
+  throw new Error("No AI API key configured (DEEPSEEK_API_KEY, GEMINI_API_KEY or BUILT_IN_FORGE_API_KEY)");
+};
 
 const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
+  if (!ENV.deepseekApiKey && !ENV.geminiApiKey && !ENV.forgeApiKey) {
+    throw new Error("No AI API key configured (DEEPSEEK_API_KEY, GEMINI_API_KEY or BUILT_IN_FORGE_API_KEY)");
   }
 };
 
@@ -266,8 +289,16 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     response_format,
   } = params;
 
+  const apiConfig = resolveApiConfig();
+  // اختيار الموديل حسب المزود
+  const modelName = apiConfig.url.includes("deepseek.com")
+    ? "deepseek-chat"
+    : apiConfig.url.includes("googleapis.com")
+      ? "gemini-2.0-flash"
+      : "gemini-2.5-flash";
+
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model: modelName,
     messages: messages.map(normalizeMessage),
   };
 
@@ -280,10 +311,13 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768;
-  payload.thinking = {
-    budget_tokens: 128,
-  };
+  payload.max_tokens = 8192;
+  // thinking غير مدعوم في DeepSeek و Gemini OpenAI-compatible API
+  if (!apiConfig.url.includes("googleapis.com") && !apiConfig.url.includes("deepseek.com")) {
+    payload.thinking = {
+      budget_tokens: 128,
+    };
+  }
 
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
@@ -296,11 +330,11 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.response_format = normalizedResponseFormat;
   }
 
-  const response = await fetch(resolveApiUrl(), {
+  const response = await fetch(apiConfig.url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
+      authorization: `Bearer ${apiConfig.key}`,
     },
     body: JSON.stringify(payload),
   });

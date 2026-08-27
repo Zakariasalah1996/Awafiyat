@@ -26,13 +26,15 @@ const bundleId =
 const timestamp = bundleId.split(".").pop()?.replace(/^t/, "") ?? "";
 const schemeFromBundleId = `manus${timestamp}`;
 
+const isEasIosBuild = process.env.EAS_BUILD_PLATFORM === "ios";
+
 const env = {
   // App branding - update these values directly (do not use env vars)
   appName: "ألف عافيات",
   appSlug: "awafiyat",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/DmjftojniSSrItKa.png",
+  logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/dcsFJGGHCktKMQSj.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -41,7 +43,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: "1.0.77",
+  version: isEasIosBuild ? "1.0.61" : "1.0.86",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -50,13 +52,14 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: env.iosBundleId,
-    "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+    buildNumber: "84",
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
+    },
   },
   android: {
     adaptiveIcon: {
-      backgroundColor: "#5D8A3C",
+      backgroundColor: "#FFF1DC",
       foregroundImage: "./assets/images/android-icon-foreground.png",
       backgroundImage: "./assets/images/android-icon-background.png",
       monochromeImage: "./assets/images/android-icon-monochrome.png",
@@ -64,11 +67,12 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
+    versionCode: 10065,
     googleServicesFile: "./google-services.json",
     permissions: [
       "POST_NOTIFICATIONS",
       "VIBRATE",
-      "USE_FULL_SCREEN_INTENT",
+      "com.google.android.gms.permission.AD_ID",
     ],
     intentFilters: [
       {
@@ -100,14 +104,16 @@ const config: ExpoConfig = {
     [
       "expo-audio",
       {
-        microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",
+        microphonePermission: false,
+        recordAudioAndroid: false,
+        enableBackgroundRecording: false,
       },
     ],
     [
-      "expo-video",
+      "expo-image-picker",
       {
-        supportsBackgroundPlayback: true,
-        supportsPictureInPicture: true,
+        photosPermission: "السماح لألف عافيات باختيار صورة طبق لنشرها في مجتمع الطبخ.",
+        cameraPermission: "السماح لألف عافيات بالتقاط صورة طبق لنشرها في مجتمع الطبخ.",
       },
     ],
     [
@@ -116,9 +122,9 @@ const config: ExpoConfig = {
         image: "./assets/images/splash-icon.png",
         imageWidth: 200,
         resizeMode: "contain",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#FFF1DC",
         dark: {
-          backgroundColor: "#000000",
+          backgroundColor: "#FFF1DC",
         },
       },
     ],
@@ -128,6 +134,8 @@ const config: ExpoConfig = {
         android: {
           buildArchs: ["armeabi-v7a", "arm64-v8a"],
           minSdkVersion: 24,
+          // منع R8/ProGuard من إزالة كلاسات AdMob الداخلية في بناء الإنتاج
+          extraProguardRules: "-keep class com.google.android.gms.ads.** { *; }\n-keep class com.google.ads.** { *; }\n-keep class com.google.android.gms.common.** { *; }\n-dontwarn com.google.android.gms.ads.**",
         },
       },
     ],
@@ -136,7 +144,6 @@ const config: ExpoConfig = {
       {
         androidAppId: "ca-app-pub-9147941153313979~6652750828",
         iosAppId: "ca-app-pub-9147941153313979~6652750828",
-        userTrackingUsageDescription: "يستخدم هذا التطبيق إعلانات لدعم المحتوى المجاني",
         skAdNetworkItems: [],
       },
     ],

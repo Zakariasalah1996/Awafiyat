@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   I18nManager,
+  Modal,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -18,13 +19,11 @@ import { useUser } from "@/lib/user-context";
 import { useSubscriptionContext } from "@/lib/subscription-context";
 import { useColors } from "@/hooks/use-colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
+import { showRewardedAd } from "@/lib/admob";
+import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
 
 I18nManager.forceRTL(true);
-
-const FRIDGE_USAGE_KEY = "@awafiyat_fridge_usage_count";
-const FREE_FRIDGE_LIMIT = 3;
 
 export default function FridgeScreen() {
   const router = useRouter();
@@ -38,33 +37,12 @@ export default function FridgeScreen() {
   const [aiResponse, setAiResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [fridgeUsageCount, setFridgeUsageCount] = useState(0);
-  const [fridgeLimitReached, setFridgeLimitReached] = useState(false);
-  const [loadingUsage, setLoadingUsage] = useState(true);
+  const [showAdModal, setShowAdModal] = useState(false);
+  const [adLoading, setAdLoading] = useState(false);
+  const [adError, setAdError] = useState<string | null>(null);
   const inputRef = useRef<TextInput>(null);
 
   const suggestMutation = trpc.fridge.suggest.useMutation();
-
-  // تحميل عداد الاستخدام عند بدء الشاشة
-  useEffect(() => {
-    const loadUsage = async () => {
-      try {
-        const savedCount = await AsyncStorage.getItem(FRIDGE_USAGE_KEY);
-        if (savedCount) {
-          const count = parseInt(savedCount, 10);
-          setFridgeUsageCount(count);
-          if (count >= FREE_FRIDGE_LIMIT && !isSubscribed) {
-            setFridgeLimitReached(true);
-          }
-        }
-      } catch (e) {
-        console.error("Failed to load fridge usage:", e);
-      } finally {
-        setLoadingUsage(false);
-      }
-    };
-    loadUsage();
-  }, [isSubscribed]);
 
   // البحث في المكونات عند الكتابة
   const handleTextChange = useCallback((text: string) => {
@@ -105,15 +83,9 @@ export default function FridgeScreen() {
     setSelectedIngredients((prev) => prev.filter((i) => i !== name));
   }, []);
 
-  // طلب اقتراح من الذكاء الاصطناعي
-  const askAI = useCallback(async () => {
+  // طلب اقتراح من الذكاء الاصطناعي (بعد مشاهدة الإعلان أو للمشترك)
+  const performAIRequest = useCallback(async () => {
     if (selectedIngredients.length === 0) return;
-
-    // التحقق من حد الاستخدام المجاني
-    if (!isSubscribed && fridgeUsageCount >= FREE_FRIDGE_LIMIT) {
-      setFridgeLimitReached(true);
-      return;
-    }
 
     setIsLoading(true);
     setShowResult(true);
@@ -126,16 +98,6 @@ export default function FridgeScreen() {
       });
       const text = result.suggestion;
       setAiResponse(typeof text === "string" ? text : "");
-
-      // زيادة العداد بعد استدعاء ناجح فقط
-      if (!isSubscribed) {
-        const newCount = fridgeUsageCount + 1;
-        setFridgeUsageCount(newCount);
-        await AsyncStorage.setItem(FRIDGE_USAGE_KEY, String(newCount));
-        if (newCount >= FREE_FRIDGE_LIMIT) {
-          // لا نعرض شاشة القفل فوراً - ندع المستخدم يرى النتيجة الأخيرة
-        }
-      }
     } catch (error) {
       setAiResponse(
         "عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى بعد قليل!"
@@ -143,7 +105,46 @@ export default function FridgeScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedIngredients, profile?.healthCondition, suggestMutation, isSubscribed, fridgeUsageCount]);
+  }, [selectedIngredients, profile?.healthCondition, suggestMutation]);
+
+  // طلب اقتراح - المشترك مباشرة، غير المشترك يشاهد إعلان
+  const askAI = useCallback(async () => {
+    if (selectedIngredients.length === 0) return;
+
+    if (isSubscribed) {
+      // المشترك يستخدم مباشرة بلا حدود
+      await performAIRequest();
+    } else {
+      // غير المشترك يظهر له نافذة الإعلان
+      setAdError(null);
+      setShowAdModal(true);
+    }
+  }, [selectedIngredients, isSubscribed, performAIRequest]);
+
+  // مشاهدة الإعلان ثم تنفيذ الطلب
+  const handleWatchAd = useCallback(async () => {
+    setAdLoading(true);
+    setAdError(null);
+    try {
+      const result = await showRewardedAd();
+      if (result.status === "rewarded") {
+        setShowAdModal(false);
+        await performAIRequest();
+        return;
+      }
+
+      if (result.status === "dismissed") {
+        setAdError("أُغلق الإعلان قبل اكتماله. شاهد الإعلان حتى النهاية للحصول على الاقتراح.");
+        return;
+      }
+
+      setAdError(formatRewardedAdErrorForUser(result.error, result.sdkHealthy));
+    } catch {
+      setAdError("تعذر تحميل الإعلان الآن. حاول مرة أخرى بعد قليل.\nرمز التشخيص: admob/unexpected");
+    } finally {
+      setAdLoading(false);
+    }
+  }, [performAIRequest]);
 
   // إعادة تعيين
   const resetAll = useCallback(() => {
@@ -153,17 +154,6 @@ export default function FridgeScreen() {
     setInputText("");
     setSuggestions([]);
   }, []);
-
-  // شاشة التحميل
-  if (loadingUsage) {
-    return (
-      <ScreenContainer edges={["top", "left", "right", "bottom"]}>
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#2D5A3D" />
-        </View>
-      </ScreenContainer>
-    );
-  }
 
   // شاشة الاختيار (مواد طازجة / تجديد النعمة)
   if (activeSection === "choose") {
@@ -255,58 +245,6 @@ export default function FridgeScreen() {
     );
   }
 
-  // إذا اختار "تجديد النعمة" يذهب لشاشة leftovers-renew (handled above via router.push)
-  // إذا اختار "مواد طازجة" يكمل للأسفل (الشاشة الأصلية)
-
-  // شاشة انتهاء المرات المجانية
-  if (fridgeLimitReached && !isSubscribed) {
-    return (
-      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
-        <View className="flex-1 items-center justify-center px-6">
-          <Text style={{ fontSize: 64, marginBottom: 16 }}>🔒</Text>
-          <Text
-            className="text-foreground font-bold"
-            style={{ fontSize: 24, textAlign: "center", marginBottom: 12 }}
-          >
-            انتهت المرات المجانية
-          </Text>
-          <Text
-            className="text-muted"
-            style={{ fontSize: 16, textAlign: "center", lineHeight: 26, marginBottom: 24 }}
-          >
-            لقد استخدمت ميزة "ماذا في ثلاجتي" {FREE_FRIDGE_LIMIT} مرات مجاناً.{"\n"}
-            اشترك الآن للاستمرار في الحصول على{"\n"}
-            اقتراحات وصفات ذكية بلا حدود!
-          </Text>
-          <TouchableOpacity
-            onPress={() => {
-              if (Platform.OS !== "web") {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              }
-              router.push("/(tabs)/subscription" as any);
-            }}
-            className="rounded-2xl px-8 py-4"
-            style={{ backgroundColor: colors.primary }}
-            activeOpacity={0.8}
-          >
-            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>
-              اشترك الآن
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="mt-4 py-2"
-            activeOpacity={0.6}
-          >
-            <Text className="text-muted" style={{ fontSize: 14 }}>رجوع</Text>
-          </TouchableOpacity>
-        </View>
-      </ScreenContainer>
-    );
-  }
-
-  const remainingUses = FREE_FRIDGE_LIMIT - fridgeUsageCount;
-
   return (
     <ScreenContainer edges={["top", "left", "right", "bottom"]}>
       <KeyboardAvoidingView
@@ -328,44 +266,6 @@ export default function FridgeScreen() {
           </Text>
           <View style={{ width: 40 }} />
         </View>
-
-        {/* عداد المرات المتبقية للمستخدم غير المشترك */}
-        {!isSubscribed && (
-          <View
-            style={{
-              backgroundColor: remainingUses <= 1 ? "#FFF3E0" : "#E8F5E9",
-              borderRadius: 12,
-              paddingHorizontal: 16,
-              paddingVertical: 10,
-              marginHorizontal: 20,
-              marginBottom: 4,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              borderWidth: 1,
-              borderColor: remainingUses <= 1 ? "#FFE0B2" : "#C8E6C9",
-            }}
-          >
-            <MaterialIcons
-              name={remainingUses <= 1 ? "warning" : "info-outline"}
-              size={18}
-              color={remainingUses <= 1 ? "#E65100" : "#2D5A3D"}
-            />
-            <Text
-              style={{
-                fontSize: 13,
-                fontWeight: "600",
-                color: remainingUses <= 1 ? "#E65100" : "#2D5A3D",
-                textAlign: "center",
-              }}
-            >
-              {remainingUses > 0
-                ? `متبقي ${remainingUses} ${remainingUses === 1 ? "مرة مجانية" : remainingUses === 2 ? "مرتان مجانيتان" : "مرات مجانية"}`
-                : "لا توجد مرات مجانية متبقية"}
-            </Text>
-          </View>
-        )}
 
         <ScrollView
           className="flex-1 px-5"
@@ -389,16 +289,18 @@ export default function FridgeScreen() {
                       key={name}
                       onPress={() => removeIngredient(name)}
                       style={{
-                        flexDirection: "row",
-                        alignItems: "center",
                         backgroundColor: "#E8F5E9",
                         borderRadius: 20,
                         paddingHorizontal: 14,
                         paddingVertical: 8,
+                        flexDirection: "row",
+                        alignItems: "center",
                         gap: 6,
+                        borderWidth: 1,
+                        borderColor: "#C8E6C9",
                       }}
                     >
-                      <Text style={{ color: "#2D5A3D", fontSize: 14, fontWeight: "600" }}>
+                      <Text style={{ color: "#2D5A3D", fontSize: 14, fontWeight: "500" }}>
                         {name}
                       </Text>
                       <MaterialIcons name="close" size={16} color="#2D5A3D" />
@@ -424,7 +326,7 @@ export default function FridgeScreen() {
                   ref={inputRef}
                   value={inputText}
                   onChangeText={handleTextChange}
-                  placeholder="اكتبي اسم المكون... (مثلاً: لحم، بصل، طماطة)"
+                  placeholder="اكتب اسم المكون (مثل: دجاج، رز، طماطة...)"
                   placeholderTextColor="#999"
                   returnKeyType="done"
                   onSubmitEditing={addCustomIngredient}
@@ -433,26 +335,18 @@ export default function FridgeScreen() {
                     fontSize: 16,
                     textAlign: "right",
                     writingDirection: "rtl",
-                    paddingVertical: 12,
+                    paddingVertical: 14,
                     color: "#333",
                   }}
                 />
                 {inputText.length > 0 && (
-                  <TouchableOpacity
-                    onPress={addCustomIngredient}
-                    style={{
-                      backgroundColor: "#4CAF50",
-                      borderRadius: 12,
-                      padding: 8,
-                      marginLeft: 8,
-                    }}
-                  >
-                    <MaterialIcons name="add" size={20} color="#fff" />
+                  <TouchableOpacity onPress={addCustomIngredient} style={{ padding: 8 }}>
+                    <MaterialIcons name="add-circle" size={28} color="#4CAF50" />
                   </TouchableOpacity>
                 )}
               </View>
 
-              {/* اقتراحات الإكمال التلقائي */}
+              {/* اقتراحات البحث */}
               {suggestions.length > 0 && (
                 <View
                   style={{
@@ -461,41 +355,41 @@ export default function FridgeScreen() {
                     marginTop: 8,
                     borderWidth: 1,
                     borderColor: "#E0E0E0",
-                    overflow: "hidden",
+                    maxHeight: 200,
                   }}
                 >
-                  {suggestions.map((item, index) => (
+                  {suggestions.slice(0, 8).map((item) => (
                     <TouchableOpacity
                       key={item.id}
                       onPress={() => addIngredient(item)}
                       style={{
+                        paddingHorizontal: 16,
+                        paddingVertical: 12,
+                        borderBottomWidth: 0.5,
+                        borderBottomColor: "#F0F0F0",
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        paddingHorizontal: 16,
-                        paddingVertical: 12,
-                        borderBottomWidth: index < suggestions.length - 1 ? 1 : 0,
-                        borderBottomColor: "#F0F0F0",
                       }}
                     >
-                      <MaterialIcons name="add-circle-outline" size={20} color="#4CAF50" />
-                      <View style={{ flex: 1, alignItems: "flex-end", marginRight: 8 }}>
+                      <MaterialIcons name="add" size={20} color="#4CAF50" />
+                      <View style={{ flex: 1, alignItems: "flex-end" }}>
                         <Text style={{ fontSize: 15, color: "#333", fontWeight: "500" }}>
                           {item.name}
                         </Text>
                         <Text style={{ fontSize: 12, color: "#999", marginTop: 2 }}>
-                          {item.category === "meat"
-                            ? "لحوم"
-                            : item.category === "vegetables"
-                              ? "خضروات"
-                              : item.category === "spices"
-                                ? "بهارات"
+                          {item.category === "vegetables"
+                            ? "خضروات"
+                            : item.category === "fruits"
+                              ? "فواكه"
+                              : item.category === "meat"
+                                ? "لحوم"
                                 : item.category === "dairy"
                                   ? "ألبان"
                                   : item.category === "grains"
                                     ? "حبوب"
-                                    : item.category === "fruits"
-                                      ? "فواكه"
+                                    : item.category === "spices"
+                                      ? "بهارات"
                                       : item.category === "legumes"
                                         ? "بقوليات"
                                         : item.category === "oils"
@@ -685,14 +579,7 @@ export default function FridgeScreen() {
                     {/* أزرار الإجراءات */}
                     <View style={{ flexDirection: "row", gap: 12, marginTop: 20 }}>
                       <TouchableOpacity
-                        onPress={() => {
-                          // التحقق من الحد قبل طلب اقتراح آخر
-                          if (!isSubscribed && fridgeUsageCount >= FREE_FRIDGE_LIMIT) {
-                            setFridgeLimitReached(true);
-                            return;
-                          }
-                          askAI();
-                        }}
+                        onPress={askAI}
                         style={{
                           flex: 1,
                           backgroundColor: "#FFF3E0",
@@ -734,6 +621,119 @@ export default function FridgeScreen() {
           <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* نافذة مشاهدة الإعلان */}
+      <Modal
+        visible={showAdModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setAdError(null);
+          setShowAdModal(false);
+        }}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 24 }}>
+          <View style={{ backgroundColor: "#fff", borderRadius: 24, padding: 28, width: "100%", maxWidth: 340, alignItems: "center" }}>
+            {/* أيقونة */}
+            <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: "#E8F5E9", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+              <Text style={{ fontSize: 36 }}>🥬</Text>
+            </View>
+
+            {/* العنوان */}
+            <Text style={{ fontSize: 20, fontWeight: "700", color: "#2D5A3D", textAlign: "center", marginBottom: 8 }}>
+              اقتراح وصفة ذكية
+            </Text>
+
+            {/* الوصف */}
+            <Text style={{ fontSize: 14, color: "#666", textAlign: "center", lineHeight: 22, marginBottom: 20 }}>
+              شاهد إعلاناً قصيراً للحصول على اقتراح وصفة من الذكاء الاصطناعي
+            </Text>
+
+            {adError ? (
+              <View
+                style={{
+                  backgroundColor: "#FFF3F2",
+                  borderColor: "#F5B7B1",
+                  borderWidth: 1,
+                  borderRadius: 12,
+                  padding: 12,
+                  width: "100%",
+                  marginBottom: 14,
+                }}
+              >
+                <Text style={{ color: "#9B2C2C", fontSize: 13, lineHeight: 20, textAlign: "right" }}>
+                  {adError}
+                </Text>
+              </View>
+            ) : null}
+
+            {/* زر الاشتراك */}
+            <TouchableOpacity
+              onPress={() => {
+                setAdError(null);
+                setShowAdModal(false);
+                router.push("/(tabs)/subscription" as any);
+              }}
+              style={{
+                backgroundColor: "#2D5A3D",
+                borderRadius: 14,
+                paddingVertical: 14,
+                paddingHorizontal: 24,
+                width: "100%",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+                اشترك للاستخدام بلا حدود
+              </Text>
+            </TouchableOpacity>
+
+            {/* فاصل "أو" */}
+            <View style={{ flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 8 }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
+              <Text style={{ marginHorizontal: 12, color: "#999", fontSize: 13 }}>أو</Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
+            </View>
+
+            {/* زر مشاهدة الإعلان */}
+            <TouchableOpacity
+              onPress={handleWatchAd}
+              disabled={adLoading}
+              style={{
+                backgroundColor: "#FFF3E0",
+                borderRadius: 14,
+                paddingVertical: 14,
+                paddingHorizontal: 24,
+                width: "100%",
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: "#FFE0B2",
+                opacity: adLoading ? 0.7 : 1,
+              }}
+            >
+              {adLoading ? (
+                <ActivityIndicator color="#E65100" size="small" />
+              ) : (
+                <Text style={{ color: "#E65100", fontSize: 15, fontWeight: "600" }}>
+                  {adError ? "إعادة محاولة عرض الإعلان" : "▶️ شاهد إعلاناً قصيراً"}
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* زر إغلاق */}
+            <TouchableOpacity
+              onPress={() => {
+                setAdError(null);
+                setShowAdModal(false);
+              }}
+              style={{ marginTop: 16, padding: 8 }}
+            >
+              <Text style={{ color: "#999", fontSize: 13 }}>إلغاء</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }

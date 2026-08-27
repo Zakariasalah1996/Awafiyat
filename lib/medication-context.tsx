@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { canUseMedicationReminders } from "@/lib/feature-access";
 
 // ============================================================
 // نظام إدارة الأدوية - رفيق الدواء (v2)
@@ -242,11 +243,10 @@ export function MedicationProvider({ children }: { children: React.ReactNode }) 
     });
   }, []);
 
-  // الدواء الأول مجاني، الإضافية تتطلب اشتراك
+  // تذكير الدواء ميزة مدفوعة بالكامل؛ لا توجد إضافة مجانية لغير المشترك
   const canAddMoreMedications = useCallback((isSubscribed: boolean): boolean => {
-    if (isSubscribed) return true;
-    return state.medications.filter((m) => m.isActive).length < 1;
-  }, [state.medications]);
+    return canUseMedicationReminders(isSubscribed);
+  }, []);
 
   const getMedicationCount = useCallback((): number => {
     return state.medications.filter((m) => m.isActive).length;

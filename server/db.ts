@@ -1,6 +1,6 @@
 // Fix SSL self-signed certificate issue
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-import { eq, desc, sql, and, count } from "drizzle-orm";
+import { eq, desc, asc, sql, and, count } from "drizzle-orm";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import {
@@ -13,6 +13,9 @@ import {
   dailyStats, InsertDailyStat,
   subscriptionClicks, InsertSubscriptionClick,
   activeUserSessions, InsertActiveUserSession,
+  communityPosts, InsertCommunityPost,
+  communityComments, InsertCommunityComment,
+  communityLikes,
 } from "../drizzle/schema";
 
 // ==================== DATABASE CONNECTION ====================
@@ -210,6 +213,45 @@ export async function ensureDatabaseSchema(): Promise<void> {
           "createdAt" timestamp NOT NULL DEFAULT now()
         )
       `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "community_posts" (
+          "id" SERIAL PRIMARY KEY,
+          "authorId" integer NOT NULL,
+          "authorName" varchar(80) NOT NULL,
+          "body" text,
+          "imageUrl" text,
+          "imageModeration" varchar(16) NOT NULL DEFAULT 'none',
+          "isHidden" boolean NOT NULL DEFAULT false,
+          "createdAt" timestamp NOT NULL DEFAULT now(),
+          "updatedAt" timestamp NOT NULL DEFAULT now()
+        )
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "community_comments" (
+          "id" SERIAL PRIMARY KEY,
+          "postId" integer NOT NULL,
+          "authorId" integer NOT NULL,
+          "authorName" varchar(80) NOT NULL,
+          "body" text NOT NULL,
+          "isHidden" boolean NOT NULL DEFAULT false,
+          "createdAt" timestamp NOT NULL DEFAULT now()
+        )
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "community_likes" (
+          "id" SERIAL PRIMARY KEY,
+          "postId" integer NOT NULL,
+          "deviceId" varchar(128) NOT NULL,
+          "createdAt" timestamp NOT NULL DEFAULT now(),
+          CONSTRAINT "community_likes_post_device_unique" UNIQUE ("postId", "deviceId")
+        )
+      `);
+
+      await pool.query(`CREATE INDEX IF NOT EXISTS "community_posts_created_at_idx" ON "community_posts" ("createdAt" DESC)`);
+      await pool.query(`CREATE INDEX IF NOT EXISTS "community_comments_post_id_idx" ON "community_comments" ("postId")`);
 
       await pool.end();
       _schemaEnsured = true;
@@ -552,4 +594,89 @@ export async function getDailyActiveUserCount() {
     sql`${activeUserSessions.lastActiveAt} >= ${today}`
   );
   return Number(result[0]?.count ?? 0);
+}
+
+// ==================== COOKING COMMUNITY ====================
+export type CommunityFeedPost = typeof communityPosts.$inferSelect & {
+  likeCount: number;
+  commentCount: number;
+  likedByCurrentUser: boolean;
+};
+
+export async function getCommunityAuthor(userId: number) {
+  if (!_db) return undefined;
+  const result = await _db.select().from(users).where(eq(users.id, userId)).limit(1);
+  return result[0];
+}
+
+export async function createCommunityPost(data: InsertCommunityPost) {
+  if (!_db) throw new Error("Database not available");
+  const result = await _db.insert(communityPosts).values(data).returning();
+  return result[0];
+}
+
+export async function getCommunityPost(postId: number) {
+  if (!_db) return undefined;
+  const result = await _db.select().from(communityPosts).where(eq(communityPosts.id, postId)).limit(1);
+  return result[0];
+}
+
+export async function getCommunityFeed(deviceId: string, limit = 30, offset = 0): Promise<CommunityFeedPost[]> {
+  if (!_db) return [];
+  const posts = await _db
+    .select()
+    .from(communityPosts)
+    .where(eq(communityPosts.isHidden, false))
+    .orderBy(desc(communityPosts.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  return Promise.all(
+    posts.map(async (post) => {
+      const [likes, comments, ownLike] = await Promise.all([
+        _db.select({ total: count() }).from(communityLikes).where(eq(communityLikes.postId, post.id)),
+        _db.select({ total: count() }).from(communityComments).where(and(eq(communityComments.postId, post.id), eq(communityComments.isHidden, false))),
+        _db.select({ id: communityLikes.id }).from(communityLikes).where(and(eq(communityLikes.postId, post.id), eq(communityLikes.deviceId, deviceId))).limit(1),
+      ]);
+
+      return {
+        ...post,
+        likeCount: Number(likes[0]?.total ?? 0),
+        commentCount: Number(comments[0]?.total ?? 0),
+        likedByCurrentUser: ownLike.length > 0,
+      };
+    }),
+  );
+}
+
+export async function toggleCommunityLike(postId: number, deviceId: string) {
+  if (!_db) throw new Error("Database not available");
+  const existing = await _db
+    .select({ id: communityLikes.id })
+    .from(communityLikes)
+    .where(and(eq(communityLikes.postId, postId), eq(communityLikes.deviceId, deviceId)))
+    .limit(1);
+
+  if (existing.length > 0) {
+    await _db.delete(communityLikes).where(eq(communityLikes.id, existing[0].id));
+    return false;
+  }
+
+  await _db.insert(communityLikes).values({ postId, deviceId });
+  return true;
+}
+
+export async function getCommunityComments(postId: number) {
+  if (!_db) return [];
+  return _db
+    .select()
+    .from(communityComments)
+    .where(and(eq(communityComments.postId, postId), eq(communityComments.isHidden, false)))
+    .orderBy(asc(communityComments.createdAt));
+}
+
+export async function createCommunityComment(data: InsertCommunityComment) {
+  if (!_db) throw new Error("Database not available");
+  const result = await _db.insert(communityComments).values(data).returning();
+  return result[0];
 }

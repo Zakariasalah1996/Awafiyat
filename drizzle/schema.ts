@@ -1,4 +1,4 @@
-import { boolean, integer, pgEnum, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, integer, pgEnum, pgTable, serial, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
 /**
  * Core user table backing auth flow.
@@ -181,3 +181,54 @@ export const activeUserSessions = pgTable("active_user_sessions", {
 
 export type ActiveUserSession = typeof activeUserSessions.$inferSelect;
 export type InsertActiveUserSession = typeof activeUserSessions.$inferInsert;
+
+/**
+ * Public cooking-community posts. A post may be text-only or include one
+ * approved food/drink image. The name is copied from the fixed user profile
+ * server-side, not trusted from the publishing form.
+ */
+export const communityPosts = pgTable("community_posts", {
+  id: serial("id").primaryKey(),
+  authorId: integer("authorId").notNull(),
+  authorName: varchar("authorName", { length: 80 }).notNull(),
+  body: text("body"),
+  imageUrl: text("imageUrl"),
+  imageModeration: varchar("imageModeration", { length: 16 }).default("none").notNull(),
+  isHidden: boolean("isHidden").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+
+export type CommunityPost = typeof communityPosts.$inferSelect;
+export type InsertCommunityPost = typeof communityPosts.$inferInsert;
+
+/** Public comments attached to a community post. */
+export const communityComments = pgTable("community_comments", {
+  id: serial("id").primaryKey(),
+  postId: integer("postId").notNull(),
+  authorId: integer("authorId").notNull(),
+  authorName: varchar("authorName", { length: 80 }).notNull(),
+  body: text("body").notNull(),
+  isHidden: boolean("isHidden").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type CommunityComment = typeof communityComments.$inferSelect;
+export type InsertCommunityComment = typeof communityComments.$inferInsert;
+
+/** One stable device may like a post once. */
+export const communityLikes = pgTable(
+  "community_likes",
+  {
+    id: serial("id").primaryKey(),
+    postId: integer("postId").notNull(),
+    deviceId: varchar("deviceId", { length: 128 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    postDeviceUnique: uniqueIndex("community_likes_post_device_unique").on(table.postId, table.deviceId),
+  }),
+);
+
+export type CommunityLike = typeof communityLikes.$inferSelect;
+export type InsertCommunityLike = typeof communityLikes.$inferInsert;

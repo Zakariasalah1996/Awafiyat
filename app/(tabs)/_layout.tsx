@@ -49,6 +49,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="community"
+        options={{
+          title: "المجتمع",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={25} name="bubble.left.and.bubble.right.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="index"
         options={{
           title: "الرئيسية",

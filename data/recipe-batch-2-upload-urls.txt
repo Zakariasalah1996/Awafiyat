@@ -1,0 +1,504 @@
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-001-ghormeh-sabzi.jpg (size: 6144380 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/pDFEvLQzCKNlRekQ.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-002-fesenjan.jpg (size: 6580180 bytes)
+Upload timeout: 3m0s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/fHODUNFQuucpMOiK.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-003-tahdig.jpg (size: 5247356 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/VEuMOUKbrjFkVjMl.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-004-ash-reshteh.jpg (size: 6422754 bytes)
+Upload timeout: 3m0s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/nCrWuYvnWGjFhzse.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-005-zereshk-polo.jpg (size: 6267588 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/AYnsOLSsFzXdAvRX.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-006-kuku-sabzi.jpg (size: 7442880 bytes)
+Upload timeout: 3m10s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SaFcTJczdxSPTCer.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-007-khachapuri.jpg (size: 5357698 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/OHLlvsnXPepeuNHT.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-008-khinkali.jpg (size: 5014118 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/EQJiyQxgzCqdltWl.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-009-lobio.jpg (size: 5966933 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/sPzgOvyjwwcuPKsC.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-010-pkhali.jpg (size: 5442299 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/TOGDjBtYgwEeZnjU.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-011-armenian-harissa.jpg (size: 5471892 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/bNsHgnOXigiOBjVQ.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-012-armenian-lavash.jpg (size: 5899813 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/TccmtdRtwTZjJoWV.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-013-armenian-dolma.jpg (size: 5264665 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/HnVWcjzCyEDXQCyQ.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-014-azerbaijani-plov.jpg (size: 5883913 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/EepmDNUbCmNbwOgw.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-015-azerbaijani-qutab.jpg (size: 6871351 bytes)
+Upload timeout: 3m0s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/wFjiIggDzWCjixOx.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-016-azerbaijani-dolma.jpg (size: 5993240 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/LqzHjxWKQTwvCcvx.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-017-pakistani-nihari.jpg (size: 5650449 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/VavPpVoowgzClKpi.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-018-pakistani-haleem.jpg (size: 6455913 bytes)
+Upload timeout: 3m0s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/BhcjIGRwdOdEFbfF.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-019-pakistani-chapli-kebab.jpg (size: 6770505 bytes)
+Upload timeout: 3m0s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/fMmFqbszXhYGjkll.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-020-pakistani-saag.jpg (size: 5863083 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/KCmWEnBGNFmfVhot.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-021-bangladeshi-khichuri.jpg (size: 5808133 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/JTtZqwCkOcycUlOY.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-022-bangladeshi-hilsa-curry.jpg (size: 5353855 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/nhuxUODprxVxEcgq.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-023-bangladeshi-pitha.jpg (size: 5615081 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/eYzCHQSHjnlFosma.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-024-sri-lankan-kottu.jpg (size: 5218291 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/wTwbeNrZpQRIVwhs.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-025-sri-lankan-pol-sambol.jpg (size: 5561291 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/YysRiWVVtbycgzRj.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-026-sri-lankan-fish-ambul-thiyal.jpg (size: 5572062 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/JTuckizpqnNAVXak.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-027-nepali-momo.jpg (size: 5114492 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/IqXPnVfJiVCpCsqR.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-028-nepali-dal-bhat.jpg (size: 5247152 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/WIfqrYZKwAmvqfQx.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-029-nepali-sel-roti.jpg (size: 5817467 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/EvpSPTauPeRevHbH.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-030-malaysian-nasi-lemak.jpg (size: 4525027 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/bjgQzsNcZfNBucMn.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-031-malaysian-laksa.jpg (size: 5192989 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ZPoymEXRiMjBsEaR.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-032-malaysian-char-kway-teow.jpg (size: 6291471 bytes)
+Upload timeout: 3m0s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/AiGdweRQkobXYlHq.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-033-malaysian-rendang.jpg (size: 5385959 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/qahvWtXNRKJwVamG.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-034-singapore-hainanese-chicken-rice.jpg (size: 4820670 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/csyxTtXunNJZCDDQ.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-035-singapore-chili-crab.jpg (size: 4868771 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/eacgBmBeRQCKxjJZ.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-036-singapore-kaya-toast.jpg (size: 4642679 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/DBoMlwtXVPupSIWr.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-037-cambodian-fish-amok.jpg (size: 4768209 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/VUvsYmwgpxIyVWfO.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-038-cambodian-khmer-curry.jpg (size: 5437766 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/BaMyeDlFnDcVOtqG.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-039-lao-larb.jpg (size: 5399920 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/qMAbXiUEjuZeTmsB.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-040-lao-sticky-rice.jpg (size: 5084027 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ztGflgfKhLrbtjsp.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-041-burmese-mohinga.jpg (size: 5472762 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/UeNReBjNawwBYWKG.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-042-burmese-tea-leaf-salad.jpg (size: 4797838 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/tihBFdBMlpWjIvrT.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-043-taiwanese-beef-noodle-soup.jpg (size: 5292207 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SdnRQdMTfaxzAJoo.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-044-taiwanese-scallion-pancake.jpg (size: 5167943 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/WToLoIlJcwxjuSBS.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-045-mongolian-buuz.jpg (size: 4614039 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/eEoAQghKZiqeKfBt.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-046-mongolian-khuushuur.jpg (size: 5745112 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/IyjVuXBmwcZTuTXi.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-047-german-schnitzel.jpg (size: 5161555 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/hXSgqmbIeUnBfcid.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-048-german-sauerbraten.jpg (size: 4951089 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ajrdcdjadiNjLGWn.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-049-german-pretzel.jpg (size: 6422460 bytes)
+Upload timeout: 3m0s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/oMwqaLoBPfciEGHg.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-050-german-black-forest-cake.jpg (size: 4969972 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/JiEswREKKjRhFToK.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-051-austrian-apple-strudel.jpg (size: 5013563 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/KmRCXmbvMAIHwhoA.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-052-austrian-sachertorte.jpg (size: 4586030 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/XAZSJoseTolNDcYX.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-053-polish-pierogi.jpg (size: 5740987 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/FggUGLJHOZxlujSy.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-054-polish-bigos.jpg (size: 5485704 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/OHxRnLbUhwgmkEHy.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-055-polish-zurek.jpg (size: 5370343 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/uHcAWZGTFORyabxT.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-056-hungarian-goulash.jpg (size: 5475098 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/nacSNndqlDlEVFzv.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-057-hungarian-chicken-paprikash.jpg (size: 4783604 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/DpmbzdRJbWkGHzlz.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-058-hungarian-langos.jpg (size: 5248470 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/YvLUXDIyjHgiyVtJ.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-059-portuguese-bacalhau.jpg (size: 4956580 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/PwFBAcumqsoTuTbV.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-060-portuguese-caldo-verde.jpg (size: 5040530 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/gmrlqJcBZYBdbDAD.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-061-portuguese-pastel-de-nata.jpg (size: 5469478 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/qRAYuxGoRzNHUCWE.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-062-dutch-stamppot.jpg (size: 5728389 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/LCcxvvfuxiEVqQJX.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-063-dutch-poffertjes.jpg (size: 5039483 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/IOxXENdFROuPuqwz.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-064-belgian-moules-frites.jpg (size: 4704514 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/PtDThururqajZsYW.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-065-belgian-waffles.jpg (size: 5653301 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/UgMHHeSqSXPTSVCl.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-066-swedish-meatballs.jpg (size: 5184541 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SQrkULLXPKBmBlNv.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-067-swedish-cinnamon-buns.jpg (size: 6159832 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/IOxxyxZCORKHwsLQ.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-068-danish-smorrebrod.jpg (size: 4852674 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ZLkJLYDIfDKgGAOm.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-069-russian-borscht.jpg (size: 4930752 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/GkZJDxulTcXtGiaT.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-070-russian-pelmeni.jpg (size: 5020489 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/bmWALPXrCigpdslC.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-071-russian-blini.jpg (size: 4819445 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/zbNpErtHCCNJKrKU.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-072-ukrainian-varenyky.jpg (size: 5600422 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SpWWZFoyBXEWkfIZ.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-073-ukrainian-holubtsi.jpg (size: 5483605 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/TyVnazXvDeshJggf.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-074-peruvian-ceviche.jpg (size: 5011262 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/BCJDddqOsIercGdd.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-075-peruvian-lomo-saltado.jpg (size: 5601087 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/JShoVxBiOtVMGwaE.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-076-peruvian-aji-de-gallina.jpg (size: 4965808 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/oTnsiVfeVrIxSuvM.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-077-argentinian-empanadas.jpg (size: 5421856 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/MpUguzHERwupFrWq.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-078-argentinian-asado.jpg (size: 6463512 bytes)
+Upload timeout: 3m0s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/afYLMvaseVEhRjSE.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-079-chilean-pastel-de-choclo.jpg (size: 5758853 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ALGogHQjlQkfMXZq.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-080-chilean-cazuela.jpg (size: 5382248 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/bzlPScxOvKHHeIvv.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-081-colombian-bandeja-paisa.jpg (size: 5623952 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ajGQipECauGeRFpf.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-082-colombian-arepas.jpg (size: 5408424 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/oFMqjeSnMGvMIMiU.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-083-cuban-ropa-vieja.jpg (size: 5776211 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/dtavZfmXvjbUBloA.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-084-jamaican-jerk-chicken.jpg (size: 6379437 bytes)
+Upload timeout: 3m0s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ubhHvyMiSGcLmGnc.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-085-canadian-poutine.jpg (size: 4989563 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ByfxbPsIKOsSwERY.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-086-canadian-tourtiere.jpg (size: 5143370 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/obaZyVgxzMyssVLV.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-087-bolivian-saltena.jpg (size: 5468342 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SbkLziOthzxZCKXQ.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-088-venezuelan-arepa.jpg (size: 4999202 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SYndbTcLZCkVEAfG.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-089-ecuadorian-locro.jpg (size: 4623583 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/amPoQpVZtMCHtuRv.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-090-uruguayan-chivito.jpg (size: 5768736 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/WdgJSNyEjWlfUXHs.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-091-paraguayan-sopa.jpg (size: 5802002 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/mTZglCfeZbIFhjfn.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-092-dominican-la-bandera.jpg (size: 5982658 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/TyRfGkoNphCkzYhq.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-093-costa-rican-gallo-pinto.jpg (size: 4871984 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/XOCyeKTxRYhCvrOZ.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-094-trinidad-doubles.jpg (size: 5310707 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/epXYJdzWyEsCxLpp.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-095-kenyan-nyama-choma.jpg (size: 6115584 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/WCQIARUmHiEJZjKD.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-096-tanzanian-ugali.jpg (size: 5643524 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/xOfEtLdtvKPHFFkD.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-097-ghanaian-fufu.jpg (size: 5894490 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ORzUfLUqnCMbQuQq.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-098-senegalese-thieboudienne.jpg (size: 6003760 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/DBmHEbwqoaNnssuQ.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-099-botswanan-seswaa.jpg (size: 5132194 bytes)
+Upload timeout: 2m40s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/uHGgBhnmtxGEvIVc.jpg
+Uploading file: /home/ubuntu/webdev-static-assets/recipe-batch-2-100-malagasy-romazava.jpg (size: 6074868 bytes)
+Upload timeout: 2m50s
+File uploaded successfully!
+CDN URL: https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/fTaVwIIoHeDDSvbb.jpg
+
+========== Upload Summary ==========
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-001-ghormeh-sabzi.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/pDFEvLQzCKNlRekQ.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-002-fesenjan.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/fHODUNFQuucpMOiK.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-003-tahdig.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/VEuMOUKbrjFkVjMl.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-004-ash-reshteh.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/nCrWuYvnWGjFhzse.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-005-zereshk-polo.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/AYnsOLSsFzXdAvRX.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-006-kuku-sabzi.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SaFcTJczdxSPTCer.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-007-khachapuri.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/OHLlvsnXPepeuNHT.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-008-khinkali.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/EQJiyQxgzCqdltWl.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-009-lobio.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/sPzgOvyjwwcuPKsC.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-010-pkhali.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/TOGDjBtYgwEeZnjU.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-011-armenian-harissa.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/bNsHgnOXigiOBjVQ.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-012-armenian-lavash.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/TccmtdRtwTZjJoWV.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-013-armenian-dolma.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/HnVWcjzCyEDXQCyQ.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-014-azerbaijani-plov.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/EepmDNUbCmNbwOgw.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-015-azerbaijani-qutab.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/wFjiIggDzWCjixOx.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-016-azerbaijani-dolma.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/LqzHjxWKQTwvCcvx.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-017-pakistani-nihari.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/VavPpVoowgzClKpi.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-018-pakistani-haleem.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/BhcjIGRwdOdEFbfF.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-019-pakistani-chapli-kebab.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/fMmFqbszXhYGjkll.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-020-pakistani-saag.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/KCmWEnBGNFmfVhot.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-021-bangladeshi-khichuri.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/JTtZqwCkOcycUlOY.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-022-bangladeshi-hilsa-curry.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/nhuxUODprxVxEcgq.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-023-bangladeshi-pitha.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/eYzCHQSHjnlFosma.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-024-sri-lankan-kottu.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/wTwbeNrZpQRIVwhs.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-025-sri-lankan-pol-sambol.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/YysRiWVVtbycgzRj.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-026-sri-lankan-fish-ambul-thiyal.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/JTuckizpqnNAVXak.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-027-nepali-momo.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/IqXPnVfJiVCpCsqR.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-028-nepali-dal-bhat.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/WIfqrYZKwAmvqfQx.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-029-nepali-sel-roti.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/EvpSPTauPeRevHbH.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-030-malaysian-nasi-lemak.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/bjgQzsNcZfNBucMn.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-031-malaysian-laksa.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ZPoymEXRiMjBsEaR.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-032-malaysian-char-kway-teow.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/AiGdweRQkobXYlHq.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-033-malaysian-rendang.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/qahvWtXNRKJwVamG.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-034-singapore-hainanese-chicken-rice.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/csyxTtXunNJZCDDQ.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-035-singapore-chili-crab.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/eacgBmBeRQCKxjJZ.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-036-singapore-kaya-toast.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/DBoMlwtXVPupSIWr.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-037-cambodian-fish-amok.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/VUvsYmwgpxIyVWfO.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-038-cambodian-khmer-curry.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/BaMyeDlFnDcVOtqG.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-039-lao-larb.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/qMAbXiUEjuZeTmsB.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-040-lao-sticky-rice.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ztGflgfKhLrbtjsp.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-041-burmese-mohinga.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/UeNReBjNawwBYWKG.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-042-burmese-tea-leaf-salad.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/tihBFdBMlpWjIvrT.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-043-taiwanese-beef-noodle-soup.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SdnRQdMTfaxzAJoo.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-044-taiwanese-scallion-pancake.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/WToLoIlJcwxjuSBS.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-045-mongolian-buuz.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/eEoAQghKZiqeKfBt.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-046-mongolian-khuushuur.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/IyjVuXBmwcZTuTXi.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-047-german-schnitzel.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/hXSgqmbIeUnBfcid.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-048-german-sauerbraten.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ajrdcdjadiNjLGWn.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-049-german-pretzel.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/oMwqaLoBPfciEGHg.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-050-german-black-forest-cake.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/JiEswREKKjRhFToK.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-051-austrian-apple-strudel.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/KmRCXmbvMAIHwhoA.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-052-austrian-sachertorte.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/XAZSJoseTolNDcYX.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-053-polish-pierogi.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/FggUGLJHOZxlujSy.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-054-polish-bigos.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/OHxRnLbUhwgmkEHy.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-055-polish-zurek.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/uHcAWZGTFORyabxT.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-056-hungarian-goulash.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/nacSNndqlDlEVFzv.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-057-hungarian-chicken-paprikash.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/DpmbzdRJbWkGHzlz.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-058-hungarian-langos.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/YvLUXDIyjHgiyVtJ.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-059-portuguese-bacalhau.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/PwFBAcumqsoTuTbV.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-060-portuguese-caldo-verde.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/gmrlqJcBZYBdbDAD.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-061-portuguese-pastel-de-nata.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/qRAYuxGoRzNHUCWE.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-062-dutch-stamppot.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/LCcxvvfuxiEVqQJX.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-063-dutch-poffertjes.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/IOxXENdFROuPuqwz.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-064-belgian-moules-frites.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/PtDThururqajZsYW.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-065-belgian-waffles.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/UgMHHeSqSXPTSVCl.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-066-swedish-meatballs.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SQrkULLXPKBmBlNv.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-067-swedish-cinnamon-buns.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/IOxxyxZCORKHwsLQ.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-068-danish-smorrebrod.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ZLkJLYDIfDKgGAOm.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-069-russian-borscht.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/GkZJDxulTcXtGiaT.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-070-russian-pelmeni.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/bmWALPXrCigpdslC.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-071-russian-blini.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/zbNpErtHCCNJKrKU.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-072-ukrainian-varenyky.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SpWWZFoyBXEWkfIZ.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-073-ukrainian-holubtsi.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/TyVnazXvDeshJggf.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-074-peruvian-ceviche.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/BCJDddqOsIercGdd.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-075-peruvian-lomo-saltado.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/JShoVxBiOtVMGwaE.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-076-peruvian-aji-de-gallina.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/oTnsiVfeVrIxSuvM.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-077-argentinian-empanadas.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/MpUguzHERwupFrWq.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-078-argentinian-asado.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/afYLMvaseVEhRjSE.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-079-chilean-pastel-de-choclo.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ALGogHQjlQkfMXZq.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-080-chilean-cazuela.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/bzlPScxOvKHHeIvv.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-081-colombian-bandeja-paisa.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ajGQipECauGeRFpf.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-082-colombian-arepas.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/oFMqjeSnMGvMIMiU.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-083-cuban-ropa-vieja.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/dtavZfmXvjbUBloA.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-084-jamaican-jerk-chicken.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ubhHvyMiSGcLmGnc.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-085-canadian-poutine.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ByfxbPsIKOsSwERY.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-086-canadian-tourtiere.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/obaZyVgxzMyssVLV.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-087-bolivian-saltena.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SbkLziOthzxZCKXQ.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-088-venezuelan-arepa.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/SYndbTcLZCkVEAfG.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-089-ecuadorian-locro.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/amPoQpVZtMCHtuRv.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-090-uruguayan-chivito.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/WdgJSNyEjWlfUXHs.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-091-paraguayan-sopa.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/mTZglCfeZbIFhjfn.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-092-dominican-la-bandera.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/TyRfGkoNphCkzYhq.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-093-costa-rican-gallo-pinto.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/XOCyeKTxRYhCvrOZ.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-094-trinidad-doubles.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/epXYJdzWyEsCxLpp.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-095-kenyan-nyama-choma.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/WCQIARUmHiEJZjKD.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-096-tanzanian-ugali.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/xOfEtLdtvKPHFFkD.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-097-ghanaian-fufu.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/ORzUfLUqnCMbQuQq.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-098-senegalese-thieboudienne.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/DBmHEbwqoaNnssuQ.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-099-botswanan-seswaa.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/uHGgBhnmtxGEvIVc.jpg
+[SUCCESS] /home/ubuntu/webdev-static-assets/recipe-batch-2-100-malagasy-romazava.jpg -> https://files.manuscdn.com/user_upload_by_module/session_file/310519663550643615/fTaVwIIoHeDDSvbb.jpg
+=====================================
+Total: 100, Success: 100, Failed: 0

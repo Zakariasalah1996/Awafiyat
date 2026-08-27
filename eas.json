@@ -15,7 +15,8 @@
     },
     "production": {
       "android": {
-        "buildType": "apk"
+        "buildType": "app-bundle",
+        "credentialsSource": "remote"
       },
       "ios": {
         "simulator": false
@@ -23,6 +24,10 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "6775841115"
+      }
+    }
   }
 }

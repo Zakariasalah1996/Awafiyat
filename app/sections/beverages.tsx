@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,15 @@ import {
   I18nManager,
   FlatList,
   Modal,
+  Image,
+  Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useUser } from "@/lib/user-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { shareBeverage } from "@/lib/share-service";
 
 I18nManager.forceRTL(true);
 
@@ -1609,7 +1612,449 @@ const BEVERAGES: Beverage[] = [
     ],
     tips: "يُمكن تحليته بالعسل بدل السكر",
   },
+  // ============ توسعة المشروبات: 76–100 ============
+  {
+    id: "bev_76",
+    name: "شاي المليسة",
+    description: "منقوع عشبي دافئ بأوراق المليسة والليمون، خفيف وعطري.",
+    type: "hot",
+    subtype: "healthy",
+    calories: 5,
+    healthTags: ["all"],
+    ingredients: [
+      { name: "أوراق مليسة مجففة أو طازجة", amount: "ملعقة كبيرة" },
+      { name: "ماء مغلي", amount: "كوب" },
+      { name: "شريحة ليمون", amount: "اختياري" },
+    ],
+    steps: ["توضع المليسة في الكوب", "يُسكب الماء المغلي ويُغطّى 7 دقائق", "يُصفّى ويُقدّم دافئاً"],
+    tips: "غطِّ الكوب أثناء النقع للحفاظ على رائحة الأعشاب.",
+  },
+  {
+    id: "bev_77",
+    name: "شاي الشمر",
+    description: "مشروب دافئ من بذور الشمر بنكهة حلوة طبيعية خفيفة.",
+    type: "hot",
+    subtype: "healthy",
+    calories: 5,
+    healthTags: ["all"],
+    ingredients: [
+      { name: "بذور شمر", amount: "ملعقتان صغيرتان" },
+      { name: "ماء مغلي", amount: "كوب" },
+      { name: "شريحة ليمون", amount: "اختياري" },
+    ],
+    steps: ["تُسحق بذور الشمر سحقاً خفيفاً", "تُنقع في الماء المغلي 8 دقائق", "تُصفّى وتُقدّم"],
+    tips: "اطحن البذور قليلاً قبل النقع لنكهة أوضح.",
+  },
+  {
+    id: "bev_78",
+    name: "شاي النعناع الفلفلي",
+    description: "منقوع نعناع فلفلي دافئ ومنعش من دون سكر مضاف.",
+    type: "hot",
+    subtype: "healthy",
+    calories: 2,
+    healthTags: ["all"],
+    ingredients: [
+      { name: "أوراق نعناع فلفلي", amount: "ملعقة كبيرة أو 12 ورقة" },
+      { name: "ماء مغلي", amount: "كوب" },
+    ],
+    steps: ["توضع الأوراق في الكوب", "يُضاف الماء المغلي", "يُغطى 5 دقائق ثم يُصفّى"],
+    tips: "لا تُطل مدة النقع كي تبقى النكهة متوازنة.",
+  },
+  {
+    id: "bev_79",
+    name: "شاي القرنفل والليمون",
+    description: "شاي عطري ساخن بالقرنفل وشرائح الليمون الطازجة.",
+    type: "hot",
+    subtype: "healthy",
+    calories: 5,
+    healthTags: ["all"],
+    ingredients: [
+      { name: "قرنفل صحيح", amount: "4 حبات" },
+      { name: "ماء", amount: "كوب" },
+      { name: "ليمون", amount: "شريحتان" },
+    ],
+    steps: ["يُغلى الماء مع القرنفل 3 دقائق", "تُضاف شرائح الليمون بعد رفعه عن النار", "يُصفّى ويُقدّم"],
+    tips: "يمكن تحليته اختيارياً بكمية صغيرة من محلي مناسب.",
+  },
+  {
+    id: "bev_80",
+    name: "قهوة الشعير",
+    description: "مشروب شعير محمّص دافئ بنكهة تشبه القهوة ومن دون بن.",
+    type: "hot",
+    subtype: "healthy",
+    calories: 25,
+    healthTags: ["all"],
+    ingredients: [
+      { name: "شعير محمص ومطحون", amount: "ملعقتان كبيرتان" },
+      { name: "ماء", amount: "كوبان" },
+      { name: "هيل مطحون", amount: "رشة" },
+    ],
+    steps: ["يُغلى الماء", "يُضاف الشعير والهيل", "يُترك على نار هادئة 8 دقائق ثم يُصفّى"],
+    tips: "استعمل شعيراً محمصاً مخصصاً للمشروبات للحصول على نكهة أغنى.",
+  },
+  {
+    id: "bev_81",
+    name: "لاتيه الشوفان بالقرفة",
+    description: "قهوة بالحليب النباتي والقرفة، تُقدّم ساخنة وقشدية القوام.",
+    type: "hot",
+    subtype: "regular",
+    calories: 120,
+    healthTags: [],
+    ingredients: [
+      { name: "حليب شوفان غير محلى", amount: "كوب" },
+      { name: "إسبريسو", amount: "جرعة واحدة" },
+      { name: "قرفة مطحونة", amount: "رشة" },
+    ],
+    steps: ["يُسخن حليب الشوفان دون غليان", "تُحضّر جرعة القهوة", "يُسكب الحليب فوقها وتُضاف القرفة"],
+    tips: "اخفق الحليب برفق قبل السكب للحصول على رغوة خفيفة.",
+  },
+  {
+    id: "bev_82",
+    name: "حليب اللوز الساخن بالفانيليا",
+    description: "حليب لوز دافئ مع فانيليا وقرفة، مناسب لأمسيات الشتاء.",
+    type: "hot",
+    subtype: "healthy",
+    calories: 45,
+    healthTags: ["all"],
+    ingredients: [
+      { name: "حليب لوز غير محلى", amount: "كوب" },
+      { name: "فانيليا", amount: "ربع ملعقة صغيرة" },
+      { name: "قرفة مطحونة", amount: "رشة" },
+    ],
+    steps: ["يُسخن حليب اللوز على نار هادئة", "تُضاف الفانيليا والقرفة", "يُحرّك ويُقدّم قبل الغليان"],
+    tips: "اختر حليب لوز غير محلى لتبقى السعرات منخفضة.",
+  },
+  {
+    id: "bev_83",
+    name: "قهوة بيضاء لبنانية",
+    description: "مشروب لبناني عطري من الماء الساخن وماء الزهر، بلا بن فعلياً.",
+    type: "hot",
+    subtype: "healthy",
+    calories: 2,
+    healthTags: ["all"],
+    ingredients: [
+      { name: "ماء ساخن", amount: "كوب" },
+      { name: "ماء زهر", amount: "ملعقة صغيرة" },
+    ],
+    steps: ["يُسكب ماء الزهر في فنجان", "يُضاف الماء الساخن", "يُحرّك برفق ويُقدّم"],
+    tips: "استخدم ماء زهر طبيعي بكمية قليلة حتى لا تطغى نكهته.",
+  },
+  {
+    id: "bev_84",
+    name: "شاي التفاح والقرفة",
+    description: "منقوع تفاح دافئ بالقرفة برائحة فاكهية لطيفة.",
+    type: "hot",
+    subtype: "healthy",
+    calories: 35,
+    healthTags: ["all"],
+    ingredients: [
+      { name: "تفاح", amount: "نصف حبة مقطعة" },
+      { name: "قرفة", amount: "عود واحد" },
+      { name: "ماء", amount: "كوبان" },
+    ],
+    steps: ["يُغلى التفاح والقرفة مع الماء 8 دقائق", "يُترك دقيقتين", "يُصفّى ويُقدّم ساخناً"],
+    tips: "احتفظ بالقشر بعد غسله جيداً لمذاق فاكهي أقوى.",
+  },
+  {
+    id: "bev_85",
+    name: "شاي الليمون الأسود",
+    description: "مشروب خليجي دافئ من اللومي المجفف بنكهة حمضية مدخنة.",
+    type: "hot",
+    subtype: "healthy",
+    calories: 3,
+    healthTags: ["all"],
+    ingredients: [
+      { name: "ليمون أسود مجفف (لومي)", amount: "حبتان مثقوبتان" },
+      { name: "ماء", amount: "كوبان" },
+      { name: "نعناع مجفف", amount: "رشة اختيارية" },
+    ],
+    steps: ["تُثقب حبات اللومي", "تُغلى في الماء 7 دقائق", "يُصفّى ويُضاف النعناع عند التقديم"],
+    tips: "لا تُكثر من الغلي حتى لا يصبح الطعم مرّاً جداً.",
+  },
+  {
+    id: "bev_86",
+    name: "ماء الفراولة والريحان",
+    description: "ماء بارد منقوع بالفراولة والريحان للترطيب بنكهة طبيعية.",
+    type: "cold",
+    subtype: "healthy",
+    calories: 15,
+    healthTags: ["all"],
+    ingredients: [
+      { name: "فراولة طازجة", amount: "5 حبات" },
+      { name: "ريحان طازج", amount: "6 أوراق" },
+      { name: "ماء بارد", amount: "كوبان" },
+      { name: "ثلج", amount: "حسب الرغبة" },
+    ],
+    steps: ["تُقطع الفراولة", "توضع مع الريحان في إبريق", "يُضاف الماء والثلج ويُبرّد ساعة"],
+    tips: "افرك أوراق الريحان برفق قبل إضافتها لإظهار رائحتها.",
+  },
+  {
+    id: "bev_87",
+    name: "ماء البرتقال وإكليل الجبل",
+    description: "ماء منقوع بقطع البرتقال وإكليل الجبل، منعش وخفيف.",
+    type: "cold",
+    subtype: "healthy",
+    calories: 10,
+    healthTags: ["all"],
+    ingredients: [
+      { name: "برتقال", amount: "نصف حبة شرائح" },
+      { name: "إكليل الجبل", amount: "غصن صغير" },
+      { name: "ماء بارد", amount: "لتر" },
+      { name: "ثلج", amount: "حسب الرغبة" },
+    ],
+    steps: ["توضع الشرائح وإكليل الجبل في إبريق", "يُضاف الماء", "يُبرّد 45 دقيقة ويُقدّم مع الثلج"],
+    tips: "انزع شرائح البرتقال بعد ساعات طويلة إذا أصبح الطعم مرّاً.",
+  },
+  {
+    id: "bev_88",
+    name: "عصير الكرفس والتفاح الأخضر",
+    description: "عصير طازج بالكرفس والتفاح والليمون بنكهة خضراء متوازنة.",
+    type: "cold",
+    subtype: "healthy",
+    calories: 85,
+    healthTags: ["cholesterol", "obesity"],
+    ingredients: [
+      { name: "كرفس", amount: "3 أعواد" },
+      { name: "تفاح أخضر", amount: "حبة واحدة" },
+      { name: "عصير ليمون", amount: "ملعقة كبيرة" },
+      { name: "ماء بارد", amount: "نصف كوب" },
+    ],
+    steps: ["تُغسل المكونات وتُقطع", "تُخلط مع الماء", "يُضاف الليمون ويُقدّم فوراً"],
+    tips: "عدم التصفية يحافظ على ألياف أكثر في المشروب.",
+  },
+  {
+    id: "bev_89",
+    name: "عصير العنب الأحمر الطبيعي",
+    description: "عصير عنب أحمر طازج مبرد من دون سكر مضاف.",
+    type: "cold",
+    subtype: "healthy",
+    calories: 125,
+    healthTags: [],
+    ingredients: [
+      { name: "عنب أحمر", amount: "كوبان" },
+      { name: "ماء بارد", amount: "نصف كوب" },
+      { name: "ليمون", amount: "ملعقة صغيرة من العصير" },
+    ],
+    steps: ["يُغسل العنب", "يُخلط مع الماء والليمون", "يُصفّى حسب الرغبة ويُقدّم بارداً"],
+    tips: "استخدم عنباً ناضجاً لتجنب الحاجة إلى أي سكر مضاف.",
+  },
+  {
+    id: "bev_90",
+    name: "عصير الكرز الطبيعي",
+    description: "عصير كرز مبرد بطعم فاكهي مركز ومن دون محليات مضافة.",
+    type: "cold",
+    subtype: "healthy",
+    calories: 120,
+    healthTags: [],
+    ingredients: [
+      { name: "كرز منزوع النوى", amount: "كوبان" },
+      { name: "ماء بارد", amount: "نصف كوب" },
+      { name: "عصير ليمون", amount: "ملعقة صغيرة" },
+    ],
+    steps: ["يُزال نوى الكرز", "يُخلط مع الماء والليمون", "يُقدّم بارداً مع الثلج"],
+    tips: "اختر الكرز الداكن الناضج لمذاق حلو طبيعي.",
+  },
+  {
+    id: "bev_91",
+    name: "عصير الكمثرى والزنجبيل",
+    description: "عصير كمثرى طازج مع لمسة زنجبيل وليمون منعشة.",
+    type: "cold",
+    subtype: "healthy",
+    calories: 115,
+    healthTags: [],
+    ingredients: [
+      { name: "كمثرى ناضجة", amount: "حبتان" },
+      { name: "زنجبيل طازج", amount: "قطعة صغيرة" },
+      { name: "عصير ليمون", amount: "ملعقة كبيرة" },
+      { name: "ماء بارد", amount: "نصف كوب" },
+    ],
+    steps: ["تُقطع الكمثرى بعد إزالة البذور", "تُخلط مع الزنجبيل والماء", "يُضاف الليمون ويُقدّم"],
+    tips: "اترك قشر الكمثرى بعد غسلها جيداً للاستفادة من قوامه.",
+  },
+  {
+    id: "bev_92",
+    name: "عصير الليمون والريحان",
+    description: "ليمونادة باردة مع الريحان الطازج والثلج.",
+    type: "cold",
+    subtype: "regular",
+    calories: 90,
+    healthTags: [],
+    ingredients: [
+      { name: "عصير ليمون طازج", amount: "ربع كوب" },
+      { name: "ريحان طازج", amount: "10 أوراق" },
+      { name: "سكر", amount: "ملعقة كبيرة" },
+      { name: "ماء بارد", amount: "كوبان" },
+      { name: "ثلج", amount: "نصف كوب" },
+    ],
+    steps: ["يُذاب السكر في قليل من الماء", "يُخلط مع الليمون والريحان", "يُضاف الماء والثلج ويُقدّم"],
+    tips: "يمكن تقليل السكر تدريجياً أو استبداله بمحلي مناسب.",
+  },
+  {
+    id: "bev_93",
+    name: "سموذي الكيوي والسبانخ",
+    description: "سموذي أخضر بالكيوي والسبانخ وحليب اللوز.",
+    type: "cold",
+    subtype: "healthy",
+    calories: 165,
+    healthTags: ["cholesterol", "obesity"],
+    ingredients: [
+      { name: "كيوي", amount: "حبتان" },
+      { name: "سبانخ طازجة", amount: "كوب" },
+      { name: "موز", amount: "نصف حبة" },
+      { name: "حليب لوز غير محلى", amount: "كوب" },
+    ],
+    steps: ["تُقشر حبات الكيوي", "تُخلط جميع المكونات حتى تنعم", "يُقدّم فوراً"],
+    tips: "استخدم موزاً مجمداً لقوام أثخن بلا ثلج إضافي.",
+  },
+  {
+    id: "bev_94",
+    name: "سموذي الخوخ والزبادي",
+    description: "سموذي كريمي بالخوخ والزبادي قليل الدسم.",
+    type: "cold",
+    subtype: "healthy",
+    calories: 155,
+    healthTags: ["cholesterol", "obesity"],
+    ingredients: [
+      { name: "خوخ مقطع ومجمد", amount: "كوب ونصف" },
+      { name: "زبادي قليل الدسم", amount: "نصف كوب" },
+      { name: "حليب قليل الدسم", amount: "ربع كوب" },
+      { name: "قرفة", amount: "رشة" },
+    ],
+    steps: ["توضع المكونات في الخلاط", "تُخلط حتى يصبح القوام ناعماً", "تُقدّم باردة"],
+    tips: "الخوخ المجمد يغني عن إضافة الثلج ويمنح قواماً كريماً.",
+  },
+  {
+    id: "bev_95",
+    name: "سموذي الفراولة وبذور الكتان",
+    description: "سموذي فراولة مع بذور كتان وزبادي بطعم خفيف وقوام مشبع.",
+    type: "cold",
+    subtype: "healthy",
+    calories: 190,
+    healthTags: ["cholesterol", "obesity"],
+    ingredients: [
+      { name: "فراولة مجمدة", amount: "كوب" },
+      { name: "بذور كتان مطحونة", amount: "ملعقة كبيرة" },
+      { name: "زبادي يوناني قليل الدسم", amount: "نصف كوب" },
+      { name: "حليب لوز غير محلى", amount: "نصف كوب" },
+    ],
+    steps: ["توضع جميع المكونات في الخلاط", "تُخلط حتى تتجانس", "تُقدّم مباشرة"],
+    tips: "اطحن بذور الكتان قبل استخدامها مباشرة لنكهة أفضل.",
+  },
+  {
+    id: "bev_96",
+    name: "سموذي البطيخ والفراولة",
+    description: "مشروب صيفي بارد من البطيخ والفراولة والليمون.",
+    type: "cold",
+    subtype: "healthy",
+    calories: 105,
+    healthTags: [],
+    ingredients: [
+      { name: "بطيخ مقطع", amount: "كوبان" },
+      { name: "فراولة", amount: "نصف كوب" },
+      { name: "عصير ليمون", amount: "ملعقة صغيرة" },
+      { name: "ثلج", amount: "نصف كوب" },
+    ],
+    steps: ["تُزال بذور البطيخ", "تُخلط المكونات حتى تنعم", "يُقدّم فوراً"],
+    tips: "برّد البطيخ مسبقاً لتقليل كمية الثلج.",
+  },
+  {
+    id: "bev_97",
+    name: "لاسي المانجو بالزبادي",
+    description: "مشروب هندي بارد بالمانجو والزبادي والهيل.",
+    type: "cold",
+    subtype: "regular",
+    calories: 225,
+    healthTags: [],
+    ingredients: [
+      { name: "مانجو ناضجة", amount: "كوب مقطع" },
+      { name: "زبادي سادة", amount: "كوب" },
+      { name: "حليب بارد", amount: "ربع كوب" },
+      { name: "هيل مطحون", amount: "رشة" },
+    ],
+    steps: ["تُخلط المانجو والزبادي والحليب", "يُضاف الهيل", "يُقدّم بارداً"],
+    tips: "استخدم مانجو مجمدة للحصول على قوام أكثر سماكة.",
+  },
+  {
+    id: "bev_98",
+    name: "لاسي الفراولة بالزبادي",
+    description: "مشروب بارد بالفراولة والزبادي وقوام ناعم.",
+    type: "cold",
+    subtype: "regular",
+    calories: 175,
+    healthTags: [],
+    ingredients: [
+      { name: "فراولة طازجة أو مجمدة", amount: "كوب" },
+      { name: "زبادي سادة", amount: "كوب" },
+      { name: "حليب بارد", amount: "ربع كوب" },
+      { name: "عسل", amount: "ملعقة صغيرة اختيارية" },
+    ],
+    steps: ["تُخلط الفراولة والزبادي", "يُضاف الحليب ويُخلط حتى ينعّم", "يُقدّم بارداً"],
+    tips: "لا تضف المحلّي إلا بعد تذوق حلاوة الفراولة.",
+  },
+  {
+    id: "bev_99",
+    name: "قهوة مثلجة بالحليب",
+    description: "قهوة باردة مع الحليب والثلج، خفيفة وسريعة التحضير.",
+    type: "cold",
+    subtype: "regular",
+    calories: 105,
+    healthTags: [],
+    ingredients: [
+      { name: "قهوة سريعة الذوبان", amount: "ملعقة صغيرة" },
+      { name: "ماء دافئ", amount: "ملعقتان كبيرتان" },
+      { name: "حليب بارد", amount: "كوب" },
+      { name: "ثلج", amount: "6 مكعبات" },
+    ],
+    steps: ["تُذاب القهوة في الماء الدافئ", "يُملأ الكوب بالثلج", "يُضاف الحليب ثم القهوة ويُحرّك"],
+    tips: "برّد القهوة المركزة مسبقاً لتقليل ذوبان الثلج.",
+  },
+  {
+    id: "bev_100",
+    name: "موكا باردة بالكاكاو",
+    description: "مشروب بارد يجمع القهوة والكاكاو والحليب والثلج.",
+    type: "cold",
+    subtype: "regular",
+    calories: 165,
+    healthTags: [],
+    ingredients: [
+      { name: "حليب بارد", amount: "كوب" },
+      { name: "قهوة سريعة الذوبان", amount: "ملعقة صغيرة" },
+      { name: "كاكاو غير محلى", amount: "ملعقة كبيرة" },
+      { name: "سكر", amount: "ملعقة صغيرة اختيارية" },
+      { name: "ثلج", amount: "نصف كوب" },
+    ],
+    steps: ["تُذاب القهوة والكاكاو في قليل من الماء", "تُخلط مع الحليب والسكر", "تُسكب فوق الثلج وتُقدّم"],
+    tips: "استخدم كاكاو غير محلى وتحكم بكمية السكر وفق ذوقك.",
+  },
 ];
+
+const BEVERAGE_IMAGES: Record<string, string> = {
+  bev_76: "/manus-storage/bev-076-lemon-balm-tea_6ca81139.jpg",
+  bev_77: "/manus-storage/bev-077-fennel-tea_0bca7d85.jpg",
+  bev_78: "/manus-storage/bev-078-peppermint-tea_6852cee8.jpg",
+  bev_79: "/manus-storage/bev-079-clove-lemon-tea_864a9839.jpg",
+  bev_80: "/manus-storage/bev-080-barley-coffee_d33e852f.jpg",
+  bev_81: "/manus-storage/bev-081-oat-cinnamon-latte_129d58c3.jpg",
+  bev_82: "/manus-storage/bev-082-hot-almond-vanilla-milk_088c24ef.jpg",
+  bev_83: "/manus-storage/bev-083-lebanese-white-coffee_6cd4b509.jpg",
+  bev_84: "/manus-storage/bev-084-apple-cinnamon-tea_6017f558.jpg",
+  bev_85: "/manus-storage/bev-085-black-lime-tea_10bc7692.jpg",
+  bev_86: "/manus-storage/bev-086-strawberry-basil-water_26863a22.jpg",
+  bev_87: "/manus-storage/bev-087-orange-rosemary-water_07e01996.jpg",
+  bev_88: "/manus-storage/bev-088-celery-green-apple-juice_6192484a.jpg",
+  bev_89: "/manus-storage/bev-089-red-grape-juice_360341ff.jpg",
+  bev_90: "/manus-storage/bev-090-cherry-juice_590cb0d3.jpg",
+  bev_91: "/manus-storage/bev-091-pear-ginger-juice_c5540977.jpg",
+  bev_92: "/manus-storage/bev-092-basil-lemonade_880bc2be.jpg",
+  bev_93: "/manus-storage/bev-093-kiwi-spinach-smoothie_4d329ef7.jpg",
+  bev_94: "/manus-storage/bev-094-peach-yogurt-smoothie_e82cb961.jpg",
+  bev_95: "/manus-storage/bev-095-strawberry-flax-smoothie_89222df8.jpg",
+  bev_96: "/manus-storage/bev-096-watermelon-strawberry-smoothie_f65de2dc.jpg",
+  bev_97: "/manus-storage/bev-097-mango-lassi_7d058b9b.jpg",
+  bev_98: "/manus-storage/bev-098-strawberry-lassi_47453abb.jpg",
+  bev_99: "/manus-storage/bev-099-iced-milk-coffee_51cb4265.jpg",
+  bev_100: "/manus-storage/bev-100-iced-mocha_37977bc0.jpg",
+};
 
 const CATEGORIES = [
   { key: "hot", label: "ساخنة", icon: "local-fire-department" as const },
@@ -1624,11 +2069,28 @@ const SUBTYPES = [
 
 export default function BeveragesScreen() {
   const router = useRouter();
+  const { beverage: sharedBeverageId } = useLocalSearchParams<{ beverage?: string }>();
   const colors = useColors();
   const { profile } = useUser();
   const [selectedCategory, setSelectedCategory] = useState<string>("hot");
   const [selectedType, setSelectedType] = useState<"all" | "healthy" | "regular">("all");
   const [selectedBeverage, setSelectedBeverage] = useState<Beverage | null>(null);
+
+  useEffect(() => {
+    if (!sharedBeverageId) return;
+    const sharedBeverage = BEVERAGES.find((beverage) => beverage.id === sharedBeverageId);
+    if (sharedBeverage) setSelectedBeverage(sharedBeverage);
+  }, [sharedBeverageId]);
+
+  const handleShareBeverage = useCallback(async () => {
+    if (!selectedBeverage) return;
+
+    try {
+      await shareBeverage(selectedBeverage);
+    } catch {
+      Alert.alert("تعذرت المشاركة", "حاول مرة أخرى بعد قليل.");
+    }
+  }, [selectedBeverage]);
 
   const filteredBeverages = useMemo(() => {
     return BEVERAGES.filter((bev) => {
@@ -1658,20 +2120,37 @@ export default function BeveragesScreen() {
             {item.description}
           </Text>
         </View>
-        <View
-          className="px-2 py-1 rounded-lg mr-2"
-          style={{
-            backgroundColor: item.subtype === "healthy" ? "#4CAF5020" : "#FF980020",
-          }}
-        >
-          <Text
-            className="text-xs font-medium"
+        <View className="items-end gap-2 mr-2">
+          {BEVERAGE_IMAGES[item.id] ? (
+            <Image
+              source={{ uri: BEVERAGE_IMAGES[item.id] }}
+              style={{ width: 58, height: 58, borderRadius: 14, backgroundColor: colors.border }}
+              resizeMode="cover"
+              accessibilityLabel={`صورة ${item.name}`}
+            />
+          ) : (
+            <View
+              className="items-center justify-center"
+              style={{ width: 58, height: 58, borderRadius: 14, backgroundColor: colors.primary + "15" }}
+            >
+              <MaterialIcons name="local-cafe" size={28} color={colors.primary} />
+            </View>
+          )}
+          <View
+            className="px-2 py-1 rounded-lg"
             style={{
-              color: item.subtype === "healthy" ? "#4CAF50" : "#FF9800",
+              backgroundColor: item.subtype === "healthy" ? "#4CAF5020" : "#FF980020",
             }}
           >
-            {item.subtype === "healthy" ? "صحي" : "عادي"}
-          </Text>
+            <Text
+              className="text-xs font-medium"
+              style={{
+                color: item.subtype === "healthy" ? "#4CAF50" : "#FF9800",
+              }}
+            >
+              {item.subtype === "healthy" ? "صحي" : "عادي"}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -1811,19 +2290,38 @@ export default function BeveragesScreen() {
                 <Text className="text-xl font-bold text-foreground flex-1" style={{ textAlign: "right" }}>
                   {selectedBeverage.name}
                 </Text>
-                <TouchableOpacity
-                  onPress={() => setSelectedBeverage(null)}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
-                    backgroundColor: colors.surface,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <MaterialIcons name="close" size={20} color={colors.foreground} />
-                </TouchableOpacity>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                  <TouchableOpacity
+                    onPress={handleShareBeverage}
+                    accessibilityRole="button"
+                    accessibilityLabel={`مشاركة مشروب ${selectedBeverage.name}`}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      backgroundColor: colors.primary + "16",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <MaterialIcons name="share" size={20} color={colors.primary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setSelectedBeverage(null)}
+                    accessibilityRole="button"
+                    accessibilityLabel="إغلاق تفاصيل المشروب"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      backgroundColor: colors.surface,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <MaterialIcons name="close" size={20} color={colors.foreground} />
+                  </TouchableOpacity>
+                </View>
               </View>
 
               {/* Description */}

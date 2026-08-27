@@ -14,6 +14,8 @@ import Animated, { FadeInDown, FadeInUp, FadeIn } from "react-native-reanimated"
 import { LinearGradient } from "expo-linear-gradient";
 import { Image as ExpoImage } from "expo-image";
 import * as Localization from "expo-localization";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getSafeBottomPadding } from "@/lib/safe-area-spacing";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -28,7 +30,7 @@ function detectCountryFromLocale(): Country {
       if (tag.includes("ae") || region === "ae") return "uae";
       if (tag.includes("eg") || region === "eg") return "egypt";
     }
-  } catch (_) {}
+  } catch {}
   return "iraq";
 }
 
@@ -62,13 +64,14 @@ const ALL_FEATURES = [
 
 export default function OnboardingScreen() {
   const { updateProfile } = useUser();
+  const insets = useSafeAreaInsets();
   const [customizeStep, setCustomizeStep] = useState<null | "disease" | "offer">(null);
   const [selectedCondition, setSelectedCondition] = useState<HealthCondition>("none");
 
   useEffect(() => {
     const country = detectCountryFromLocale();
     updateProfile({ country });
-  }, []);
+  }, [updateProfile]);
 
   const handleStart = async () => {
     await updateProfile({ onboardingComplete: true });
@@ -108,7 +111,17 @@ export default function OnboardingScreen() {
       <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(255,255,255,0.22)" }]} />
 
       {/* المحتوى الرئيسي - بدون ScrollView */}
-      <View style={styles.content}>
+      <View
+        style={[
+          styles.content,
+          {
+            paddingBottom: Math.max(
+              SCREEN_HEIGHT * 0.04,
+              getSafeBottomPadding(insets.bottom, 16),
+            ),
+          },
+        ]}
+      >
 
         {/* الشعار والعنوان */}
         <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.logoSection}>
@@ -165,7 +178,12 @@ export default function OnboardingScreen() {
       {/* ── Modal: سؤال المرض ── */}
       <Modal visible={customizeStep === "disease"} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View
+            style={[
+              styles.modalContent,
+              { paddingBottom: getSafeBottomPadding(insets.bottom, 36) },
+            ]}
+          >
             <Text style={styles.modalTitle}>🩺 ما هي حالتك الصحية؟</Text>
             <Text style={styles.modalSubtitle}>
               سنخصص لك تحذيرات صحية دقيقة بناءً على حالتك
@@ -202,7 +220,7 @@ export default function OnboardingScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity onPress={handleSkipOffer} style={{ marginTop: 10, alignItems: "center" }}>
-              <Text style={{ color: "#999", fontSize: 14 }}>تخطي</Text>
+              <Text style={{ color: "#999", fontSize: 14 }}>تخطَّ الآن</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -211,7 +229,12 @@ export default function OnboardingScreen() {
       {/* ── Modal: عرض الاشتراك - بدون ScrollView ── */}
       <Modal visible={customizeStep === "offer"} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.offerModalContent}>
+          <View
+            style={[
+              styles.offerModalContent,
+              { paddingBottom: getSafeBottomPadding(insets.bottom, 28) },
+            ]}
+          >
             {/* الرأس */}
             <View style={{ alignItems: "center", marginBottom: 12 }}>
               <Text style={{ fontSize: 28 }}>💎</Text>

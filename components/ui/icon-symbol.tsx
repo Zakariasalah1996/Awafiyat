@@ -52,6 +52,7 @@ const MAPPING = {
   "drop.fill": "water-drop",
   "pills.fill": "medication",
   "heart.text.square.fill": "health-and-safety",
+  "bubble.left.and.bubble.right.fill": "forum",
 } as IconMapping;
 
 export function IconSymbol({

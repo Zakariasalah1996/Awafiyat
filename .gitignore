@@ -13,6 +13,8 @@ expo-env.d.ts
 .kotlin/
 *.orig.*
 *.jks
+*.keystore
+credentials.json
 *.p8
 *.p12
 *.key
@@ -60,8 +62,14 @@ Thumbs.db
 *.tgz
 *.tar.gz
 .cache/
+.secure/
 
-# Webdev artifacts (checkpoint zips, migrations, etc.)
+# Webdev artifacts (checkpoint zips, migrations, local audit extracts, etc.)
 .webdev/
+.manus/
 server/firebase-service-account.json
 .project-config.json
+
+# Large promotional images (stored locally, not in git)
+app-store-assets/*.png
+assets/images/subscription_*.png

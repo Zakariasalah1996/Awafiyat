@@ -1,11 +1,16 @@
 import { HealthCondition } from "./user-context";
+import { GLOBAL_RECIPE_BATCH_1 } from "./global-recipes-batch-1";
+import { GLOBAL_RECIPE_BATCH_2 } from "./global-recipes-batch-2";
+import { GLOBAL_RECIPE_BATCH_3 } from "./global-recipes-batch-3";
 
 export interface Recipe {
   id: string;
   name: string;
   nameEn: string;
   category: "main" | "side" | "soup" | "bread" | "dessert" | "breakfast";
-  cuisine: "iraqi" | "arab" | "kurdish";
+  cuisine: "iraqi" | "arab" | "kurdish" | "international";
+  /** البلد المحدد للوصفات ذات الأصل الوطني الواضح. */
+  country?: string;
   ingredients: string[];
   instructions: string[];
   prepTime: string;
@@ -600,54 +605,8 @@ export const RECIPES_DATABASE: Recipe[] = [
   },
 ];
 
-// دالة لتوليد وصفات إضافية ديناميكياً عند الحاجة (بدلاً من تحميلها جميعاً)
-function generateAdditionalRecipes(count: number): Recipe[] {
-  const recipes: Recipe[] = [];
-  const categories: Array<"main" | "side" | "soup" | "bread" | "dessert" | "breakfast"> = [
-    "main",
-    "side",
-    "soup",
-    "bread",
-    "dessert",
-    "breakfast",
-  ];
-  const cuisines: Array<"iraqi" | "arab" | "kurdish"> = ["iraqi", "arab", "kurdish"];
-  const difficulties: Array<"easy" | "medium" | "hard"> = ["easy", "medium", "hard"];
-  const emojis = ["🍲", "🥘", "🍳", "🥗", "🍞", "🍰"];
-
-  for (let i = 0; i < count; i++) {
-    recipes.push({
-      id: `recipe_${24 + i}`,
-      name: `وصفة متنوعة ${i + 1}`,
-      nameEn: `Recipe ${i + 1}`,
-      category: categories[Math.floor(Math.random() * categories.length)],
-      cuisine: cuisines[Math.floor(Math.random() * cuisines.length)],
-      ingredients: ["مكون 1", "مكون 2", "مكون 3"],
-      instructions: ["خطوة 1", "خطوة 2", "خطوة 3"],
-      prepTime: `${Math.floor(Math.random() * 30) + 5} دقائق`,
-      cookTime: `${Math.floor(Math.random() * 60) + 10} دقائق`,
-      servings: Math.floor(Math.random() * 4) + 2,
-      calories: Math.floor(Math.random() * 400) + 100,
-      protein: Math.floor(Math.random() * 30) + 5,
-      carbs: Math.floor(Math.random() * 50) + 10,
-      fat: Math.floor(Math.random() * 20) + 5,
-      healthTags: ["all"],
-      difficulty: difficulties[Math.floor(Math.random() * difficulties.length)],
-      emoji: emojis[Math.floor(Math.random() * emojis.length)],
-    });
-  }
-
-  return recipes;
-}
-
-// تخزين مؤقت للوصفات الإضافية
-let additionalRecipesCache: Recipe[] | null = null;
-
 export function getAllRecipes(): Recipe[] {
-  if (!additionalRecipesCache) {
-    additionalRecipesCache = generateAdditionalRecipes(177);
-  }
-  return [...RECIPES_DATABASE, ...additionalRecipesCache];
+  return [...RECIPES_DATABASE, ...GLOBAL_RECIPE_BATCH_1, ...GLOBAL_RECIPE_BATCH_2, ...GLOBAL_RECIPE_BATCH_3];
 }
 
 export function getRecipesByHealthCondition(condition: HealthCondition): Recipe[] {

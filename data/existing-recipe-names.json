@@ -1,0 +1,5252 @@
+[
+  {
+    "id": "lunch_1",
+    "name": "تشريب لحم عراقي",
+    "normalized": "تشريب لحم عراقي",
+    "country": "iraqi"
+  },
+  {
+    "id": "lunch_2",
+    "name": "دولمة عراقية",
+    "normalized": "دولمه عراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "lunch_3",
+    "name": "برياني عراقي",
+    "normalized": "برياني عراقي",
+    "country": "iraqi"
+  },
+  {
+    "id": "lunch_4",
+    "name": "كبة حلب (كبة مقلية)",
+    "normalized": "كبه حلب (كبه مقليه)",
+    "country": "iraqi"
+  },
+  {
+    "id": "lunch_5",
+    "name": "مرقة بامية عراقية",
+    "normalized": "مرقه باميه عراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "lunch_6",
+    "name": "تمن أحمر عراقي (رز أحمر)",
+    "normalized": "تمن احمر عراقي (رز احمر)",
+    "country": "iraqi"
+  },
+  {
+    "id": "lunch_7",
+    "name": "سمك مسكوف",
+    "normalized": "سمك مسكوف",
+    "country": "iraqi"
+  },
+  {
+    "id": "lunch_8",
+    "name": "فسنجون عراقي",
+    "normalized": "فسنجون عراقي",
+    "country": "general"
+  },
+  {
+    "id": "lunch_9",
+    "name": "مرقة فاصوليا عراقية",
+    "normalized": "مرقه فاصوليا عراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "lunch_10",
+    "name": "كبة برغل بالمرق",
+    "normalized": "كبه برغل بالمرق",
+    "country": "iraqi"
+  },
+  {
+    "id": "dinner_1",
+    "name": "لبلبي عراقي (حمص بالمرق)",
+    "normalized": "لبلبي عراقي (حمص بالمرق)",
+    "country": "iraqi"
+  },
+  {
+    "id": "dinner_2",
+    "name": "عروق تمن (رز بالشبت)",
+    "normalized": "عروق تمن (رز بالشبت)",
+    "country": "iraqi"
+  },
+  {
+    "id": "dinner_3",
+    "name": "شوربة عدس عراقية",
+    "normalized": "شوربه عدس عراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "dinner_4",
+    "name": "مسبحة حمص",
+    "normalized": "مسبحه حمص",
+    "country": "general"
+  },
+  {
+    "id": "healthy_1",
+    "name": "سلطة تبولة عراقية",
+    "normalized": "سلطه تبوله عراقيه",
+    "country": "general"
+  },
+  {
+    "id": "healthy_2",
+    "name": "دجاج مشوي بالأعشاب العراقية",
+    "normalized": "دجاج مشوي بالاعشاب العراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "dessert_1",
+    "name": "زلابية عراقية",
+    "normalized": "زلابيه عراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "dessert_2",
+    "name": "حلاوة تمر عراقية",
+    "normalized": "حلاوه تمر عراقيه",
+    "country": "general"
+  },
+  {
+    "id": "new_1",
+    "name": "مسقعة البيض العراقية",
+    "normalized": "مسقعه البيض العراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "new_2",
+    "name": "الحمص بالطحينة",
+    "normalized": "الحمص بالطحينه",
+    "country": "general"
+  },
+  {
+    "id": "new_3",
+    "name": "الفتوش العراقي",
+    "normalized": "الفتوش العراقي",
+    "country": "general"
+  },
+  {
+    "id": "new_4",
+    "name": "شوربة الخضار الصحية",
+    "normalized": "شوربه الخضار الصحيه",
+    "country": "general"
+  },
+  {
+    "id": "new_5",
+    "name": "الدجاج المشوي بالليمون",
+    "normalized": "الدجاج المشوي بالليمون",
+    "country": "iraqi"
+  },
+  {
+    "id": "new_6",
+    "name": "السمك المشوي بالأعشاب",
+    "normalized": "السمك المشوي بالاعشاب",
+    "country": "iraqi"
+  },
+  {
+    "id": "new_7",
+    "name": "الكنافة العراقية",
+    "normalized": "الكنافه العراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "new_8",
+    "name": "البقلاوة العراقية",
+    "normalized": "البقلاوه العراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "new_9",
+    "name": "تمر بالسمسم والجوز",
+    "normalized": "تمر بالسمسم والجوز",
+    "country": "general"
+  },
+  {
+    "id": "new_10",
+    "name": "الخبز الأسمر الصحي",
+    "normalized": "الخبز الاسمر الصحي",
+    "country": "general"
+  },
+  {
+    "id": "new_11",
+    "name": "سلطة الجرجير بالرمان",
+    "normalized": "سلطه الجرجير بالرمان",
+    "country": "general"
+  },
+  {
+    "id": "new_12",
+    "name": "الكليجة العراقية",
+    "normalized": "الكليجه العراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "kb_1",
+    "name": "سقسوقة كردية بالجبن",
+    "normalized": "سقسوقه كرديه بالجبن",
+    "country": "kurdish"
+  },
+  {
+    "id": "kb_2",
+    "name": "شوربة العدس على الطريقة الكردية",
+    "normalized": "شوربه العدس علي الطريقه الكرديه",
+    "country": "kurdish"
+  },
+  {
+    "id": "kb_3",
+    "name": "نان بربري كردي",
+    "normalized": "نان بربري كردي",
+    "country": "general"
+  },
+  {
+    "id": "kb_4",
+    "name": "خاگينه (عجة كردية)",
+    "normalized": "خاگينه (عجه كرديه)",
+    "country": "kurdish"
+  },
+  {
+    "id": "kb_5",
+    "name": "كليجة كردية",
+    "normalized": "كليجه كرديه",
+    "country": "general"
+  },
+  {
+    "id": "kb_6",
+    "name": "شير برنج (رز بالحليب كردي)",
+    "normalized": "شير برنج (رز بالحليب كردي)",
+    "country": "general"
+  },
+  {
+    "id": "kb_7",
+    "name": "نان سنگك",
+    "normalized": "نان سنگك",
+    "country": "general"
+  },
+  {
+    "id": "kb_8",
+    "name": "خبز تنور كردي",
+    "normalized": "خبز تنور كردي",
+    "country": "kurdish"
+  },
+  {
+    "id": "kb_9",
+    "name": "حلوى كردية بالسمسم (Oqîtê Kunjî)",
+    "normalized": "حلوي كرديه بالسمسم (Oqîtê Kunjî)",
+    "country": "general"
+  },
+  {
+    "id": "kb_10",
+    "name": "فطيرة كردية بالجبن",
+    "normalized": "فطيره كرديه بالجبن",
+    "country": "kurdish"
+  },
+  {
+    "id": "kb_11",
+    "name": "بيض بالطماطة كردي (Temate û Hêkêt)",
+    "normalized": "بيض بالطماطه كردي (Temate û Hêkêt)",
+    "country": "general"
+  },
+  {
+    "id": "kb_12",
+    "name": "لبنة كردية",
+    "normalized": "لبنه كرديه",
+    "country": "general"
+  },
+  {
+    "id": "kb_13",
+    "name": "جبن كردي بيتي (Penîrê Kurdî)",
+    "normalized": "جبن كردي بيتي (Penîrê Kurdî)",
+    "country": "kurdish"
+  },
+  {
+    "id": "kb_15",
+    "name": "دولمة كردية باللبن (Yaprax)",
+    "normalized": "دولمه كرديه باللبن (Yaprax)",
+    "country": "kurdish"
+  },
+  {
+    "id": "kb_16",
+    "name": "خبز الصاج الكردي (نان ساجي)",
+    "normalized": "خبز الصاج الكردي (نان ساجي)",
+    "country": "general"
+  },
+  {
+    "id": "kb_17",
+    "name": "شوربة الدوغ الكردية (Mastaw)",
+    "normalized": "شوربه الدوغ الكرديه (Mastaw)",
+    "country": "kurdish"
+  },
+  {
+    "id": "kb_18",
+    "name": "شفتة (كفتة كردية)",
+    "normalized": "شفته (كفته كرديه)",
+    "country": "iraqi"
+  },
+  {
+    "id": "kb_19",
+    "name": "زبادي بالعسل والجوز على الطريقة الكردية",
+    "normalized": "زبادي بالعسل والجوز علي الطريقه الكرديه",
+    "country": "kurdish"
+  },
+  {
+    "id": "kb_20",
+    "name": "مخلمة عراقية باللحم",
+    "normalized": "مخلمه عراقيه باللحم",
+    "country": "iraqi"
+  },
+  {
+    "id": "kb_21",
+    "name": "بورك عراقي بالجبن",
+    "normalized": "بورك عراقي بالجبن",
+    "country": "iraqi"
+  },
+  {
+    "id": "kb_22",
+    "name": "فلافل عراقية",
+    "normalized": "فلافل عراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "kb_23",
+    "name": "باقلاء بالدهن",
+    "normalized": "باقلاء بالدهن",
+    "country": "iraqi"
+  },
+  {
+    "id": "kb_24",
+    "name": "جرك عراقي",
+    "normalized": "جرك عراقي",
+    "country": "general"
+  },
+  {
+    "id": "kb_25",
+    "name": "كبة البرغل الكردية (كوتلك)",
+    "normalized": "كبه البرغل الكرديه (كوتلك)",
+    "country": "kurdish"
+  },
+  {
+    "id": "kl_1",
+    "name": "كبة السليمانية",
+    "normalized": "كبه السليمانيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_2",
+    "name": "برياني كردي",
+    "normalized": "برياني كردي",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_3",
+    "name": "دولمة كردية",
+    "normalized": "دولمه كرديه",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_4",
+    "name": "قوزي كردي",
+    "normalized": "قوزي كردي",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_5",
+    "name": "تشريب كردي",
+    "normalized": "تشريب كردي",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_6",
+    "name": "كباب كردي",
+    "normalized": "كباب كردي",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_7",
+    "name": "طاس كباب",
+    "normalized": "طاس كباب",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_8",
+    "name": "مرقة فاصوليا كردية",
+    "normalized": "مرقه فاصوليا كرديه",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_9",
+    "name": "رز بالدجاج كردي",
+    "normalized": "رز بالدجاج كردي",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_10",
+    "name": "كفتة كردية",
+    "normalized": "كفته كرديه",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_11",
+    "name": "شوربة عدس كردية",
+    "normalized": "شوربه عدس كرديه",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_12",
+    "name": "ياخني كردي",
+    "normalized": "ياخني كردي",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_13",
+    "name": "شلة و قيمة",
+    "normalized": "شله و قيمه",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_14",
+    "name": "كفتة باللبن (دوغابا)",
+    "normalized": "كفته باللبن (دوغابا)",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_15",
+    "name": "مرقة سماق",
+    "normalized": "مرقه سماق",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_16",
+    "name": "برغل بالدجاج",
+    "normalized": "برغل بالدجاج",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_17",
+    "name": "شيش كباب دجاج كردي",
+    "normalized": "شيش كباب دجاج كردي",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_18",
+    "name": "مرقة شجر (كوسا) باللبن",
+    "normalized": "مرقه شجر (كوسا) باللبن",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_19",
+    "name": "الكفتة النية الكردية (Çiğ köfte)",
+    "normalized": "الكفته النيه الكرديه (Çiğ köfte)",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_20",
+    "name": "صاج دجاج كردي",
+    "normalized": "صاج دجاج كردي",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_21",
+    "name": "مرقة سبانخ كردية",
+    "normalized": "مرقه سبانخ كرديه",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_22",
+    "name": "مقلوبة كردية",
+    "normalized": "مقلوبه كرديه",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_23",
+    "name": "شوربة ماش كردية",
+    "normalized": "شوربه ماش كرديه",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_24",
+    "name": "كباب باذنجان كردي",
+    "normalized": "كباب باذنجان كردي",
+    "country": "iraqi"
+  },
+  {
+    "id": "kl_25",
+    "name": "شيش برك كردي",
+    "normalized": "شيش برك كردي",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-1",
+    "name": "كاهي بالقيمر",
+    "normalized": "كاهي بالقيمر",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-2",
+    "name": "لبلبي",
+    "normalized": "لبلبي",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-3",
+    "name": "باجة عراقية",
+    "normalized": "باجه عراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-4",
+    "name": "تشريب فطور",
+    "normalized": "تشريب فطور",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-5",
+    "name": "خبز تنور",
+    "normalized": "خبز تنور",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-6",
+    "name": "صمون بالبيض",
+    "normalized": "صمون بالبيض",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-7",
+    "name": "عجة عراقية",
+    "normalized": "عجه عراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-9",
+    "name": "حمص بالزيت",
+    "normalized": "حمص بالزيت",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-10",
+    "name": "فول بالطحينة",
+    "normalized": "فول بالطحينه",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-11",
+    "name": "بيض مسلوق بالكركم",
+    "normalized": "بيض مسلوق بالكركم",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-12",
+    "name": "خبز رقاق",
+    "normalized": "خبز رقاق",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-13",
+    "name": "لحم بعجين",
+    "normalized": "لحم بعجين",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-14",
+    "name": "فطائر سبانخ",
+    "normalized": "فطائر سبانخ",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-15",
+    "name": "مخلمة",
+    "normalized": "مخلمه",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_1",
+    "name": "مرقة لوبيا",
+    "normalized": "مرقه لوبيا",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_2",
+    "name": "تمن باقلاء بالشبنت",
+    "normalized": "تمن باقلاء بالشبنت",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_3",
+    "name": "قوزي عراقي",
+    "normalized": "قوزي عراقي",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_4",
+    "name": "كبة حلب مقلية",
+    "normalized": "كبه حلب مقليه",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_5",
+    "name": "تبسي باذنجان (مسقعة عراقية)",
+    "normalized": "تبسي باذنجان (مسقعه عراقيه)",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_6",
+    "name": "تشريب دجاج أصفر",
+    "normalized": "تشريب دجاج اصفر",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_7",
+    "name": "مرقة سبزي (قيمة سبزي)",
+    "normalized": "مرقه سبزي (قيمه سبزي)",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_8",
+    "name": "رز بالبرغل (تمن برغل)",
+    "normalized": "رز بالبرغل (تمن برغل)",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_9",
+    "name": "كباب عراقي مشوي",
+    "normalized": "كباب عراقي مشوي",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_10",
+    "name": "تكة دجاج عراقية",
+    "normalized": "تكه دجاج عراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_11",
+    "name": "مرقة قرع (شجر أصفر)",
+    "normalized": "مرقه قرع (شجر اصفر)",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_12",
+    "name": "شيخ محشي عراقي",
+    "normalized": "شيخ محشي عراقي",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_13",
+    "name": "كبة برغل سلق",
+    "normalized": "كبه برغل سلق",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_15",
+    "name": "مرقة شجر (كوسا)",
+    "normalized": "مرقه شجر (كوسا)",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_16",
+    "name": "مطبك سمك عراقي",
+    "normalized": "مطبك سمك عراقي",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_18",
+    "name": "مقلوبة دجاج عراقية",
+    "normalized": "مقلوبه دجاج عراقيه",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_19",
+    "name": "تمن ماش عراقي",
+    "normalized": "تمن ماش عراقي",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_20",
+    "name": "مرقة فاصوليا يابسة",
+    "normalized": "مرقه فاصوليا يابسه",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_21",
+    "name": "برياني عراقي بالدجاج",
+    "normalized": "برياني عراقي بالدجاج",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_22",
+    "name": "مرقة بتيتة (بطاطا) باللحم",
+    "normalized": "مرقه بتيته (بطاطا) باللحم",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_23",
+    "name": "تمن جزر عراقي",
+    "normalized": "تمن جزر عراقي",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_24",
+    "name": "تبسي دجاج بالفرن",
+    "normalized": "تبسي دجاج بالفرن",
+    "country": "iraqi"
+  },
+  {
+    "id": "il_25",
+    "name": "مرقة طرشانة (قيسي)",
+    "normalized": "مرقه طرشانه (قيسي)",
+    "country": "iraqi"
+  },
+  {
+    "id": "batch_5_1",
+    "name": "شوربة ماش",
+    "normalized": "شوربه ماش",
+    "country": "iraqi"
+  },
+  {
+    "id": "batch_5_2",
+    "name": "سلطة عراقية",
+    "normalized": "سلطه عراقيه",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_3",
+    "name": "باذنجان مشوي",
+    "normalized": "باذنجان مشوي",
+    "country": "iraqi"
+  },
+  {
+    "id": "batch_5_4",
+    "name": "حمص بالكاري",
+    "normalized": "حمص بالكاري",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_5",
+    "name": "عدس أصفر",
+    "normalized": "عدس اصفر",
+    "country": "iraqi"
+  },
+  {
+    "id": "batch_5_6",
+    "name": "شوربة شعيرية",
+    "normalized": "شوربه شعيريه",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_7",
+    "name": "فتة حمص",
+    "normalized": "فته حمص",
+    "country": "iraqi"
+  },
+  {
+    "id": "batch_5_8",
+    "name": "سلطة بطاطا",
+    "normalized": "سلطه بطاطا",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_9",
+    "name": "متبل باذنجان",
+    "normalized": "متبل باذنجان",
+    "country": "iraqi"
+  },
+  {
+    "id": "batch_5_10",
+    "name": "بابا غنوج عراقي",
+    "normalized": "بابا غنوج عراقي",
+    "country": "iraqi"
+  },
+  {
+    "id": "batch_5_11",
+    "name": "شوربة خضار",
+    "normalized": "شوربه خضار",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_12",
+    "name": "سلطة فاصوليا",
+    "normalized": "سلطه فاصوليا",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_13",
+    "name": "لبن عراقي (شنينة)",
+    "normalized": "لبن عراقي (شنينه)",
+    "country": "iraqi"
+  },
+  {
+    "id": "batch_5_14",
+    "name": "سلطة شمندر",
+    "normalized": "سلطه شمندر",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_15",
+    "name": "جاجيك",
+    "normalized": "جاجيك",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_16",
+    "name": "شوربة فطر",
+    "normalized": "شوربه فطر",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_17",
+    "name": "معكرونة باللبن",
+    "normalized": "معكرونه باللبن",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_18",
+    "name": "سلطة جرجير بالرمان",
+    "normalized": "سلطه جرجير بالرمان",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_19",
+    "name": "بيض وطماطة (مخلمة)",
+    "normalized": "بيض وطماطه (مخلمه)",
+    "country": "iraqi"
+  },
+  {
+    "id": "batch_5_20",
+    "name": "طرشانة (سلطة فواكه مجففة)",
+    "normalized": "طرشانه (سلطه فواكه مجففه)",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_21",
+    "name": "شوربة برغل",
+    "normalized": "شوربه برغل",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_22",
+    "name": "سلطة باذنجان وبطاطا مقلية",
+    "normalized": "سلطه باذنجان وبطاطا مقليه",
+    "country": "iraqi"
+  },
+  {
+    "id": "batch_5_23",
+    "name": "حساء الطماطم بالشعيرية",
+    "normalized": "حساء الطماطم بالشعيريه",
+    "country": "general"
+  },
+  {
+    "id": "batch_5_24",
+    "name": "سلطة الملفوف والجزر (كولسلو)",
+    "normalized": "سلطه الملفوف والجزر (كولسلو)",
+    "country": "iraqi"
+  },
+  {
+    "id": "batch_5_25",
+    "name": "شوربة قرنابيط (زهرة)",
+    "normalized": "شوربه قرنابيط (زهره)",
+    "country": "general"
+  },
+  {
+    "id": "gb_1",
+    "name": "بلاليط",
+    "normalized": "بلاليط",
+    "country": "emirati"
+  },
+  {
+    "id": "gb_2",
+    "name": "خبز رقاق خليجي",
+    "normalized": "خبز رقاق خليجي",
+    "country": "emirati"
+  },
+  {
+    "id": "gb_3",
+    "name": "جباب",
+    "normalized": "جباب",
+    "country": "emirati"
+  },
+  {
+    "id": "gb_4",
+    "name": "لقيمات",
+    "normalized": "لقيمات",
+    "country": "general"
+  },
+  {
+    "id": "gb_5",
+    "name": "بيض بالطماطة خليجي",
+    "normalized": "بيض بالطماطه خليجي",
+    "country": "general"
+  },
+  {
+    "id": "gb_6",
+    "name": "فول خليجي (مدمس)",
+    "normalized": "فول خليجي (مدمس)",
+    "country": "general"
+  },
+  {
+    "id": "gb_7",
+    "name": "شكشوكة خليجية",
+    "normalized": "شكشوكه خليجيه",
+    "country": "general"
+  },
+  {
+    "id": "gb_8",
+    "name": "خبز محلى",
+    "normalized": "خبز محلي",
+    "country": "general"
+  },
+  {
+    "id": "gb_9",
+    "name": "عصيدة",
+    "normalized": "عصيده",
+    "country": "general"
+  },
+  {
+    "id": "gb_10",
+    "name": "معصوب",
+    "normalized": "معصوب",
+    "country": "general"
+  },
+  {
+    "id": "gb_11",
+    "name": "فتة خليجية",
+    "normalized": "فته خليجيه",
+    "country": "general"
+  },
+  {
+    "id": "gb_12",
+    "name": "مطبق",
+    "normalized": "مطبق",
+    "country": "general"
+  },
+  {
+    "id": "gb_13",
+    "name": "شاي كرك",
+    "normalized": "شاي كرك",
+    "country": "general"
+  },
+  {
+    "id": "gb_14",
+    "name": "حلوى خليجية (الحلوى البحرينية)",
+    "normalized": "حلوي خليجيه (الحلوي البحرينيه)",
+    "country": "general"
+  },
+  {
+    "id": "gb_15",
+    "name": "قرص عقيلي",
+    "normalized": "قرص عقيلي",
+    "country": "general"
+  },
+  {
+    "id": "gb_16",
+    "name": "خبز التاوه",
+    "normalized": "خبز التاوه",
+    "country": "general"
+  },
+  {
+    "id": "gb_17",
+    "name": "دango (نخي)",
+    "normalized": "دango (نخي)",
+    "country": "general"
+  },
+  {
+    "id": "gb_18",
+    "name": "باقلاء بالدهن على الطريقة الخليجية",
+    "normalized": "باقلاء بالدهن علي الطريقه الخليجيه",
+    "country": "general"
+  },
+  {
+    "id": "gb_19",
+    "name": "محروق صبعه",
+    "normalized": "محروق صبعه",
+    "country": "general"
+  },
+  {
+    "id": "gb_20",
+    "name": "كبدة على الصاج",
+    "normalized": "كبده علي الصاج",
+    "country": "general"
+  },
+  {
+    "id": "gb_21",
+    "name": "حمسة حلوم",
+    "normalized": "حمسه حلوم",
+    "country": "general"
+  },
+  {
+    "id": "gb_22",
+    "name": "جريش بالحليب",
+    "normalized": "جريش بالحليب",
+    "country": "general"
+  },
+  {
+    "id": "gb_23",
+    "name": "مربين",
+    "normalized": "مربين",
+    "country": "general"
+  },
+  {
+    "id": "gb_24",
+    "name": "خمير",
+    "normalized": "خمير",
+    "country": "general"
+  },
+  {
+    "id": "gb_25",
+    "name": "مهياوة",
+    "normalized": "مهياوه",
+    "country": "general"
+  },
+  {
+    "id": "hd_1",
+    "name": "سلطة كينوا",
+    "normalized": "سلطه كينوا",
+    "country": "general"
+  },
+  {
+    "id": "hd_2",
+    "name": "دجاج مشوي بالخضار",
+    "normalized": "دجاج مشوي بالخضار",
+    "country": "general"
+  },
+  {
+    "id": "hd_3",
+    "name": "سمك بالليمون والأعشاب",
+    "normalized": "سمك بالليمون والاعشاب",
+    "country": "general"
+  },
+  {
+    "id": "hd_4",
+    "name": "شوربة عدس خفيفة",
+    "normalized": "شوربه عدس خفيفه",
+    "country": "iraqi"
+  },
+  {
+    "id": "hd_5",
+    "name": "سلطة فاصوليا حمراء",
+    "normalized": "سلطه فاصوليا حمراء",
+    "country": "general"
+  },
+  {
+    "id": "hd_6",
+    "name": "خضار مشوية بالفرن",
+    "normalized": "خضار مشويه بالفرن",
+    "country": "iraqi"
+  },
+  {
+    "id": "hd_7",
+    "name": "دجاج بالكركم والزنجبيل",
+    "normalized": "دجاج بالكركم والزنجبيل",
+    "country": "general"
+  },
+  {
+    "id": "hd_8",
+    "name": "سمك بالأعشاب والبرغل",
+    "normalized": "سمك بالاعشاب والبرغل",
+    "country": "emirati"
+  },
+  {
+    "id": "hd_9",
+    "name": "سلطة حمص وشمندر",
+    "normalized": "سلطه حمص وشمندر",
+    "country": "general"
+  },
+  {
+    "id": "hd_10",
+    "name": "شوربة بروكلي بالكريمة اللايت",
+    "normalized": "شوربه بروكلي بالكريمه اللايت",
+    "country": "general"
+  },
+  {
+    "id": "hd_11",
+    "name": "بيض مخفوق بالسبانخ والفطر",
+    "normalized": "بيض مخفوق بالسبانخ والفطر",
+    "country": "general"
+  },
+  {
+    "id": "hd_12",
+    "name": "كفتة دجاج بالشوفان",
+    "normalized": "كفته دجاج بالشوفان",
+    "country": "iraqi"
+  },
+  {
+    "id": "hd_13",
+    "name": "تبولة الشمندر",
+    "normalized": "تبوله الشمندر",
+    "country": "general"
+  },
+  {
+    "id": "hd_14",
+    "name": "زبادي بالفواكه والشيا",
+    "normalized": "زبادي بالفواكه والشيا",
+    "country": "general"
+  },
+  {
+    "id": "hd_15",
+    "name": "مرق باميا باللحم قليل الدهن",
+    "normalized": "مرق باميا باللحم قليل الدهن",
+    "country": "iraqi"
+  },
+  {
+    "id": "hd_21",
+    "name": "باذنجان بالفرن مع الطحينة",
+    "normalized": "باذنجان بالفرن مع الطحينه",
+    "country": "iraqi"
+  },
+  {
+    "id": "hd_22",
+    "name": "سلطة الدجاج والافوكادو",
+    "normalized": "سلطه الدجاج والافوكادو",
+    "country": "general"
+  },
+  {
+    "id": "hd_23",
+    "name": "برغل بالكاري والخضار",
+    "normalized": "برغل بالكاري والخضار",
+    "country": "kurdish"
+  },
+  {
+    "id": "hd_24",
+    "name": "بان كيك الشوفان والموز",
+    "normalized": "بان كيك الشوفان والموز",
+    "country": "general"
+  },
+  {
+    "id": "hd_25",
+    "name": "صينية لحم مفروم بالخضار",
+    "normalized": "صينيه لحم مفروم بالخضار",
+    "country": "general"
+  },
+  {
+    "id": "hd_16",
+    "name": "شوربة فطر صحية",
+    "normalized": "شوربه فطر صحيه",
+    "country": "general"
+  },
+  {
+    "id": "hd_17",
+    "name": "سلطة جرجير بالفراولة",
+    "normalized": "سلطه جرجير بالفراوله",
+    "country": "general"
+  },
+  {
+    "id": "hd_18",
+    "name": "مطبق سمك صحي",
+    "normalized": "مطبق سمك صحي",
+    "country": "emirati"
+  },
+  {
+    "id": "hd_19",
+    "name": "عصير أخضر منظف للجسم",
+    "normalized": "عصير اخضر منظف للجسم",
+    "country": "general"
+  },
+  {
+    "id": "hd_20",
+    "name": "فلافل مشوية بالفرن",
+    "normalized": "فلافل مشويه بالفرن",
+    "country": "egyptian"
+  },
+  {
+    "id": "hh_1",
+    "name": "سلطة سبانخ بالرمان",
+    "normalized": "سلطه سبانخ بالرمان",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_2",
+    "name": "سمك سلمون مشوي بالليمون والأعشاب",
+    "normalized": "سمك سلمون مشوي بالليمون والاعشاب",
+    "country": "general"
+  },
+  {
+    "id": "hh_3",
+    "name": "شوربة شوفان بالخضار",
+    "normalized": "شوربه شوفان بالخضار",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_4",
+    "name": "دجاج بالزنجبيل والبروكلي",
+    "normalized": "دجاج بالزنجبيل والبروكلي",
+    "country": "general"
+  },
+  {
+    "id": "hh_5",
+    "name": "سلطة أفوكادو وطماطة",
+    "normalized": "سلطه افوكادو وطماطه",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_6",
+    "name": "خضار مطبوخة بالبخار",
+    "normalized": "خضار مطبوخه بالبخار",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_7",
+    "name": "سمك مشوي بالكركم",
+    "normalized": "سمك مشوي بالكركم",
+    "country": "general"
+  },
+  {
+    "id": "hh_8",
+    "name": "شوربة طماطة وشعيرية",
+    "normalized": "شوربه طماطه وشعيريه",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_9",
+    "name": "سلطة جرجير بالفطر",
+    "normalized": "سلطه جرجير بالفطر",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_10",
+    "name": "فاكهة مع زبادي قليل الدسم",
+    "normalized": "فاكهه مع زبادي قليل الدسم",
+    "country": "general"
+  },
+  {
+    "id": "hh_11",
+    "name": "تبسي باذنجان صحي",
+    "normalized": "تبسي باذنجان صحي",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_12",
+    "name": "مجدرة برغل",
+    "normalized": "مجدره برغل",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_13",
+    "name": "عصير بنجر (شمندر) وتفاح",
+    "normalized": "عصير بنجر (شمندر) وتفاح",
+    "country": "general"
+  },
+  {
+    "id": "hh_14",
+    "name": "حمص بالطحينة بيتي",
+    "normalized": "حمص بالطحينه بيتي",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_15",
+    "name": "برياني خضار صحي",
+    "normalized": "برياني خضار صحي",
+    "country": "general"
+  },
+  {
+    "id": "hh_16",
+    "name": "كباب دجاج بالشوفان",
+    "normalized": "كباب دجاج بالشوفان",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_17",
+    "name": "سلطة فاصوليا حمراء بالذرة",
+    "normalized": "سلطه فاصوليا حمراء بالذره",
+    "country": "general"
+  },
+  {
+    "id": "hh_18",
+    "name": "بيض مخفوق بالسبانخ والطماطة",
+    "normalized": "بيض مخفوق بالسبانخ والطماطه",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_19",
+    "name": "مرق شجر (كوسا) بالعدس",
+    "normalized": "مرق شجر (كوسا) بالعدس",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_20",
+    "name": "سناك الحمص المحمص",
+    "normalized": "سناك الحمص المحمص",
+    "country": "general"
+  },
+  {
+    "id": "hh_21",
+    "name": "شوربة عدس كردية (نيسكه)",
+    "normalized": "شوربه عدس كرديه (نيسكه)",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_22",
+    "name": "مضروبة دجاج صحية",
+    "normalized": "مضروبه دجاج صحيه",
+    "country": "general"
+  },
+  {
+    "id": "hh_23",
+    "name": "فتوش بدون خبز مقلي",
+    "normalized": "فتوش بدون خبز مقلي",
+    "country": "general"
+  },
+  {
+    "id": "hh_24",
+    "name": "صينية بطاطا بالدجاج والأعشاب",
+    "normalized": "صينيه بطاطا بالدجاج والاعشاب",
+    "country": "iraqi"
+  },
+  {
+    "id": "hh_25",
+    "name": "مهلبية صحية بحليب اللوز",
+    "normalized": "مهلبيه صحيه بحليب اللوز",
+    "country": "general"
+  },
+  {
+    "id": "gulf_68",
+    "name": "مسخّن خليجي",
+    "normalized": "مسخن خليجي",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_69",
+    "name": "فتّة دجاج خليجية",
+    "normalized": "فته دجاج خليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_70",
+    "name": "محمّر إماراتي (أرز حلو)",
+    "normalized": "محمر اماراتي (ارز حلو)",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_71",
+    "name": "عصيدة خليجية",
+    "normalized": "عصيده خليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_72",
+    "name": "مرق دجاج بالخضروات خليجي",
+    "normalized": "مرق دجاج بالخضروات خليجي",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_73",
+    "name": "كشري خليجي",
+    "normalized": "كشري خليجي",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_74",
+    "name": "شوربة الفطر الخليجية",
+    "normalized": "شوربه الفطر الخليجيه",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_75",
+    "name": "صيادية سمك خليجية",
+    "normalized": "صياديه سمك خليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_76",
+    "name": "مكرونة بالبشاميل خليجية",
+    "normalized": "مكرونه بالبشاميل خليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_77",
+    "name": "دجاج بالكاري خليجي",
+    "normalized": "دجاج بالكاري خليجي",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_78",
+    "name": "سمك مقلي بالبهارات الخليجية",
+    "normalized": "سمك مقلي بالبهارات الخليجيه",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_79",
+    "name": "محشي فلفل خليجي",
+    "normalized": "محشي فلفل خليجي",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_80",
+    "name": "شوربة طماطم خليجية",
+    "normalized": "شوربه طماطم خليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_81",
+    "name": "رز مبهّر بالدجاج خليجي",
+    "normalized": "رز مبهر بالدجاج خليجي",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_82",
+    "name": "سلطة زبادي بالخيار خليجية",
+    "normalized": "سلطه زبادي بالخيار خليجيه",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_83",
+    "name": "كبسة لحم بالزبيب خليجية",
+    "normalized": "كبسه لحم بالزبيب خليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_84",
+    "name": "شوربة الشوفان الخليجية",
+    "normalized": "شوربه الشوفان الخليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_85",
+    "name": "دجاج محشي بالأرز خليجي",
+    "normalized": "دجاج محشي بالارز خليجي",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_86",
+    "name": "سلطة الجرجير بالرمان خليجية",
+    "normalized": "سلطه الجرجير بالرمان خليجيه",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_87",
+    "name": "كنافة بالجبن خليجية",
+    "normalized": "كنافه بالجبن خليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_88",
+    "name": "فتوش بالحلوم خليجي",
+    "normalized": "فتوش بالحلوم خليجي",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_89",
+    "name": "رز بالتمر خليجي",
+    "normalized": "رز بالتمر خليجي",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_90",
+    "name": "شوربة الدجاج بالذرة خليجية",
+    "normalized": "شوربه الدجاج بالذره خليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_91",
+    "name": "كبة مشوية خليجية",
+    "normalized": "كبه مشويه خليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_92",
+    "name": "فول مدمس خليجي",
+    "normalized": "فول مدمس خليجي",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_93",
+    "name": "مفطح لحم خليجي",
+    "normalized": "مفطح لحم خليجي",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_94",
+    "name": "مهلبية خليجية بالزعفران",
+    "normalized": "مهلبيه خليجيه بالزعفران",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_95",
+    "name": "سلطة البطاطس الخليجية",
+    "normalized": "سلطه البطاطس الخليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_96",
+    "name": "بابا غنوج خليجي",
+    "normalized": "بابا غنوج خليجي",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_97",
+    "name": "شوربة العدس الأحمر الخليجية",
+    "normalized": "شوربه العدس الاحمر الخليجيه",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_98",
+    "name": "أم علي خليجية",
+    "normalized": "ام علي خليجيه",
+    "country": "saudi"
+  },
+  {
+    "id": "gulf_99",
+    "name": "تمرية خليجية",
+    "normalized": "تمريه خليجيه",
+    "country": "emirati"
+  },
+  {
+    "id": "gulf_100",
+    "name": "قهوة عربية سعودية",
+    "normalized": "قهوه عربيه سعوديه",
+    "country": "saudi"
+  },
+  {
+    "id": "breakfast_1",
+    "name": "خبز عروك عراقي",
+    "normalized": "خبز عروك عراقي",
+    "country": "iraqi"
+  },
+  {
+    "id": "breakfast_2",
+    "name": "بيض بالطماطة (شكشوكة عراقية)",
+    "normalized": "بيض بالطماطه (شكشوكه عراقيه)",
+    "country": "iraqi"
+  },
+  {
+    "id": "ib-16",
+    "name": "بيض طماطة (شكشوكة)",
+    "normalized": "بيض طماطه (شكشوكه)",
+    "country": "iraqi"
+  },
+  {
+    "id": "breakfast_3",
+    "name": "قيمر وعسل مع صمون",
+    "normalized": "قيمر وعسل مع صمون",
+    "country": "iraqi"
+  },
+  {
+    "id": "breakfast_4",
+    "name": "فول مدمس عراقي",
+    "normalized": "فول مدمس عراقي",
+    "country": "iraqi"
+  },
+  {
+    "id": "breakfast_5",
+    "name": "كاهي عراقي",
+    "normalized": "كاهي عراقي",
+    "country": "iraqi"
+  },
+  {
+    "id": "global_1_1",
+    "name": "كبسة سعودية",
+    "normalized": "كبسه سعوديه",
+    "country": "السعودية"
+  },
+  {
+    "id": "global_1_2",
+    "name": "جريش سعودي بالدجاج",
+    "normalized": "جريش سعودي بالدجاج",
+    "country": "السعودية"
+  },
+  {
+    "id": "global_1_3",
+    "name": "سليق سعودي",
+    "normalized": "سليق سعودي",
+    "country": "السعودية"
+  },
+  {
+    "id": "global_1_4",
+    "name": "قرصان سعودي",
+    "normalized": "قرصان سعودي",
+    "country": "السعودية"
+  },
+  {
+    "id": "global_1_5",
+    "name": "مطازيز سعودية",
+    "normalized": "مطازيز سعوديه",
+    "country": "السعودية"
+  },
+  {
+    "id": "global_1_6",
+    "name": "مرقوق سعودي",
+    "normalized": "مرقوق سعودي",
+    "country": "السعودية"
+  },
+  {
+    "id": "global_1_7",
+    "name": "مجبوس دجاج إماراتي",
+    "normalized": "مجبوس دجاج اماراتي",
+    "country": "الإمارات"
+  },
+  {
+    "id": "global_1_8",
+    "name": "لقيمات إماراتية",
+    "normalized": "لقيمات اماراتيه",
+    "country": "الإمارات"
+  },
+  {
+    "id": "global_1_9",
+    "name": "بلاليط إماراتي",
+    "normalized": "بلاليط اماراتي",
+    "country": "الإمارات"
+  },
+  {
+    "id": "global_1_10",
+    "name": "مطبق سمك كويتي",
+    "normalized": "مطبق سمك كويتي",
+    "country": "الكويت"
+  },
+  {
+    "id": "global_1_11",
+    "name": "مجبوس الروبيان الكويتي",
+    "normalized": "مجبوس الروبيان الكويتي",
+    "country": "الكويت"
+  },
+  {
+    "id": "global_1_12",
+    "name": "قرص عقيلي كويتي",
+    "normalized": "قرص عقيلي كويتي",
+    "country": "الكويت"
+  },
+  {
+    "id": "global_1_13",
+    "name": "مجبوس دجاج بحريني",
+    "normalized": "مجبوس دجاج بحريني",
+    "country": "البحرين"
+  },
+  {
+    "id": "global_1_14",
+    "name": "محمر بحريني",
+    "normalized": "محمر بحريني",
+    "country": "البحرين"
+  },
+  {
+    "id": "global_1_15",
+    "name": "خنفروش بحريني",
+    "normalized": "خنفروش بحريني",
+    "country": "البحرين"
+  },
+  {
+    "id": "global_1_16",
+    "name": "ثريد لحم قطري",
+    "normalized": "ثريد لحم قطري",
+    "country": "قطر"
+  },
+  {
+    "id": "global_1_17",
+    "name": "مرقوق قطري",
+    "normalized": "مرقوق قطري",
+    "country": "قطر"
+  },
+  {
+    "id": "global_1_18",
+    "name": "شواء عماني",
+    "normalized": "شواء عماني",
+    "country": "عمان"
+  },
+  {
+    "id": "global_1_19",
+    "name": "عرسية عمانية",
+    "normalized": "عرسيه عمانيه",
+    "country": "عمان"
+  },
+  {
+    "id": "global_1_20",
+    "name": "مشاكيك عمانية",
+    "normalized": "مشاكيك عمانيه",
+    "country": "عمان"
+  },
+  {
+    "id": "global_1_21",
+    "name": "مندي يمني",
+    "normalized": "مندي يمني",
+    "country": "اليمن"
+  },
+  {
+    "id": "global_1_22",
+    "name": "سلتة يمنية",
+    "normalized": "سلته يمنيه",
+    "country": "اليمن"
+  },
+  {
+    "id": "global_1_23",
+    "name": "بنت الصحن اليمنية",
+    "normalized": "بنت الصحن اليمنيه",
+    "country": "اليمن"
+  },
+  {
+    "id": "global_1_24",
+    "name": "كشري مصري",
+    "normalized": "كشري مصري",
+    "country": "مصر"
+  },
+  {
+    "id": "global_1_25",
+    "name": "ملوخية مصرية",
+    "normalized": "ملوخيه مصريه",
+    "country": "مصر"
+  },
+  {
+    "id": "global_1_26",
+    "name": "محشي مصري",
+    "normalized": "محشي مصري",
+    "country": "مصر"
+  },
+  {
+    "id": "global_1_27",
+    "name": "فتة مصرية",
+    "normalized": "فته مصريه",
+    "country": "مصر"
+  },
+  {
+    "id": "global_1_28",
+    "name": "طعمية مصرية",
+    "normalized": "طعميه مصريه",
+    "country": "مصر"
+  },
+  {
+    "id": "global_1_29",
+    "name": "أم علي مصرية",
+    "normalized": "ام علي مصريه",
+    "country": "مصر"
+  },
+  {
+    "id": "global_1_30",
+    "name": "بسبوسة مصرية",
+    "normalized": "بسبوسه مصريه",
+    "country": "مصر"
+  },
+  {
+    "id": "global_1_31",
+    "name": "رز بلبن مصري",
+    "normalized": "رز بلبن مصري",
+    "country": "مصر"
+  },
+  {
+    "id": "global_1_32",
+    "name": "طاجين دجاج مغربي بالليمون والزيتون",
+    "normalized": "طاجين دجاج مغربي بالليمون والزيتون",
+    "country": "المغرب"
+  },
+  {
+    "id": "global_1_33",
+    "name": "كسكس مغربي بالخضر",
+    "normalized": "كسكس مغربي بالخضر",
+    "country": "المغرب"
+  },
+  {
+    "id": "global_1_34",
+    "name": "حريرة مغربية",
+    "normalized": "حريره مغربيه",
+    "country": "المغرب"
+  },
+  {
+    "id": "global_1_35",
+    "name": "رفيسة مغربية",
+    "normalized": "رفيسه مغربيه",
+    "country": "المغرب"
+  },
+  {
+    "id": "global_1_36",
+    "name": "باستيلة مغربية بالدجاج",
+    "normalized": "باستيله مغربيه بالدجاج",
+    "country": "المغرب"
+  },
+  {
+    "id": "global_1_37",
+    "name": "زعلوك مغربي",
+    "normalized": "زعلوك مغربي",
+    "country": "المغرب"
+  },
+  {
+    "id": "global_1_38",
+    "name": "بريك تونسي",
+    "normalized": "بريك تونسي",
+    "country": "تونس"
+  },
+  {
+    "id": "global_1_39",
+    "name": "لبلابي تونسي",
+    "normalized": "لبلابي تونسي",
+    "country": "تونس"
+  },
+  {
+    "id": "global_1_40",
+    "name": "كسكسي تونسي بالسمك",
+    "normalized": "كسكسي تونسي بالسمك",
+    "country": "تونس"
+  },
+  {
+    "id": "global_1_41",
+    "name": "شخشوخة جزائرية",
+    "normalized": "شخشوخه جزائريه",
+    "country": "الجزائر"
+  },
+  {
+    "id": "global_1_42",
+    "name": "رشتة جزائرية",
+    "normalized": "رشته جزائريه",
+    "country": "الجزائر"
+  },
+  {
+    "id": "global_1_43",
+    "name": "محاجب جزائرية",
+    "normalized": "محاجب جزائريه",
+    "country": "الجزائر"
+  },
+  {
+    "id": "global_1_44",
+    "name": "تبولة لبنانية",
+    "normalized": "تبوله لبنانيه",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_1_45",
+    "name": "كبة بالصينية لبنانية",
+    "normalized": "كبه بالصينيه لبنانيه",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_1_46",
+    "name": "شاورما دجاج لبنانية",
+    "normalized": "شاورما دجاج لبنانيه",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_1_47",
+    "name": "فتة باذنجان سورية (فتة مكدوس)",
+    "normalized": "فته باذنجان سوريه (فته مكدوس)",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_1_48",
+    "name": "شيخ المحشي السوري",
+    "normalized": "شيخ المحشي السوري",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_1_49",
+    "name": "مجدرة برغل سورية",
+    "normalized": "مجدره برغل سوريه",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_1_50",
+    "name": "مسخن فلسطيني",
+    "normalized": "مسخن فلسطيني",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_1_51",
+    "name": "مقلوبة فلسطينية",
+    "normalized": "مقلوبه فلسطينيه",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_1_52",
+    "name": "كنافة نابلسية فلسطينية",
+    "normalized": "كنافه نابلسيه فلسطينيه",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_1_53",
+    "name": "منسف أردني بالجميد",
+    "normalized": "منسف اردني بالجميد",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_1_54",
+    "name": "رشوف أردني",
+    "normalized": "رشوف اردني",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_1_55",
+    "name": "مكمورة أردنية",
+    "normalized": "مكموره اردنيه",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_1_56",
+    "name": "إسكندر كباب تركي",
+    "normalized": "اسكندر كباب تركي",
+    "country": "تركيا"
+  },
+  {
+    "id": "global_1_57",
+    "name": "مانتي تركي",
+    "normalized": "مانتي تركي",
+    "country": "تركيا"
+  },
+  {
+    "id": "global_1_58",
+    "name": "إيمام بايلدي تركي",
+    "normalized": "ايمام بايلدي تركي",
+    "country": "تركيا"
+  },
+  {
+    "id": "global_1_59",
+    "name": "لازانيا بولونيز إيطالية",
+    "normalized": "لازانيا بولونيز ايطاليه",
+    "country": "إيطاليا"
+  },
+  {
+    "id": "global_1_60",
+    "name": "ريزوتو ميلاني إيطالي",
+    "normalized": "ريزوتو ميلاني ايطالي",
+    "country": "إيطاليا"
+  },
+  {
+    "id": "global_1_61",
+    "name": "أوسو بوكو إيطالي",
+    "normalized": "اوسو بوكو ايطالي",
+    "country": "إيطاليا"
+  },
+  {
+    "id": "global_1_62",
+    "name": "تيراميسو إيطالي",
+    "normalized": "تيراميسو ايطالي",
+    "country": "إيطاليا"
+  },
+  {
+    "id": "global_1_63",
+    "name": "راتاتوي فرنسي",
+    "normalized": "راتاتوي فرنسي",
+    "country": "فرنسا"
+  },
+  {
+    "id": "global_1_64",
+    "name": "كيش لورين فرنسي",
+    "normalized": "كيش لورين فرنسي",
+    "country": "فرنسا"
+  },
+  {
+    "id": "global_1_65",
+    "name": "كريب فرنسي",
+    "normalized": "كريب فرنسي",
+    "country": "فرنسا"
+  },
+  {
+    "id": "global_1_66",
+    "name": "باييّا فالنسية إسبانية",
+    "normalized": "باييا فالنسيه اسبانيه",
+    "country": "إسبانيا"
+  },
+  {
+    "id": "global_1_67",
+    "name": "غازباتشو إسباني",
+    "normalized": "غازباتشو اسباني",
+    "country": "إسبانيا"
+  },
+  {
+    "id": "global_1_68",
+    "name": "تورتيّا إسبانية",
+    "normalized": "تورتيا اسبانيه",
+    "country": "إسبانيا"
+  },
+  {
+    "id": "global_1_69",
+    "name": "موساكا يونانية",
+    "normalized": "موساكا يونانيه",
+    "country": "اليونان"
+  },
+  {
+    "id": "global_1_70",
+    "name": "سلطة يونانية (هورياتيكي)",
+    "normalized": "سلطه يونانيه (هورياتيكي)",
+    "country": "اليونان"
+  },
+  {
+    "id": "global_1_71",
+    "name": "فيش أند تشيبس بريطاني",
+    "normalized": "فيش اند تشيبس بريطاني",
+    "country": "المملكة المتحدة"
+  },
+  {
+    "id": "global_1_72",
+    "name": "فطيرة الراعي البريطانية",
+    "normalized": "فطيره الراعي البريطانيه",
+    "country": "المملكة المتحدة"
+  },
+  {
+    "id": "global_1_73",
+    "name": "برغر أمريكي كلاسيكي",
+    "normalized": "برغر امريكي كلاسيكي",
+    "country": "الولايات المتحدة"
+  },
+  {
+    "id": "global_1_74",
+    "name": "مكرونة وجبن أمريكية",
+    "normalized": "مكرونه وجبن امريكيه",
+    "country": "الولايات المتحدة"
+  },
+  {
+    "id": "global_1_75",
+    "name": "فطيرة تفاح أمريكية",
+    "normalized": "فطيره تفاح امريكيه",
+    "country": "الولايات المتحدة"
+  },
+  {
+    "id": "global_1_76",
+    "name": "تاكو مكسيكي تقليدي",
+    "normalized": "تاكو مكسيكي تقليدي",
+    "country": "المكسيك"
+  },
+  {
+    "id": "global_1_77",
+    "name": "إنشيلادا مكسيكية",
+    "normalized": "انشيلادا مكسيكيه",
+    "country": "المكسيك"
+  },
+  {
+    "id": "global_1_78",
+    "name": "غواكامولي مكسيكي",
+    "normalized": "غواكامولي مكسيكي",
+    "country": "المكسيك"
+  },
+  {
+    "id": "global_1_79",
+    "name": "فيجوادا برازيلية",
+    "normalized": "فيجوادا برازيليه",
+    "country": "البرازيل"
+  },
+  {
+    "id": "global_1_80",
+    "name": "خبز الجبن البرازيلي",
+    "normalized": "خبز الجبن البرازيلي",
+    "country": "البرازيل"
+  },
+  {
+    "id": "global_1_81",
+    "name": "دورو وات إثيوبي",
+    "normalized": "دورو وات اثيوبي",
+    "country": "إثيوبيا"
+  },
+  {
+    "id": "global_1_82",
+    "name": "إنجيرا إثيوبية",
+    "normalized": "انجيرا اثيوبيه",
+    "country": "إثيوبيا"
+  },
+  {
+    "id": "global_1_83",
+    "name": "شيرو وات إثيوبي",
+    "normalized": "شيرو وات اثيوبي",
+    "country": "إثيوبيا"
+  },
+  {
+    "id": "global_1_84",
+    "name": "جولوف رايس نيجيري",
+    "normalized": "جولوف رايس نيجيري",
+    "country": "نيجيريا"
+  },
+  {
+    "id": "global_1_85",
+    "name": "شوربة إيغوسي نيجيرية",
+    "normalized": "شوربه ايغوسي نيجيريه",
+    "country": "نيجيريا"
+  },
+  {
+    "id": "global_1_86",
+    "name": "بوبوتي جنوب أفريقي",
+    "normalized": "بوبوتي جنوب افريقي",
+    "country": "جنوب أفريقيا"
+  },
+  {
+    "id": "global_1_87",
+    "name": "برياني دجاج هندي",
+    "normalized": "برياني دجاج هندي",
+    "country": "الهند"
+  },
+  {
+    "id": "global_1_88",
+    "name": "دال ماخاني هندي",
+    "normalized": "دال ماخاني هندي",
+    "country": "الهند"
+  },
+  {
+    "id": "global_1_89",
+    "name": "ماسالا دوسا هندية",
+    "normalized": "ماسالا دوسا هنديه",
+    "country": "الهند"
+  },
+  {
+    "id": "global_1_90",
+    "name": "دجاج كونغ باو صيني",
+    "normalized": "دجاج كونغ باو صيني",
+    "country": "الصين"
+  },
+  {
+    "id": "global_1_91",
+    "name": "مابو توفو صيني",
+    "normalized": "مابو توفو صيني",
+    "country": "الصين"
+  },
+  {
+    "id": "global_1_92",
+    "name": "سوشي ماكي ياباني",
+    "normalized": "سوشي ماكي ياباني",
+    "country": "اليابان"
+  },
+  {
+    "id": "global_1_93",
+    "name": "رامن ميسو ياباني",
+    "normalized": "رامن ميسو ياباني",
+    "country": "اليابان"
+  },
+  {
+    "id": "global_1_94",
+    "name": "تيرياكي دجاج ياباني",
+    "normalized": "تيرياكي دجاج ياباني",
+    "country": "اليابان"
+  },
+  {
+    "id": "global_1_95",
+    "name": "بيبيمباب كوري",
+    "normalized": "بيبيمباب كوري",
+    "country": "كوريا الجنوبية"
+  },
+  {
+    "id": "global_1_96",
+    "name": "كيمتشي جيجيه كوري",
+    "normalized": "كيمتشي جيجيه كوري",
+    "country": "كوريا الجنوبية"
+  },
+  {
+    "id": "global_1_97",
+    "name": "باد تاي تايلاندي",
+    "normalized": "باد تاي تايلاندي",
+    "country": "تايلاند"
+  },
+  {
+    "id": "global_1_98",
+    "name": "توم يوم تايلاندية",
+    "normalized": "توم يوم تايلانديه",
+    "country": "تايلاند"
+  },
+  {
+    "id": "global_1_99",
+    "name": "فو فيتنامي",
+    "normalized": "فو فيتنامي",
+    "country": "فيتنام"
+  },
+  {
+    "id": "global_1_100",
+    "name": "ناسي جورينغ إندونيسي",
+    "normalized": "ناسي جورينغ اندونيسي",
+    "country": "إندونيسيا"
+  },
+  {
+    "id": "global_2_1",
+    "name": "قورمه سبزي",
+    "normalized": "قورمه سبزي",
+    "country": "إيران"
+  },
+  {
+    "id": "global_2_2",
+    "name": "فسنجان",
+    "normalized": "فسنجان",
+    "country": "إيران"
+  },
+  {
+    "id": "global_2_3",
+    "name": "ته ديغ (الأرز الإيراني المقرمش)",
+    "normalized": "ته ديغ (الارز الايراني المقرمش)",
+    "country": "إيران"
+  },
+  {
+    "id": "global_2_4",
+    "name": "آش رشته",
+    "normalized": "اش رشته",
+    "country": "إيران"
+  },
+  {
+    "id": "global_2_5",
+    "name": "زرشك بلو",
+    "normalized": "زرشك بلو",
+    "country": "إيران"
+  },
+  {
+    "id": "global_2_6",
+    "name": "كوكو سبزي",
+    "normalized": "كوكو سبزي",
+    "country": "إيران"
+  },
+  {
+    "id": "global_2_7",
+    "name": "خاشابوري جورجي",
+    "normalized": "خاشابوري جورجي",
+    "country": "جورجيا"
+  },
+  {
+    "id": "global_2_8",
+    "name": "خينكالي",
+    "normalized": "خينكالي",
+    "country": "جورجيا"
+  },
+  {
+    "id": "global_2_9",
+    "name": "لوبيو",
+    "normalized": "لوبيو",
+    "country": "جورجيا"
+  },
+  {
+    "id": "global_2_10",
+    "name": "بخالي السبانخ",
+    "normalized": "بخالي السبانخ",
+    "country": "جورجيا"
+  },
+  {
+    "id": "global_2_11",
+    "name": "هاريسا أرمنية",
+    "normalized": "هاريسا ارمنيه",
+    "country": "أرمينيا"
+  },
+  {
+    "id": "global_2_12",
+    "name": "لافاش أرمني",
+    "normalized": "لافاش ارمني",
+    "country": "أرمينيا"
+  },
+  {
+    "id": "global_2_13",
+    "name": "دولما أرمنية (تولما)",
+    "normalized": "دولما ارمنيه (تولما)",
+    "country": "أرمينيا"
+  },
+  {
+    "id": "global_2_14",
+    "name": "بلوف أذربيجاني",
+    "normalized": "بلوف اذربيجاني",
+    "country": "أذربيجان"
+  },
+  {
+    "id": "global_2_15",
+    "name": "قطاب أذربيجاني",
+    "normalized": "قطاب اذربيجاني",
+    "country": "أذربيجان"
+  },
+  {
+    "id": "global_2_16",
+    "name": "دولما أذربيجانية (يارباغ دولماسي)",
+    "normalized": "دولما اذربيجانيه (يارباغ دولماسي)",
+    "country": "أذربيجان"
+  },
+  {
+    "id": "global_2_17",
+    "name": "نهاري باكستاني",
+    "normalized": "نهاري باكستاني",
+    "country": "باكستان"
+  },
+  {
+    "id": "global_2_18",
+    "name": "حليم باكستاني",
+    "normalized": "حليم باكستاني",
+    "country": "باكستان"
+  },
+  {
+    "id": "global_2_19",
+    "name": "كباب تشابلي",
+    "normalized": "كباب تشابلي",
+    "country": "باكستان"
+  },
+  {
+    "id": "global_2_20",
+    "name": "ساغ باكستاني (سرسون كا ساغ)",
+    "normalized": "ساغ باكستاني (سرسون كا ساغ)",
+    "country": "باكستان"
+  },
+  {
+    "id": "global_2_21",
+    "name": "خيشوري بنغلاديشي (بونا خيشوري)",
+    "normalized": "خيشوري بنغلاديشي (بونا خيشوري)",
+    "country": "بنغلاديش"
+  },
+  {
+    "id": "global_2_22",
+    "name": "كاري سمك هيلسا بنغلاديشي (إيليش ماتشر جهول)",
+    "normalized": "كاري سمك هيلسا بنغلاديشي (ايليش ماتشر جهول)",
+    "country": "بنغلاديش"
+  },
+  {
+    "id": "global_2_23",
+    "name": "بيته باتيشابتا",
+    "normalized": "بيته باتيشابتا",
+    "country": "بنغلاديش"
+  },
+  {
+    "id": "global_2_24",
+    "name": "كوتو روتي بالدجاج",
+    "normalized": "كوتو روتي بالدجاج",
+    "country": "سريلانكا"
+  },
+  {
+    "id": "global_2_25",
+    "name": "بول سامبول",
+    "normalized": "بول سامبول",
+    "country": "سريلانكا"
+  },
+  {
+    "id": "global_2_26",
+    "name": "فيش أمبول ثيال",
+    "normalized": "فيش امبول ثيال",
+    "country": "سريلانكا"
+  },
+  {
+    "id": "global_2_27",
+    "name": "مومو نيبالي",
+    "normalized": "مومو نيبالي",
+    "country": "نيبال"
+  },
+  {
+    "id": "global_2_28",
+    "name": "دال بهات",
+    "normalized": "دال بهات",
+    "country": "نيبال"
+  },
+  {
+    "id": "global_2_29",
+    "name": "سيل روتي",
+    "normalized": "سيل روتي",
+    "country": "نيبال"
+  },
+  {
+    "id": "global_2_30",
+    "name": "ناسي ليماك",
+    "normalized": "ناسي ليماك",
+    "country": "ماليزيا"
+  },
+  {
+    "id": "global_2_31",
+    "name": "لاكسا ماليزية",
+    "normalized": "لاكسا ماليزيه",
+    "country": "ماليزيا"
+  },
+  {
+    "id": "global_2_32",
+    "name": "تشار كواي تيو",
+    "normalized": "تشار كواي تيو",
+    "country": "ماليزيا"
+  },
+  {
+    "id": "global_2_33",
+    "name": "رندانغ لحم البقر الماليزي",
+    "normalized": "رندانغ لحم البقر الماليزي",
+    "country": "ماليزيا"
+  },
+  {
+    "id": "global_2_34",
+    "name": "أرز دجاج هايناني",
+    "normalized": "ارز دجاج هايناني",
+    "country": "سنغافورة"
+  },
+  {
+    "id": "global_2_35",
+    "name": "سلطعون بالفلفل الحار",
+    "normalized": "سلطعون بالفلفل الحار",
+    "country": "سنغافورة"
+  },
+  {
+    "id": "global_2_36",
+    "name": "كايا توست",
+    "normalized": "كايا توست",
+    "country": "سنغافورة"
+  },
+  {
+    "id": "global_2_37",
+    "name": "فيش أموك (أموك السمك)",
+    "normalized": "فيش اموك (اموك السمك)",
+    "country": "كمبوديا"
+  },
+  {
+    "id": "global_2_38",
+    "name": "كاري خمير الكمبودي (سوملار كاري)",
+    "normalized": "كاري خمير الكمبودي (سوملار كاري)",
+    "country": "كمبوديا"
+  },
+  {
+    "id": "global_2_39",
+    "name": "لارب لاوسي",
+    "normalized": "لارب لاوسي",
+    "country": "لاوس"
+  },
+  {
+    "id": "global_2_40",
+    "name": "أرز لزج لاوسي (خاو نيو)",
+    "normalized": "ارز لزج لاوسي (خاو نيو)",
+    "country": "لاوس"
+  },
+  {
+    "id": "global_2_41",
+    "name": "موهينغا",
+    "normalized": "موهينغا",
+    "country": "ميانمار"
+  },
+  {
+    "id": "global_2_42",
+    "name": "سلطة أوراق الشاي الميانمارية (لاهبيت ثوك)",
+    "normalized": "سلطه اوراق الشاي الميانماريه (لاهبيت ثوك)",
+    "country": "ميانمار"
+  },
+  {
+    "id": "global_2_43",
+    "name": "شوربة نودلز لحم تايوانية",
+    "normalized": "شوربه نودلز لحم تايوانيه",
+    "country": "تايوان"
+  },
+  {
+    "id": "global_2_44",
+    "name": "فطيرة بصل أخضر تايوانية",
+    "normalized": "فطيره بصل اخضر تايوانيه",
+    "country": "تايوان"
+  },
+  {
+    "id": "global_2_45",
+    "name": "بوز منغولي",
+    "normalized": "بوز منغولي",
+    "country": "منغوليا"
+  },
+  {
+    "id": "global_2_46",
+    "name": "خوشور منغولي",
+    "normalized": "خوشور منغولي",
+    "country": "منغوليا"
+  },
+  {
+    "id": "global_2_47",
+    "name": "شنيتزل ألماني",
+    "normalized": "شنيتزل الماني",
+    "country": "ألمانيا"
+  },
+  {
+    "id": "global_2_48",
+    "name": "ساوربراتن",
+    "normalized": "ساوربراتن",
+    "country": "ألمانيا"
+  },
+  {
+    "id": "global_2_49",
+    "name": "بريتزل ألماني",
+    "normalized": "بريتزل الماني",
+    "country": "ألمانيا"
+  },
+  {
+    "id": "global_2_50",
+    "name": "كعكة الغابة السوداء",
+    "normalized": "كعكه الغابه السوداء",
+    "country": "ألمانيا"
+  },
+  {
+    "id": "global_2_51",
+    "name": "شترودل التفاح",
+    "normalized": "شترودل التفاح",
+    "country": "النمسا"
+  },
+  {
+    "id": "global_2_52",
+    "name": "تورتة زاخر",
+    "normalized": "تورته زاخر",
+    "country": "النمسا"
+  },
+  {
+    "id": "global_2_53",
+    "name": "بيروغي بولندية (بالبطاطس والجبن)",
+    "normalized": "بيروغي بولنديه (بالبطاطس والجبن)",
+    "country": "بولندا"
+  },
+  {
+    "id": "global_2_54",
+    "name": "بيغوس (يخنة الصياد البولندية)",
+    "normalized": "بيغوس (يخنه الصياد البولنديه)",
+    "country": "بولندا"
+  },
+  {
+    "id": "global_2_55",
+    "name": "شوربة جورك (شوربة الراي الحامضة)",
+    "normalized": "شوربه جورك (شوربه الراي الحامضه)",
+    "country": "بولندا"
+  },
+  {
+    "id": "global_2_56",
+    "name": "غولاش مجري",
+    "normalized": "غولاش مجري",
+    "country": "المجر"
+  },
+  {
+    "id": "global_2_57",
+    "name": "بابريكاش الدجاج",
+    "normalized": "بابريكاش الدجاج",
+    "country": "المجر"
+  },
+  {
+    "id": "global_2_58",
+    "name": "لانغوش مجري",
+    "normalized": "لانغوش مجري",
+    "country": "المجر"
+  },
+  {
+    "id": "global_2_59",
+    "name": "باكالهاو آ براس (سمك القد مع البطاطس والبيض)",
+    "normalized": "باكالهاو ا براس (سمك القد مع البطاطس والبيض)",
+    "country": "البرتغال"
+  },
+  {
+    "id": "global_2_60",
+    "name": "كالدوس فيرديس",
+    "normalized": "كالدوس فيرديس",
+    "country": "البرتغال"
+  },
+  {
+    "id": "global_2_61",
+    "name": "باستيل دي ناتا",
+    "normalized": "باستيل دي ناتا",
+    "country": "البرتغال"
+  },
+  {
+    "id": "global_2_62",
+    "name": "ستامبوت هولندي",
+    "normalized": "ستامبوت هولندي",
+    "country": "هولندا"
+  },
+  {
+    "id": "global_2_63",
+    "name": "بوفيرتشيس هولندية",
+    "normalized": "بوفيرتشيس هولنديه",
+    "country": "هولندا"
+  },
+  {
+    "id": "global_2_64",
+    "name": "مول فريت بلجيكي",
+    "normalized": "مول فريت بلجيكي",
+    "country": "بلجيكا"
+  },
+  {
+    "id": "global_2_65",
+    "name": "وافل بلجيكي",
+    "normalized": "وافل بلجيكي",
+    "country": "بلجيكا"
+  },
+  {
+    "id": "global_2_66",
+    "name": "كرات اللحم السويدية",
+    "normalized": "كرات اللحم السويديه",
+    "country": "السويد"
+  },
+  {
+    "id": "global_2_67",
+    "name": "لفائف القرفة السويدية (كانيلبولار)",
+    "normalized": "لفائف القرفه السويديه (كانيلبولار)",
+    "country": "السويد"
+  },
+  {
+    "id": "global_2_68",
+    "name": "سموربرود دنماركي (شطيرة البطاطس)",
+    "normalized": "سموربرود دنماركي (شطيره البطاطس)",
+    "country": "الدنمارك"
+  },
+  {
+    "id": "global_2_69",
+    "name": "بورشت روسي",
+    "normalized": "بورشت روسي",
+    "country": "روسيا"
+  },
+  {
+    "id": "global_2_70",
+    "name": "بيلميني روسي",
+    "normalized": "بيلميني روسي",
+    "country": "روسيا"
+  },
+  {
+    "id": "global_2_71",
+    "name": "بليني روسي",
+    "normalized": "بليني روسي",
+    "country": "روسيا"
+  },
+  {
+    "id": "global_2_72",
+    "name": "فارينيكي أوكرانية",
+    "normalized": "فارينيكي اوكرانيه",
+    "country": "أوكرانيا"
+  },
+  {
+    "id": "global_2_73",
+    "name": "هولوبتسي أوكرانية",
+    "normalized": "هولوبتسي اوكرانيه",
+    "country": "أوكرانيا"
+  },
+  {
+    "id": "global_2_74",
+    "name": "سيفيتشي بيروفي",
+    "normalized": "سيفيتشي بيروفي",
+    "country": "بيرو"
+  },
+  {
+    "id": "global_2_75",
+    "name": "لومو سالتادو",
+    "normalized": "لومو سالتادو",
+    "country": "بيرو"
+  },
+  {
+    "id": "global_2_76",
+    "name": "آخي دي غايينا",
+    "normalized": "اخي دي غايينا",
+    "country": "بيرو"
+  },
+  {
+    "id": "global_2_77",
+    "name": "إمبانادا أرجنتينية (إمبانادا ميندوسينا)",
+    "normalized": "امبانادا ارجنتينيه (امبانادا ميندوسينا)",
+    "country": "الأرجنتين"
+  },
+  {
+    "id": "global_2_78",
+    "name": "أسادو أرجنتيني",
+    "normalized": "اسادو ارجنتيني",
+    "country": "الأرجنتين"
+  },
+  {
+    "id": "global_2_79",
+    "name": "باستيل دي تشوكو",
+    "normalized": "باستيل دي تشوكو",
+    "country": "تشيلي"
+  },
+  {
+    "id": "global_2_80",
+    "name": "كازويلا تشيلية",
+    "normalized": "كازويلا تشيليه",
+    "country": "تشيلي"
+  },
+  {
+    "id": "global_2_81",
+    "name": "بانديخا بايسا",
+    "normalized": "بانديخا بايسا",
+    "country": "كولومبيا"
+  },
+  {
+    "id": "global_2_82",
+    "name": "أريبا كولومبية",
+    "normalized": "اريبا كولومبيه",
+    "country": "كولومبيا"
+  },
+  {
+    "id": "global_2_83",
+    "name": "روبا بييخا",
+    "normalized": "روبا بييخا",
+    "country": "كوبا"
+  },
+  {
+    "id": "global_2_84",
+    "name": "دجاج جيرك جامايكي",
+    "normalized": "دجاج جيرك جامايكي",
+    "country": "جامايكا"
+  },
+  {
+    "id": "global_2_85",
+    "name": "بوتين كندي",
+    "normalized": "بوتين كندي",
+    "country": "كندا"
+  },
+  {
+    "id": "global_2_86",
+    "name": "تورتيير كندية",
+    "normalized": "تورتيير كنديه",
+    "country": "كندا"
+  },
+  {
+    "id": "global_2_87",
+    "name": "سالتينيا بوليفية",
+    "normalized": "سالتينيا بوليفيه",
+    "country": "بوليفيا"
+  },
+  {
+    "id": "global_2_88",
+    "name": "أريبا فنزويلية",
+    "normalized": "اريبا فنزويليه",
+    "country": "فنزويلا"
+  },
+  {
+    "id": "global_2_89",
+    "name": "لوكرو دي بابا",
+    "normalized": "لوكرو دي بابا",
+    "country": "الإكوادور"
+  },
+  {
+    "id": "global_2_90",
+    "name": "تشيفيتو أوروغوياني",
+    "normalized": "تشيفيتو اوروغوياني",
+    "country": "أوروغواي"
+  },
+  {
+    "id": "global_2_91",
+    "name": "سوبا باراغوايا",
+    "normalized": "سوبا باراغوايا",
+    "country": "باراغواي"
+  },
+  {
+    "id": "global_2_92",
+    "name": "لا بانديرا دومينيكانية",
+    "normalized": "لا بانديرا دومينيكانيه",
+    "country": "جمهورية الدومينيكان"
+  },
+  {
+    "id": "global_2_93",
+    "name": "غايو بينتو",
+    "normalized": "غايو بينتو",
+    "country": "كوستاريكا"
+  },
+  {
+    "id": "global_2_94",
+    "name": "دبلز ترينيدادي",
+    "normalized": "دبلز ترينيدادي",
+    "country": "ترينيداد وتوباغو"
+  },
+  {
+    "id": "global_2_95",
+    "name": "نياما تشوما",
+    "normalized": "نياما تشوما",
+    "country": "كينيا"
+  },
+  {
+    "id": "global_2_96",
+    "name": "أوغالي تنزاني",
+    "normalized": "اوغالي تنزاني",
+    "country": "تنزانيا"
+  },
+  {
+    "id": "global_2_97",
+    "name": "فوفو غاني",
+    "normalized": "فوفو غاني",
+    "country": "غانا"
+  },
+  {
+    "id": "global_2_98",
+    "name": "تيبو ديين (سيبو جين)",
+    "normalized": "تيبو ديين (سيبو جين)",
+    "country": "السنغال"
+  },
+  {
+    "id": "global_2_99",
+    "name": "سيسوا بوتسوانية",
+    "normalized": "سيسوا بوتسوانيه",
+    "country": "بوتسوانا"
+  },
+  {
+    "id": "global_2_100",
+    "name": "رومازافا مدغشقرية",
+    "normalized": "رومازافا مدغشقريه",
+    "country": "مدغشقر"
+  },
+  {
+    "id": "global_3_1",
+    "name": "كابلي بلو",
+    "normalized": "كابلي بلو",
+    "country": "أفغانستان"
+  },
+  {
+    "id": "global_3_2",
+    "name": "منتو أفغاني",
+    "normalized": "منتو افغاني",
+    "country": "أفغانستان"
+  },
+  {
+    "id": "global_3_3",
+    "name": "بولاني",
+    "normalized": "بولاني",
+    "country": "أفغانستان"
+  },
+  {
+    "id": "global_3_4",
+    "name": "بلوف أوزبكي",
+    "normalized": "بلوف اوزبكي",
+    "country": "أوزبكستان"
+  },
+  {
+    "id": "global_3_5",
+    "name": "سامسا أوزبكية",
+    "normalized": "سامسا اوزبكيه",
+    "country": "أوزبكستان"
+  },
+  {
+    "id": "global_3_6",
+    "name": "لغمان أوزبكي",
+    "normalized": "لغمان اوزبكي",
+    "country": "أوزبكستان"
+  },
+  {
+    "id": "global_3_7",
+    "name": "بيشبارماق",
+    "normalized": "بيشبارماق",
+    "country": "كازاخستان"
+  },
+  {
+    "id": "global_3_8",
+    "name": "باورساق",
+    "normalized": "باورساق",
+    "country": "كازاخستان"
+  },
+  {
+    "id": "global_3_9",
+    "name": "كورداق كازاخي",
+    "normalized": "كورداق كازاخي",
+    "country": "كازاخستان"
+  },
+  {
+    "id": "global_3_10",
+    "name": "أشلان فو",
+    "normalized": "اشلان فو",
+    "country": "قيرغيزستان"
+  },
+  {
+    "id": "global_3_11",
+    "name": "بشبارماق قيرغيزي",
+    "normalized": "بشبارماق قيرغيزي",
+    "country": "قيرغيزستان"
+  },
+  {
+    "id": "global_3_12",
+    "name": "قوروتوب",
+    "normalized": "قوروتوب",
+    "country": "طاجيكستان"
+  },
+  {
+    "id": "global_3_13",
+    "name": "أوش طاجيكي (أوشي بالاف)",
+    "normalized": "اوش طاجيكي (اوشي بالاف)",
+    "country": "طاجيكستان"
+  },
+  {
+    "id": "global_3_14",
+    "name": "أدوبو الدجاج الفلبيني",
+    "normalized": "ادوبو الدجاج الفلبيني",
+    "country": "الفلبين"
+  },
+  {
+    "id": "global_3_15",
+    "name": "سينيغانغ",
+    "normalized": "سينيغانغ",
+    "country": "الفلبين"
+  },
+  {
+    "id": "global_3_16",
+    "name": "بانسيت بيهون",
+    "normalized": "بانسيت بيهون",
+    "country": "الفلبين"
+  },
+  {
+    "id": "global_3_17",
+    "name": "ليتشون كاوالي",
+    "normalized": "ليتشون كاوالي",
+    "country": "الفلبين"
+  },
+  {
+    "id": "global_3_18",
+    "name": "ساتيه الدجاج الإندونيسي",
+    "normalized": "ساتيه الدجاج الاندونيسي",
+    "country": "إندونيسيا"
+  },
+  {
+    "id": "global_3_19",
+    "name": "غادو غادو",
+    "normalized": "غادو غادو",
+    "country": "إندونيسيا"
+  },
+  {
+    "id": "global_3_20",
+    "name": "مارتاباك مانيس (فطيرة إندونيسية حلوة)",
+    "normalized": "مارتاباك مانيس (فطيره اندونيسيه حلوه)",
+    "country": "إندونيسيا"
+  },
+  {
+    "id": "global_3_21",
+    "name": "أمبويات",
+    "normalized": "امبويات",
+    "country": "بروناي"
+  },
+  {
+    "id": "global_3_22",
+    "name": "ناسي كاتوك",
+    "normalized": "ناسي كاتوك",
+    "country": "بروناي"
+  },
+  {
+    "id": "global_3_23",
+    "name": "إيما داتشي",
+    "normalized": "ايما داتشي",
+    "country": "بوتان"
+  },
+  {
+    "id": "global_3_24",
+    "name": "فاكشا با",
+    "normalized": "فاكشا با",
+    "country": "بوتان"
+  },
+  {
+    "id": "global_3_25",
+    "name": "إيكان بيبس (إيكاني بيبين)",
+    "normalized": "ايكان بيبس (ايكاني بيبين)",
+    "country": "تيمور الشرقية"
+  },
+  {
+    "id": "global_3_26",
+    "name": "ديم سم (شوماي)",
+    "normalized": "ديم سم (شوماي)",
+    "country": "الصين"
+  },
+  {
+    "id": "global_3_27",
+    "name": "بط بكين",
+    "normalized": "بط بكين",
+    "country": "الصين"
+  },
+  {
+    "id": "global_3_28",
+    "name": "نودلز دان دان",
+    "normalized": "نودلز دان دان",
+    "country": "الصين"
+  },
+  {
+    "id": "global_3_29",
+    "name": "هوت بوت صيني (هوا غوو)",
+    "normalized": "هوت بوت صيني (هوا غوو)",
+    "country": "الصين"
+  },
+  {
+    "id": "global_3_30",
+    "name": "أوكونومياكي",
+    "normalized": "اوكونومياكي",
+    "country": "اليابان"
+  },
+  {
+    "id": "global_3_31",
+    "name": "تونكاتسو (شرائح لحم الخنزير المقرمشة)",
+    "normalized": "تونكاتسو (شرائح لحم الخنزير المقرمشه)",
+    "country": "اليابان"
+  },
+  {
+    "id": "global_3_32",
+    "name": "أونيغيري",
+    "normalized": "اونيغيري",
+    "country": "اليابان"
+  },
+  {
+    "id": "global_3_33",
+    "name": "بولغوغي",
+    "normalized": "بولغوغي",
+    "country": "كوريا الجنوبية"
+  },
+  {
+    "id": "global_3_34",
+    "name": "تتوكبوكي",
+    "normalized": "تتوكبوكي",
+    "country": "كوريا الجنوبية"
+  },
+  {
+    "id": "global_3_35",
+    "name": "كيمباب",
+    "normalized": "كيمباب",
+    "country": "كوريا الجنوبية"
+  },
+  {
+    "id": "global_3_36",
+    "name": "سباتزل (Spätzle)",
+    "normalized": "سباتزل (Spätzle)",
+    "country": "ألمانيا"
+  },
+  {
+    "id": "global_3_37",
+    "name": "رولادن اللحم البقري",
+    "normalized": "رولادن اللحم البقري",
+    "country": "ألمانيا"
+  },
+  {
+    "id": "global_3_38",
+    "name": "فينر شنيتزل",
+    "normalized": "فينر شنيتزل",
+    "country": "النمسا"
+  },
+  {
+    "id": "global_3_39",
+    "name": "غولاش فييني (Wiener Saftgulasch)",
+    "normalized": "غولاش فييني (Wiener Saftgulasch)",
+    "country": "النمسا"
+  },
+  {
+    "id": "global_3_40",
+    "name": "فوندو الجبن السويسري",
+    "normalized": "فوندو الجبن السويسري",
+    "country": "سويسرا"
+  },
+  {
+    "id": "global_3_41",
+    "name": "روستي",
+    "normalized": "روستي",
+    "country": "سويسرا"
+  },
+  {
+    "id": "global_3_42",
+    "name": "راكليت",
+    "normalized": "راكليت",
+    "country": "سويسرا"
+  },
+  {
+    "id": "global_3_43",
+    "name": "سلمون غرافلاكس",
+    "normalized": "سلمون غرافلاكس",
+    "country": "النرويج"
+  },
+  {
+    "id": "global_3_44",
+    "name": "حساء السمك النرويجي (فيسكيسوبّه)",
+    "normalized": "حساء السمك النرويجي (فيسكيسوبه)",
+    "country": "النرويج"
+  },
+  {
+    "id": "global_3_45",
+    "name": "لابسكاوس",
+    "normalized": "لابسكاوس",
+    "country": "النرويج"
+  },
+  {
+    "id": "global_3_46",
+    "name": "شوربة السلمون الفنلندية (لوهيكيتو)",
+    "normalized": "شوربه السلمون الفنلنديه (لوهيكيتو)",
+    "country": "فنلندا"
+  },
+  {
+    "id": "global_3_47",
+    "name": "فطيرة كاريليان",
+    "normalized": "فطيره كاريليان",
+    "country": "فنلندا"
+  },
+  {
+    "id": "global_3_48",
+    "name": "بولات فنلندية",
+    "normalized": "بولات فنلنديه",
+    "country": "فنلندا"
+  },
+  {
+    "id": "global_3_49",
+    "name": "هانغيركيوت",
+    "normalized": "هانغيركيوت",
+    "country": "آيسلندا"
+  },
+  {
+    "id": "global_3_50",
+    "name": "سكاير آيسلندي",
+    "normalized": "سكاير ايسلندي",
+    "country": "آيسلندا"
+  },
+  {
+    "id": "global_3_51",
+    "name": "يخنة أيرلندية",
+    "normalized": "يخنه ايرلنديه",
+    "country": "إيرلندا"
+  },
+  {
+    "id": "global_3_52",
+    "name": "كولكانون",
+    "normalized": "كولكانون",
+    "country": "أيرلندا"
+  },
+  {
+    "id": "global_3_53",
+    "name": "خبز الصودا الأيرلندي",
+    "normalized": "خبز الصودا الايرلندي",
+    "country": "إيرلندا"
+  },
+  {
+    "id": "global_3_54",
+    "name": "سفيتشكوفا نا سميتاني",
+    "normalized": "سفيتشكوفا نا سميتاني",
+    "country": "التشيك"
+  },
+  {
+    "id": "global_3_55",
+    "name": "غولاش لحم البقر التشيكي (Hovězí guláš)",
+    "normalized": "غولاش لحم البقر التشيكي (Hovězí guláš)",
+    "country": "التشيك"
+  },
+  {
+    "id": "global_3_56",
+    "name": "ترودلنيك (كعكة المدخنة التشيكية)",
+    "normalized": "ترودلنيك (كعكه المدخنه التشيكيه)",
+    "country": "التشيك"
+  },
+  {
+    "id": "global_3_57",
+    "name": "بريندزوفي هالوشكي",
+    "normalized": "بريندزوفي هالوشكي",
+    "country": "سلوفاكيا"
+  },
+  {
+    "id": "global_3_58",
+    "name": "كابوستنيتسا",
+    "normalized": "كابوستنيتسا",
+    "country": "سلوفاكيا"
+  },
+  {
+    "id": "global_3_59",
+    "name": "بوتيكا سلوفينية",
+    "normalized": "بوتيكا سلوفينيه",
+    "country": "سلوفينيا"
+  },
+  {
+    "id": "global_3_60",
+    "name": "يوته (يخنة الكرنب والفاصوليا السلوفينية)",
+    "normalized": "يوته (يخنه الكرنب والفاصوليا السلوفينيه)",
+    "country": "سلوفينيا"
+  },
+  {
+    "id": "global_3_61",
+    "name": "باستيشتسا دالماتية",
+    "normalized": "باستيشتسا دالماتيه",
+    "country": "كرواتيا"
+  },
+  {
+    "id": "global_3_62",
+    "name": "سارما كرواتية",
+    "normalized": "سارما كرواتيه",
+    "country": "كرواتيا"
+  },
+  {
+    "id": "global_3_63",
+    "name": "فريتولي",
+    "normalized": "فريتولي",
+    "country": "كرواتيا"
+  },
+  {
+    "id": "global_3_64",
+    "name": "تشيفابي بوسني",
+    "normalized": "تشيفابي بوسني",
+    "country": "البوسنة والهرسك"
+  },
+  {
+    "id": "global_3_65",
+    "name": "بورك بوسني (بوريك باللحم)",
+    "normalized": "بورك بوسني (بوريك باللحم)",
+    "country": "البوسنة والهرسك"
+  },
+  {
+    "id": "global_3_66",
+    "name": "بيغوفا تشوربا (شوربة البك)",
+    "normalized": "بيغوفا تشوربا (شوربه البك)",
+    "country": "البوسنة والهرسك"
+  },
+  {
+    "id": "global_3_67",
+    "name": "بليسكافيتسا",
+    "normalized": "بليسكافيتسا",
+    "country": "صربيا"
+  },
+  {
+    "id": "global_3_68",
+    "name": "سارما صربية",
+    "normalized": "سارما صربيه",
+    "country": "صربيا"
+  },
+  {
+    "id": "global_3_69",
+    "name": "أجفار صربي",
+    "normalized": "اجفار صربي",
+    "country": "صربيا"
+  },
+  {
+    "id": "global_3_70",
+    "name": "سارماله (لفائف الملفوف الرومانية)",
+    "normalized": "سارماله (لفائف الملفوف الرومانيه)",
+    "country": "رومانيا"
+  },
+  {
+    "id": "global_3_71",
+    "name": "ميتش روماني (ميتيتي)",
+    "normalized": "ميتش روماني (ميتيتي)",
+    "country": "رومانيا"
+  },
+  {
+    "id": "global_3_72",
+    "name": "ماماليغا",
+    "normalized": "ماماليغا",
+    "country": "رومانيا"
+  },
+  {
+    "id": "global_3_73",
+    "name": "بانيتسا بلغارية",
+    "normalized": "بانيتسا بلغاريه",
+    "country": "بلغاريا"
+  },
+  {
+    "id": "global_3_74",
+    "name": "شوبسكا سالاتا",
+    "normalized": "شوبسكا سالاتا",
+    "country": "بلغاريا"
+  },
+  {
+    "id": "global_3_75",
+    "name": "كافارما بلغارية تقليدية",
+    "normalized": "كافارما بلغاريه تقليديه",
+    "country": "بلغاريا"
+  },
+  {
+    "id": "global_3_76",
+    "name": "تافه كوسي",
+    "normalized": "تافه كوسي",
+    "country": "ألبانيا"
+  },
+  {
+    "id": "global_3_77",
+    "name": "بيوريك ألباني بالسبانخ والجبن",
+    "normalized": "بيوريك الباني بالسبانخ والجبن",
+    "country": "ألبانيا"
+  },
+  {
+    "id": "global_3_78",
+    "name": "فليجا ألبانية",
+    "normalized": "فليجا البانيه",
+    "country": "ألبانيا"
+  },
+  {
+    "id": "global_3_79",
+    "name": "تسيبليناي",
+    "normalized": "تسيبليناي",
+    "country": "ليتوانيا"
+  },
+  {
+    "id": "global_3_80",
+    "name": "كوغليز ليتواني",
+    "normalized": "كوغليز ليتواني",
+    "country": "ليتوانيا"
+  },
+  {
+    "id": "global_3_81",
+    "name": "البازلاء الرمادية مع اللحم المقدد (غراي بيرنزي)",
+    "normalized": "البازلاء الرماديه مع اللحم المقدد (غراي بيرنزي)",
+    "country": "لاتفيا"
+  },
+  {
+    "id": "global_3_82",
+    "name": "كاما إستونية",
+    "normalized": "كاما استونيه",
+    "country": "إستونيا"
+  },
+  {
+    "id": "global_3_83",
+    "name": "مماليغا مولدوفية",
+    "normalized": "مماليغا مولدوفيه",
+    "country": "مولدوفا"
+  },
+  {
+    "id": "global_3_84",
+    "name": "درانيكي",
+    "normalized": "درانيكي",
+    "country": "بيلاروسيا"
+  },
+  {
+    "id": "global_3_85",
+    "name": "بيبيان غواتيمالي",
+    "normalized": "بيبيان غواتيمالي",
+    "country": "غواتيمالا"
+  },
+  {
+    "id": "global_3_86",
+    "name": "تامال غواتيمالي (كولورادو)",
+    "normalized": "تامال غواتيمالي (كولورادو)",
+    "country": "غواتيمالا"
+  },
+  {
+    "id": "global_3_87",
+    "name": "باليادا",
+    "normalized": "باليادا",
+    "country": "هندوراس"
+  },
+  {
+    "id": "global_3_88",
+    "name": "بوبوسا",
+    "normalized": "بوبوسا",
+    "country": "السلفادور"
+  },
+  {
+    "id": "global_3_89",
+    "name": "غايو بينتو نيكاراغوي",
+    "normalized": "غايو بينتو نيكاراغوي",
+    "country": "نيكاراغوا"
+  },
+  {
+    "id": "global_3_90",
+    "name": "سانكوتشو بنمي (سانكوتشو دي غايينا)",
+    "normalized": "سانكوتشو بنمي (سانكوتشو دي غايينا)",
+    "country": "بنما"
+  },
+  {
+    "id": "global_3_91",
+    "name": "غريو هايتي",
+    "normalized": "غريو هايتي",
+    "country": "هايتي"
+  },
+  {
+    "id": "global_3_92",
+    "name": "موفونغو",
+    "normalized": "موفونغو",
+    "country": "بورتوريكو"
+  },
+  {
+    "id": "global_3_93",
+    "name": "كو كو وسمك طائر",
+    "normalized": "كو كو وسمك طائر",
+    "country": "باربادوس"
+  },
+  {
+    "id": "global_3_94",
+    "name": "بيبر بوت غوياني",
+    "normalized": "بيبر بوت غوياني",
+    "country": "غويانا"
+  },
+  {
+    "id": "global_3_95",
+    "name": "إيسومبي",
+    "normalized": "ايسومبي",
+    "country": "رواندا"
+  },
+  {
+    "id": "global_3_96",
+    "name": "رولكس أوغندي",
+    "normalized": "رولكس اوغندي",
+    "country": "أوغندا"
+  },
+  {
+    "id": "global_3_97",
+    "name": "نشيما",
+    "normalized": "نشيما",
+    "country": "زامبيا"
+  },
+  {
+    "id": "global_3_98",
+    "name": "سادزا",
+    "normalized": "سادزا",
+    "country": "زيمبابوي"
+  },
+  {
+    "id": "global_3_99",
+    "name": "دجاج بيري بيري موزمبيقي",
+    "normalized": "دجاج بيري بيري موزمبيقي",
+    "country": "موزمبيق"
+  },
+  {
+    "id": "global_3_100",
+    "name": "بوتجيكوس",
+    "normalized": "بوتجيكوس",
+    "country": "ناميبيا"
+  },
+  {
+    "id": "global_4_1",
+    "name": "بازين",
+    "normalized": "بازين",
+    "country": "ليبيا"
+  },
+  {
+    "id": "global_4_2",
+    "name": "مبكبكة",
+    "normalized": "مبكبكه",
+    "country": "ليبيا"
+  },
+  {
+    "id": "global_4_3",
+    "name": "عصبان",
+    "normalized": "عصبان",
+    "country": "ليبيا"
+  },
+  {
+    "id": "global_4_4",
+    "name": "الشوربة العربية الليبية",
+    "normalized": "الشوربه العربيه الليبيه",
+    "country": "ليبيا"
+  },
+  {
+    "id": "global_4_5",
+    "name": "العصيدة الليبية",
+    "normalized": "العصيده الليبيه",
+    "country": "ليبيا"
+  },
+  {
+    "id": "global_4_6",
+    "name": "الكسرة السودانية",
+    "normalized": "الكسره السودانيه",
+    "country": "السودان"
+  },
+  {
+    "id": "global_4_7",
+    "name": "قراصة",
+    "normalized": "قراصه",
+    "country": "السودان"
+  },
+  {
+    "id": "global_4_8",
+    "name": "شية لحم سودانية",
+    "normalized": "شيه لحم سودانيه",
+    "country": "السودان"
+  },
+  {
+    "id": "global_4_9",
+    "name": "ملاح روب",
+    "normalized": "ملاح روب",
+    "country": "السودان"
+  },
+  {
+    "id": "global_4_10",
+    "name": "أقاشي",
+    "normalized": "اقاشي",
+    "country": "السودان"
+  },
+  {
+    "id": "global_4_11",
+    "name": "أنجيرو",
+    "normalized": "انجيرو",
+    "country": "الصومال"
+  },
+  {
+    "id": "global_4_12",
+    "name": "بريس إسكوكاريس",
+    "normalized": "بريس اسكوكاريس",
+    "country": "الصومال"
+  },
+  {
+    "id": "global_4_13",
+    "name": "سُقَار",
+    "normalized": "سقار",
+    "country": "الصومال"
+  },
+  {
+    "id": "global_4_14",
+    "name": "سمبوسة صومالية",
+    "normalized": "سمبوسه صوماليه",
+    "country": "الصومال"
+  },
+  {
+    "id": "global_4_15",
+    "name": "حلوى صومالية",
+    "normalized": "حلوي صوماليه",
+    "country": "الصومال"
+  },
+  {
+    "id": "global_4_16",
+    "name": "زقني",
+    "normalized": "زقني",
+    "country": "إريتريا"
+  },
+  {
+    "id": "global_4_17",
+    "name": "كيشا فت فت",
+    "normalized": "كيشا فت فت",
+    "country": "إريتريا"
+  },
+  {
+    "id": "global_4_18",
+    "name": "شيرو",
+    "normalized": "شيرو",
+    "country": "إريتريا"
+  },
+  {
+    "id": "global_4_19",
+    "name": "همباشا",
+    "normalized": "همباشا",
+    "country": "إريتريا"
+  },
+  {
+    "id": "global_4_20",
+    "name": "فول إريتري",
+    "normalized": "فول اريتري",
+    "country": "إريتريا"
+  },
+  {
+    "id": "global_4_21",
+    "name": "واكي",
+    "normalized": "واكي",
+    "country": "غانا"
+  },
+  {
+    "id": "global_4_22",
+    "name": "ريد ريد",
+    "normalized": "ريد ريد",
+    "country": "غانا"
+  },
+  {
+    "id": "global_4_23",
+    "name": "بانكو",
+    "normalized": "بانكو",
+    "country": "غانا"
+  },
+  {
+    "id": "global_4_24",
+    "name": "كيليويلي",
+    "normalized": "كيليويلي",
+    "country": "غانا"
+  },
+  {
+    "id": "global_4_25",
+    "name": "حساء الفول السوداني الغاني",
+    "normalized": "حساء الفول السوداني الغاني",
+    "country": "غانا"
+  },
+  {
+    "id": "global_4_26",
+    "name": "ندولي",
+    "normalized": "ندولي",
+    "country": "الكاميرون"
+  },
+  {
+    "id": "global_4_27",
+    "name": "إيرو",
+    "normalized": "ايرو",
+    "country": "الكاميرون"
+  },
+  {
+    "id": "global_4_28",
+    "name": "دجاج دي جي",
+    "normalized": "دجاج دي جي",
+    "country": "الكاميرون"
+  },
+  {
+    "id": "global_4_29",
+    "name": "أشو",
+    "normalized": "اشو",
+    "country": "الكاميرون"
+  },
+  {
+    "id": "global_4_30",
+    "name": "كوكي",
+    "normalized": "كوكي",
+    "country": "الكاميرون"
+  },
+  {
+    "id": "global_4_31",
+    "name": "أتيكيه",
+    "normalized": "اتيكيه",
+    "country": "ساحل العاج"
+  },
+  {
+    "id": "global_4_32",
+    "name": "كيدجينو",
+    "normalized": "كيدجينو",
+    "country": "ساحل العاج"
+  },
+  {
+    "id": "global_4_33",
+    "name": "ألوكّو",
+    "normalized": "الوكو",
+    "country": "ساحل العاج"
+  },
+  {
+    "id": "global_4_34",
+    "name": "فوتو",
+    "normalized": "فوتو",
+    "country": "ساحل العاج"
+  },
+  {
+    "id": "global_4_35",
+    "name": "صلصة الحبوب",
+    "normalized": "صلصه الحبوب",
+    "country": "ساحل العاج"
+  },
+  {
+    "id": "global_4_36",
+    "name": "ياسا دجاج",
+    "normalized": "ياسا دجاج",
+    "country": "السنغال"
+  },
+  {
+    "id": "global_4_37",
+    "name": "مافيه",
+    "normalized": "مافيه",
+    "country": "السنغال"
+  },
+  {
+    "id": "global_4_38",
+    "name": "باستيل",
+    "normalized": "باستيل",
+    "country": "السنغال"
+  },
+  {
+    "id": "global_4_39",
+    "name": "لاخ",
+    "normalized": "لاخ",
+    "country": "السنغال"
+  },
+  {
+    "id": "global_4_40",
+    "name": "ثيبوديان",
+    "normalized": "ثيبوديان",
+    "country": "السنغال"
+  },
+  {
+    "id": "global_4_41",
+    "name": "تيغا ديغيه (يخنة الفول السوداني)",
+    "normalized": "تيغا ديغيه (يخنه الفول السوداني)",
+    "country": "مالي"
+  },
+  {
+    "id": "global_4_42",
+    "name": "تو",
+    "normalized": "تو",
+    "country": "مالي"
+  },
+  {
+    "id": "global_4_43",
+    "name": "ديغيه",
+    "normalized": "ديغيه",
+    "country": "مالي"
+  },
+  {
+    "id": "global_4_44",
+    "name": "كابا (ذرة بالفاصوليا)",
+    "normalized": "كابا (ذره بالفاصوليا)",
+    "country": "مالي"
+  },
+  {
+    "id": "global_4_45",
+    "name": "فارا",
+    "normalized": "فارا",
+    "country": "مالي"
+  },
+  {
+    "id": "global_4_46",
+    "name": "إيغيسافوليا",
+    "normalized": "ايغيسافوليا",
+    "country": "رواندا"
+  },
+  {
+    "id": "global_4_47",
+    "name": "إبيهازا",
+    "normalized": "ابيهازا",
+    "country": "رواندا"
+  },
+  {
+    "id": "global_4_48",
+    "name": "بروشيت رواندية",
+    "normalized": "بروشيت روانديه",
+    "country": "رواندا"
+  },
+  {
+    "id": "global_4_49",
+    "name": "أوبوغا ري",
+    "normalized": "اوبوغا ري",
+    "country": "رواندا"
+  },
+  {
+    "id": "global_4_50",
+    "name": "ماتوكه",
+    "normalized": "ماتوكه",
+    "country": "رواندا"
+  },
+  {
+    "id": "global_4_51",
+    "name": "ماتابا",
+    "normalized": "ماتابا",
+    "country": "موزمبيق"
+  },
+  {
+    "id": "global_4_52",
+    "name": "دجاج بيري بيري",
+    "normalized": "دجاج بيري بيري",
+    "country": "موزمبيق"
+  },
+  {
+    "id": "global_4_53",
+    "name": "شيما",
+    "normalized": "شيما",
+    "country": "موزمبيق"
+  },
+  {
+    "id": "global_4_54",
+    "name": "فيجوادا موزمبيقية",
+    "normalized": "فيجوادا موزمبيقيه",
+    "country": "موزمبيق"
+  },
+  {
+    "id": "global_4_55",
+    "name": "بولو بولانا",
+    "normalized": "بولو بولانا",
+    "country": "موزمبيق"
+  },
+  {
+    "id": "global_4_56",
+    "name": "موامبا دي غالينيا",
+    "normalized": "موامبا دي غالينيا",
+    "country": "أنغولا"
+  },
+  {
+    "id": "global_4_57",
+    "name": "فونجي",
+    "normalized": "فونجي",
+    "country": "أنغولا"
+  },
+  {
+    "id": "global_4_58",
+    "name": "كالولو",
+    "normalized": "كالولو",
+    "country": "أنغولا"
+  },
+  {
+    "id": "global_4_59",
+    "name": "موامبا دي غينغوبا",
+    "normalized": "موامبا دي غينغوبا",
+    "country": "أنغولا"
+  },
+  {
+    "id": "global_4_60",
+    "name": "كيزاكا",
+    "normalized": "كيزاكا",
+    "country": "أنغولا"
+  },
+  {
+    "id": "global_4_61",
+    "name": "ساكا ساكا",
+    "normalized": "ساكا ساكا",
+    "country": "جمهورية الكونغو"
+  },
+  {
+    "id": "global_4_62",
+    "name": "بوندو (أوراق المانيوك)",
+    "normalized": "بوندو (اوراق المانيوك)",
+    "country": "جمهورية الكونغو"
+  },
+  {
+    "id": "global_4_63",
+    "name": "ليبوكي السمك",
+    "normalized": "ليبوكي السمك",
+    "country": "جمهورية الكونغو"
+  },
+  {
+    "id": "global_4_64",
+    "name": "ماكايابو",
+    "normalized": "ماكايابو",
+    "country": "جمهورية الكونغو"
+  },
+  {
+    "id": "global_4_65",
+    "name": "فومبوا",
+    "normalized": "فومبوا",
+    "country": "جمهورية الكونغو"
+  },
+  {
+    "id": "global_4_66",
+    "name": "كاشوبا",
+    "normalized": "كاشوبا",
+    "country": "الرأس الأخضر"
+  },
+  {
+    "id": "global_4_67",
+    "name": "باستيل كوم ديابلو دينترو",
+    "normalized": "باستيل كوم ديابلو دينترو",
+    "country": "الرأس الأخضر"
+  },
+  {
+    "id": "global_4_68",
+    "name": "كانجا",
+    "normalized": "كانجا",
+    "country": "الرأس الأخضر"
+  },
+  {
+    "id": "global_4_69",
+    "name": "كسكس الرأس الأخضر (كسكس دي ميلو)",
+    "normalized": "كسكس الراس الاخضر (كسكس دي ميلو)",
+    "country": "الرأس الأخضر"
+  },
+  {
+    "id": "global_4_70",
+    "name": "كفتة التونة (بولينيوس دي أتوم)",
+    "normalized": "كفته التونه (بولينيوس دي اتوم)",
+    "country": "الرأس الأخضر"
+  },
+  {
+    "id": "global_4_71",
+    "name": "يخنة أوراق الكسافا",
+    "normalized": "يخنه اوراق الكسافا",
+    "country": "سيراليون"
+  },
+  {
+    "id": "global_4_72",
+    "name": "بلاساس",
+    "normalized": "بلاساس",
+    "country": "سيراليون"
+  },
+  {
+    "id": "global_4_73",
+    "name": "أرز جولوف سيراليوني",
+    "normalized": "ارز جولوف سيراليوني",
+    "country": "سيراليون"
+  },
+  {
+    "id": "global_4_74",
+    "name": "أكارا سيراليون",
+    "normalized": "اكارا سيراليون",
+    "country": "سيراليون"
+  },
+  {
+    "id": "global_4_75",
+    "name": "فري فري",
+    "normalized": "فري فري",
+    "country": "سيراليون"
+  },
+  {
+    "id": "global_4_76",
+    "name": "أميوو",
+    "normalized": "اميوو",
+    "country": "بنين"
+  },
+  {
+    "id": "global_4_77",
+    "name": "أكارا بنينية",
+    "normalized": "اكارا بنينيه",
+    "country": "بنين"
+  },
+  {
+    "id": "global_4_78",
+    "name": "واجاسي",
+    "normalized": "واجاسي",
+    "country": "بنين"
+  },
+  {
+    "id": "global_4_79",
+    "name": "صلصة الفول السوداني (أزينديسي)",
+    "normalized": "صلصه الفول السوداني (ازينديسي)",
+    "country": "بنين"
+  },
+  {
+    "id": "global_4_80",
+    "name": "أتاسي",
+    "normalized": "اتاسي",
+    "country": "بنين"
+  },
+  {
+    "id": "global_4_81",
+    "name": "أكومي",
+    "normalized": "اكومي",
+    "country": "توغو"
+  },
+  {
+    "id": "global_4_82",
+    "name": "دجينكومي",
+    "normalized": "دجينكومي",
+    "country": "توغو"
+  },
+  {
+    "id": "global_4_83",
+    "name": "فوفو توغولي",
+    "normalized": "فوفو توغولي",
+    "country": "توغو"
+  },
+  {
+    "id": "global_4_84",
+    "name": "كوكلو ديسي",
+    "normalized": "كوكلو ديسي",
+    "country": "توغو"
+  },
+  {
+    "id": "global_4_85",
+    "name": "دجاج نييمبوي",
+    "normalized": "دجاج نييمبوي",
+    "country": "الغابون"
+  },
+  {
+    "id": "global_4_86",
+    "name": "دجاج نييمبوي (نيامبو)",
+    "normalized": "دجاج نييمبوي (نيامبو)",
+    "country": "الغابون"
+  },
+  {
+    "id": "global_4_87",
+    "name": "أصابع المانيوق (مانيوق مطبوخ)",
+    "normalized": "اصابع المانيوق (مانيوق مطبوخ)",
+    "country": "الغابون"
+  },
+  {
+    "id": "global_4_88",
+    "name": "سمك مشوي غابوني",
+    "normalized": "سمك مشوي غابوني",
+    "country": "الغابون"
+  },
+  {
+    "id": "global_4_89",
+    "name": "ثوبوا",
+    "normalized": "ثوبوا",
+    "country": "ملاوي"
+  },
+  {
+    "id": "global_4_90",
+    "name": "شامبو",
+    "normalized": "شامبو",
+    "country": "مالاوي"
+  },
+  {
+    "id": "global_4_91",
+    "name": "ماندازي",
+    "normalized": "ماندازي",
+    "country": "مالاوي"
+  },
+  {
+    "id": "global_4_92",
+    "name": "زيتومبوا",
+    "normalized": "زيتومبوا",
+    "country": "ملاوي"
+  },
+  {
+    "id": "global_4_93",
+    "name": "بابا",
+    "normalized": "بابا",
+    "country": "ليسوتو"
+  },
+  {
+    "id": "global_4_94",
+    "name": "موروهو",
+    "normalized": "موروهو",
+    "country": "ليسوتو"
+  },
+  {
+    "id": "global_4_95",
+    "name": "سيشوالا",
+    "normalized": "سيشوالا",
+    "country": "إسواتيني"
+  },
+  {
+    "id": "global_4_96",
+    "name": "كابانا",
+    "normalized": "كابانا",
+    "country": "ناميبيا"
+  },
+  {
+    "id": "global_4_97",
+    "name": "دومودا",
+    "normalized": "دومودا",
+    "country": "غامبيا"
+  },
+  {
+    "id": "global_4_98",
+    "name": "كالديرا دي بيكسه",
+    "normalized": "كالديرا دي بيكسه",
+    "country": "غينيا بيساو"
+  },
+  {
+    "id": "global_4_99",
+    "name": "ثريد موريتاني",
+    "normalized": "ثريد موريتاني",
+    "country": "موريتانيا"
+  },
+  {
+    "id": "global_4_100",
+    "name": "كالولو دي بيشي",
+    "normalized": "كالولو دي بيشي",
+    "country": "ساو تومي وبرينسيب"
+  },
+  {
+    "id": "global_5_1",
+    "name": "خبز دامبر",
+    "normalized": "خبز دامبر",
+    "country": "أستراليا"
+  },
+  {
+    "id": "global_5_2",
+    "name": "بافلوفا",
+    "normalized": "بافلوفا",
+    "country": "أستراليا"
+  },
+  {
+    "id": "global_5_3",
+    "name": "بسكويت أنزاك",
+    "normalized": "بسكويت انزاك",
+    "country": "أستراليا"
+  },
+  {
+    "id": "global_5_4",
+    "name": "لامينغتون",
+    "normalized": "لامينغتون",
+    "country": "أستراليا"
+  },
+  {
+    "id": "global_5_5",
+    "name": "شريحة الفانيليا الأسترالية",
+    "normalized": "شريحه الفانيليا الاستراليه",
+    "country": "أستراليا"
+  },
+  {
+    "id": "global_5_6",
+    "name": "سكونز اليقطين",
+    "normalized": "سكونز اليقطين",
+    "country": "أستراليا"
+  },
+  {
+    "id": "global_5_7",
+    "name": "ريزول اللحم الأسترالي",
+    "normalized": "ريزول اللحم الاسترالي",
+    "country": "أستراليا"
+  },
+  {
+    "id": "global_5_8",
+    "name": "فطيرة اللحم الأسترالية",
+    "normalized": "فطيره اللحم الاستراليه",
+    "country": "أستراليا"
+  },
+  {
+    "id": "global_5_9",
+    "name": "سمك الباراموندي بميرتل الليمون",
+    "normalized": "سمك الباراموندي بميرتل الليمون",
+    "country": "أستراليا"
+  },
+  {
+    "id": "global_5_10",
+    "name": "ستيك الكنغر بالأعشاب البرية",
+    "normalized": "ستيك الكنغر بالاعشاب البريه",
+    "country": "أستراليا"
+  },
+  {
+    "id": "global_5_11",
+    "name": "هنجي",
+    "normalized": "هنجي",
+    "country": "New Zealand"
+  },
+  {
+    "id": "global_5_12",
+    "name": "خبز ريوينا",
+    "normalized": "خبز ريوينا",
+    "country": "New Zealand"
+  },
+  {
+    "id": "global_5_13",
+    "name": "بويل أب الماوري",
+    "normalized": "بويل اب الماوري",
+    "country": "New Zealand"
+  },
+  {
+    "id": "global_5_14",
+    "name": "بسكويت أفغان",
+    "normalized": "بسكويت افغان",
+    "country": "New Zealand"
+  },
+  {
+    "id": "global_5_15",
+    "name": "لفائف الجبن من ساوثلاند",
+    "normalized": "لفائف الجبن من ساوثلاند",
+    "country": "New Zealand"
+  },
+  {
+    "id": "global_5_16",
+    "name": "فطائر وايت بيت",
+    "normalized": "فطائر وايت بيت",
+    "country": "New Zealand"
+  },
+  {
+    "id": "global_5_17",
+    "name": "كعكة الحلوى (لولي كيك)",
+    "normalized": "كعكه الحلوي (لولي كيك)",
+    "country": "New Zealand"
+  },
+  {
+    "id": "global_5_18",
+    "name": "إوزة المستعمرات",
+    "normalized": "اوزه المستعمرات",
+    "country": "New Zealand"
+  },
+  {
+    "id": "global_5_19",
+    "name": "كوكودا (سلطة سمك فيجية)",
+    "normalized": "كوكودا (سلطه سمك فيجيه)",
+    "country": "فيجي"
+  },
+  {
+    "id": "global_5_20",
+    "name": "فيش سورووا (كاري السمك الفيجي)",
+    "normalized": "فيش سورووا (كاري السمك الفيجي)",
+    "country": "فيجي"
+  },
+  {
+    "id": "global_5_21",
+    "name": "رورو (أوراق القلقاس بحليب جوز الهند)",
+    "normalized": "رورو (اوراق القلقاس بحليب جوز الهند)",
+    "country": "فيجي"
+  },
+  {
+    "id": "global_5_22",
+    "name": "بالوسامي (لفائف القلقاس المحشوة)",
+    "normalized": "بالوسامي (لفائف القلقاس المحشوه)",
+    "country": "فيجي"
+  },
+  {
+    "id": "global_5_23",
+    "name": "إيكا فاكالولو (سمك مطهو بحليب جوز الهند)",
+    "normalized": "ايكا فاكالولو (سمك مطهو بحليب جوز الهند)",
+    "country": "فيجي"
+  },
+  {
+    "id": "global_5_24",
+    "name": "فاكالافالافا (كعكة الكسافا)",
+    "normalized": "فاكالافالافا (كعكه الكسافا)",
+    "country": "فيجي"
+  },
+  {
+    "id": "global_5_25",
+    "name": "بوريني (بودينغ فيجي المطهو على البخار)",
+    "normalized": "بوريني (بودينغ فيجي المطهو علي البخار)",
+    "country": "فيجي"
+  },
+  {
+    "id": "global_5_26",
+    "name": "توبوي (زلابية جوز الهند)",
+    "normalized": "توبوي (زلابيه جوز الهند)",
+    "country": "فيجي"
+  },
+  {
+    "id": "global_5_27",
+    "name": "لولو بانز (خبز جوز الهند الحلو)",
+    "normalized": "لولو بانز (خبز جوز الهند الحلو)",
+    "country": "فيجي"
+  },
+  {
+    "id": "global_5_28",
+    "name": "باذنجان فالو (باذنجان محشو بالسمك)",
+    "normalized": "باذنجان فالو (باذنجان محشو بالسمك)",
+    "country": "فيجي"
+  },
+  {
+    "id": "global_5_29",
+    "name": "أوكا إيا",
+    "normalized": "اوكا ايا",
+    "country": "Samoa"
+  },
+  {
+    "id": "global_5_30",
+    "name": "بالوسامي",
+    "normalized": "بالوسامي",
+    "country": "Samoa"
+  },
+  {
+    "id": "global_5_31",
+    "name": "بانيبوبو",
+    "normalized": "بانيبوبو",
+    "country": "Samoa"
+  },
+  {
+    "id": "global_5_32",
+    "name": "سابا سوي",
+    "normalized": "سابا سوي",
+    "country": "Samoa"
+  },
+  {
+    "id": "global_5_33",
+    "name": "كوكو ألايسا",
+    "normalized": "كوكو الايسا",
+    "country": "Samoa"
+  },
+  {
+    "id": "global_5_34",
+    "name": "فايبابا",
+    "normalized": "فايبابا",
+    "country": "Samoa"
+  },
+  {
+    "id": "global_5_35",
+    "name": "سوبو إيسي",
+    "normalized": "سوبو ايسي",
+    "country": "Samoa"
+  },
+  {
+    "id": "global_5_36",
+    "name": "بانيكيكي",
+    "normalized": "بانيكيكي",
+    "country": "Samoa"
+  },
+  {
+    "id": "global_5_37",
+    "name": "كيكي بوا",
+    "normalized": "كيكي بوا",
+    "country": "Samoa"
+  },
+  {
+    "id": "global_5_38",
+    "name": "فاوسي",
+    "normalized": "فاوسي",
+    "country": "Samoa"
+  },
+  {
+    "id": "global_5_39",
+    "name": "أوتا إيكا",
+    "normalized": "اوتا ايكا",
+    "country": "Tonga"
+  },
+  {
+    "id": "global_5_40",
+    "name": "لو سيبي",
+    "normalized": "لو سيبي",
+    "country": "Tonga"
+  },
+  {
+    "id": "global_5_41",
+    "name": "فايكاكي مالي مالي",
+    "normalized": "فايكاكي مالي مالي",
+    "country": "Tonga"
+  },
+  {
+    "id": "global_5_42",
+    "name": "لو بولو",
+    "normalized": "لو بولو",
+    "country": "Tonga"
+  },
+  {
+    "id": "global_5_43",
+    "name": "لوي فيكي",
+    "normalized": "لوي فيكي",
+    "country": "Tonga"
+  },
+  {
+    "id": "global_5_44",
+    "name": "كيليفي إيكا",
+    "normalized": "كيليفي ايكا",
+    "country": "Tonga"
+  },
+  {
+    "id": "global_5_45",
+    "name": "فاي سيايني",
+    "normalized": "فاي سيايني",
+    "country": "Tonga"
+  },
+  {
+    "id": "global_5_46",
+    "name": "فايكاكي توباي",
+    "normalized": "فايكاكي توباي",
+    "country": "Tonga"
+  },
+  {
+    "id": "global_5_47",
+    "name": "أوتاي",
+    "normalized": "اوتاي",
+    "country": "Tonga"
+  },
+  {
+    "id": "global_5_48",
+    "name": "بولو ماسيما",
+    "normalized": "بولو ماسيما",
+    "country": "Tonga"
+  },
+  {
+    "id": "global_5_49",
+    "name": "مومو",
+    "normalized": "مومو",
+    "country": "Papua New Guinea"
+  },
+  {
+    "id": "global_5_50",
+    "name": "كوكودا",
+    "normalized": "كوكودا",
+    "country": "Papua New Guinea"
+  },
+  {
+    "id": "global_5_51",
+    "name": "ساكساك",
+    "normalized": "ساكساك",
+    "country": "Papua New Guinea"
+  },
+  {
+    "id": "global_5_52",
+    "name": "كاو كاو بجوز الهند",
+    "normalized": "كاو كاو بجوز الهند",
+    "country": "Papua New Guinea"
+  },
+  {
+    "id": "global_5_53",
+    "name": "حساء بوجاندي بالبيض",
+    "normalized": "حساء بوجاندي بالبيض",
+    "country": "Papua New Guinea"
+  },
+  {
+    "id": "global_5_54",
+    "name": "كول بيس نو رايس",
+    "normalized": "كول بيس نو رايس",
+    "country": "Papua New Guinea"
+  },
+  {
+    "id": "global_5_55",
+    "name": "وعاء الدجاج",
+    "normalized": "وعاء الدجاج",
+    "country": "Papua New Guinea"
+  },
+  {
+    "id": "global_5_56",
+    "name": "أيغير",
+    "normalized": "ايغير",
+    "country": "Papua New Guinea"
+  },
+  {
+    "id": "global_5_57",
+    "name": "تالوتو",
+    "normalized": "تالوتو",
+    "country": "Papua New Guinea"
+  },
+  {
+    "id": "global_5_58",
+    "name": "كايما بونا جاتوي",
+    "normalized": "كايما بونا جاتوي",
+    "country": "Papua New Guinea"
+  },
+  {
+    "id": "global_5_59",
+    "name": "دال بوري",
+    "normalized": "دال بوري",
+    "country": "موريشيوس"
+  },
+  {
+    "id": "global_5_60",
+    "name": "بول رينفيرسيه (الوعاء المقلوب)",
+    "normalized": "بول رينفيرسيه (الوعاء المقلوب)",
+    "country": "موريشيوس"
+  },
+  {
+    "id": "global_5_61",
+    "name": "فينداي السمك",
+    "normalized": "فينداي السمك",
+    "country": "موريشيوس"
+  },
+  {
+    "id": "global_5_62",
+    "name": "جاتو بيمو (كعك الفلفل)",
+    "normalized": "جاتو بيمو (كعك الفلفل)",
+    "country": "موريشيوس"
+  },
+  {
+    "id": "global_5_63",
+    "name": "روغاي السجق",
+    "normalized": "روغاي السجق",
+    "country": "موريشيوس"
+  },
+  {
+    "id": "global_5_64",
+    "name": "برياني موريشيوس",
+    "normalized": "برياني موريشيوس",
+    "country": "موريشيوس"
+  },
+  {
+    "id": "global_5_65",
+    "name": "الودة",
+    "normalized": "الوده",
+    "country": "موريشيوس"
+  },
+  {
+    "id": "global_5_66",
+    "name": "كاري الدجاج الموريشيوسي",
+    "normalized": "كاري الدجاج الموريشيوسي",
+    "country": "موريشيوس"
+  },
+  {
+    "id": "global_5_67",
+    "name": "مين فريت (نودلز مقلية)",
+    "normalized": "مين فريت (نودلز مقليه)",
+    "country": "موريشيوس"
+  },
+  {
+    "id": "global_5_68",
+    "name": "سلطة قلب النخيل",
+    "normalized": "سلطه قلب النخيل",
+    "country": "موريشيوس"
+  },
+  {
+    "id": "global_5_69",
+    "name": "كاري أخطبوط بحليب جوز الهند",
+    "normalized": "كاري اخطبوط بحليب جوز الهند",
+    "country": "سيشل"
+  },
+  {
+    "id": "global_5_70",
+    "name": "سمك مشوي على الطريقة الكريولية",
+    "normalized": "سمك مشوي علي الطريقه الكريوليه",
+    "country": "سيشل"
+  },
+  {
+    "id": "global_5_71",
+    "name": "لادوب الموز",
+    "normalized": "لادوب الموز",
+    "country": "سيشل"
+  },
+  {
+    "id": "global_5_72",
+    "name": "جاتو بيمان (كعكات الفلفل الحار)",
+    "normalized": "جاتو بيمان (كعكات الفلفل الحار)",
+    "country": "سيشل"
+  },
+  {
+    "id": "global_5_73",
+    "name": "شاتني القرش (ساتيني ريكين)",
+    "normalized": "شاتني القرش (ساتيني ريكين)",
+    "country": "سيشل"
+  },
+  {
+    "id": "global_5_74",
+    "name": "بويون بريد (شوربة الخضار الورقية)",
+    "normalized": "بويون بريد (شوربه الخضار الورقيه)",
+    "country": "سيشل"
+  },
+  {
+    "id": "global_5_75",
+    "name": "كات كات كارانج (مهروس السمك والموز)",
+    "normalized": "كات كات كارانج (مهروس السمك والموز)",
+    "country": "سيشل"
+  },
+  {
+    "id": "global_5_76",
+    "name": "سلطة الأخطبوط السيشلية",
+    "normalized": "سلطه الاخطبوط السيشليه",
+    "country": "سيشل"
+  },
+  {
+    "id": "global_5_77",
+    "name": "كرات سمك التريفالي (بوليت كارانج)",
+    "normalized": "كرات سمك التريفالي (بوليت كارانج)",
+    "country": "سيشل"
+  },
+  {
+    "id": "global_5_78",
+    "name": "متسولولا",
+    "normalized": "متسولولا",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_5_79",
+    "name": "مكاترا فوترا",
+    "normalized": "مكاترا فوترا",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_5_80",
+    "name": "دجاج بجوز الهند",
+    "normalized": "دجاج بجوز الهند",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_5_81",
+    "name": "مادابا",
+    "normalized": "مادابا",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_5_82",
+    "name": "بيلاو",
+    "normalized": "بيلاو",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_5_83",
+    "name": "كاتريلز",
+    "normalized": "كاتريلز",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_5_84",
+    "name": "جراد البحر بالفانيليا",
+    "normalized": "جراد البحر بالفانيليا",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_5_85",
+    "name": "مشاكيكي",
+    "normalized": "مشاكيكي",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_5_86",
+    "name": "لادو",
+    "normalized": "لادو",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_5_87",
+    "name": "أمبريفاديس بالكاري",
+    "normalized": "امبريفاديس بالكاري",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_5_88",
+    "name": "بوكو بوكو هريس",
+    "normalized": "بوكو بوكو هريس",
+    "country": "Burundi"
+  },
+  {
+    "id": "global_5_89",
+    "name": "إيبيهاراجي",
+    "normalized": "ايبيهاراجي",
+    "country": "Burundi"
+  },
+  {
+    "id": "global_5_90",
+    "name": "ماهاراغوي",
+    "normalized": "ماهاراغوي",
+    "country": "Burundi"
+  },
+  {
+    "id": "global_5_91",
+    "name": "موكيكي",
+    "normalized": "موكيكي",
+    "country": "Burundi"
+  },
+  {
+    "id": "global_5_92",
+    "name": "نداغالا",
+    "normalized": "نداغالا",
+    "country": "Burundi"
+  },
+  {
+    "id": "global_5_93",
+    "name": "أغاتوكي",
+    "normalized": "اغاتوكي",
+    "country": "Burundi"
+  },
+  {
+    "id": "global_5_94",
+    "name": "رينغا رينغا",
+    "normalized": "رينغا رينغا",
+    "country": "Burundi"
+  },
+  {
+    "id": "global_5_95",
+    "name": "بوغالي",
+    "normalized": "بوغالي",
+    "country": "Burundi"
+  },
+  {
+    "id": "global_5_96",
+    "name": "ماتورا وماهو",
+    "normalized": "ماتورا وماهو",
+    "country": "Burundi"
+  },
+  {
+    "id": "global_5_97",
+    "name": "إيغيكوما",
+    "normalized": "ايغيكوما",
+    "country": "Burundi"
+  },
+  {
+    "id": "global_5_98",
+    "name": "لاب لاب",
+    "normalized": "لاب لاب",
+    "country": "فانواتو"
+  },
+  {
+    "id": "global_5_99",
+    "name": "بودينغ الكسافا",
+    "normalized": "بودينغ الكسافا",
+    "country": "جزر سليمان"
+  },
+  {
+    "id": "global_5_100",
+    "name": "تي بوا تورو ني باوكين",
+    "normalized": "تي بوا تورو ني باوكين",
+    "country": "كيريباتي"
+  },
+  {
+    "id": "global_6_1",
+    "name": "قدرة خليلية",
+    "normalized": "قدره خليليه",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_6_2",
+    "name": "رمانية غزاوي",
+    "normalized": "رمانيه غزاوي",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_6_3",
+    "name": "سماقية غزاوي",
+    "normalized": "سماقيه غزاوي",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_6_4",
+    "name": "مفتول فلسطيني",
+    "normalized": "مفتول فلسطيني",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_6_5",
+    "name": "فقاعية غزاوي",
+    "normalized": "فقاعيه غزاوي",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_6_6",
+    "name": "زرب أردني",
+    "normalized": "زرب اردني",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_6_7",
+    "name": "جعاجيل أردنية",
+    "normalized": "جعاجيل اردنيه",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_6_8",
+    "name": "لزاقيات أردنية",
+    "normalized": "لزاقيات اردنيه",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_6_9",
+    "name": "قلاية بندورة أردنية",
+    "normalized": "قلايه بندوره اردنيه",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_6_10",
+    "name": "كباب الرمثا",
+    "normalized": "كباب الرمثا",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_6_11",
+    "name": "كبة نية",
+    "normalized": "كبه نيه",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_6_12",
+    "name": "مغمور",
+    "normalized": "مغمور",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_6_13",
+    "name": "هندبة بالزيت",
+    "normalized": "هندبه بالزيت",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_6_14",
+    "name": "مناقيش زعتر",
+    "normalized": "مناقيش زعتر",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_6_15",
+    "name": "صفوف",
+    "normalized": "صفوف",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_6_16",
+    "name": "حراق إصبعو",
+    "normalized": "حراق اصبعو",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_6_17",
+    "name": "شاكرية باللحم",
+    "normalized": "شاكريه باللحم",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_6_18",
+    "name": "كبة سفرجلية",
+    "normalized": "كبه سفرجليه",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_6_19",
+    "name": "يبرق سوري",
+    "normalized": "يبرق سوري",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_6_20",
+    "name": "مامونية حلبية",
+    "normalized": "مامونيه حلبيه",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_6_21",
+    "name": "حواوشي مصري",
+    "normalized": "حواوشي مصري",
+    "country": "مصر"
+  },
+  {
+    "id": "global_6_22",
+    "name": "حمام محشي بالأرز",
+    "normalized": "حمام محشي بالارز",
+    "country": "مصر"
+  },
+  {
+    "id": "global_6_23",
+    "name": "كباب حلة مصري",
+    "normalized": "كباب حله مصري",
+    "country": "مصر"
+  },
+  {
+    "id": "global_6_24",
+    "name": "أرز معمر حادق",
+    "normalized": "ارز معمر حادق",
+    "country": "مصر"
+  },
+  {
+    "id": "global_6_25",
+    "name": "بصارة مصرية",
+    "normalized": "بصاره مصريه",
+    "country": "مصر"
+  },
+  {
+    "id": "global_6_26",
+    "name": "ملاح التقلية",
+    "normalized": "ملاح التقليه",
+    "country": "السودان"
+  },
+  {
+    "id": "global_6_27",
+    "name": "سلطة الأسود",
+    "normalized": "سلطه الاسود",
+    "country": "السودان"
+  },
+  {
+    "id": "global_6_28",
+    "name": "الكمونية السودانية",
+    "normalized": "الكمونيه السودانيه",
+    "country": "السودان"
+  },
+  {
+    "id": "global_6_29",
+    "name": "الرجلة السودانية",
+    "normalized": "الرجله السودانيه",
+    "country": "السودان"
+  },
+  {
+    "id": "global_6_30",
+    "name": "ملاح النعيمية",
+    "normalized": "ملاح النعيميه",
+    "country": "السودان"
+  },
+  {
+    "id": "global_6_31",
+    "name": "المبطن الليبي",
+    "normalized": "المبطن الليبي",
+    "country": "ليبيا"
+  },
+  {
+    "id": "global_6_32",
+    "name": "رشدة كسكاس",
+    "normalized": "رشده كسكاس",
+    "country": "ليبيا"
+  },
+  {
+    "id": "global_6_33",
+    "name": "القلاية الليبية",
+    "normalized": "القلايه الليبيه",
+    "country": "ليبيا"
+  },
+  {
+    "id": "global_6_34",
+    "name": "الكمونية الليبية",
+    "normalized": "الكمونيه الليبيه",
+    "country": "ليبيا"
+  },
+  {
+    "id": "global_6_35",
+    "name": "الكسكسي الليبي بالبصلة",
+    "normalized": "الكسكسي الليبي بالبصله",
+    "country": "ليبيا"
+  },
+  {
+    "id": "global_6_36",
+    "name": "عجة بالمرقاز",
+    "normalized": "عجه بالمرقاز",
+    "country": "تونس"
+  },
+  {
+    "id": "global_6_37",
+    "name": "كفتاجي قيرواني",
+    "normalized": "كفتاجي قيرواني",
+    "country": "تونس"
+  },
+  {
+    "id": "global_6_38",
+    "name": "فريكاسي تونسي",
+    "normalized": "فريكاسي تونسي",
+    "country": "تونس"
+  },
+  {
+    "id": "global_6_39",
+    "name": "طاجين تونسي بالدجاج",
+    "normalized": "طاجين تونسي بالدجاج",
+    "country": "تونس"
+  },
+  {
+    "id": "global_6_40",
+    "name": "ملوخية تونسية باللحم",
+    "normalized": "ملوخيه تونسيه باللحم",
+    "country": "تونس"
+  },
+  {
+    "id": "global_6_41",
+    "name": "شوربة فريك",
+    "normalized": "شوربه فريك",
+    "country": "الجزائر"
+  },
+  {
+    "id": "global_6_42",
+    "name": "طاجين الزيتون",
+    "normalized": "طاجين الزيتون",
+    "country": "الجزائر"
+  },
+  {
+    "id": "global_6_43",
+    "name": "المتوم الجزائري",
+    "normalized": "المتوم الجزائري",
+    "country": "الجزائر"
+  },
+  {
+    "id": "global_6_44",
+    "name": "التليتلي بالدجاج",
+    "normalized": "التليتلي بالدجاج",
+    "country": "الجزائر"
+  },
+  {
+    "id": "global_6_45",
+    "name": "الكرنتيكا الوهرانية",
+    "normalized": "الكرنتيكا الوهرانيه",
+    "country": "الجزائر"
+  },
+  {
+    "id": "global_6_46",
+    "name": "طنجية مراكشية باللحم",
+    "normalized": "طنجيه مراكشيه باللحم",
+    "country": "المغرب"
+  },
+  {
+    "id": "global_6_47",
+    "name": "بيصارة مغربية بالفول",
+    "normalized": "بيصاره مغربيه بالفول",
+    "country": "المغرب"
+  },
+  {
+    "id": "global_6_48",
+    "name": "طاجين اللحم بالبرقوق واللوز",
+    "normalized": "طاجين اللحم بالبرقوق واللوز",
+    "country": "المغرب"
+  },
+  {
+    "id": "global_6_49",
+    "name": "سفة مدفونة بالدجاج",
+    "normalized": "سفه مدفونه بالدجاج",
+    "country": "المغرب"
+  },
+  {
+    "id": "global_6_50",
+    "name": "بغرير مغربي (فطائر الألف ثقب)",
+    "normalized": "بغرير مغربي (فطائر الالف ثقب)",
+    "country": "المغرب"
+  },
+  {
+    "id": "global_6_51",
+    "name": "تيبوجن (أرز بالسمك)",
+    "normalized": "تيبوجن (ارز بالسمك)",
+    "country": "موريتانيا"
+  },
+  {
+    "id": "global_6_52",
+    "name": "بونافا (يخنة اللحم والبطاطس)",
+    "normalized": "بونافا (يخنه اللحم والبطاطس)",
+    "country": "موريتانيا"
+  },
+  {
+    "id": "global_6_53",
+    "name": "مارو واللحم",
+    "normalized": "مارو واللحم",
+    "country": "موريتانيا"
+  },
+  {
+    "id": "global_6_54",
+    "name": "الكسور (فطائر باللحم والخضار)",
+    "normalized": "الكسور (فطائر باللحم والخضار)",
+    "country": "موريتانيا"
+  },
+  {
+    "id": "global_6_55",
+    "name": "تيشطار (طبيخ اللحم المقدد)",
+    "normalized": "تيشطار (طبيخ اللحم المقدد)",
+    "country": "موريتانيا"
+  },
+  {
+    "id": "global_6_56",
+    "name": "الفحسة اليمنية",
+    "normalized": "الفحسه اليمنيه",
+    "country": "اليمن"
+  },
+  {
+    "id": "global_6_57",
+    "name": "الزربيان العدني",
+    "normalized": "الزربيان العدني",
+    "country": "اليمن"
+  },
+  {
+    "id": "global_6_58",
+    "name": "الشافوت اليمني",
+    "normalized": "الشافوت اليمني",
+    "country": "اليمن"
+  },
+  {
+    "id": "global_6_59",
+    "name": "الباخمري الحضرمي",
+    "normalized": "الباخمري الحضرمي",
+    "country": "اليمن"
+  },
+  {
+    "id": "global_6_60",
+    "name": "الزوم الصنعاني",
+    "normalized": "الزوم الصنعاني",
+    "country": "اليمن"
+  },
+  {
+    "id": "global_6_61",
+    "name": "القبولي العماني",
+    "normalized": "القبولي العماني",
+    "country": "عُمان"
+  },
+  {
+    "id": "global_6_62",
+    "name": "البابلو العماني",
+    "normalized": "البابلو العماني",
+    "country": "عُمان"
+  },
+  {
+    "id": "global_6_63",
+    "name": "المشواي العماني",
+    "normalized": "المشواي العماني",
+    "country": "عُمان"
+  },
+  {
+    "id": "global_6_64",
+    "name": "الخبيصة العمانية",
+    "normalized": "الخبيصه العمانيه",
+    "country": "عُمان"
+  },
+  {
+    "id": "global_6_65",
+    "name": "المضبي العماني",
+    "normalized": "المضبي العماني",
+    "country": "عُمان"
+  },
+  {
+    "id": "global_6_66",
+    "name": "تكة بحرينية باللومي",
+    "normalized": "تكه بحرينيه باللومي",
+    "country": "البحرين"
+  },
+  {
+    "id": "global_6_67",
+    "name": "كباب بحريني (كباب نخي)",
+    "normalized": "كباب بحريني (كباب نخي)",
+    "country": "البحرين"
+  },
+  {
+    "id": "global_6_68",
+    "name": "خبيصة بحرينية",
+    "normalized": "خبيصه بحرينيه",
+    "country": "البحرين"
+  },
+  {
+    "id": "global_6_69",
+    "name": "العيش المدلل البحريني",
+    "normalized": "العيش المدلل البحريني",
+    "country": "البحرين"
+  },
+  {
+    "id": "global_6_70",
+    "name": "حلوى بحرينية ملكية",
+    "normalized": "حلوي بحرينيه ملكيه",
+    "country": "البحرين"
+  },
+  {
+    "id": "global_6_71",
+    "name": "القبوط الكويتي",
+    "normalized": "القبوط الكويتي",
+    "country": "الكويت"
+  },
+  {
+    "id": "global_6_72",
+    "name": "المعدس الكويتي",
+    "normalized": "المعدس الكويتي",
+    "country": "الكويت"
+  },
+  {
+    "id": "global_6_73",
+    "name": "صب القفشة",
+    "normalized": "صب القفشه",
+    "country": "الكويت"
+  },
+  {
+    "id": "global_6_74",
+    "name": "البثيث الكويتي",
+    "normalized": "البثيث الكويتي",
+    "country": "الكويت"
+  },
+  {
+    "id": "global_6_75",
+    "name": "مموش ربيان يابس",
+    "normalized": "مموش ربيان يابس",
+    "country": "الكويت"
+  },
+  {
+    "id": "global_6_76",
+    "name": "مجبوس دجاج قطري",
+    "normalized": "مجبوس دجاج قطري",
+    "country": "قطر"
+  },
+  {
+    "id": "global_6_77",
+    "name": "هريس قطري",
+    "normalized": "هريس قطري",
+    "country": "قطر"
+  },
+  {
+    "id": "global_6_78",
+    "name": "صالونة لحم قطرية",
+    "normalized": "صالونه لحم قطريه",
+    "country": "قطر"
+  },
+  {
+    "id": "global_6_79",
+    "name": "خنفروش قطري",
+    "normalized": "خنفروش قطري",
+    "country": "قطر"
+  },
+  {
+    "id": "global_6_80",
+    "name": "خبيص قطري",
+    "normalized": "خبيص قطري",
+    "country": "قطر"
+  },
+  {
+    "id": "global_6_81",
+    "name": "هريس إماراتي",
+    "normalized": "هريس اماراتي",
+    "country": "الإمارات العربية المتحدة"
+  },
+  {
+    "id": "global_6_82",
+    "name": "ثريد لحم إماراتي",
+    "normalized": "ثريد لحم اماراتي",
+    "country": "الإمارات العربية المتحدة"
+  },
+  {
+    "id": "global_6_83",
+    "name": "صالونة دجاج إماراتية",
+    "normalized": "صالونه دجاج اماراتيه",
+    "country": "الإمارات العربية المتحدة"
+  },
+  {
+    "id": "global_6_84",
+    "name": "خبيصة إماراتية",
+    "normalized": "خبيصه اماراتيه",
+    "country": "الإمارات العربية المتحدة"
+  },
+  {
+    "id": "global_6_85",
+    "name": "مالح فوكا إماراتي",
+    "normalized": "مالح فوكا اماراتي",
+    "country": "الإمارات العربية المتحدة"
+  },
+  {
+    "id": "global_6_86",
+    "name": "المغش الجيزاني",
+    "normalized": "المغش الجيزاني",
+    "country": "السعودية"
+  },
+  {
+    "id": "global_6_87",
+    "name": "مقلقل اللحم السعودي",
+    "normalized": "مقلقل اللحم السعودي",
+    "country": "السعودية"
+  },
+  {
+    "id": "global_6_88",
+    "name": "الحنيذ السعودي",
+    "normalized": "الحنيذ السعودي",
+    "country": "السعودية"
+  },
+  {
+    "id": "global_6_89",
+    "name": "المضغوط السعودي",
+    "normalized": "المضغوط السعودي",
+    "country": "السعودية"
+  },
+  {
+    "id": "global_6_90",
+    "name": "كليجا القصيم",
+    "normalized": "كليجا القصيم",
+    "country": "السعودية"
+  },
+  {
+    "id": "global_6_91",
+    "name": "سكويدكارس",
+    "normalized": "سكويدكارس",
+    "country": "جيبوتي"
+  },
+  {
+    "id": "global_6_92",
+    "name": "فحفح",
+    "normalized": "فحفح",
+    "country": "جيبوتي"
+  },
+  {
+    "id": "global_6_93",
+    "name": "لحوح جيبوتي",
+    "normalized": "لحوح جيبوتي",
+    "country": "جيبوتي"
+  },
+  {
+    "id": "global_6_94",
+    "name": "سباياد",
+    "normalized": "سباياد",
+    "country": "جيبوتي"
+  },
+  {
+    "id": "global_6_95",
+    "name": "مرق كلون",
+    "normalized": "مرق كلون",
+    "country": "جيبوتي"
+  },
+  {
+    "id": "global_6_96",
+    "name": "مكاترا سينيا",
+    "normalized": "مكاترا سينيا",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_6_97",
+    "name": "غودوغودو",
+    "normalized": "غودوغودو",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_6_98",
+    "name": "باتاباتا",
+    "normalized": "باتاباتا",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_6_99",
+    "name": "دوناس",
+    "normalized": "دوناس",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_6_100",
+    "name": "كاكاموكو",
+    "normalized": "كاكاموكو",
+    "country": "جزر القمر"
+  },
+  {
+    "id": "global_7_1",
+    "name": "فتة غزاويّة",
+    "normalized": "فته غزاويه",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_7_2",
+    "name": "كعك القدس",
+    "normalized": "كعك القدس",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_7_3",
+    "name": "خبيزة فلسطينية بالزيت",
+    "normalized": "خبيزه فلسطينيه بالزيت",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_7_4",
+    "name": "الفتوت الفلاحي",
+    "normalized": "الفتوت الفلاحي",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_7_5",
+    "name": "عكوب باللحم واللبن",
+    "normalized": "عكوب باللحم واللبن",
+    "country": "فلسطين"
+  },
+  {
+    "id": "global_7_6",
+    "name": "المجللة الكركية",
+    "normalized": "المجلله الكركيه",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_7_7",
+    "name": "البكيلة المعانية",
+    "normalized": "البكيله المعانيه",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_7_8",
+    "name": "كباب عبيدات",
+    "normalized": "كباب عبيدات",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_7_9",
+    "name": "خبز العربود",
+    "normalized": "خبز العربود",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_7_10",
+    "name": "السيالية الأردنية",
+    "normalized": "السياليه الاردنيه",
+    "country": "الأردن"
+  },
+  {
+    "id": "global_7_11",
+    "name": "المغربية اللبنانية",
+    "normalized": "المغربيه اللبنانيه",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_7_12",
+    "name": "مجدرة حمراء",
+    "normalized": "مجدره حمراء",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_7_13",
+    "name": "كبة أرنبية",
+    "normalized": "كبه ارنبيه",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_7_14",
+    "name": "برغل بدفينة",
+    "normalized": "برغل بدفينه",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_7_15",
+    "name": "كبة يقطين",
+    "normalized": "كبه يقطين",
+    "country": "لبنان"
+  },
+  {
+    "id": "global_7_16",
+    "name": "الباسماشكات",
+    "normalized": "الباسماشكات",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_7_17",
+    "name": "باشا وعساكره",
+    "normalized": "باشا وعساكره",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_7_18",
+    "name": "كبة سماقية حلبية",
+    "normalized": "كبه سماقيه حلبيه",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_7_19",
+    "name": "جظ مظ سوري",
+    "normalized": "جظ مظ سوري",
+    "country": "سوريا"
+  },
+  {
+    "id": "global_7_20",
+    "name": "الشنكليش السوري",
+    "normalized": "الشنكليش السوري",
+    "country": "سوريا"
+  }
+]

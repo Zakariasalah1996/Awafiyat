@@ -2,7 +2,7 @@ import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 import { getApiBaseUrl } from "@/constants/oauth";
-import { getGuestUserId } from "@/lib/guest-auth";
+import { getDeviceId, getGuestUserId } from "@/lib/guest-auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ============================================================
@@ -103,6 +103,17 @@ export async function setupNotificationChannelsAndCategories(): Promise<void> {
       await Notifications.setNotificationChannelAsync("motivation", {
         name: "تحفيز وتشجيع",
         importance: Notifications.AndroidImportance.DEFAULT,
+      });
+
+      // إشعارات لوحة التحكم: قناة عادية لا تطلب إيقاظ الشاشة أو تجاوز عدم الإزعاج.
+      await Notifications.setNotificationChannelAsync("admin_updates", {
+        name: "تحديثات ألف عافيات",
+        description: "رسائل وتنبيهات عامة من إدارة التطبيق",
+        importance: Notifications.AndroidImportance.DEFAULT,
+        sound: "default",
+        enableVibrate: true,
+        bypassDnd: false,
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PRIVATE,
       });
     }
 
@@ -395,16 +406,20 @@ export async function getExpoPushToken(): Promise<string | null> {
       console.warn("[Push] Native FCM token failed:", (e1 as Error)?.message);
     }
 
-    // Method 2: Expo push token fallback
+    // Method 2: Expo push token fallback using the immutable EAS project ID.
     try {
-      console.log("[Push] Trying Expo token without projectId...");
-      const tokenData = await Notifications.getExpoPushTokenAsync();
+      const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
+      if (!projectId) {
+        throw new Error("EAS projectId is missing from app configuration");
+      }
+      console.log("[Push] Trying Expo token with configured projectId...");
+      const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
       if (tokenData.data) {
-        console.log("[Push] Got Expo token (no projectId):", tokenData.data?.substring(0, 35) + "...");
+        console.log("[Push] Got Expo token:", tokenData.data?.substring(0, 35) + "...");
         return tokenData.data;
       }
     } catch (e3) {
-      console.warn("[Push] Expo token (no projectId) failed:", (e3 as Error)?.message);
+      console.warn("[Push] Expo token failed:", (e3 as Error)?.message);
     }
 
     console.error("[Push] All token methods failed");
@@ -415,7 +430,7 @@ export async function getExpoPushToken(): Promise<string | null> {
   }
 }
 
-export async function registerPushToken(token: string, userId?: string): Promise<void> {
+export async function registerPushToken(token: string, userId?: string): Promise<boolean> {
   try {
     const apiBase = getApiBaseUrl();
     const url = apiBase ? `${apiBase}/api/user/push-token` : "/api/user/push-token";
@@ -427,21 +442,41 @@ export async function registerPushToken(token: string, userId?: string): Promise
       if (guestId) finalUserId = guestId.toString();
     }
 
+    const deviceId = await getDeviceId();
+    let country = "iraq";
+    try {
+      const profileJson =
+        (await AsyncStorage.getItem("@awafiyat_user_profile")) ??
+        (await AsyncStorage.getItem("user_profile"));
+      if (profileJson) {
+        const profile = JSON.parse(profileJson);
+        if (typeof profile.country === "string" && profile.country.trim()) {
+          country = profile.country.trim();
+        }
+      }
+    } catch {}
+
     console.log("[Push] Registering token at:", url, "platform:", platform, "userId:", finalUserId);
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, userId: finalUserId, platform }),
+      body: JSON.stringify({ token, userId: finalUserId, platform, deviceId, country }),
     });
 
     if (!response.ok) {
-      console.error("Failed to register push token:", response.statusText);
-      return;
+      let errorMessage = response.statusText;
+      try {
+        const payload = await response.json();
+        errorMessage = payload?.error || errorMessage;
+      } catch {}
+      throw new Error(`Push token registration failed (${response.status}): ${errorMessage}`);
     }
 
     console.log("Push token registered successfully:", token.substring(0, 20) + "...");
+    return true;
   } catch (e) {
     console.error("Failed to register push token:", e);
+    return false;
   }
 }
 
@@ -515,8 +550,12 @@ export async function requestNotificationPermissions(): Promise<boolean> {
         } catch (saveErr) {
           console.warn("[Push] Failed to save token to AsyncStorage:", saveErr);
         }
-        await registerPushToken(token);
-        console.log("[Push] Token registered successfully with server");
+        const registered = await registerPushToken(token);
+        if (registered) {
+          console.log("[Push] Token registered successfully with server");
+        } else {
+          console.warn("[Push] Token saved locally; server registration will retry on startup");
+        }
       } else {
         console.error("[Push] FAILED: Could not get push token after 5 attempts");
         console.error("[Push] This means the device cannot receive push notifications");

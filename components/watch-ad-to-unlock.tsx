@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, Pressable, ActivityIndicator, StyleSheet } from "react-native";
+
 import { useColors } from "@/hooks/use-colors";
 import { showRewardedAd } from "@/lib/admob";
+import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
 
 interface WatchAdToUnlockProps {
   /** نوع المحتوى المقفل */
@@ -13,7 +15,8 @@ interface WatchAdToUnlockProps {
 }
 
 /**
- * مكوّن يعرض قفلاً مع زر "شاهد إعلاناً" لفتح المحتوى
+ * مكوّن يعرض قفلاً مع زر "شاهد إعلاناً" لفتح المحتوى.
+ * لا يستدعي onUnlocked إلا بعد وصول حدث EARNED_REWARD من AdMob.
  */
 export function WatchAdToUnlock({ contentType, contentName, onUnlocked }: WatchAdToUnlockProps) {
   const colors = useColors();
@@ -24,17 +27,27 @@ export function WatchAdToUnlock({ contentType, contentName, onUnlocked }: WatchA
   const icon = contentType === "recipe" ? "🔒" : "⚠️";
 
   async function handleWatchAd() {
+    if (loading) return;
+
     setLoading(true);
     setError(null);
+
     try {
-      const rewarded = await showRewardedAd();
-      if (rewarded) {
+      const result = await showRewardedAd();
+
+      if (result.status === "rewarded") {
         onUnlocked();
-      } else {
-        setError("يجب مشاهدة الإعلان كاملاً لفتح المحتوى");
+        return;
       }
+
+      if (result.status === "dismissed") {
+        setError("أُغلق الإعلان قبل اكتماله. شاهد الإعلان حتى النهاية لفتح المحتوى.");
+        return;
+      }
+
+      setError(formatRewardedAdErrorForUser(result.error, result.sdkHealthy));
     } catch {
-      setError("حدث خطأ، حاول مرة أخرى");
+      setError("تعذر تحميل الإعلان الآن. حاول مرة أخرى بعد قليل.\nرمز التشخيص: admob/unexpected");
     } finally {
       setLoading(false);
     }
@@ -42,47 +55,55 @@ export function WatchAdToUnlock({ contentType, contentName, onUnlocked }: WatchA
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      {/* أيقونة القفل */}
-      <Text style={styles.lockIcon}>{icon}</Text>
+      <Text style={styles.lockIcon} accessibilityElementsHidden>
+        {icon}
+      </Text>
 
-      {/* العنوان */}
       <Text style={[styles.title, { color: colors.foreground }]}>
-        {contentName ? `"${contentName}" مقفلة` : `${label} مقفلة`}
+        {contentName ? `«${contentName}» مقفلة` : `${label} مقفلة`}
       </Text>
 
-      {/* الوصف */}
       <Text style={[styles.description, { color: colors.muted }]}>
-        شاهد إعلاناً قصيراً لفتح {label} مجاناً
+        شاهد إعلانًا قصيرًا لفتح {label} مجانًا
       </Text>
 
-      {/* زر المشاهدة */}
       <Pressable
         onPress={handleWatchAd}
         disabled={loading}
+        accessibilityRole="button"
+        accessibilityLabel={`شاهد إعلانًا لفتح ${label}`}
+        accessibilityState={{ disabled: loading, busy: loading }}
         style={({ pressed }) => [
           styles.button,
           { backgroundColor: colors.primary, opacity: pressed || loading ? 0.8 : 1 },
         ]}
       >
         {loading ? (
-          <ActivityIndicator color="#fff" size="small" />
+          <>
+            <ActivityIndicator color="#fff" size="small" />
+            <Text style={styles.buttonText}>جارٍ تجهيز الإعلان…</Text>
+          </>
         ) : (
           <>
-            <Text style={styles.buttonIcon}>▶️</Text>
-            <Text style={styles.buttonText}>شاهد إعلاناً لفتح {label}</Text>
+            <Text style={styles.buttonIcon}>▶</Text>
+            <Text style={styles.buttonText}>{error ? "حاول تحميل الإعلان مجددًا" : `شاهد إعلانًا لفتح ${label}`}</Text>
           </>
         )}
       </Pressable>
 
-      {/* رسالة الخطأ */}
-      {error && (
-        <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
-      )}
+      {error ? (
+        <View
+          style={[
+            styles.errorContainer,
+            { backgroundColor: `${colors.error}10`, borderColor: `${colors.error}35` },
+          ]}
+          accessibilityRole="alert"
+        >
+          <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
+        </View>
+      ) : null}
 
-      {/* ملاحظة صغيرة */}
-      <Text style={[styles.note, { color: colors.muted }]}>
-        الإعلان يدعم تطوير التطبيق المجاني
-      </Text>
+      <Text style={[styles.note, { color: colors.muted }]}>الإعلان يدعم استمرار المحتوى المجاني</Text>
     </View>
   );
 }
@@ -103,6 +124,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     textAlign: "center",
+    lineHeight: 25,
   },
   description: {
     fontSize: 14,
@@ -113,23 +135,34 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 12,
     marginTop: 4,
-    minWidth: 220,
+    minWidth: 240,
+    minHeight: 50,
     justifyContent: "center",
   },
   buttonIcon: {
-    fontSize: 16,
+    color: "#fff",
+    fontSize: 15,
   },
   buttonText: {
     color: "#fff",
     fontSize: 15,
     fontWeight: "700",
+    textAlign: "center",
+  },
+  errorContainer: {
+    alignSelf: "stretch",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   error: {
     fontSize: 13,
+    lineHeight: 20,
     textAlign: "center",
   },
   note: {

@@ -7,6 +7,8 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  deepseekApiKey: process.env.DEEPSEEK_API_KEY ?? "",
   // Cloudflare R2 Storage
   r2AccountId: process.env.R2_ACCOUNT_ID ?? "4ae55b3c5dd50d13a7b4c040d31f7a1e",
   r2AccessKeyId: process.env.R2_ACCESS_KEY_ID ?? "4b5deaea2f6355c2fa4d56443826191c",

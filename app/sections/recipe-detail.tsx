@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
-import { showRewardedAd, unlockWarning } from "@/lib/admob";
-import { Alert } from "react-native";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { getUnlockedWarnings, showRewardedAd, unlockWarning } from "@/lib/admob";
+import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
+
 import {
   View,
   Text,
@@ -9,12 +10,14 @@ import {
   Modal,
   I18nManager,
   Platform,
+  Alert,
 } from "react-native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useUser } from "@/lib/user-context";
 import { useSubscriptionContext } from "@/lib/subscription-context";
-import { getRecipeById } from "@/lib/data/recipes";
+import { getRecipeById, RECIPES } from "@/lib/data/recipes";
 import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
@@ -23,10 +26,13 @@ import { useRecipeImages, getImageFromMap } from "@/hooks/use-recipe-images";
 import * as Haptics from "expo-haptics";
 import {
   generateHealthWarnings,
+  getHealthierRecipeAlternatives,
   getConditionLabel,
   getSeverityColor,
   type HealthWarning,
 } from "@/lib/health-warnings-engine";
+import { canViewHealthWarnings } from "@/lib/feature-access";
+import { shareRecipe } from "@/lib/share-service";
 
 I18nManager.forceRTL(true);
 
@@ -46,8 +52,30 @@ export default function RecipeDetailScreen() {
 
   // حالة نافذة الاشتراك
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  // حالة فتح التحذير بالإعلان
+  // حالة فتح التحذير بالإعلان، مع استعادة الفتح المحفوظ لهذه الوصفة
   const [warningUnlockedByAd, setWarningUnlockedByAd] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const warningId = id || "";
+
+    setWarningUnlockedByAd(false);
+    if (!warningId) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    void getUnlockedWarnings().then((unlockedWarnings) => {
+      if (isMounted && unlockedWarnings.includes(warningId)) {
+        setWarningUnlockedByAd(true);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
 
   const isSaved = profile.savedRecipes.includes(id || "");
 
@@ -73,35 +101,23 @@ export default function RecipeDetailScreen() {
     [id, rateRecipe]
   );
 
-  // عند الضغط على التحذير المقفل
+  const handleShare = useCallback(async () => {
+    if (!recipe) return;
+
+    try {
+      await shareRecipe(recipe);
+    } catch {
+      Alert.alert("تعذرت المشاركة", "حاول مرة أخرى بعد قليل.");
+    }
+  }, [recipe]);
+
+  // عند الضغط على التحذير المقفل - يفتح النافذة الجميلة
   const handleLockedWarningPress = useCallback(() => {
     if (Platform.OS !== "web") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     }
-    Alert.alert(
-      "⚠️ تحذير صحي مقفل",
-      "افتح التحذير الصحي مجاناً بمشاهدة إعلان قصير",
-      [
-        { text: "إلغاء", style: "cancel" },
-        {
-          text: "▶️ شاهد إعلاناً",
-          onPress: async () => {
-            const rewarded = await showRewardedAd();
-            if (rewarded) {
-              await unlockWarning(id || "");
-              setWarningUnlockedByAd(true);
-            } else {
-              Alert.alert("تنبيه", "يجب مشاهدة الإعلان كاملاً لفتح التحذير");
-            }
-          },
-        },
-        {
-          text: "اشترك للوصول الكامل",
-          onPress: () => setShowSubscriptionModal(true),
-        },
-      ]
-    );
-  }, [id]);
+    setShowSubscriptionModal(true);
+  }, []);
 
   if (!recipe) {
     return (
@@ -150,6 +166,12 @@ export default function RecipeDetailScreen() {
 
   const conditionLabel = getConditionLabel(profile.healthCondition);
   const hasWarnings = healthWarnings.length > 0;
+  const healthierRecipeAlternatives = useMemo(
+    () => hasWarnings
+      ? getHealthierRecipeAlternatives(recipe, RECIPES, profile.healthCondition)
+      : [],
+    [hasWarnings, recipe, profile.healthCondition],
+  );
 
   return (
     <ScreenContainer edges={["top", "bottom", "left", "right"]}>
@@ -172,13 +194,28 @@ export default function RecipeDetailScreen() {
           >
             <IconSymbol name="chevron.right" size={20} color={colors.foreground} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSave}>
-            <IconSymbol
-              name={isSaved ? "heart.fill" : "heart"}
-              size={28}
-              color={isSaved ? colors.error : colors.muted}
-            />
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+            <TouchableOpacity
+              onPress={handleShare}
+              accessibilityRole="button"
+              accessibilityLabel={`مشاركة وصفة ${recipe.name}`}
+              hitSlop={10}
+            >
+              <MaterialIcons name="share" size={25} color={colors.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleSave}
+              accessibilityRole="button"
+              accessibilityLabel={isSaved ? "إزالة من المحفوظات" : "حفظ الوصفة"}
+              hitSlop={10}
+            >
+              <IconSymbol
+                name={isSaved ? "heart.fill" : "heart"}
+                size={28}
+                color={isSaved ? colors.error : colors.muted}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Recipe Image */}
@@ -224,8 +261,11 @@ export default function RecipeDetailScreen() {
         {/* ─── التحذيرات الصحية - حصرية للمشتركين ─── */}
         {hasWarnings && (
           <View className="mx-5 mt-3">
-            {isPremium ? (
-              /* ✅ مشترك: يرى التحذيرات الكاملة */
+            {canViewHealthWarnings({
+              isPremium,
+              unlockedByReward: warningUnlockedByAd,
+            }) ? (
+              /* ✅ مشترك أو شاهد الإعلان: يرى التحذيرات الكاملة */
               <View
                 style={{
                   backgroundColor: colors.error + "10",
@@ -329,6 +369,61 @@ export default function RecipeDetailScreen() {
                     </View>
                   </View>
                 ))}
+                {healthierRecipeAlternatives.length > 0 ? (
+                  <View
+                    style={{
+                      marginTop: 12,
+                      paddingTop: 12,
+                      borderTopWidth: 1,
+                      borderTopColor: colors.border,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: "700",
+                        color: "#059669",
+                        textAlign: "right",
+                        writingDirection: "rtl",
+                        marginBottom: 7,
+                      }}
+                    >
+                      🌿 بدائل وصفات أخف من المكتبة
+                    </Text>
+                    {healthierRecipeAlternatives.map((alternative) => (
+                      <TouchableOpacity
+                        key={alternative.id}
+                        onPress={() => router.push({ pathname: "/sections/recipe-detail" as any, params: { id: alternative.id } })}
+                        activeOpacity={0.72}
+                        style={{
+                          flexDirection: "row-reverse",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          backgroundColor: "#10B98112",
+                          borderRadius: 9,
+                          paddingVertical: 8,
+                          paddingHorizontal: 10,
+                          marginTop: 5,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            flex: 1,
+                            color: colors.foreground,
+                            fontSize: 12,
+                            fontWeight: "600",
+                            textAlign: "right",
+                            writingDirection: "rtl",
+                          }}
+                          numberOfLines={1}
+                        >
+                          {alternative.name}
+                        </Text>
+                        <Text style={{ color: "#059669", fontSize: 12, marginRight: 8 }}>عرض ‹</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                ) : null}
               </View>
             ) : (
               /* 🔒 غير مشترك: يرى التحذير مقفلاً */
@@ -682,7 +777,7 @@ export default function RecipeDetailScreen() {
             activeOpacity={1}
             onPress={() => {}}
             style={{
-              backgroundColor: colors.background,
+              backgroundColor: "#ffffff",
               borderRadius: 24,
               padding: 28,
               width: "100%",
@@ -715,7 +810,7 @@ export default function RecipeDetailScreen() {
               style={{
                 fontSize: 20,
                 fontWeight: "800",
-                color: colors.foreground,
+                color: "#1a1a1a",
                 textAlign: "center",
                 marginBottom: 10,
               }}
@@ -728,7 +823,7 @@ export default function RecipeDetailScreen() {
               style={{
                 fontSize: 14,
                 lineHeight: 22,
-                color: colors.muted,
+                color: "#666",
                 textAlign: "center",
                 writingDirection: "rtl",
                 marginBottom: 8,
@@ -740,7 +835,7 @@ export default function RecipeDetailScreen() {
               style={{
                 fontSize: 14,
                 lineHeight: 22,
-                color: colors.muted,
+                color: "#666",
                 textAlign: "center",
                 writingDirection: "rtl",
                 marginBottom: 24,
@@ -768,7 +863,7 @@ export default function RecipeDetailScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: colors.foreground,
+                    color: "#1a1a1a",
                     textAlign: "right",
                     writingDirection: "rtl",
                   }}
@@ -804,18 +899,41 @@ export default function RecipeDetailScreen() {
 
             {/* فاصل */}
             <View style={{ flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 12 }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
-              <Text style={{ color: colors.muted, fontSize: 12, marginHorizontal: 10 }}>أو</Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
+              <Text style={{ color: "#999", fontSize: 12, marginHorizontal: 10 }}>أو</Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
             </View>
 
             {/* زر مشاهدة إعلان */}
             <TouchableOpacity
-              onPress={() => {
-                setShowSubscriptionModal(false);
-                // TODO: تشغيل إعلان AdMob هنا
-                // مؤقتاً: نفتح التحذير مباشرة
-                alert("شكراً! سيتم فتح التحذيرات بعد مشاهدة الإعلان");
+              onPress={async () => {
+                try {
+                  const result = await showRewardedAd();
+                  if (result.status === "rewarded") {
+                    await unlockWarning(id || "");
+                    setWarningUnlockedByAd(true);
+                    setShowSubscriptionModal(false);
+                    return;
+                  }
+
+                  if (result.status === "dismissed") {
+                    Alert.alert(
+                      "لم يكتمل الإعلان",
+                      "شاهد الإعلان حتى النهاية لفتح التحذيرات الصحية.",
+                    );
+                    return;
+                  }
+
+                  Alert.alert(
+                    "تعذر عرض الإعلان",
+                    formatRewardedAdErrorForUser(result.error, result.sdkHealthy),
+                  );
+                } catch {
+                  Alert.alert(
+                    "تعذر عرض الإعلان",
+                    "حاول مرة أخرى بعد قليل.\nرمز التشخيص: admob/unexpected",
+                  );
+                }
               }}
               style={{
                 borderWidth: 1.5,
@@ -830,7 +948,7 @@ export default function RecipeDetailScreen() {
               <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "700" }}>
                 📺 شاهد إعلاناً لفتح التحذيرات
               </Text>
-              <Text style={{ color: colors.muted, fontSize: 12, marginTop: 2 }}>
+              <Text style={{ color: "#666", fontSize: 12, marginTop: 2 }}>
                 مجاناً • إعلان قصير 30 ثانية
               </Text>
             </TouchableOpacity>
@@ -840,7 +958,7 @@ export default function RecipeDetailScreen() {
               onPress={() => setShowSubscriptionModal(false)}
               style={{ marginTop: 12 }}
             >
-              <Text style={{ color: colors.muted, fontSize: 14 }}>ليس الآن</Text>
+              <Text style={{ color: "#999", fontSize: 14 }}>ليس الآن</Text>
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>

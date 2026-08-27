@@ -9,7 +9,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema } from "../db";
+import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema, createCommunityComment, createCommunityPost, getCommunityAuthor, getCommunityComments, getCommunityFeed, getCommunityPost, toggleCommunityLike } from "../db";
 import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
@@ -160,6 +160,86 @@ async function sendPushViaFCM(tokens: string[], title: string, body: string, dbD
 
   console.log(`[Push] Total: ${tokens.length} (${expoTokens.length} Expo + ${fcmTokens.length} FCM), success: ${successCount}, fail: ${failCount}`);
   return { successCount, failCount, sentCount: tokens.length };
+}
+
+type CommunityImageModeration = {
+  accepted: boolean;
+  reason: string;
+};
+
+/**
+ * Fail closed: a photo is never published when the visual food check cannot
+ * validate it. Text-only posts remain available to keep community discussion open.
+ */
+async function moderateCommunityFoodImage(imageData: string, contentType: string): Promise<CommunityImageModeration> {
+  const forgeUrl = process.env.BUILT_IN_FORGE_API_URL;
+  const forgeKey = process.env.BUILT_IN_FORGE_API_KEY;
+  if (!forgeUrl || !forgeKey) {
+    return { accepted: false, reason: "فاحص الصور غير متاح مؤقتاً" };
+  }
+
+  try {
+    const response = await fetch(`${forgeUrl.replace(/\/$/, "")}/v1/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${forgeKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-5-mini",
+        messages: [
+          {
+            role: "system",
+            content: "أنت فاحص صور صارم لمجتمع طبخ. اقبل فقط صورة يظهر فيها بوضوح طبق طعام أو مشروب أو مكونات طبخ أو تحضير طعام. ارفض الصور الشخصية والوجوه والأشخاص، الحيوانات، الوثائق، المركبات، المناظر، الميمات، الشعارات، لقطات الشاشة، الإعلانات، أو أي صورة لا يكون الطعام محورها الواضح. عند الشك ارفض. أعد JSON فقط.",
+          },
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "هل يمكن نشر هذه الصورة في مجتمع طبخ؟" },
+              {
+                type: "image_url",
+                image_url: { url: `data:${contentType};base64,${imageData}`, detail: "low" },
+              },
+            ],
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "community_food_image_check",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                isFoodRelated: { type: "boolean" },
+                confidence: { type: "number" },
+                reason: { type: "string" },
+              },
+              required: ["isFoodRelated", "confidence", "reason"],
+              additionalProperties: false,
+            },
+          },
+        },
+        max_completion_tokens: 120,
+      }),
+    });
+
+    if (!response.ok) return { accepted: false, reason: "تعذر التحقق من الصورة" };
+
+    const result = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
+    const content = result.choices?.[0]?.message?.content;
+    if (!content) return { accepted: false, reason: "تعذر قراءة نتيجة فحص الصورة" };
+
+    const verdict = JSON.parse(content) as { isFoodRelated?: boolean; confidence?: number; reason?: string };
+    const accepted = verdict.isFoodRelated === true && Number(verdict.confidence) >= 0.7;
+    return {
+      accepted,
+      reason: accepted ? "" : (verdict.reason || "نقبل فقط صور الطعام والمشروبات"),
+    };
+  } catch (error) {
+    console.error("[Community] Image moderation failed:", error);
+    return { accepted: false, reason: "تعذر التحقق من الصورة" };
+  }
 }
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -679,6 +759,116 @@ async function startServer() {
       res.json(imageMap);
     } catch (e: any) {
       res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==================== PUBLIC COOKING COMMUNITY ====================
+  // Feed is intentionally public. Publishing uses the server-side guest identity
+  // so the author name cannot be changed from one post to the next.
+  app.get('/api/community/posts', async (req, res) => {
+    try {
+      const deviceId = typeof req.query.deviceId === 'string' ? req.query.deviceId : '';
+      const limit = Math.min(Math.max(Number(req.query.limit) || 30, 1), 50);
+      const offset = Math.max(Number(req.query.offset) || 0, 0);
+      const posts = await getCommunityFeed(deviceId, limit, offset);
+      res.json({ posts, nextOffset: posts.length === limit ? offset + posts.length : null });
+    } catch (error: any) {
+      console.error('[Community] Feed failed:', error);
+      res.status(500).json({ error: 'تعذر تحميل منشورات المجتمع' });
+    }
+  });
+
+  app.post('/api/community/posts', async (req, res) => {
+    try {
+      const { userId, body, imageData, contentType } = req.body ?? {};
+      const normalizedBody = typeof body === 'string' ? body.trim() : '';
+      const hasImage = typeof imageData === 'string' && imageData.length > 0;
+
+      if (!Number.isInteger(userId)) return res.status(401).json({ error: 'تعذر التحقق من هوية الناشر' });
+      if (!normalizedBody && !hasImage) return res.status(400).json({ error: 'اكتب منشوراً أو أضف صورة طعام' });
+      if (normalizedBody.length > 1200) return res.status(400).json({ error: 'المنشور طويل جداً' });
+      if (hasImage && imageData.length > 8 * 1024 * 1024) return res.status(413).json({ error: 'حجم الصورة كبير جداً' });
+
+      const author = await getCommunityAuthor(userId);
+      const authorName = author?.name?.trim() ?? '';
+      if (!author || !authorName || authorName === 'مستخدم عافيات') {
+        return res.status(400).json({ error: 'أضف اسماً ظاهراً ثابتاً من صفحة حسابي قبل النشر' });
+      }
+
+      let imageUrl: string | null = null;
+      if (hasImage) {
+        const permittedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        const normalizedType = permittedTypes.includes(contentType) ? contentType : 'image/jpeg';
+        const moderation = await moderateCommunityFoodImage(imageData, normalizedType);
+        if (!moderation.accepted) {
+          return res.status(422).json({ error: moderation.reason || 'نقبل فقط صور الطعام والمشروبات' });
+        }
+
+        const { storagePut } = await import('../storage');
+        const extension = normalizedType === 'image/png' ? 'png' : normalizedType === 'image/webp' ? 'webp' : 'jpg';
+        const buffer = Buffer.from(imageData, 'base64');
+        const stored = await storagePut(`community-images/${author.id}-${Date.now()}.${extension}`, buffer, normalizedType);
+        imageUrl = stored.url;
+      }
+
+      const post = await createCommunityPost({
+        authorId: author.id,
+        authorName,
+        body: normalizedBody || null,
+        imageUrl,
+        imageModeration: imageUrl ? 'approved' : 'none',
+      });
+      res.status(201).json({ post: { ...post, likeCount: 0, commentCount: 0, likedByCurrentUser: false } });
+    } catch (error: any) {
+      console.error('[Community] Create post failed:', error);
+      res.status(500).json({ error: 'تعذر نشر المنشور، حاول مرة أخرى' });
+    }
+  });
+
+  app.post('/api/community/posts/:postId/like', async (req, res) => {
+    try {
+      const postId = Number(req.params.postId);
+      const deviceId = typeof req.body?.deviceId === 'string' ? req.body.deviceId.trim() : '';
+      if (!Number.isInteger(postId) || !deviceId) return res.status(400).json({ error: 'بيانات الإعجاب غير مكتملة' });
+      const post = await getCommunityPost(postId);
+      if (!post || post.isHidden) return res.status(404).json({ error: 'المنشور غير موجود' });
+      const liked = await toggleCommunityLike(postId, deviceId);
+      res.json({ liked });
+    } catch (error: any) {
+      if (error?.code === '23505') return res.json({ liked: true });
+      console.error('[Community] Like failed:', error);
+      res.status(500).json({ error: 'تعذر تسجيل الإعجاب' });
+    }
+  });
+
+  app.get('/api/community/posts/:postId/comments', async (req, res) => {
+    try {
+      const postId = Number(req.params.postId);
+      if (!Number.isInteger(postId)) return res.status(400).json({ error: 'معرف المنشور غير صالح' });
+      const comments = await getCommunityComments(postId);
+      res.json({ comments });
+    } catch (error: any) {
+      console.error('[Community] Comments failed:', error);
+      res.status(500).json({ error: 'تعذر تحميل التعليقات' });
+    }
+  });
+
+  app.post('/api/community/posts/:postId/comments', async (req, res) => {
+    try {
+      const postId = Number(req.params.postId);
+      const userId = req.body?.userId;
+      const body = typeof req.body?.body === 'string' ? req.body.body.trim() : '';
+      if (!Number.isInteger(postId) || !Number.isInteger(userId) || !body) return res.status(400).json({ error: 'بيانات التعليق غير مكتملة' });
+      if (body.length > 500) return res.status(400).json({ error: 'التعليق طويل جداً' });
+      const [post, author] = await Promise.all([getCommunityPost(postId), getCommunityAuthor(userId)]);
+      const authorName = author?.name?.trim() ?? '';
+      if (!post || post.isHidden) return res.status(404).json({ error: 'المنشور غير موجود' });
+      if (!author || !authorName || authorName === 'مستخدم عافيات') return res.status(400).json({ error: 'أضف اسماً ظاهراً ثابتاً من صفحة حسابي قبل التعليق' });
+      const comment = await createCommunityComment({ postId, authorId: author.id, authorName, body });
+      res.status(201).json({ comment });
+    } catch (error: any) {
+      console.error('[Community] Create comment failed:', error);
+      res.status(500).json({ error: 'تعذر إضافة التعليق' });
     }
   });
 

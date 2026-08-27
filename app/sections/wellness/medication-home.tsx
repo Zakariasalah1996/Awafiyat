@@ -1,4 +1,3 @@
-import { useState, useMemo } from "react";
 import {
   ScrollView,
   Text,
@@ -8,14 +7,15 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { SubscriptionFeatureGate } from "@/components/subscription-feature-gate";
 import { useColors } from "@/hooks/use-colors";
 import {
   useMedication,
   type Medication,
   TIME_PERIODS,
 } from "@/lib/medication-context";
-import { useUser } from "@/lib/user-context";
 import { useSubscriptionContext } from "@/lib/subscription-context";
+import { canUseMedicationReminders } from "@/lib/feature-access";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { cancelMedicationReminder } from "@/lib/medication-notifications";
@@ -39,7 +39,6 @@ const DAY_LABELS: Record<string, string> = {
 export default function MedicationHomeScreen() {
   const colors = useColors();
   const { state, deleteMedication, canAddMoreMedications, recordIntake, getIntakeForDate, getWeeklyAdherence } = useMedication();
-  const { profile } = useUser();
   const { isPremium } = useSubscriptionContext();
 
   const activeMeds = state.medications.filter((m) => m.isActive);
@@ -47,10 +46,10 @@ export default function MedicationHomeScreen() {
   const today = new Date().toISOString().split("T")[0];
 
   const handleAddMedication = () => {
-    if (!canAddMoreMedications(isPremium)) {
+    if (!canUseMedicationReminders(isPremium) || !canAddMoreMedications(isPremium)) {
       Alert.alert(
         "اشتراك مطلوب 👑",
-        "الدواء الأول مجاني! لإضافة أدوية إضافية، يرجى الاشتراك في النسخة الكاملة.",
+        "تذكير الدواء متاح حصراً للمشتركين في ألف عافيات المميزة.",
         [
           { text: "لاحقاً", style: "cancel" },
           {
@@ -65,10 +64,12 @@ export default function MedicationHomeScreen() {
   };
 
   const handleEditMedication = (med: Medication) => {
+    if (!canUseMedicationReminders(isPremium)) return;
     router.push(`/sections/wellness/edit-medication?id=${med.id}` as any);
   };
 
   const handleDeleteMedication = (med: Medication) => {
+    if (!canUseMedicationReminders(isPremium)) return;
     Alert.alert(
       "حذف الدواء",
       `هل تريد حذف "${med.name}" من قائمة أدويتك؟`,
@@ -87,6 +88,7 @@ export default function MedicationHomeScreen() {
   };
 
   const handleRecordIntake = async (medId: string, timeIndex: number, taken: boolean) => {
+    if (!canUseMedicationReminders(isPremium)) return;
     await recordIntake(medId, timeIndex, taken);
   };
 
@@ -95,6 +97,17 @@ export default function MedicationHomeScreen() {
     const h = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
     return `${h}:${String(minute).padStart(2, "0")} ${period}`;
   };
+
+  if (!canUseMedicationReminders(isPremium)) {
+    return (
+      <SubscriptionFeatureGate
+        emoji="🔒"
+        title="تذكير الدواء للمشتركين"
+        description="اشترك في ألف عافيات المميزة لإضافة أدويتك، جدولة التنبيهات، تعديل المواعيد، ومتابعة الالتزام بالجرعات."
+        buttonLabel="اشترك لفتح تذكير الدواء"
+      />
+    );
+  }
 
   // إذا لم يكمل الإعداد بعد
   if (!state.setupComplete) {
@@ -386,17 +399,6 @@ export default function MedicationHomeScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* ملاحظة الاشتراك */}
-          {!isPremium && activeMeds.length >= 1 && (
-            <View className="mt-3 px-4 py-3 rounded-xl" style={{ backgroundColor: "#FFF3E0" }}>
-              <Text
-                className="text-xs text-center leading-5"
-                style={{ color: "#E65100", writingDirection: "rtl" }}
-              >
-                👑 الدواء الأول مجاني! لإضافة أدوية إضافية، اشترك في النسخة الكاملة.
-              </Text>
-            </View>
-          )}
         </Animated.View>
       </ScrollView>
     </ScreenContainer>

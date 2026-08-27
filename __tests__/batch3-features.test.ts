@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-// Test 1: Verify recipe count is 333
+// Test 1: Verify the original library is preserved with all global batches.
 describe("Recipe Database - Batch 3", () => {
   it("should have at least 260 unique recipes", async () => {
     const { RECIPES } = await import("../lib/data/recipes");
@@ -11,9 +11,58 @@ describe("Recipe Database - Batch 3", () => {
     expect(uniqueIds.size).toBe(RECIPES.length);
   });
 
-  it("should have 333 recipes total", async () => {
+  it("should have 1000 recipes total after the 125-recipe expansion", async () => {
     const { RECIPES } = await import("../lib/data/recipes");
-    expect(RECIPES.length).toBe(255);
+    expect(RECIPES.length).toBe(1000);
+  });
+
+  it("should include 100 distinct batch-five recipes with an image and a country", async () => {
+    const { RECIPES } = await import("../lib/data/recipes");
+    const batchFive = RECIPES.filter((recipe) => recipe.id.startsWith("global_5_"));
+    expect(batchFive).toHaveLength(100);
+    expect(new Set(batchFive.map((recipe) => recipe.id)).size).toBe(100);
+    expect(new Set(batchFive.map((recipe) => recipe.name.trim().replace(/\s+/g, " "))).size).toBe(100);
+    expect(batchFive.every((recipe) => recipe.image?.startsWith("/manus-storage/") && recipe.country)).toBe(true);
+  });
+
+  it("should include 100 distinct non-Iraqi batch-six recipes with images and countries", async () => {
+    const { RECIPES } = await import("../lib/data/recipes");
+    const batchSix = RECIPES.filter((recipe) => recipe.id.startsWith("global_6_"));
+    expect(batchSix).toHaveLength(100);
+    expect(new Set(batchSix.map((recipe) => recipe.id)).size).toBe(100);
+    expect(new Set(batchSix.map((recipe) => recipe.name.trim().replace(/\s+/g, " "))).size).toBe(100);
+    expect(batchSix.every((recipe) => recipe.image?.startsWith("/manus-storage/") && recipe.country && !recipe.isIraqi)).toBe(true);
+  });
+
+  it("should include 20 distinct non-Iraqi batch-seven recipes with images and countries", async () => {
+    const { RECIPES } = await import("../lib/data/recipes");
+    const batchSeven = RECIPES.filter((recipe) => recipe.id.startsWith("global_7_"));
+    expect(batchSeven).toHaveLength(20);
+    expect(new Set(batchSeven.map((recipe) => recipe.id)).size).toBe(20);
+    expect(new Set(batchSeven.map((recipe) => recipe.name.trim().replace(/\s+/g, " "))).size).toBe(20);
+    expect(batchSeven.every((recipe) => recipe.image?.startsWith("/manus-storage/") && recipe.country && !recipe.isIraqi)).toBe(true);
+  });
+
+  it("should include 125 distinct non-Iraqi batch-eight recipes with images and countries", async () => {
+    const { RECIPES } = await import("../lib/data/recipes");
+    const batchEight = RECIPES.filter((recipe) => recipe.id.startsWith("global_8_"));
+    expect(batchEight).toHaveLength(125);
+    expect(new Set(batchEight.map((recipe) => recipe.id)).size).toBe(125);
+    expect(new Set(batchEight.map((recipe) => recipe.name.trim().replace(/\s+/g, " "))).size).toBe(125);
+    expect(batchEight.every((recipe) => recipe.image?.startsWith("/manus-storage/") && recipe.country && !recipe.isIraqi)).toBe(true);
+  });
+
+  it("should not duplicate recipe IDs or normalized names across the full library", async () => {
+    const { RECIPES } = await import("../lib/data/recipes");
+    const normalizeName = (name: string) => name
+      .trim()
+      .replace(/[أإآ]/g, "ا")
+      .replace(/ى/g, "ي")
+      .replace(/ة/g, "ه")
+      .replace(/[\u064B-\u065F]/g, "")
+      .replace(/\s+/g, " ");
+    expect(new Set(RECIPES.map((recipe) => recipe.id)).size).toBe(RECIPES.length);
+    expect(new Set(RECIPES.map((recipe) => normalizeName(recipe.name))).size).toBe(RECIPES.length);
   });
 
   it("should have breakfast, lunch, and dinner recipes", async () => {

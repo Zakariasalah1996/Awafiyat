@@ -17,6 +17,32 @@ export interface HealthWarning {
   severity: "high" | "medium" | "low";
 }
 
+/** الشكل الأدنى للوصفة اللازم لاختيار بدائل فعلية من المكتبة. */
+export interface HealthRecipeCandidate {
+  id: string;
+  name: string;
+  category: string;
+  calories: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+  ingredients: { name: string; amount: string }[];
+  steps: string[];
+}
+
+/** توحيد أكثر صيغ العربية شيوعاً قبل مطابقة أسماء المكونات. */
+function normalizeArabic(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[\u064B-\u065F\u0670]/g, "")
+    .replace(/ـ/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 // ─────────────────────────────────────────────
 // قاعدة بيانات التحذيرات لكل مرض مع البدائل
 // ─────────────────────────────────────────────
@@ -31,7 +57,7 @@ interface WarningRule {
 
 const DIABETES_RULES: WarningRule[] = [
   {
-    keywords: ["سكر", "سكر أبيض", "سكر ناعم", "شيرة", "قطر", "شربت", "شراب"],
+    keywords: ["سكر", "سكر أبيض", "سكر ناعم", "شيرة", "قطر", "شربت", "شراب", "سيروب"],
     cause: "السكر المضاف",
     message: "يرفع مستوى الجلوكوز في الدم بسرعة.",
     alternatives: ["ستيفيا (محلي طبيعي بدون سعرات)", "إريثريتول", "قرفة لإضافة حلاوة طبيعية", "تقليل الكمية للنصف"],
@@ -59,7 +85,7 @@ const DIABETES_RULES: WarningRule[] = [
     severity: "high",
   },
   {
-    keywords: ["رز أبيض", "أرز أبيض", "رز", "أرز"],
+    keywords: ["رز أبيض", "أرز أبيض", "رز", "أرز", "رز بسمتي", "أرز بسمتي"],
     cause: "الأرز الأبيض",
     message: "مؤشره الجلايسيمي مرتفع ويرفع السكر بسرعة.",
     alternatives: ["أرز بني أو أرز بسمتي (مؤشر جلايسيمي أقل)", "برغل", "كينوا", "تقليل الكمية لنصف كوب"],
@@ -73,7 +99,7 @@ const DIABETES_RULES: WarningRule[] = [
     severity: "medium",
   },
   {
-    keywords: ["طحين أبيض", "طحين"],
+    keywords: ["طحين أبيض", "طحين", "دقيق أبيض", "دقيق"],
     cause: "الطحين الأبيض",
     message: "مكرر ويتحول إلى سكر بسرعة في الجسم.",
     alternatives: ["طحين قمح كامل", "طحين لوز", "طحين جوز الهند", "طحين الشوفان"],
@@ -97,9 +123,9 @@ const DIABETES_RULES: WarningRule[] = [
 
 const HYPERTENSION_RULES: WarningRule[] = [
   {
-    keywords: ["ملح", "ملح الطعام", "ملح خشن"],
+    keywords: ["ملح", "ملح الطعام", "ملح خشن", "ملح بحري"],
     cause: "الملح الزائد",
-    message: "يرفع ضغط الدم مباشرة عبر احتباس السوائل.",
+    message: "قد يرفع ضغط الدم عند زيادة الكمية بسبب الصوديوم واحتباس السوائل.",
     alternatives: ["أعشاب طازجة (بقدونس، كزبرة، نعناع)", "ليمون وخل", "ثوم وبصل مجفف", "كمون وكركم", "تقليل الكمية للنصف"],
     severity: "high",
   },
@@ -111,21 +137,21 @@ const HYPERTENSION_RULES: WarningRule[] = [
     severity: "high",
   },
   {
-    keywords: ["مرقة جاهزة", "مرقة مكعبات", "ماجي", "كنور", "بهارات جاهزة"],
+    keywords: ["مرقة جاهزة", "مرقة مكعبات", "مكعب مرقة", "ماجي", "كنور", "بهارات جاهزة", "بودرة مرقة"],
     cause: "المرقة الجاهزة",
     message: "تحتوي على صوديوم عالٍ جداً ومواد حافظة.",
     alternatives: ["مرقة منزلية طازجة (عظم + خضروات)", "ماء مع أعشاب وتوابل طبيعية", "مرقة خضروات محضرة في البيت"],
     severity: "high",
   },
   {
-    keywords: ["مخلل", "مخللات", "طرشي", "زيتون مملح"],
+    keywords: ["مخلل", "مخللات", "طرشي", "زيتون مملح", "ليمون مخلل"],
     cause: "المخللات",
     message: "غنية بالملح والصوديوم.",
     alternatives: ["خضروات طازجة مقطعة", "زيتون قليل الملح (منقوع بالماء)", "سلطة خضراء", "خيار طازج بدلاً من المخلل"],
     severity: "high",
   },
   {
-    keywords: ["جبنة", "جبن", "جبنة بيضاء", "جبنة صفراء", "جبنة معالجة"],
+    keywords: ["جبنة", "جبن", "جبنة بيضاء", "جبنة صفراء", "جبنة معالجة", "فيتا", "حلومي"],
     cause: "الجبن المملح",
     message: "يحتوي على نسبة عالية من الصوديوم.",
     alternatives: ["جبنة قريش (قليلة الملح)", "لبنة منزلية", "جبنة موزاريلا طازجة", "أفوكادو كبديل دسم"],
@@ -159,11 +185,18 @@ const HYPERTENSION_RULES: WarningRule[] = [
     alternatives: ["زبادي يوناني قليل الدسم", "حليب جوز الهند الخفيف", "حليب قليل الدسم", "كريمة كاجو منزلية"],
     severity: "medium",
   },
+  {
+    keywords: ["سمك مملح", "فسيخ", "رنجة", "أنشوجة", "صلصة سمك"],
+    cause: "أطعمة عالية الصوديوم",
+    message: "قد تحتوي على صوديوم مرتفع، لذلك تحتاج الحصة إلى ضبط لدى من يراقب الضغط.",
+    alternatives: ["سمك طازج مشوي مع ليمون", "تتبيلة أعشاب بلا ملح مضاف", "تقليل الكمية وغسل المكوّن المملح عند الإمكان"],
+    severity: "high",
+  },
 ];
 
 const OBESITY_RULES: WarningRule[] = [
   {
-    keywords: ["سمن", "سمن حيواني", "زبدة", "دهن"],
+    keywords: ["سمن", "سمن بلدي", "سمن حيواني", "زبدة", "دهن", "شحم"],
     cause: "الدهون العالية",
     message: "عالية السعرات (120 سعرة في ملعقة واحدة).",
     alternatives: ["رش زيت زيتون بالبخاخ (أقل كمية)", "طهي بدون دهون (تيفال)", "زيت جوز الهند بكمية صغيرة", "مرق خضروات بدلاً من الزيت"],
@@ -184,11 +217,18 @@ const OBESITY_RULES: WarningRule[] = [
     severity: "high",
   },
   {
-    keywords: ["سكر", "شيرة", "قطر", "شربت"],
+    keywords: ["سكر", "شيرة", "قطر", "شربت", "عسل", "دبس"],
     cause: "السكر المضاف",
     message: "يتحول إلى دهون في الجسم عند الزيادة.",
     alternatives: ["ستيفيا (صفر سعرات)", "قرفة للحلاوة الطبيعية", "فاكهة مهروسة كمحلي", "تقليل الكمية تدريجياً"],
     severity: "high",
+  },
+  {
+    keywords: ["زيت", "زيت نباتي", "زيت للقلي"],
+    cause: "زيت مضاف",
+    message: "الزيت مفيد بنوعه المناسب، لكن زيادته ترفع سعرات الوجبة بسرعة.",
+    alternatives: ["قياس الزيت بملعقة بدلاً من سكبه مباشرة", "الشوي أو القلاية الهوائية", "زيادة الخضروات وخفض كمية الزيت"],
+    severity: "low",
   },
   {
     keywords: ["عجينة", "فطير", "باستا", "معكرونة", "نودلز"],
@@ -222,7 +262,7 @@ const CHOLESTEROL_RULES: WarningRule[] = [
     severity: "high",
   },
   {
-    keywords: ["زبدة", "سمن حيواني", "دهن حيواني", "شحم"],
+    keywords: ["زبدة", "سمن", "سمن بلدي", "سمن حيواني", "دهن حيواني", "شحم"],
     cause: "الدهون المشبعة الحيوانية",
     message: "ترفع الكوليسترول الضار (LDL) مباشرة.",
     alternatives: ["زيت زيتون بكر ممتاز", "زيت الكانولا", "زيت الأفوكادو", "زيت بذور الكتان"],
@@ -264,6 +304,13 @@ const CHOLESTEROL_RULES: WarningRule[] = [
     severity: "medium",
   },
   {
+    keywords: ["لحم غنم", "لحم ضان", "لحم بقر", "لحم عجل", "لحم احمر"],
+    cause: "لحم أحمر",
+    message: "قد يرفع الدهون المشبعة بحسب القطعة والكمية؛ اختيار القطع قليلة الدهن يخفف الأثر.",
+    alternatives: ["لحم أحمر قليل الدهن بعد إزالة الدهن الظاهر", "دجاج منزوع الجلد", "سمك مشوي", "عدس أو فاصوليا"],
+    severity: "medium",
+  },
+  {
     keywords: ["جوز الهند", "زيت جوز الهند", "حليب جوز الهند"],
     cause: "زيت جوز الهند",
     message: "غني بالدهون المشبعة رغم كونه نباتياً.",
@@ -298,10 +345,10 @@ export function generateHealthWarnings(
   const seen = new Set<string>();
 
   // دمج كل النصوص للبحث فيها
-  const allText = [
-    ...ingredients.map((i) => i.name.toLowerCase()),
-    ...steps.map((s) => s.toLowerCase()),
-  ].join(" ");
+  const allText = normalizeArabic([
+    ...ingredients.map((i) => i.name),
+    ...steps,
+  ].join(" "));
 
   // اختيار قواعد المرض المناسبة
   let rules: WarningRule[] = [];
@@ -314,7 +361,7 @@ export function generateHealthWarnings(
   for (const rule of rules) {
     if (seen.has(rule.cause)) continue;
     for (const keyword of rule.keywords) {
-      if (allText.includes(keyword.toLowerCase())) {
+      if (allText.includes(normalizeArabic(keyword))) {
         seen.add(rule.cause);
         warnings.push({
           cause: rule.cause,
@@ -328,16 +375,16 @@ export function generateHealthWarnings(
   }
 
   // تحذيرات إضافية بناءً على القيم الغذائية
-  if (healthCondition === "diabetes" && carbs > 50 && !seen.has("كربوهيدرات عالية")) {
+  if (healthCondition === "diabetes" && carbs >= 45 && !seen.has("كربوهيدرات عالية")) {
     warnings.push({
       cause: "كربوهيدرات عالية",
-      message: `تحتوي على ${carbs}g كربوهيدرات وهو مرتفع لمريض السكري.`,
+      message: `تحتوي على ${carbs}g كربوهيدرات للحصة؛ راقب حجم الحصة ضمن خطتك الغذائية.`,
       alternatives: ["تقليل الحصة للنصف", "إضافة بروتين أو دهون صحية لإبطاء الامتصاص", "تناولها مع سلطة خضراء"],
       severity: "medium",
     });
   }
 
-  if (healthCondition === "obesity" && calories > 500 && !seen.has("سعرات عالية")) {
+  if (healthCondition === "obesity" && calories >= 400 && !seen.has("سعرات عالية")) {
     warnings.push({
       cause: "سعرات عالية",
       message: `تحتوي على ${calories} سعرة حرارية للحصة الواحدة.`,
@@ -346,11 +393,20 @@ export function generateHealthWarnings(
     });
   }
 
-  if (healthCondition === "cholesterol" && fat > 20 && !seen.has("دهون عالية")) {
+  if (healthCondition === "obesity" && fat >= 18 && !seen.has("دهون عالية")) {
     warnings.push({
       cause: "دهون عالية",
-      message: `تحتوي على ${fat}g دهون للحصة وهو مرتفع.`,
-      alternatives: ["استبدال الدهون المشبعة بزيت زيتون", "تقليل كمية الزيت المستخدمة", "استخدام طريقة الشوي بدلاً من القلي"],
+      message: `تحتوي على ${fat}g دهون للحصة؛ خفف الدهون المضافة ووازنها بالخضروات.`,
+      alternatives: ["قياس الزيت بملعقة", "اختيار الشوي أو الخَبز", "تقليل الإضافات الدسمة"],
+      severity: "medium",
+    });
+  }
+
+  if (healthCondition === "cholesterol" && fat >= 18 && !seen.has("دهون عالية")) {
+    warnings.push({
+      cause: "دهون عالية",
+      message: `تحتوي على ${fat}g دهون للحصة؛ راجع نوع الدهون واختر غير المشبعة قدر الإمكان.`,
+      alternatives: ["استبدال السمن والزبدة بزيت زيتون", "اختيار قطع لحم أقل دهناً", "استخدام طريقة الشوي بدلاً من القلي"],
       severity: "medium",
     });
   }
@@ -378,6 +434,51 @@ export function generateHealthWarnings(
   warnings.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
 
   return warnings;
+}
+
+/** درجة نسبية لاختيار بديل أخف من الوصفة المعروضة، وليست حكماً طبياً. */
+export function getHealthWarningScore(recipe: HealthRecipeCandidate, healthCondition: HealthCondition): number {
+  const severityScore = { high: 3, medium: 2, low: 1 };
+  const warnings = generateHealthWarnings(
+    recipe.ingredients,
+    recipe.steps,
+    recipe.category,
+    recipe.calories,
+    recipe.carbs,
+    recipe.fat,
+    healthCondition,
+  );
+  return warnings.reduce((total, warning) => total + severityScore[warning.severity], 0);
+}
+
+/**
+ * يقترح حتى ثلاث وصفات فعلية من المكتبة ذات عبء تحذيري أقل، ويفضل الفئة نفسها.
+ */
+export function getHealthierRecipeAlternatives<T extends HealthRecipeCandidate>(
+  recipe: T,
+  recipes: T[],
+  healthCondition: HealthCondition,
+  limit = 3,
+): T[] {
+  if (healthCondition === "none") return [];
+
+  const recipeScore = getHealthWarningScore(recipe, healthCondition);
+  const candidates = recipes.filter((candidate) =>
+    candidate.id !== recipe.id && getHealthWarningScore(candidate, healthCondition) < recipeScore,
+  );
+  const sameCategory = candidates.filter((candidate) => candidate.category === recipe.category);
+  const pool = sameCategory.length >= limit ? sameCategory : candidates;
+
+  return [...pool]
+    .sort((left, right) => {
+      const scoreDifference = getHealthWarningScore(left, healthCondition) - getHealthWarningScore(right, healthCondition);
+      if (scoreDifference !== 0) return scoreDifference;
+      if (healthCondition === "diabetes") return left.carbs - right.carbs || right.fiber - left.fiber;
+      if (healthCondition === "obesity") return left.calories - right.calories || left.fat - right.fat;
+      if (healthCondition === "cholesterol") return left.fat - right.fat || right.fiber - left.fiber;
+      return left.calories - right.calories || right.fiber - left.fiber;
+    })
+    .slice(0, limit);
 }
 
 // اسم المرض بالعربي
