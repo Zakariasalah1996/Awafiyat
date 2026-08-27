@@ -86,7 +86,8 @@ export default function CommunityScreen() {
       setImage(null);
       setEditingPostId(null);
     } catch (error) {
-      Alert.alert("تعذر النشر", error instanceof Error ? error.message : "حاول مرة أخرى");
+      const message = error instanceof Error ? error.message : "حاول مرة أخرى";
+      Alert.alert(message.includes("احذف منشورك السابق") ? "النشر محدود مؤقتاً" : "تعذر النشر", message);
     } finally {
       setPublishing(false);
     }

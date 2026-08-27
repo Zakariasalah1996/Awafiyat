@@ -628,6 +628,41 @@ export async function createCommunityPost(data: InsertCommunityPost) {
   return result[0];
 }
 
+const COMMUNITY_POST_COOLDOWN_MS = 60 * 60 * 1000;
+
+export async function getCommunityPostCooldownSeconds(authorId: number): Promise<number> {
+  if (!_db) throw new Error("Database not available");
+  const latest = await _db
+    .select({ createdAt: communityPosts.createdAt })
+    .from(communityPosts)
+    .where(and(eq(communityPosts.authorId, authorId), eq(communityPosts.isHidden, false)))
+    .orderBy(desc(communityPosts.createdAt))
+    .limit(1);
+  if (!latest[0]?.createdAt) return 0;
+  const remainingMs = COMMUNITY_POST_COOLDOWN_MS - (Date.now() - latest[0].createdAt.getTime());
+  return remainingMs > 0 ? Math.ceil(remainingMs / 1000) : 0;
+}
+
+export async function createCommunityPostWithHourlyLimit(data: InsertCommunityPost) {
+  if (!_db) throw new Error("Database not available");
+  return _db.transaction(async (tx) => {
+    // Serializes concurrent publish requests from the same author.
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(72491, ${data.authorId})`);
+    const latest = await tx
+      .select({ createdAt: communityPosts.createdAt })
+      .from(communityPosts)
+      .where(and(eq(communityPosts.authorId, data.authorId), eq(communityPosts.isHidden, false)))
+      .orderBy(desc(communityPosts.createdAt))
+      .limit(1);
+    if (latest[0]?.createdAt) {
+      const remainingMs = COMMUNITY_POST_COOLDOWN_MS - (Date.now() - latest[0].createdAt.getTime());
+      if (remainingMs > 0) return { post: null, retryAfterSeconds: Math.ceil(remainingMs / 1000) };
+    }
+    const inserted = await tx.insert(communityPosts).values(data).returning();
+    return { post: inserted[0], retryAfterSeconds: 0 };
+  });
+}
+
 export async function getCommunityPost(postId: number) {
   if (!_db) return undefined;
   const result = await _db.select().from(communityPosts).where(eq(communityPosts.id, postId)).limit(1);

@@ -38,4 +38,17 @@ describe("مجتمع الطبخ", () => {
     expect(client).toContain('method: "DELETE"');
     expect(tabs).toContain('communityUnread > 9 ? "9+"');
   });
+
+  it("يفرض منشوراً واحداً خلال ساعة ويستثني المنشورات المحذوفة", () => {
+    const screen = read("app/(tabs)/community.tsx");
+    const database = read("server/db.ts");
+    const server = read("server/_core/index.ts");
+    expect(database).toContain("COMMUNITY_POST_COOLDOWN_MS = 60 * 60 * 1000");
+    expect(database).toContain("pg_advisory_xact_lock");
+    expect(database).toContain("eq(communityPosts.isHidden, false)");
+    expect(server).toContain("COMMUNITY_POST_COOLDOWN");
+    expect(server).toContain("retryAfterSeconds");
+    expect(server).toContain("احذف منشورك السابق أو انتظر قليلاً");
+    expect(screen).toContain("النشر محدود مؤقتاً");
+  });
 });

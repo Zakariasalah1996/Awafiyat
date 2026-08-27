@@ -9,7 +9,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema, createCommunityComment, createCommunityPost, createCommunityReport, deleteCommunityPost, getCommunityAuthor, getCommunityComments, getCommunityFeed, getCommunityPost, toggleCommunityLike, updateCommunityPost } from "../db";
+import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema, createCommunityComment, createCommunityPostWithHourlyLimit, createCommunityReport, deleteCommunityPost, getCommunityAuthor, getCommunityComments, getCommunityFeed, getCommunityPost, getCommunityPostCooldownSeconds, toggleCommunityLike, updateCommunityPost } from "../db";
 import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
@@ -772,6 +772,16 @@ async function startServer() {
         return res.status(400).json({ error: 'أضف اسماً ظاهراً ثابتاً من صفحة حسابي قبل النشر' });
       }
 
+      const initialRetryAfterSeconds = await getCommunityPostCooldownSeconds(author.id);
+      if (initialRetryAfterSeconds > 0) {
+        const minutes = Math.max(1, Math.ceil(initialRetryAfterSeconds / 60));
+        return res.status(429).json({
+          error: `احذف منشورك السابق أو انتظر قليلاً. يمكنك النشر بعد ${minutes} دقيقة.`,
+          code: 'COMMUNITY_POST_COOLDOWN',
+          retryAfterSeconds: initialRetryAfterSeconds,
+        });
+      }
+
       let imageUrl: string | null = null;
       if (hasImage) {
         const permittedTypes = ['image/jpeg', 'image/png', 'image/webp'];
@@ -788,13 +798,22 @@ async function startServer() {
         imageUrl = stored.url;
       }
 
-      const post = await createCommunityPost({
+      const creation = await createCommunityPostWithHourlyLimit({
         authorId: author.id,
         authorName,
         body: normalizedBody || null,
         imageUrl,
         imageModeration: imageUrl ? 'approved' : 'none',
       });
+      if (!creation.post) {
+        const minutes = Math.max(1, Math.ceil(creation.retryAfterSeconds / 60));
+        return res.status(429).json({
+          error: `احذف منشورك السابق أو انتظر قليلاً. يمكنك النشر بعد ${minutes} دقيقة.`,
+          code: 'COMMUNITY_POST_COOLDOWN',
+          retryAfterSeconds: creation.retryAfterSeconds,
+        });
+      }
+      const post = creation.post;
       res.status(201).json({ post: { ...post, likeCount: 0, commentCount: 0, likedByCurrentUser: false } });
     } catch (error: any) {
       console.error('[Community] Create post failed:', error);
