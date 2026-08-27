@@ -9,7 +9,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema, createCommunityComment, createCommunityPost, getCommunityAuthor, getCommunityComments, getCommunityFeed, getCommunityPost, toggleCommunityLike } from "../db";
+import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema, createCommunityComment, createCommunityPost, createCommunityReport, deleteCommunityPost, getCommunityAuthor, getCommunityComments, getCommunityFeed, getCommunityPost, toggleCommunityLike, updateCommunityPost } from "../db";
 import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
@@ -823,6 +823,47 @@ async function startServer() {
       console.error('[Community] Create post failed:', error);
       res.status(500).json({ error: 'تعذر نشر المنشور، حاول مرة أخرى' });
     }
+  });
+
+  app.patch('/api/community/posts/:postId', async (req, res) => {
+    try {
+      const postId = Number(req.params.postId); const userId = req.body?.userId;
+      const body = typeof req.body?.body === 'string' ? req.body.body.trim() : '';
+      if (!Number.isInteger(postId) || !Number.isInteger(userId) || body.length > 1200) return res.status(400).json({ error: 'بيانات التعديل غير صالحة' });
+      const current = await getCommunityPost(postId);
+      if (!current || current.isHidden) return res.status(404).json({ error: 'المنشور غير موجود' });
+      if (current.authorId !== userId) return res.status(403).json({ error: 'لا يمكنك تعديل منشور مستخدم آخر' });
+      if (!body && !current.imageUrl) return res.status(400).json({ error: 'لا يمكن أن يكون المنشور فارغاً' });
+      const post = await updateCommunityPost(postId, userId, body || null, current.imageUrl);
+      res.json({ post });
+    } catch { res.status(500).json({ error: 'تعذر تعديل المنشور' }); }
+  });
+
+  app.delete('/api/community/posts/:postId', async (req, res) => {
+    try {
+      const postId = Number(req.params.postId); const userId = req.body?.userId;
+      if (!Number.isInteger(postId) || !Number.isInteger(userId)) return res.status(400).json({ error: 'بيانات الحذف غير مكتملة' });
+      if (!(await deleteCommunityPost(postId, userId))) return res.status(403).json({ error: 'لا يمكنك حذف هذا المنشور' });
+      res.json({ success: true });
+    } catch { res.status(500).json({ error: 'تعذر حذف المنشور' }); }
+  });
+
+  app.post('/api/community/posts/:postId/report', async (req, res) => {
+    try {
+      const postId = Number(req.params.postId); const deviceId = String(req.body?.deviceId ?? '').trim(); const reason = String(req.body?.reason ?? '').trim().slice(0, 120);
+      if (!Number.isInteger(postId) || !deviceId || !reason) return res.status(400).json({ error: 'حدد سبب الإبلاغ' });
+      await createCommunityReport({ postId, reporterDeviceId: deviceId, reason });
+      res.status(201).json({ success: true });
+    } catch { res.status(500).json({ error: 'تعذر إرسال البلاغ' }); }
+  });
+
+  app.post('/api/community/comments/:commentId/report', async (req, res) => {
+    try {
+      const commentId = Number(req.params.commentId); const deviceId = String(req.body?.deviceId ?? '').trim(); const reason = String(req.body?.reason ?? '').trim().slice(0, 120);
+      if (!Number.isInteger(commentId) || !deviceId || !reason) return res.status(400).json({ error: 'حدد سبب الإبلاغ' });
+      await createCommunityReport({ commentId, reporterDeviceId: deviceId, reason });
+      res.status(201).json({ success: true });
+    } catch { res.status(500).json({ error: 'تعذر إرسال البلاغ' }); }
   });
 
   app.post('/api/community/posts/:postId/like', async (req, res) => {

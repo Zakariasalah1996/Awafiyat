@@ -8,7 +8,8 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useUser } from "@/lib/user-context";
-import { CommunityComment, CommunityPost, getCommunityPosts, getPostComments, publishCommunityPost, publishPostComment, togglePostLike } from "@/lib/community-api";
+import { CommunityComment, CommunityPost, deleteCommunityPost, getCommunityCurrentUserId, getCommunityPosts, getPostComments, publishCommunityPost, publishPostComment, reportCommunityComment, reportCommunityPost, togglePostLike, updateCommunityPost } from "@/lib/community-api";
+import { markCommunityAsRead } from "@/lib/community-unread";
 
 function formatDate(value: string) {
   try {
@@ -30,11 +31,14 @@ export default function CommunityScreen() {
   const [comments, setComments] = useState<CommunityComment[]>([]);
   const [commentDraft, setCommentDraft] = useState("");
   const [commenting, setCommenting] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [editingPostId, setEditingPostId] = useState<number | null>(null);
 
   const loadPosts = useCallback(async () => {
     try {
       setLoading(true);
       setPosts(await getCommunityPosts());
+      await markCommunityAsRead();
     } catch (error) {
       Alert.alert("تعذر التحميل", error instanceof Error ? error.message : "حاول مرة أخرى");
     } finally {
@@ -43,6 +47,7 @@ export default function CommunityScreen() {
   }, []);
 
   useEffect(() => { loadPosts(); }, [loadPosts]);
+  useEffect(() => { getCommunityCurrentUserId().then(setCurrentUserId).catch(() => undefined); }, []);
 
   const requireName = () => {
     if (profile.name.trim().length >= 2) return true;
@@ -73,10 +78,13 @@ export default function CommunityScreen() {
       const imageData = image
         ? await FileSystem.readAsStringAsync(image.uri, { encoding: FileSystem.EncodingType.Base64 })
         : undefined;
-      const post = await publishCommunityPost({ body, imageData, contentType: image?.mimeType ?? "image/jpeg" });
-      setPosts((current) => [post, ...current]);
+      const post = editingPostId
+        ? await updateCommunityPost(editingPostId, body)
+        : await publishCommunityPost({ body, imageData, contentType: image?.mimeType ?? "image/jpeg" });
+      setPosts((current) => editingPostId ? current.map((item) => item.id === post.id ? { ...item, ...post } : item) : [post, ...current]);
       setDraft("");
       setImage(null);
+      setEditingPostId(null);
     } catch (error) {
       Alert.alert("تعذر النشر", error instanceof Error ? error.message : "حاول مرة أخرى");
     } finally {
@@ -113,11 +121,27 @@ export default function CommunityScreen() {
     } finally { setCommenting(false); }
   };
 
+  const reportPost = (post: CommunityPost) => Alert.alert("الإبلاغ عن المنشور", "اختر السبب", [
+    { text: "إلغاء", style: "cancel" },
+    { text: "رسائل مزعجة", onPress: () => reportCommunityPost(post.id, "رسائل مزعجة").then(() => Alert.alert("تم الإبلاغ", "سيُراجع المنشور.")) },
+    { text: "محتوى غير مناسب", onPress: () => reportCommunityPost(post.id, "محتوى غير مناسب").then(() => Alert.alert("تم الإبلاغ", "سيُراجع المنشور.")) },
+  ]);
+
+  const managePost = (post: CommunityPost) => {
+    if (post.authorId !== currentUserId) return reportPost(post);
+    Alert.alert("إدارة المنشور", undefined, [
+      { text: "إلغاء", style: "cancel" },
+      { text: "تعديل", onPress: () => { setEditingPostId(post.id); setDraft(post.body ?? ""); } },
+      { text: "حذف", style: "destructive", onPress: () => Alert.alert("حذف المنشور؟", "لا يمكن التراجع عن الحذف.", [{ text: "إلغاء", style: "cancel" }, { text: "حذف", style: "destructive", onPress: () => deleteCommunityPost(post.id).then(() => setPosts((items) => items.filter((item) => item.id !== post.id))).catch((error) => Alert.alert("تعذر الحذف", error.message)) }]) },
+    ]);
+  };
+
   const renderPost = ({ item }: { item: CommunityPost }) => (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.authorRow}>
         <View style={[styles.avatar, { backgroundColor: `${colors.primary}20` }]}><Text style={{ color: colors.primary, fontWeight: "800" }}>{item.authorName.slice(0, 1)}</Text></View>
         <View style={styles.authorInfo}><Text style={[styles.author, { color: colors.foreground }]}>{item.authorName}</Text><Text style={[styles.date, { color: colors.muted }]}>{formatDate(item.createdAt)}</Text></View>
+        <TouchableOpacity onPress={() => managePost(item)} style={{ padding: 6 }}><MaterialIcons name="more-horiz" size={23} color={colors.muted} /></TouchableOpacity>
       </View>
       {!!item.body && <Text style={[styles.body, { color: colors.foreground }]}>{item.body}</Text>}
       {!!item.imageUrl && <Image source={{ uri: item.imageUrl }} style={styles.postImage} resizeMode="cover" />}
@@ -144,7 +168,7 @@ export default function CommunityScreen() {
             {!!image && <View><Image source={{ uri: image.uri }} style={styles.preview} /><Pressable onPress={() => setImage(null)} style={styles.removeImage}><MaterialIcons name="close" color="#fff" size={18} /></Pressable></View>}
             <View style={styles.composerFooter}>
               <View style={styles.mediaActions}><TouchableOpacity onPress={() => selectImage(false)} style={styles.iconButton}><MaterialIcons name="photo-library" size={22} color={colors.primary} /></TouchableOpacity><TouchableOpacity onPress={() => selectImage(true)} style={styles.iconButton}><MaterialIcons name="camera-alt" size={22} color={colors.primary} /></TouchableOpacity></View>
-              <TouchableOpacity onPress={publish} disabled={publishing} style={[styles.publishButton, { backgroundColor: colors.primary, opacity: publishing ? 0.6 : 1 }]}><Text style={styles.publishText}>{publishing ? "جارٍ الفحص..." : "نشر"}</Text></TouchableOpacity>
+              <TouchableOpacity onPress={publish} disabled={publishing} style={[styles.publishButton, { backgroundColor: colors.primary, opacity: publishing ? 0.6 : 1 }]}><Text style={styles.publishText}>{publishing ? "جارٍ الحفظ..." : editingPostId ? "حفظ التعديل" : "نشر"}</Text></TouchableOpacity>
             </View>
             <Text style={[styles.note, { color: colors.muted }]}>النص حر. الصور تمر بفاحص يقبل الطعام والمشروبات فقط.</Text>
           </View>
@@ -155,7 +179,7 @@ export default function CommunityScreen() {
       <Modal visible={!!activePost} animationType="slide" transparent onRequestClose={() => setActivePost(null)}>
         <View style={styles.modalBackdrop}><View style={[styles.modal, { backgroundColor: colors.background }]}>
           <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}><Text style={[styles.modalTitle, { color: colors.foreground }]}>التعليقات</Text><TouchableOpacity onPress={() => setActivePost(null)}><MaterialIcons name="close" size={25} color={colors.foreground} /></TouchableOpacity></View>
-          <FlatList data={comments} keyExtractor={(comment) => String(comment.id)} contentContainerStyle={styles.comments} renderItem={({ item }) => <View style={[styles.comment, { backgroundColor: colors.surface }]}><Text style={[styles.commentName, { color: colors.foreground }]}>{item.authorName}</Text><Text style={[styles.commentBody, { color: colors.foreground }]}>{item.body}</Text></View>} ListEmptyComponent={<Text style={[styles.noComments, { color: colors.muted }]}>لا توجد تعليقات بعد. اكتب أول تعليق.</Text>} />
+          <FlatList data={comments} keyExtractor={(comment) => String(comment.id)} contentContainerStyle={styles.comments} renderItem={({ item }) => <View style={[styles.comment, { backgroundColor: colors.surface }]}><View style={{ flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center" }}><Text style={[styles.commentName, { color: colors.foreground }]}>{item.authorName}</Text><TouchableOpacity onPress={() => reportCommunityComment(item.id, "تعليق غير مناسب").then(() => Alert.alert("تم الإبلاغ", "سيُراجع التعليق."))}><MaterialIcons name="flag" size={17} color={colors.muted} /></TouchableOpacity></View><Text style={[styles.commentBody, { color: colors.foreground }]}>{item.body}</Text></View>} ListEmptyComponent={<Text style={[styles.noComments, { color: colors.muted }]}>لا توجد تعليقات بعد. اكتب أول تعليق.</Text>} />
           <View style={[styles.commentComposer, { borderTopColor: colors.border }]}><TextInput value={commentDraft} onChangeText={setCommentDraft} placeholder="أضف تعليقاً..." placeholderTextColor={colors.muted} style={[styles.commentInput, { color: colors.foreground, borderColor: colors.border }]} maxLength={500} /><TouchableOpacity onPress={addComment} disabled={commenting} style={[styles.sendButton, { backgroundColor: colors.primary }]}><MaterialIcons name="send" size={20} color="#fff" /></TouchableOpacity></View>
         </View></View>
       </Modal>

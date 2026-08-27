@@ -232,3 +232,16 @@ export const communityLikes = pgTable(
 
 export type CommunityLike = typeof communityLikes.$inferSelect;
 export type InsertCommunityLike = typeof communityLikes.$inferInsert;
+
+export const communityReports = pgTable("community_reports", {
+  id: serial("id").primaryKey(),
+  postId: integer("postId"),
+  commentId: integer("commentId"),
+  reporterDeviceId: varchar("reporterDeviceId", { length: 128 }).notNull(),
+  reason: varchar("reason", { length: 120 }).notNull(),
+  status: varchar("status", { length: 16 }).default("new").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type CommunityReport = typeof communityReports.$inferSelect;
+export type InsertCommunityReport = typeof communityReports.$inferInsert;

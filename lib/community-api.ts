@@ -78,3 +78,26 @@ export async function publishPostComment(postId: number, body: string): Promise<
   });
   return result.comment;
 }
+
+export async function getCommunityCurrentUserId() { return requireCommunityUserId(); }
+
+export async function updateCommunityPost(postId: number, body: string): Promise<CommunityPost> {
+  const userId = await requireCommunityUserId();
+  const result = await api<{ post: CommunityPost }>(`/api/community/posts/${postId}`, { method: "PATCH", body: JSON.stringify({ userId, body }) });
+  return result.post;
+}
+
+export async function deleteCommunityPost(postId: number): Promise<void> {
+  const userId = await requireCommunityUserId();
+  await api(`/api/community/posts/${postId}`, { method: "DELETE", body: JSON.stringify({ userId }) });
+}
+
+export async function reportCommunityPost(postId: number, reason: string): Promise<void> {
+  const deviceId = await getDeviceId();
+  await api(`/api/community/posts/${postId}/report`, { method: "POST", body: JSON.stringify({ deviceId, reason }) });
+}
+
+export async function reportCommunityComment(commentId: number, reason: string): Promise<void> {
+  const deviceId = await getDeviceId();
+  await api(`/api/community/comments/${commentId}/report`, { method: "POST", body: JSON.stringify({ deviceId, reason }) });
+}

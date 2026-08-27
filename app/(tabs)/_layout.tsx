@@ -1,17 +1,28 @@
 import { Tabs, Redirect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Platform } from "react-native";
 import { useColors } from "@/hooks/use-colors";
 import { useUser } from "@/lib/user-context";
+import { refreshCommunityUnreadCount, subscribeToCommunityUnread } from "@/lib/community-unread";
 
 export default function TabLayout() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { profile } = useUser();
+  const [communityUnread, setCommunityUnread] = useState(0);
   const bottomPadding = Platform.OS === "web" ? 12 : Math.max(insets.bottom, 8);
   const tabBarHeight = 56 + bottomPadding;
+
+  const refreshCommunityBadge = useCallback(() => { refreshCommunityUnreadCount().catch(() => undefined); }, []);
+  useEffect(() => {
+    refreshCommunityBadge();
+    const unsubscribe = subscribeToCommunityUnread(setCommunityUnread);
+    const interval = setInterval(refreshCommunityBadge, 45_000);
+    return () => { unsubscribe(); clearInterval(interval); };
+  }, [refreshCommunityBadge]);
 
   // Redirect to onboarding if not completed
   if (!profile.onboardingComplete) {
@@ -52,6 +63,8 @@ export default function TabLayout() {
         name="community"
         options={{
           title: "المجتمع",
+          tabBarBadge: communityUnread > 9 ? "9+" : communityUnread || undefined,
+          tabBarBadgeStyle: { backgroundColor: "#E53935", color: "#fff", fontSize: 10, fontWeight: "800", minWidth: 18, height: 18, borderRadius: 9 },
           tabBarIcon: ({ color }) => (
             <IconSymbol size={25} name="bubble.left.and.bubble.right.fill" color={color} />
           ),

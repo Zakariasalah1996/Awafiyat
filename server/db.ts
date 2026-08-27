@@ -16,6 +16,7 @@ import {
   communityPosts, InsertCommunityPost,
   communityComments, InsertCommunityComment,
   communityLikes,
+  communityReports, InsertCommunityReport,
 } from "../drizzle/schema";
 
 // ==================== DATABASE CONNECTION ====================
@@ -247,6 +248,18 @@ export async function ensureDatabaseSchema(): Promise<void> {
           "deviceId" varchar(128) NOT NULL,
           "createdAt" timestamp NOT NULL DEFAULT now(),
           CONSTRAINT "community_likes_post_device_unique" UNIQUE ("postId", "deviceId")
+        )
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "community_reports" (
+          "id" SERIAL PRIMARY KEY,
+          "postId" integer,
+          "commentId" integer,
+          "reporterDeviceId" varchar(128) NOT NULL,
+          "reason" varchar(120) NOT NULL,
+          "status" varchar(16) NOT NULL DEFAULT 'new',
+          "createdAt" timestamp NOT NULL DEFAULT now()
         )
       `);
 
@@ -678,5 +691,23 @@ export async function getCommunityComments(postId: number) {
 export async function createCommunityComment(data: InsertCommunityComment) {
   if (!_db) throw new Error("Database not available");
   const result = await _db.insert(communityComments).values(data).returning();
+  return result[0];
+}
+
+export async function updateCommunityPost(postId: number, authorId: number, body: string | null, imageUrl: string | null) {
+  if (!_db) throw new Error("Database not available");
+  const result = await _db.update(communityPosts).set({ body, imageUrl, imageModeration: imageUrl ? "approved" : "none", updatedAt: new Date() }).where(and(eq(communityPosts.id, postId), eq(communityPosts.authorId, authorId), eq(communityPosts.isHidden, false))).returning();
+  return result[0];
+}
+
+export async function deleteCommunityPost(postId: number, authorId: number) {
+  if (!_db) throw new Error("Database not available");
+  const result = await _db.update(communityPosts).set({ isHidden: true, updatedAt: new Date() }).where(and(eq(communityPosts.id, postId), eq(communityPosts.authorId, authorId), eq(communityPosts.isHidden, false))).returning({ id: communityPosts.id });
+  return result.length > 0;
+}
+
+export async function createCommunityReport(data: InsertCommunityReport) {
+  if (!_db) throw new Error("Database not available");
+  const result = await _db.insert(communityReports).values(data).returning();
   return result[0];
 }

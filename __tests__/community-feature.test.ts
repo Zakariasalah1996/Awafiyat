@@ -23,4 +23,19 @@ describe("مجتمع الطبخ", () => {
     expect(server).toContain("moderateCommunityFoodImage");
     expect(server).toContain("/api/community/posts/:postId/comments");
   });
+
+  it("يثبت التعديل والحذف والبلاغات وشارة المنشورات الجديدة", () => {
+    const screen = read("app/(tabs)/community.tsx");
+    const client = read("lib/community-api.ts");
+    const server = read("server/_core/index.ts");
+    const tabs = read("app/(tabs)/_layout.tsx");
+    expect(screen).toContain("updateCommunityPost");
+    expect(screen).toContain("deleteCommunityPost");
+    expect(screen).toContain("reportCommunityPost");
+    expect(server).toContain("createCommunityReport");
+    expect(server).toContain("deleteCommunityPost");
+    expect(client).toContain('method: "PATCH"');
+    expect(client).toContain('method: "DELETE"');
+    expect(tabs).toContain('communityUnread > 9 ? "9+"');
+  });
 });
