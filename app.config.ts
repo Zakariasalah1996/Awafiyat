@@ -144,6 +144,10 @@ const config: ExpoConfig = {
       {
         androidAppId: "ca-app-pub-9147941153313979~6652750828",
         iosAppId: "ca-app-pub-9147941153313979~6652750828",
+        // SDK 24 يشغّل هذين الخيارين افتراضياً في خيوط خلفية. تعطيلهما يجعل
+        // التهيئة والتحميل متسلسلين مع Firebase Messaging ويمنع internal-error.
+        optimizeInitialization: false,
+        optimizeAdLoading: false,
         skAdNetworkItems: [],
       },
     ],

@@ -110,7 +110,13 @@ async function initializeAdMob(): Promise<void> {
   if (!adMobInitializationPromise) {
     adMobInitializationPromise = (async () => {
       const admobModule = await import("react-native-google-mobile-ads");
-      const { default: mobileAds } = admobModule;
+      const { default: mobileAds, MaxAdContentRating } = admobModule;
+
+      // يجب ضبط إعداد الطلب قبل initialize وفق توثيق Google. كما أن إبقاء
+      // التهيئة هنا في Promise واحدة يمنع تزامنها مع Firebase Messaging عند الإقلاع.
+      await mobileAds().setRequestConfiguration({
+        maxAdContentRating: MaxAdContentRating.PG,
+      });
       await mobileAds().initialize();
       isAdMobInitialized = true;
     })();
@@ -123,6 +129,14 @@ async function initializeAdMob(): Promise<void> {
     adMobInitializationPromise = null;
     throw error;
   }
+}
+
+/**
+ * يتيح لتدفقات Android الأصلية الأخرى انتظار اكتمال AdMob حتى لا تبدأ
+ * Firebase Messaging وGoogle Mobile Ads التهيئة في اللحظة نفسها.
+ */
+export async function initializeRewardedAds(): Promise<void> {
+  await initializeAdMob();
 }
 
 async function createAndLoadRewardedAd(adUnitId: string, timeoutMs: number): Promise<any> {
@@ -375,8 +389,14 @@ export async function showRewardedAd(): Promise<RewardedAdResult> {
 // تحميل الإعلان مسبقاً عند بدء التطبيق
 export function preloadRewardedAd(): void {
   if (Platform.OS !== "web" && !isAdLoading) {
-    setTimeout(() => {
-      void loadRewardedAd().catch(() => {});
-    }, 3_000);
+    void initializeRewardedAds()
+      .then(
+        () =>
+          new Promise<void>((resolve) => {
+            setTimeout(resolve, 500);
+          }),
+      )
+      .then(() => loadRewardedAd())
+      .catch(() => {});
   }
 }

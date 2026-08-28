@@ -31,13 +31,30 @@ describe("AdMob rewarded ads", () => {
 
   it("serializes SDK initialization and retries transient interactive-load failures", () => {
     const admob = readProjectFile("lib", "admob.ts");
+    const rootLayout = readProjectFile("app", "_layout.tsx");
 
     expect(admob).toContain("let adMobInitializationPromise: Promise<void> | null = null;");
+    expect(admob).toContain("await mobileAds().setRequestConfiguration({");
+    expect(admob).toContain("maxAdContentRating: MaxAdContentRating.PG");
     expect(admob).toContain("await adMobInitializationPromise;");
+    expect(admob).toContain("export async function initializeRewardedAds(): Promise<void>");
     expect(admob).toContain("async function ensureRewardedAdReady(): Promise<void>");
     expect(admob).toContain("const MAX_INTERACTIVE_LOAD_ATTEMPTS = 2;");
     expect(admob).toContain("normalized.category === \"internal\"");
     expect(admob).toContain("await ensureRewardedAdReady();");
+    expect(rootLayout).toContain(".then(({ initializeRewardedAds }) => initializeRewardedAds())");
+    expect(rootLayout.indexOf("initializeRewardedAds")).toBeLessThan(
+      rootLayout.indexOf("await requestNotificationPermissions()"),
+    );
+  });
+
+  it("uses the RN 0.81-compatible stable SDK and disables concurrent native optimizations", () => {
+    const packageJson = readProjectFile("package.json");
+    const appConfig = readProjectFile("app.config.ts");
+
+    expect(packageJson).toContain('"react-native-google-mobile-ads": "15.8.3"');
+    expect(appConfig).toContain("optimizeInitialization: false");
+    expect(appConfig).toContain("optimizeAdLoading: false");
   });
 
   it("includes AD_ID permission and ProGuard keep rules for AdMob", () => {

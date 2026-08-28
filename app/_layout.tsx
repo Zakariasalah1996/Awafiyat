@@ -84,7 +84,8 @@ function RootLayoutInner() {
     registerGuest().catch((e) => console.warn("[Guest] Error:", e));
     // Track active user on app open
     sendHeartbeat().catch(() => {});
-    // Preload AdMob rewarded ad in background
+    // ابدأ تهيئة AdMob أولاً؛ تدفق Firebase Messaging أدناه ينتظرها حتى لا
+    // يتزامن SDKان من Google في لحظة الإقلاع نفسها على Android.
     if (Platform.OS !== "web") {
       import("@/lib/admob").then(({ preloadRewardedAd }) => preloadRewardedAd()).catch(() => {});
     }
@@ -96,8 +97,11 @@ function RootLayoutInner() {
 
     const registerPushFlow = async () => {
       try {
-        // Wait 3 seconds for Firebase/app to fully initialize
-        await new Promise((r) => setTimeout(r, 3000));
+        // افصل تهيئة Firebase Messaging عن تهيئة Google Mobile Ads الأصلية.
+        await import("@/lib/admob")
+          .then(({ initializeRewardedAds }) => initializeRewardedAds())
+          .catch((error) => console.warn("[AdMob] Initialization before push failed:", error));
+        await new Promise((r) => setTimeout(r, 1000));
 
         console.log("[Push] Starting auto-registration flow...");
         const granted = await requestNotificationPermissions();
