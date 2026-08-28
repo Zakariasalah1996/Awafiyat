@@ -43,7 +43,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: isEasIosBuild ? "1.0.61" : "1.0.87",
+  version: isEasIosBuild ? "1.0.61" : "1.0.88",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -67,7 +67,7 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    versionCode: 10066,
+    versionCode: 10067,
     googleServicesFile: "./google-services.json",
     permissions: [
       "POST_NOTIFICATIONS",
