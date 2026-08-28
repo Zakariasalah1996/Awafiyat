@@ -1,5 +1,7 @@
 // Auto-generated food category image mapping
 
+import { getApiBaseUrl } from "@/constants/oauth";
+
 export const FOOD_CATEGORY_IMAGES: Record<string, any> = {
   "iraqi-rice": require("@/assets/images/food-categories/iraqi-rice.jpg"),
   "iraqi-soups-and-stews": require("@/assets/images/food-categories/iraqi-soups-and-stews.jpg"),
@@ -28,9 +30,19 @@ export const FOOD_CATEGORY_IMAGES: Record<string, any> = {
 export type FoodCategory = keyof typeof FOOD_CATEGORY_IMAGES;
 
 export function getFoodCategoryImage(category: string): any {
-  // If it's a URL (uploaded image from admin), return as URI object for expo-image
-  if (category && (category.startsWith('http://') || category.startsWith('https://'))) {
-    return { uri: category };
+  const value = category?.trim();
+
+  // Preserve absolute uploaded-image URLs.
+  if (value && (value.startsWith("http://") || value.startsWith("https://"))) {
+    return { uri: value };
   }
-  return FOOD_CATEGORY_IMAGES[category] || FOOD_CATEGORY_IMAGES['iraqi-rice'];
+
+  // Recipe assets are stored as production-relative `/manus-storage/...` paths.
+  // Native image components cannot resolve them without the API origin.
+  if (value?.startsWith("/")) {
+    const apiBaseUrl = getApiBaseUrl().replace(/\/$/, "");
+    return { uri: apiBaseUrl ? `${apiBaseUrl}${value}` : value };
+  }
+
+  return FOOD_CATEGORY_IMAGES[value] || FOOD_CATEGORY_IMAGES["iraqi-rice"];
 }

@@ -83,4 +83,13 @@ describe("recipe image API and app cache contract", () => {
     expect(hook).toContain("AsyncStorage.multiRemove(LEGACY_RECIPE_IMAGES_KEYS)");
     expect(hook).toContain("An empty map is meaningful");
   });
+
+  it("resolves bundled recipe storage paths against the production API origin", () => {
+    const root = resolve(import.meta.dirname, "..");
+    const resolver = readFileSync(resolve(root, "lib/food-category-images.ts"), "utf8");
+
+    expect(resolver).toContain('import { getApiBaseUrl } from "@/constants/oauth"');
+    expect(resolver).toContain('value?.startsWith("/")');
+    expect(resolver).toContain('`${apiBaseUrl}${value}`');
+  });
 });

@@ -51,4 +51,13 @@ describe("مجتمع الطبخ", () => {
     expect(server).toContain("احذف منشورك السابق أو انتظر قليلاً");
     expect(screen).toContain("النشر محدود مؤقتاً");
   });
+
+  it("يبقي مؤلف التعليق وزر الإرسال فوق لوحة المفاتيح وشريط النظام", () => {
+    const screen = read("app/(tabs)/community.tsx");
+    expect(screen).toContain("KeyboardAvoidingView");
+    expect(screen).toContain("useSafeAreaInsets");
+    expect(screen).toContain("paddingBottom: Math.max(insets.bottom, 12)");
+    expect(screen).toContain('keyboardShouldPersistTaps="handled"');
+    expect(screen).toContain('returnKeyType="send"');
+  });
 });
