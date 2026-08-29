@@ -29,6 +29,15 @@ describe("AdMob rewarded ads", () => {
     expect(admob).not.toContain("REWARDED_INTERSTITIAL");
   });
 
+  it("publishes the new company publisher in app-ads.txt", () => {
+    const appAds = readProjectFile("server", "public", "app-ads.txt").trim();
+
+    expect(appAds).toBe(
+      "google.com, pub-7512540809552904, DIRECT, f08c47fec0942fa0",
+    );
+    expect(appAds).not.toContain("pub-9147941153313979");
+  });
+
   it("serializes SDK initialization and retries transient interactive-load failures", () => {
     const admob = readProjectFile("lib", "admob.ts");
     const rootLayout = readProjectFile("app", "_layout.tsx");
