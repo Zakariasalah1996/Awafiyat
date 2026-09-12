@@ -3,35 +3,25 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   normalizeRewardedAdError,
-  type RewardedAdErrorInfo,
+  type RewardedAdFailureStage,
   type RewardedAdResult,
 } from "@/lib/admob-result";
 
 // ============================================================
 // نظام الإعلانات - Google AdMob Rewarded Ads
-// المستخدم يختار بنفسه مشاهدة إعلان مقابل فتح محتوى مقفل.
+// مخزون أحادي: إعلان واحد صالح لساعة، يعرض مرة واحدة فقط.
 // ============================================================
 
 const LIVE_REWARDED_AD_UNIT_ID = "ca-app-pub-9147941153313979/1707506280";
 const LOAD_TIMEOUT_MS = 20_000;
-const CONTROL_LOAD_TIMEOUT_MS = 12_000;
 const SHOW_TIMEOUT_MS = 180_000;
-const RETRY_DELAYS_MS = [5_000, 15_000, 45_000, 120_000];
-const INTERACTIVE_RETRY_DELAY_MS = 1_500;
-const MAX_INTERACTIVE_LOAD_ATTEMPTS = 2;
+const AD_CACHE_TTL_MS = 60 * 60 * 1000;
 
-// مفاتيح التخزين
 const UNLOCKED_RECIPES_KEY = "@unlocked_recipes";
 const UNLOCKED_WARNINGS_KEY = "@unlocked_warnings";
 
-// عدد الوصفات المجانية قبل القفل
 export const FREE_RECIPES_COUNT = 5;
-// عدد التحذيرات المجانية قبل القفل
 export const FREE_WARNINGS_COUNT = 3;
-
-// ============================================================
-// إدارة المحتوى المفتوح
-// ============================================================
 
 export async function getUnlockedRecipes(): Promise<string[]> {
   try {
@@ -84,36 +74,63 @@ export async function isWarningUnlocked(warningId: string, warningIndex: number)
 }
 
 // ============================================================
-// تحميل وعرض الإعلان
+// تهيئة SDK والمخزون الأحادي
 // ============================================================
 
-let rewardedAd: any = null;
-let isAdLoaded = false;
-let isAdLoading = false;
+type StagedAdError = Error & { adMobStage?: RewardedAdFailureStage; code?: string };
+
 let isAdMobInitialized = false;
 let adMobInitializationPromise: Promise<void> | null = null;
+let cachedRewardedAd: any = null;
+let cachedRewardedAdLoadedAt = 0;
+let cacheExpiryTimer: ReturnType<typeof setTimeout> | null = null;
 let activeLoadPromise: Promise<void> | null = null;
-let lastLoadError: RewardedAdErrorInfo | null = null;
-let retryAttempt = 0;
-let retryTimer: ReturnType<typeof setTimeout> | null = null;
-let controlResultCache: { healthy: boolean; expiresAt: number } | null = null;
+let activeShowPromise: Promise<RewardedAdResult> | null = null;
 
-function createTimeoutError(code: string, message: string): Error & { code: string } {
-  return Object.assign(new Error(message), { code });
+function createStagedError(
+  error: unknown,
+  stage: RewardedAdFailureStage,
+  fallbackCode = "admob/unknown",
+  fallbackMessage = "Unknown Google Mobile Ads error",
+): StagedAdError {
+  const errorRecord =
+    error && typeof error === "object" ? (error as Record<string, unknown>) : null;
+  const sourceMessage =
+    typeof errorRecord?.message === "string" ? errorRecord.message : fallbackMessage;
+  const staged: StagedAdError = error instanceof Error
+    ? (error as StagedAdError)
+    : (Object.assign(new Error(sourceMessage), errorRecord ?? {}, {
+        code:
+          typeof errorRecord?.code === "string" ? errorRecord.code : fallbackCode,
+      }) as StagedAdError);
+  staged.adMobStage = stage;
+  if (!staged.code) staged.code = fallbackCode;
+  return staged;
+}
+
+function createTimeoutError(code: string, message: string): StagedAdError {
+  return Object.assign(new Error(message), {
+    code,
+    adMobStage: "timeout" as const,
+  });
+}
+
+function getErrorStage(error: unknown, fallback: RewardedAdFailureStage): RewardedAdFailureStage {
+  if (error && typeof error === "object") {
+    const stage = (error as { adMobStage?: RewardedAdFailureStage }).adMobStage;
+    if (stage) return stage;
+  }
+  return fallback;
 }
 
 async function initializeAdMob(): Promise<void> {
   if (Platform.OS === "web" || isAdMobInitialized) return;
 
-  // لا تسمح لعدة شاشات أو محاولات تحميل بالبدء بتهيئة SDK متزامنة؛ يحدث ذلك
-  // أحياناً عند تشغيل التطبيق ببطء على أجهزة Android المتوسطة ويعيد SDK internal-error.
   if (!adMobInitializationPromise) {
     adMobInitializationPromise = (async () => {
       const admobModule = await import("react-native-google-mobile-ads");
       const { default: mobileAds, MaxAdContentRating } = admobModule;
 
-      // يجب ضبط إعداد الطلب قبل initialize وفق توثيق Google. كما أن إبقاء
-      // التهيئة هنا في Promise واحدة يمنع تزامنها مع Firebase Messaging عند الإقلاع.
       await mobileAds().setRequestConfiguration({
         maxAdContentRating: MaxAdContentRating.PG,
       });
@@ -125,26 +142,70 @@ async function initializeAdMob(): Promise<void> {
   try {
     await adMobInitializationPromise;
   } catch (error) {
-    // اسمح بمحاولة تهيئة جديدة لاحقاً إذا فشلت المحاولة الأولى مؤقتاً.
     adMobInitializationPromise = null;
-    throw error;
+    throw createStagedError(
+      error,
+      "initialization",
+      "admob/initialization-failed",
+      "Google Mobile Ads SDK initialization failed",
+    );
   }
 }
 
-/**
- * يتيح لتدفقات Android الأصلية الأخرى انتظار اكتمال AdMob حتى لا تبدأ
- * Firebase Messaging وGoogle Mobile Ads التهيئة في اللحظة نفسها.
- */
 export async function initializeRewardedAds(): Promise<void> {
   await initializeAdMob();
 }
 
-async function createAndLoadRewardedAd(adUnitId: string, timeoutMs: number): Promise<any> {
+function clearCachedRewardedAd(): void {
+  cachedRewardedAd = null;
+  cachedRewardedAdLoadedAt = 0;
+  if (cacheExpiryTimer) {
+    clearTimeout(cacheExpiryTimer);
+    cacheExpiryTimer = null;
+  }
+}
+
+function hasFreshCachedRewardedAd(): boolean {
+  if (!cachedRewardedAd || cachedRewardedAdLoadedAt <= 0) return false;
+  if (Date.now() - cachedRewardedAdLoadedAt >= AD_CACHE_TTL_MS) {
+    clearCachedRewardedAd();
+    return false;
+  }
+  return true;
+}
+
+function scheduleCacheExpiry(): void {
+  if (cacheExpiryTimer) clearTimeout(cacheExpiryTimer);
+  const expiresAt = cachedRewardedAdLoadedAt + AD_CACHE_TTL_MS;
+  const delay = Math.max(0, expiresAt - Date.now());
+
+  cacheExpiryTimer = setTimeout(() => {
+    clearCachedRewardedAd();
+    // Google يوصي بتجديد الإعلان المخزّن بعد ساعة. محاولة واحدة فقط بلا إعادة تلقائية.
+    void loadOneRewardedAdIntoCache().catch(() => {});
+  }, delay);
+}
+
+function cacheRewardedAd(ad: any): void {
+  clearCachedRewardedAd();
+  cachedRewardedAd = ad;
+  cachedRewardedAdLoadedAt = Date.now();
+  scheduleCacheExpiry();
+}
+
+function takeCachedRewardedAdForShow(): any | null {
+  if (!hasFreshCachedRewardedAd()) return null;
+  const ad = cachedRewardedAd;
+  // الإعلان كامل الشاشة يُعرض مرة واحدة فقط؛ صفّره قبل استدعاء show.
+  clearCachedRewardedAd();
+  return ad;
+}
+
+async function createAndLoadRewardedAd(adUnitId: string): Promise<any> {
   await initializeAdMob();
 
   const admobModule = await import("react-native-google-mobile-ads");
   const { RewardedAd, RewardedAdEventType, AdEventType } = admobModule;
-  // خصوصية Apple: استخدم طلبات غير مخصصة على iOS فقط؛ يبقى Android بإعداده الحالي.
   const requestNonPersonalizedAdsOnly = Platform.OS === "ios";
   const ad = RewardedAd.createForAdRequest(adUnitId, {
     requestNonPersonalizedAdsOnly,
@@ -170,160 +231,95 @@ async function createAndLoadRewardedAd(adUnitId: string, timeoutMs: number): Pro
 
     const timeout = setTimeout(() => {
       finish(() =>
-        reject(
-          createTimeoutError(
-            "admob/load-timeout",
-            "Rewarded ad load timed out",
-          ),
-        ),
+        reject(createTimeoutError("admob/load-timeout", "Rewarded ad load timed out")),
       );
-    }, timeoutMs);
+    }, LOAD_TIMEOUT_MS);
 
     unsubscribeLoaded = ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
       finish(() => resolve(ad));
     });
 
     unsubscribeError = ad.addAdEventListener(AdEventType.ERROR, (error: unknown) => {
-      finish(() => reject(error));
+      finish(() => reject(createStagedError(error, "load")));
     });
 
     try {
+      // موضع طلب الإعلان الحقيقي الوحيد في التطبيق.
       ad.load();
     } catch (error) {
-      finish(() => reject(error));
+      finish(() => reject(createStagedError(error, "load")));
     }
   });
 }
 
-function scheduleLiveAdRetry(): void {
-  if (Platform.OS === "web" || retryTimer) return;
-
-  const delay = RETRY_DELAYS_MS[Math.min(retryAttempt, RETRY_DELAYS_MS.length - 1)];
-  retryAttempt += 1;
-  retryTimer = setTimeout(() => {
-    retryTimer = null;
-    void loadRewardedAd().catch(() => {});
-  }, delay);
-}
-
-async function loadRewardedAd(): Promise<void> {
-  if (Platform.OS === "web" || isAdLoaded) return;
+async function loadOneRewardedAdIntoCache(): Promise<void> {
+  if (Platform.OS === "web" || hasFreshCachedRewardedAd()) return;
   if (activeLoadPromise) return activeLoadPromise;
 
-  activeLoadPromise = (async () => {
-    isAdLoading = true;
-    try {
-      const admobModule = await import("react-native-google-mobile-ads");
-      const { TestIds } = admobModule;
-      const adUnitId = __DEV__ ? TestIds.REWARDED : LIVE_REWARDED_AD_UNIT_ID;
-
-      rewardedAd = await createAndLoadRewardedAd(adUnitId, LOAD_TIMEOUT_MS);
-      isAdLoaded = true;
-      lastLoadError = null;
-      retryAttempt = 0;
-      if (retryTimer) {
-        clearTimeout(retryTimer);
-        retryTimer = null;
-      }
-    } catch (error) {
-      rewardedAd = null;
-      isAdLoaded = false;
-      lastLoadError = normalizeRewardedAdError(error);
-      console.warn("[AdMob] Rewarded ad unavailable", {
-        category: lastLoadError.category,
-        code: lastLoadError.code,
-      });
-      scheduleLiveAdRetry();
-      throw error;
-    } finally {
-      isAdLoading = false;
-      activeLoadPromise = null;
-    }
+  const loadPromise = (async () => {
+    const admobModule = await import("react-native-google-mobile-ads");
+    // إعلان Google التجريبي موجود في وضع التطوير فقط؛ الإنتاج لا يطلبه أبداً.
+    const adUnitId = __DEV__ ? admobModule.TestIds.REWARDED : LIVE_REWARDED_AD_UNIT_ID;
+    const ad = await createAndLoadRewardedAd(adUnitId);
+    cacheRewardedAd(ad);
   })();
 
-  return activeLoadPromise;
-}
-
-async function ensureRewardedAdReady(): Promise<void> {
-  let latestError: unknown = null;
-
-  for (let attempt = 1; attempt <= MAX_INTERACTIVE_LOAD_ATTEMPTS; attempt += 1) {
-    try {
-      await loadRewardedAd();
-      return;
-    } catch (error) {
-      latestError = error;
-      const normalized = normalizeRewardedAdError(error);
-      const isTransientSdkError =
-        normalized.category === "internal" ||
-        normalized.category === "network" ||
-        normalized.category === "unknown";
-
-      if (!isTransientSdkError || attempt === MAX_INTERACTIVE_LOAD_ATTEMPTS) {
-        throw error;
-      }
-
-      // أعطِ Google Mobile Ads وقتاً قصيراً بعد فشل عابر قبل عرض رسالة عدم التوفر.
-      await new Promise<void>((resolve) => setTimeout(resolve, INTERACTIVE_RETRY_DELAY_MS));
-    }
-  }
-
-  throw latestError ?? createTimeoutError("admob/not-ready", "Rewarded ad is not ready");
-}
-
-async function checkSdkWithGoogleTestInventory(): Promise<boolean> {
-  if (Platform.OS === "web") return true;
-  if (controlResultCache && controlResultCache.expiresAt > Date.now()) {
-    return controlResultCache.healthy;
-  }
-
+  activeLoadPromise = loadPromise;
   try {
-    const admobModule = await import("react-native-google-mobile-ads");
-    await createAndLoadRewardedAd(
-      admobModule.TestIds.REWARDED,
-      CONTROL_LOAD_TIMEOUT_MS,
-    );
-    controlResultCache = { healthy: true, expiresAt: Date.now() + 10 * 60_000 };
-    return true;
-  } catch {
-    controlResultCache = { healthy: false, expiresAt: Date.now() + 2 * 60_000 };
-    return false;
+    await loadPromise;
+  } finally {
+    if (activeLoadPromise === loadPromise) activeLoadPromise = null;
   }
 }
 
-async function unavailableResult(error: unknown): Promise<RewardedAdResult> {
-  const normalized = normalizeRewardedAdError(error);
-  const sdkHealthy = __DEV__ ? true : await checkSdkWithGoogleTestInventory();
-  return { status: "unavailable", error: normalized, sdkHealthy };
+function unavailableResult(
+  error: unknown,
+  fallbackStage: RewardedAdFailureStage,
+): RewardedAdResult {
+  const stage = getErrorStage(error, fallbackStage);
+  return {
+    status: "unavailable",
+    error: normalizeRewardedAdError(error, stage),
+    // لا نطلق طلب اختبار تلقائياً في الإنتاج؛ الإعلان التجريبي للتطوير فقط.
+    sdkHealthy: null,
+  };
 }
 
-function prepareNextRewardedAd(): void {
-  rewardedAd = null;
-  isAdLoaded = false;
-  setTimeout(() => {
-    void loadRewardedAd().catch(() => {});
-  }, 1_000);
+function refillSingleRewardedAd(): void {
+  void loadOneRewardedAdIntoCache().catch((error) => {
+    const diagnostic = normalizeRewardedAdError(error, getErrorStage(error, "load"));
+    console.warn("[AdMob] Single cache refill failed", {
+      stage: diagnostic.stage,
+      category: diagnostic.category,
+      code: diagnostic.code,
+      domain: diagnostic.domain,
+      responseId: diagnostic.responseId,
+    });
+  });
 }
 
-/**
- * يعرض Rewarded Ad اختيارياً ولا يفتح المحتوى إلا بعد حدث EARNED_REWARD.
- */
-export async function showRewardedAd(): Promise<RewardedAdResult> {
+async function runRewardedAdFlow(): Promise<RewardedAdResult> {
   if (Platform.OS === "web") return { status: "rewarded" };
 
   try {
-    if (!isAdLoaded) {
-      await ensureRewardedAdReady();
+    if (!hasFreshCachedRewardedAd()) {
+      // إذا كان المخزون فارغاً، تنشئ محاولة المستخدم طلباً واحداً فقط.
+      await loadOneRewardedAdIntoCache();
     }
 
-    if (!rewardedAd || !isAdLoaded) {
+    const ad = takeCachedRewardedAdForShow();
+    if (!ad) {
       return unavailableResult(
-        lastLoadError ??
-          createTimeoutError("admob/not-ready", "Rewarded ad is not ready"),
+        createStagedError(
+          null,
+          "load",
+          "admob/not-ready",
+          "Rewarded ad is not ready",
+        ),
+        "load",
       );
     }
 
-    const ad = rewardedAd;
     const admobModule = await import("react-native-google-mobile-ads");
     const { RewardedAdEventType, AdEventType } = admobModule;
 
@@ -335,29 +331,24 @@ export async function showRewardedAd(): Promise<RewardedAdResult> {
       const cleanup = () => {
         clearTimeout(showTimeout);
         for (const unsubscribe of unsubscribers) unsubscribe();
-        prepareNextRewardedAd();
       };
 
-      const finish = (result: RewardedAdResult) => {
+      const finish = (result: RewardedAdResult, refillAfterClose = false) => {
         if (settled) return;
         settled = true;
         cleanup();
         resolve(result);
+        if (refillAfterClose) refillSingleRewardedAd();
       };
 
-      const finishWithError = async (error: unknown) => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        resolve(await unavailableResult(error));
+      const finishWithError = (error: unknown, stage: RewardedAdFailureStage) => {
+        finish(unavailableResult(createStagedError(error, stage), stage));
       };
 
       const showTimeout = setTimeout(() => {
-        void finishWithError(
-          createTimeoutError(
-            "admob/show-timeout",
-            "Rewarded interstitial ad did not close in time",
-          ),
+        finishWithError(
+          createTimeoutError("admob/show-timeout", "Rewarded ad did not close in time"),
+          "timeout",
         );
       }, SHOW_TIMEOUT_MS);
 
@@ -366,37 +357,43 @@ export async function showRewardedAd(): Promise<RewardedAdResult> {
           rewarded = true;
         }),
         ad.addAdEventListener(AdEventType.CLOSED, () => {
-          finish(rewarded ? { status: "rewarded" } : { status: "dismissed" });
+          finish(rewarded ? { status: "rewarded" } : { status: "dismissed" }, true);
         }),
         ad.addAdEventListener(AdEventType.ERROR, (error: unknown) => {
-          void finishWithError(error);
+          finishWithError(error, "show");
         }),
       );
 
       try {
         void Promise.resolve(ad.show()).catch((error) => {
-          void finishWithError(error);
+          finishWithError(error, "show");
         });
       } catch (error) {
-        void finishWithError(error);
+        finishWithError(error, "show");
       }
     });
   } catch (error) {
-    return unavailableResult(error);
+    return unavailableResult(error, getErrorStage(error, "load"));
   }
 }
 
-// تحميل الإعلان مسبقاً عند بدء التطبيق
-export function preloadRewardedAd(): void {
-  if (Platform.OS !== "web" && !isAdLoading) {
-    void initializeRewardedAds()
-      .then(
-        () =>
-          new Promise<void>((resolve) => {
-            setTimeout(resolve, 500);
-          }),
-      )
-      .then(() => loadRewardedAd())
-      .catch(() => {});
+/**
+ * يعرض Rewarded Ad اختيارياً. الاستدعاءات المتزامنة تشترك في تدفق واحد،
+ * ولا يُفتح المحتوى إلا بعد حدث EARNED_REWARD.
+ */
+export async function showRewardedAd(): Promise<RewardedAdResult> {
+  if (activeShowPromise) return activeShowPromise;
+
+  const showPromise = runRewardedAdFlow();
+  activeShowPromise = showPromise;
+  try {
+    return await showPromise;
+  } finally {
+    if (activeShowPromise === showPromise) activeShowPromise = null;
   }
+}
+
+/** يملأ خانة المخزون بإعلان واحد فقط عند بدء التطبيق. */
+export function preloadRewardedAd(): void {
+  if (Platform.OS !== "web") refillSingleRewardedAd();
 }

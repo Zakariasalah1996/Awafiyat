@@ -13,6 +13,7 @@
     "lint": "expo lint",
     "format": "prettier --write .",
     "test": "vitest run",
+    "postinstall": "node scripts/patch-google-mobile-ads.mjs",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "android": "expo start --android",
     "ios": "expo start --ios",

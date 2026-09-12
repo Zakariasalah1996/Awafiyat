@@ -39,7 +39,7 @@ describe("AdMob rewarded ads", () => {
     expect(appAds).not.toContain("pub-7512540809552904");
   });
 
-  it("serializes SDK initialization and retries transient interactive-load failures", () => {
+  it("serializes SDK initialization and uses a single one-hour rewarded cache", () => {
     const admob = readProjectFile("lib", "admob.ts");
     const rootLayout = readProjectFile("app", "_layout.tsx");
 
@@ -48,14 +48,40 @@ describe("AdMob rewarded ads", () => {
     expect(admob).toContain("maxAdContentRating: MaxAdContentRating.PG");
     expect(admob).toContain("await adMobInitializationPromise;");
     expect(admob).toContain("export async function initializeRewardedAds(): Promise<void>");
-    expect(admob).toContain("async function ensureRewardedAdReady(): Promise<void>");
-    expect(admob).toContain("const MAX_INTERACTIVE_LOAD_ATTEMPTS = 2;");
-    expect(admob).toContain("normalized.category === \"internal\"");
-    expect(admob).toContain("await ensureRewardedAdReady();");
+    expect(admob).toContain("const AD_CACHE_TTL_MS = 60 * 60 * 1000;");
+    expect(admob).toContain("let cachedRewardedAd: any = null;");
+    expect(admob).toContain("function takeCachedRewardedAdForShow(): any | null");
+    expect(admob).toContain("clearCachedRewardedAd();");
+    expect(admob).toContain("let activeLoadPromise: Promise<void> | null = null;");
+    expect(admob).toContain("let activeShowPromise: Promise<RewardedAdResult> | null = null;");
     expect(rootLayout).toContain(".then(({ initializeRewardedAds }) => initializeRewardedAds())");
     expect(rootLayout.indexOf("initializeRewardedAds")).toBeLessThan(
       rootLayout.indexOf("await requestNotificationPermissions()"),
     );
+  });
+
+  it("makes one real load call and never probes Google test inventory in production", () => {
+    const admob = readProjectFile("lib", "admob.ts");
+
+    expect(admob.match(/ad\.load\(\)/g)).toHaveLength(1);
+    expect(admob).toContain("__DEV__ ? admobModule.TestIds.REWARDED : LIVE_REWARDED_AD_UNIT_ID");
+    expect(admob).not.toContain("checkSdkWithGoogleTestInventory");
+    expect(admob).not.toContain("CONTROL_LOAD_TIMEOUT_MS");
+    expect(admob).not.toContain("RETRY_DELAYS_MS");
+    expect(admob).not.toContain("MAX_INTERACTIVE_LOAD_ATTEMPTS");
+    expect(admob).not.toContain("scheduleLiveAdRetry");
+  });
+
+  it("persists Google LoadAdError diagnostics through the Android postinstall bridge patch", () => {
+    const packageJson = readProjectFile("package.json");
+    const patchScript = readProjectFile("scripts", "patch-google-mobile-ads.mjs");
+
+    expect(packageJson).toContain('"postinstall": "node scripts/patch-google-mobile-ads.mjs"');
+    expect(patchScript).toContain('error.putString("domain", loadAdError.domain)');
+    expect(patchScript).toContain('error.putInt("nativeCode", loadAdError.code)');
+    expect(patchScript).toContain('error.putString("responseId", loadAdError.responseInfo?.responseId)');
+    expect(patchScript).toContain('error.putString("responseInfo", loadAdError.responseInfo?.toString())');
+    expect(patchScript).toContain('error.putString("cause", loadAdError.cause?.toString())');
   });
 
   it("uses the RN 0.81-compatible stable SDK and disables concurrent native optimizations", () => {
@@ -81,14 +107,26 @@ describe("AdMob rewarded ads", () => {
   });
 
   it("classifies no-fill without treating it as a configuration failure", () => {
-    const result = normalizeRewardedAdError({
-      code: "googleMobileAds/error-code-no-fill",
-      message: "No ad returned because of lack of ad inventory",
-    });
+    const result = normalizeRewardedAdError(
+      {
+        code: "googleMobileAds/error-code-no-fill",
+        message: "No ad returned because of lack of ad inventory",
+        userInfo: {
+          domain: "com.google.android.gms.ads",
+          nativeCode: 3,
+          responseId: "response-123",
+        },
+      },
+      "load",
+    );
 
     expect(result.category).toBe("no-fill");
+    expect(result.stage).toBe("load");
+    expect(result.domain).toBe("com.google.android.gms.ads");
+    expect(result.nativeErrorCode).toBe("3");
+    expect(result.responseId).toBe("response-123");
     expect(result.retryable).toBe(true);
-    expect(formatRewardedAdErrorForUser(result, true)).toContain("الاتصال بخدمة الإعلانات سليم");
+    expect(formatRewardedAdErrorForUser(result, null)).toContain("مرحلة الفشل: تحميل الإعلان");
     expect(formatRewardedAdErrorForUser(result, true)).toContain(result.code);
   });
 
