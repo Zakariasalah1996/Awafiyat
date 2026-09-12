@@ -21,8 +21,9 @@ describe("AdMob rewarded ads", () => {
     );
     expect(appConfig).not.toContain("ca-app-pub-9147941153313979~2249498498");
     expect(admob).toContain(
-      'const LIVE_REWARDED_AD_UNIT_ID = "ca-app-pub-9147941153313979/4919884210"',
+      'const LIVE_REWARDED_AD_UNIT_ID = "ca-app-pub-9147941153313979/1707506280"',
     );
+    expect(admob).not.toContain("ca-app-pub-9147941153313979/4919884210");
     expect(admob).toContain("RewardedAd.createForAdRequest");
     expect(admob).toContain("TestIds.REWARDED");
     expect(admob).not.toContain("RewardedInterstitialAd");

@@ -12,7 +12,7 @@ import {
 // المستخدم يختار بنفسه مشاهدة إعلان مقابل فتح محتوى مقفل.
 // ============================================================
 
-const LIVE_REWARDED_AD_UNIT_ID = "ca-app-pub-9147941153313979/4919884210";
+const LIVE_REWARDED_AD_UNIT_ID = "ca-app-pub-9147941153313979/1707506280";
 const LOAD_TIMEOUT_MS = 20_000;
 const CONTROL_LOAD_TIMEOUT_MS = 12_000;
 const SHOW_TIMEOUT_MS = 180_000;
