@@ -76,6 +76,20 @@ describe("مجتمع الطبخ", () => {
     expect(database).toContain("updatedAt: new Date()");
   });
 
+  it("يسمح لصاحب التعليق بحذفه ويمنع حذف تعليق مستخدم آخر", () => {
+    const screen = read("app/(tabs)/community.tsx");
+    const client = read("lib/community-api.ts");
+    const server = read("server/_core/index.ts");
+    const database = read("server/db.ts");
+    expect(screen).toContain("confirmDeleteComment");
+    expect(screen).toContain("حذف التعليق");
+    expect(client).toContain("deleteCommunityComment");
+    expect(server).toContain("app.delete('/api/community/comments/:commentId'");
+    expect(server).toContain("لا يمكنك حذف تعليق مستخدم آخر");
+    expect(database).toContain("deleteCommunityComment");
+    expect(database).toContain("eq(communityComments.authorId, authorId)");
+  });
+
   it("يدعم إعجاب التعليقات مرة واحدة لكل جهاز ويعيد العدد والحالة", () => {
     const screen = read("app/(tabs)/community.tsx");
     const client = read("lib/community-api.ts");

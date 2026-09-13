@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useUser } from "@/lib/user-context";
-import { CommunityComment, CommunityPost, deleteCommunityPost, getCommunityCurrentUserId, getCommunityPosts, getPostComments, publishCommunityPost, publishPostComment, reportCommunityComment, reportCommunityPost, toggleCommentLike, togglePostLike, updateCommunityComment, updateCommunityPost } from "@/lib/community-api";
+import { CommunityComment, CommunityPost, deleteCommunityComment, deleteCommunityPost, getCommunityCurrentUserId, getCommunityPosts, getPostComments, publishCommunityPost, publishPostComment, reportCommunityComment, reportCommunityPost, toggleCommentLike, togglePostLike, updateCommunityComment, updateCommunityPost } from "@/lib/community-api";
 import { markCommunityAsRead } from "@/lib/community-unread";
 
 type CommunityActionSheet =
@@ -61,6 +61,7 @@ export default function CommunityScreen() {
   const [reportReason, setReportReason] = useState("");
   const [reporting, setReporting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<CommunityPost | null>(null);
+  const [deleteCommentTarget, setDeleteCommentTarget] = useState<CommunityComment | null>(null);
 
   const loadPosts = useCallback(async () => {
     try {
@@ -228,6 +229,23 @@ export default function CommunityScreen() {
     }
   };
 
+  const confirmDeleteComment = async () => {
+    if (!deleteCommentTarget) return;
+    try {
+      await deleteCommunityComment(deleteCommentTarget.id);
+      setComments((current) => current.filter((comment) => comment.id !== deleteCommentTarget.id));
+      if (activePost) {
+        const nextCommentCount = Math.max(0, activePost.commentCount - 1);
+        setActivePost({ ...activePost, commentCount: nextCommentCount });
+        setPosts((current) => current.map((post) => post.id === activePost.id ? { ...post, commentCount: Math.max(0, post.commentCount - 1) } : post));
+      }
+      setDeleteCommentTarget(null);
+      setActionSheet(null);
+    } catch (error) {
+      Alert.alert("تعذر حذف التعليق", error instanceof Error ? error.message : "حاول مرة أخرى");
+    }
+  };
+
   const closeComments = () => {
     setActivePost(null);
     setEditingCommentId(null);
@@ -365,7 +383,10 @@ export default function CommunityScreen() {
                 <TouchableOpacity onPress={() => { setDeleteTarget(actionSheet.post); setActionSheet(null); }} style={[styles.sheetOption, { borderColor: colors.border }]}><MaterialIcons name="delete-outline" size={22} color={colors.error} /><View style={{ flex: 1 }}><Text style={[styles.sheetOptionTitle, { color: colors.error }]}>حذف المنشور</Text><Text style={[styles.sheetOptionText, { color: colors.muted }]}>إخفاؤه من المجتمع نهائياً</Text></View><MaterialIcons name="chevron-left" size={22} color={colors.muted} /></TouchableOpacity>
               </>
             ) : actionSheet?.kind === "comment" && actionSheet.comment.authorId === currentUserId ? (
-              <TouchableOpacity onPress={() => startEditingComment(actionSheet.comment)} style={[styles.sheetOption, { borderColor: colors.border }]}><MaterialIcons name="edit" size={22} color={colors.primary} /><View style={{ flex: 1 }}><Text style={[styles.sheetOptionTitle, { color: colors.foreground }]}>تعديل التعليق</Text><Text style={[styles.sheetOptionText, { color: colors.muted }]}>صحح النص ثم احفظه</Text></View><MaterialIcons name="chevron-left" size={22} color={colors.muted} /></TouchableOpacity>
+              <>
+                <TouchableOpacity onPress={() => startEditingComment(actionSheet.comment)} style={[styles.sheetOption, { borderColor: colors.border }]}><MaterialIcons name="edit" size={22} color={colors.primary} /><View style={{ flex: 1 }}><Text style={[styles.sheetOptionTitle, { color: colors.foreground }]}>تعديل التعليق</Text><Text style={[styles.sheetOptionText, { color: colors.muted }]}>صحح النص ثم احفظه</Text></View><MaterialIcons name="chevron-left" size={22} color={colors.muted} /></TouchableOpacity>
+                <TouchableOpacity onPress={() => { setDeleteCommentTarget(actionSheet.comment); setActionSheet(null); }} style={[styles.sheetOption, { borderColor: colors.border }]}><MaterialIcons name="delete-outline" size={22} color={colors.error} /><View style={{ flex: 1 }}><Text style={[styles.sheetOptionTitle, { color: colors.error }]}>حذف التعليق</Text><Text style={[styles.sheetOptionText, { color: colors.muted }]}>إخفاؤه من المجتمع نهائياً</Text></View><MaterialIcons name="chevron-left" size={22} color={colors.muted} /></TouchableOpacity>
+              </>
             ) : (
               <TouchableOpacity onPress={() => actionSheet && openReport({ kind: actionSheet.kind, id: actionSheet.kind === "post" ? actionSheet.post.id : actionSheet.comment.id })} style={[styles.sheetOption, { borderColor: colors.border }]}><MaterialIcons name="flag" size={22} color={colors.error} /><View style={{ flex: 1 }}><Text style={[styles.sheetOptionTitle, { color: colors.foreground }]}>إرسال بلاغ</Text><Text style={[styles.sheetOptionText, { color: colors.muted }]}>سيصل إلى فريق المراجعة</Text></View><MaterialIcons name="chevron-left" size={22} color={colors.muted} /></TouchableOpacity>
             )}
@@ -399,6 +420,18 @@ export default function CommunityScreen() {
             <Text style={[styles.confirmText, { color: colors.muted }]}>سيختفي المنشور من المجتمع، ويمكنك النشر فوراً بعد حذفه.</Text>
             <TouchableOpacity onPress={confirmDeletePost} style={[styles.confirmDelete, { backgroundColor: colors.error }]}><Text style={{ color: "#fff", fontWeight: "800" }}>حذف المنشور</Text></TouchableOpacity>
             <TouchableOpacity onPress={() => setDeleteTarget(null)} style={[styles.confirmCancel, { borderColor: colors.border }]}><Text style={{ color: colors.foreground, fontWeight: "800" }}>إلغاء</Text></TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={!!deleteCommentTarget} transparent animationType="fade" statusBarTranslucent navigationBarTranslucent onRequestClose={() => setDeleteCommentTarget(null)}>
+        <View style={styles.centerBackdrop}>
+          <View style={[styles.confirmCard, { backgroundColor: colors.background }]}>
+            <View style={[styles.confirmIcon, { backgroundColor: `${colors.error}12` }]}><MaterialIcons name="delete-outline" size={30} color={colors.error} /></View>
+            <Text style={[styles.confirmTitle, { color: colors.foreground }]}>حذف التعليق؟</Text>
+            <Text style={[styles.confirmText, { color: colors.muted }]}>سيختفي تعليقك من المجتمع ولا يمكن استعادته.</Text>
+            <TouchableOpacity onPress={confirmDeleteComment} style={[styles.confirmDelete, { backgroundColor: colors.error }]}><Text style={{ color: "#fff", fontWeight: "800" }}>حذف التعليق</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => setDeleteCommentTarget(null)} style={[styles.confirmCancel, { borderColor: colors.border }]}><Text style={{ color: colors.foreground, fontWeight: "800" }}>إلغاء</Text></TouchableOpacity>
           </View>
         </View>
       </Modal>

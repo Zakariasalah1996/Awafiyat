@@ -275,8 +275,8 @@ export default function ProfileScreen() {
             </View>
           </View>
           <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 14 }} />
-          {renderProfileField("الاسم الظاهر", "name", "مثال: زكريا")}
-          {renderProfileField("رقم الهاتف (اختياري)", "phone", "+964 ...", "phone-pad")}
+          {renderProfileField("الاسم الظاهر", "name", "مثال: الطباخة زهراء")}
+          {renderProfileField("رقم الهاتف (اختياري)", "phone", "", "phone-pad")}
           {renderProfileField("العمر (اختياري)", "age", "مثال: 30", "numeric")}
           <View style={{ marginBottom: 4 }}>
             <Text style={{ color: colors.muted, fontSize: 13, fontWeight: "600", textAlign: "right", marginBottom: 8 }}>الجنس (اختياري)</Text>

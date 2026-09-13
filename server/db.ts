@@ -784,6 +784,16 @@ export async function updateCommunityComment(commentId: number, authorId: number
   return result[0];
 }
 
+export async function deleteCommunityComment(commentId: number, authorId: number) {
+  if (!_db) throw new Error("Database not available");
+  const result = await _db
+    .update(communityComments)
+    .set({ isHidden: true, updatedAt: new Date() })
+    .where(and(eq(communityComments.id, commentId), eq(communityComments.authorId, authorId), eq(communityComments.isHidden, false)))
+    .returning({ id: communityComments.id });
+  return result.length > 0;
+}
+
 export async function toggleCommunityCommentLike(commentId: number, deviceId: string) {
   if (!_db) throw new Error("Database not available");
   const removed = await _db

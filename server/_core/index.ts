@@ -9,7 +9,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema, createCommunityComment, createCommunityPostWithHourlyLimit, createCommunityReport, deleteCommunityPost, getCommunityAuthor, getCommunityComment, getCommunityComments, getCommunityFeed, getCommunityPost, getCommunityPostCooldownSeconds, toggleCommunityCommentLike, toggleCommunityLike, updateCommunityComment, updateCommunityPost } from "../db";
+import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema, createCommunityComment, createCommunityPostWithHourlyLimit, createCommunityReport, deleteCommunityComment, deleteCommunityPost, getCommunityAuthor, getCommunityComment, getCommunityComments, getCommunityFeed, getCommunityPost, getCommunityPostCooldownSeconds, toggleCommunityCommentLike, toggleCommunityLike, updateCommunityComment, updateCommunityPost } from "../db";
 import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
@@ -1016,6 +1016,19 @@ async function startServer() {
     } catch (error: any) {
       console.error('[Community] Update comment failed:', error);
       res.status(500).json({ error: 'تعذر تعديل التعليق' });
+    }
+  });
+
+  app.delete('/api/community/comments/:commentId', async (req, res) => {
+    try {
+      const commentId = Number(req.params.commentId);
+      const userId = req.body?.userId;
+      if (!Number.isInteger(commentId) || !Number.isInteger(userId)) return res.status(400).json({ error: 'بيانات حذف التعليق غير مكتملة' });
+      if (!(await deleteCommunityComment(commentId, userId))) return res.status(403).json({ error: 'لا يمكنك حذف تعليق مستخدم آخر' });
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('[Community] Delete comment failed:', error);
+      res.status(500).json({ error: 'تعذر حذف التعليق' });
     }
   });
 

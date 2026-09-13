@@ -31,3 +31,12 @@ describe("نموذج معلومات حسابي", () => {
     expect(context).toContain("await saveProfile(updated)");
   });
 });
+
+describe("أمثلة نموذج حسابي", () => {
+  it("يستخدم مثال اسم عام ويترك حقل الهاتف بلا مثال", () => {
+    const screen = read("app/(tabs)/profile.tsx");
+    expect(screen).toContain('"مثال: الطباخة زهراء"');
+    expect(screen).toContain('"رقم الهاتف (اختياري)", "phone", "", "phone-pad"');
+    expect(screen).not.toContain("مثال: زكريا");
+  });
+});

@@ -92,6 +92,14 @@ export async function updateCommunityComment(commentId: number, body: string): P
   return result.comment;
 }
 
+export async function deleteCommunityComment(commentId: number): Promise<void> {
+  const userId = await requireCommunityUserId();
+  await api(`/api/community/comments/${commentId}`, {
+    method: "DELETE",
+    body: JSON.stringify({ userId }),
+  });
+}
+
 export async function toggleCommentLike(commentId: number): Promise<boolean> {
   const deviceId = await getDeviceId();
   const result = await api<{ liked: boolean }>(`/api/community/comments/${commentId}/like`, {
