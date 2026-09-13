@@ -60,4 +60,56 @@ describe("مجتمع الطبخ", () => {
     expect(screen).toContain('keyboardShouldPersistTaps="handled"');
     expect(screen).toContain('returnKeyType="send"');
   });
+
+  it("يسمح لصاحب التعليق بتعديله ويحمي الصلاحية في الخادم", () => {
+    const screen = read("app/(tabs)/community.tsx");
+    const client = read("lib/community-api.ts");
+    const server = read("server/_core/index.ts");
+    const database = read("server/db.ts");
+    expect(screen).toContain("startEditingComment");
+    expect(screen).toContain("saveCommentEdit");
+    expect(screen).toContain("تم التعديل");
+    expect(client).toContain("updateCommunityComment");
+    expect(server).toContain("app.patch('/api/community/comments/:commentId'");
+    expect(server).toContain("لا يمكنك تعديل تعليق مستخدم آخر");
+    expect(database).toContain("eq(communityComments.authorId, authorId)");
+    expect(database).toContain("updatedAt: new Date()");
+  });
+
+  it("يدعم إعجاب التعليقات مرة واحدة لكل جهاز ويعيد العدد والحالة", () => {
+    const screen = read("app/(tabs)/community.tsx");
+    const client = read("lib/community-api.ts");
+    const server = read("server/_core/index.ts");
+    const database = read("server/db.ts");
+    const schema = read("drizzle/schema.ts");
+    expect(screen).toContain("toggleCommentLike");
+    expect(screen).toContain("likedByCurrentUser");
+    expect(client).toContain("/api/community/comments/${commentId}/like");
+    expect(server).toContain("app.post('/api/community/comments/:commentId/like'");
+    expect(database).toContain("communityCommentLikes");
+    expect(schema).toContain("community_comment_likes_comment_device_unique");
+    expect(schema).toContain("table.commentId, table.deviceId");
+  });
+
+  it("يستخدم نوافذ مخصصة مرتبة لإدارة المنشور والإبلاغ", () => {
+    const screen = read("app/(tabs)/community.tsx");
+    expect(screen).toContain("REPORT_REASONS");
+    expect(screen).toContain("إدارة المنشور");
+    expect(screen).toContain("الإبلاغ عن");
+    expect(screen).toContain("sheetBackdrop");
+    expect(screen).toContain("reportSubmit");
+    expect(screen).toContain("سيصل البلاغ إلى لوحة الإدارة للمراجعة");
+  });
+
+  it("يرسل إشعار التعليق لصاحب المنشور فقط ولا يعطل حفظ التعليق", () => {
+    const server = read("server/_core/index.ts");
+    const pushStore = read("server/push-store.ts");
+    const notification = read("server/community-notifications.ts");
+    expect(server).toContain("notifyCommunityPostOwner");
+    expect(server).toContain("void notifyCommunityPostOwner");
+    expect(server).toContain("failed without affecting the comment");
+    expect(pushStore).toContain("getPostgresPushTokensByUserId");
+    expect(notification).toContain("input.postAuthorId === input.commenterId");
+    expect(notification).toContain('type: "community_comment"');
+  });
 });

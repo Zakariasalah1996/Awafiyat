@@ -31,6 +31,8 @@ interface SendExpoPushOptions {
   tokens: string[];
   title: string;
   body: string;
+  data?: Record<string, string>;
+  channelId?: string;
   deactivate?: (token: string) => Promise<void>;
   fetchImpl?: typeof fetch;
   receiptDelayMs?: number;
@@ -71,6 +73,8 @@ export async function sendExpoPushNotifications({
   tokens,
   title,
   body,
+  data = { type: "admin_notification" },
+  channelId = "admin_updates",
   deactivate,
   fetchImpl = fetch,
   receiptDelayMs = 1_500,
@@ -92,8 +96,8 @@ export async function sendExpoPushNotifications({
     title,
     body,
     priority: "default",
-    channelId: "admin_updates",
-    data: { type: "admin_notification" },
+    channelId,
+    data,
   }));
 
   const sendResponse = await fetchImpl(EXPO_PUSH_SEND_URL, {

@@ -79,10 +79,12 @@ describe("FCM and Expo push notification setup", () => {
   it("creates a normal-priority Android channel for admin updates", () => {
     const notifications = readProjectFile("lib", "notifications.ts");
     const server = readProjectFile("server", "_core", "index.ts");
+    const communityNotification = readProjectFile("server", "community-notifications.ts");
 
     expect(notifications).toContain('setNotificationChannelAsync("admin_updates"');
     expect(notifications).toContain("Notifications.AndroidImportance.DEFAULT");
     expect(server).toContain("priority: 'normal'");
-    expect(server).toContain("channel_id: 'admin_updates'");
+    expect(server).toContain("channel_id: options.channelId ?? 'admin_updates'");
+    expect(communityNotification).toContain('type: "community_comment"');
   });
 });

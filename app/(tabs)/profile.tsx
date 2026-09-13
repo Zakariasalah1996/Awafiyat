@@ -27,6 +27,7 @@ import {
 } from "@/lib/notifications";
 import { useAlarm } from "@/lib/alarm-context";
 import type { VoiceGender } from "@/lib/notifications";
+import { normalizeBasicProfile, sanitizeProfileField, validateBasicProfile } from "@/lib/profile-validation";
 
 const HEALTH_LABELS: Record<HealthCondition, string> = {
   diabetes: "السكري",
@@ -50,8 +51,13 @@ export default function ProfileScreen() {
   const { profile, updateProfile, resetProfile: clearProfile } = useUser();
   const { isPremium } = useSubscriptionContext();
   const { colorScheme, setColorScheme } = useThemeContext();
-  const [editingField, setEditingField] = useState<string | null>(null);
-  const [tempValue, setTempValue] = useState("");
+  const [profileDraft, setProfileDraft] = useState({
+    name: profile.name,
+    phone: profile.phone,
+    age: profile.age,
+    gender: profile.gender,
+  });
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -65,6 +71,16 @@ export default function ProfileScreen() {
     // Check if push token is registered
     checkPushTokenStatus();
   }, []);
+
+  useEffect(() => {
+    if (hasUnsavedChanges) return;
+    setProfileDraft({
+      name: profile.name,
+      phone: profile.phone,
+      age: profile.age,
+      gender: profile.gender,
+    });
+  }, [hasUnsavedChanges, profile.age, profile.gender, profile.name, profile.phone]);
 
   const checkPushTokenStatus = async () => {
     try {
@@ -100,38 +116,26 @@ export default function ProfileScreen() {
     }
   };
 
-  const startEdit = (field: string, currentValue: string) => {
-    // Save the previous field's value before switching to a new field
-    if (editingField && tempValue) {
-      updateProfile({ [editingField]: tempValue }).then(() => {
-        setHasUnsavedChanges(true);
-      });
-    }
-    setEditingField(field);
-    setTempValue(currentValue);
-  };
-
-  const saveEdit = async (field: string) => {
-    if (tempValue) {
-      await updateProfile({ [field]: tempValue });
-      setHasUnsavedChanges(true);
-    }
-    setEditingField(null);
-  };
-
   const handleSaveAll = async () => {
-    // إعادة حفظ جميع البيانات الحالية في AsyncStorage
-    await updateProfile({
-      name: profile.name,
-      phone: profile.phone,
-      age: profile.age,
-      gender: profile.gender,
-      country: profile.country,
-      healthCondition: profile.healthCondition,
-    });
-    setHasUnsavedChanges(false);
-    setSaveMessage("تم حفظ جميع المعلومات بنجاح");
-    setTimeout(() => setSaveMessage(""), 3000);
+    const normalized = normalizeBasicProfile(profileDraft);
+    const validationError = validateBasicProfile(normalized);
+    if (validationError) return Alert.alert("تحقق من المعلومات", validationError);
+    try {
+      setIsSavingProfile(true);
+      await updateProfile(normalized);
+      setProfileDraft(normalized);
+      setHasUnsavedChanges(false);
+      setSaveMessage("تم حفظ معلوماتك");
+      setTimeout(() => setSaveMessage(""), 2500);
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const updateProfileDraft = (updates: Partial<typeof profileDraft>) => {
+    setProfileDraft((current) => ({ ...current, ...updates }));
+    setHasUnsavedChanges(true);
+    setSaveMessage("");
   };
 
   const handleLogout = () => {
@@ -207,40 +211,34 @@ export default function ProfileScreen() {
     await cancelMealReminder("dinner");
   };
 
-  const renderEditableField = (
+  const renderProfileField = (
     label: string,
-    field: string,
-    value: string,
+    field: "name" | "phone" | "age",
     placeholder: string,
     keyboardType: "default" | "phone-pad" | "numeric" = "default"
   ) => (
-    <View className="flex-row items-center py-4 border-b" style={{ borderBottomColor: colors.border }}>
-      <Text className="text-base text-foreground flex-1 font-medium">{label}</Text>
-      {editingField === field ? (
-        <View className="flex-row items-center gap-2">
-          <TextInput
-            value={tempValue}
-            onChangeText={setTempValue}
-            className="text-base px-3 py-1 rounded-lg min-w-[120px] text-left"
-            style={{ backgroundColor: colors.background, color: colors.foreground, borderWidth: 1, borderColor: colors.primary }}
-            keyboardType={keyboardType}
-            autoFocus
-            returnKeyType="done"
-            onSubmitEditing={() => saveEdit(field)}
-          />
-          <TouchableOpacity onPress={() => saveEdit(field)}>
-            <MaterialIcons name="check" size={22} color={colors.primary} />
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <TouchableOpacity
-          onPress={() => startEdit(field, value)}
-          className="flex-row items-center gap-1"
-        >
-          <Text className="text-base text-muted">{value || placeholder}</Text>
-          <MaterialIcons name="edit" size={16} color={colors.muted} />
-        </TouchableOpacity>
-      )}
+    <View style={{ marginBottom: 14 }}>
+      <Text style={{ color: colors.muted, fontSize: 13, fontWeight: "600", textAlign: "right", marginBottom: 7 }}>{label}</Text>
+      <TextInput
+        value={profileDraft[field]}
+        onChangeText={(value) => updateProfileDraft({ [field]: sanitizeProfileField(field, value) })}
+        placeholder={placeholder}
+        placeholderTextColor={colors.muted}
+        keyboardType={keyboardType}
+        returnKeyType="done"
+        textAlign="right"
+        style={{
+          minHeight: 50,
+          paddingHorizontal: 14,
+          paddingVertical: 11,
+          borderRadius: 14,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.background,
+          color: colors.foreground,
+          fontSize: 16,
+        }}
+      />
     </View>
   );
 
@@ -266,43 +264,70 @@ export default function ProfileScreen() {
         </View>
 
         {/* Personal Info */}
-        <View className="mx-5 bg-surface rounded-2xl px-5 py-2 mb-4 border" style={{ borderColor: colors.border }}>
-          <View className="flex-row items-center justify-between py-3">
-            <Text className="text-base font-bold text-foreground">المعلومات الشخصية</Text>
+        <View className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border" style={{ borderColor: colors.border }}>
+          <View className="flex-row-reverse items-center mb-2">
+            <View style={{ width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: `${colors.primary}18`, marginLeft: 10 }}>
+              <MaterialIcons name="person-outline" size={21} color={colors.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text className="text-base font-bold text-foreground" style={{ textAlign: "right" }}>معلوماتك الأساسية</Text>
+              <Text className="text-xs text-muted" style={{ textAlign: "right", marginTop: 2 }}>الاسم يظهر في مجتمع الطبخ، ورقم الهاتف لا يظهر للآخرين.</Text>
+            </View>
           </View>
-          {renderEditableField("الاسم", "name", profile.name, "أدخل اسمك")}
-          {renderEditableField("رقم الهاتف", "phone", profile.phone, "أدخل رقمك", "phone-pad")}
-          {renderEditableField("العمر", "age", profile.age, "أدخل عمرك", "numeric")}
-          <View className="flex-row items-center py-4">
-            <Text className="text-base text-foreground flex-1 font-medium">الجنس</Text>
-            <View className="flex-row gap-2">
+          <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 14 }} />
+          {renderProfileField("الاسم الظاهر", "name", "مثال: زكريا")}
+          {renderProfileField("رقم الهاتف (اختياري)", "phone", "+964 ...", "phone-pad")}
+          {renderProfileField("العمر (اختياري)", "age", "مثال: 30", "numeric")}
+          <View style={{ marginBottom: 4 }}>
+            <Text style={{ color: colors.muted, fontSize: 13, fontWeight: "600", textAlign: "right", marginBottom: 8 }}>الجنس (اختياري)</Text>
+            <View className="flex-row-reverse gap-2">
               <TouchableOpacity
-                onPress={() => { updateProfile({ gender: "male" }); setHasUnsavedChanges(true); }}
-                className="px-4 py-2 rounded-lg"
+                onPress={() => updateProfileDraft({ gender: "male" })}
+                className="flex-1 px-4 py-3 rounded-xl items-center"
                 style={{
-                  backgroundColor: profile.gender === "male" ? `${colors.primary}20` : colors.background,
+                  backgroundColor: profileDraft.gender === "male" ? `${colors.primary}20` : colors.background,
                   borderWidth: 1,
-                  borderColor: profile.gender === "male" ? colors.primary : colors.border,
+                  borderColor: profileDraft.gender === "male" ? colors.primary : colors.border,
                 }}
               >
-                <Text style={{ color: profile.gender === "male" ? colors.primary : colors.muted }}>ذكر</Text>
+                <Text style={{ color: profileDraft.gender === "male" ? colors.primary : colors.muted, fontWeight: "700" }}>ذكر</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => { updateProfile({ gender: "female" }); setHasUnsavedChanges(true); }}
-                className="px-4 py-2 rounded-lg"
+                onPress={() => updateProfileDraft({ gender: "female" })}
+                className="flex-1 px-4 py-3 rounded-xl items-center"
                 style={{
-                  backgroundColor: profile.gender === "female" ? `${colors.primary}20` : colors.background,
+                  backgroundColor: profileDraft.gender === "female" ? `${colors.primary}20` : colors.background,
                   borderWidth: 1,
-                  borderColor: profile.gender === "female" ? colors.primary : colors.border,
+                  borderColor: profileDraft.gender === "female" ? colors.primary : colors.border,
                 }}
               >
-                <Text style={{ color: profile.gender === "female" ? colors.primary : colors.muted }}>أنثى</Text>
+                <Text style={{ color: profileDraft.gender === "female" ? colors.primary : colors.muted, fontWeight: "700" }}>أنثى</Text>
               </TouchableOpacity>
             </View>
           </View>
+          <TouchableOpacity
+            onPress={handleSaveAll}
+            disabled={!hasUnsavedChanges || isSavingProfile}
+            style={{
+              marginTop: 16,
+              paddingVertical: 14,
+              borderRadius: 14,
+              backgroundColor: hasUnsavedChanges ? colors.primary : colors.border,
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "row",
+              gap: 8,
+              opacity: isSavingProfile ? 0.65 : 1,
+            }}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name={hasUnsavedChanges ? "save" : "check-circle"} size={21} color="#fff" />
+            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "800" }}>
+              {isSavingProfile ? "جارٍ الحفظ..." : hasUnsavedChanges ? "حفظ التغييرات" : "المعلومات محفوظة"}
+            </Text>
+          </TouchableOpacity>
+          {!!saveMessage && <Text style={{ color: colors.success, fontSize: 13, fontWeight: "700", textAlign: "center", marginTop: 10 }}>{saveMessage}</Text>}
         </View>
-
-
 
         {/* Health Condition */}
         <View className="mx-5 bg-surface rounded-2xl px-5 py-4 mb-4 border" style={{ borderColor: colors.border }}>
@@ -313,63 +338,10 @@ export default function ProfileScreen() {
           <Text className="text-base text-muted mb-3">
             الحالة الحالية: {HEALTH_LABELS[profile.healthCondition]}
           </Text>
-          <TouchableOpacity
-            onPress={() => router.push("/onboarding" as any)}
-            className="py-2"
-          >
+          <TouchableOpacity onPress={() => router.push("/onboarding" as any)} className="py-2">
             <Text className="text-sm font-medium" style={{ color: colors.primary }}>تعديل الحالة الصحية</Text>
           </TouchableOpacity>
         </View>
-
-        {/* زر حفظ المعلومات الشخصية */}
-        <TouchableOpacity
-          onPress={handleSaveAll}
-          style={{
-            marginHorizontal: 20,
-            marginBottom: 16,
-            paddingVertical: 16,
-            borderRadius: 16,
-            backgroundColor: colors.primary,
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "row",
-            gap: 8,
-            shadowColor: colors.primary,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 6,
-          }}
-          activeOpacity={0.8}
-        >
-          <MaterialIcons name="save" size={22} color="#fff" />
-          <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>
-            حفظ المعلومات
-          </Text>
-        </TouchableOpacity>
-
-        {/* رسالة تأكيد الحفظ */}
-        {saveMessage !== "" && (
-          <View
-            style={{
-              marginHorizontal: 20,
-              marginBottom: 16,
-              paddingVertical: 12,
-              paddingHorizontal: 16,
-              borderRadius: 12,
-              backgroundColor: `${colors.success}20`,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-            }}
-          >
-            <MaterialIcons name="check-circle" size={20} color={colors.success} />
-            <Text style={{ color: colors.success, fontSize: 15, fontWeight: "600" }}>
-              {saveMessage}
-            </Text>
-          </View>
-        )}
 
 
 

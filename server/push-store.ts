@@ -179,6 +179,20 @@ export async function getPostgresPushTokensByCountry(country: string): Promise<S
   return result.rows;
 }
 
+export async function getPostgresPushTokensByUserId(userId: number): Promise<StoredPushToken[]> {
+  await ensurePushStoreSchema();
+  const result = await getPool().query<StoredPushToken>(
+    `
+      SELECT id, "userId", token, platform, country, "deviceId", "isActive", "createdAt", "updatedAt"
+      FROM ${PUSH_TOKEN_TABLE}
+      WHERE "isActive" = TRUE AND "userId" = $1
+      ORDER BY "updatedAt" DESC
+    `,
+    [userId],
+  );
+  return result.rows;
+}
+
 export async function deactivatePostgresPushToken(token: string): Promise<void> {
   await ensurePushStoreSchema();
   await getPool().query(

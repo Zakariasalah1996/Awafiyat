@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type HealthCondition = "diabetes" | "hypertension" | "obesity" | "cholesterol" | "none";
@@ -94,6 +94,7 @@ const STORAGE_KEY = "@awafiyat_user_profile";
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
+  const profileRef = useRef<UserProfile>(defaultProfile);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -105,7 +106,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        setProfile({ ...defaultProfile, ...parsed });
+        const restored = { ...defaultProfile, ...parsed };
+        profileRef.current = restored;
+        setProfile(restored);
       }
     } catch (e) {
       console.error("Failed to load profile:", e);
@@ -123,14 +126,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateProfile = useCallback(async (updates: Partial<UserProfile>) => {
-    setProfile((prev) => {
-      const updated = { ...prev, ...updates };
-      saveProfile(updated);
-      return updated;
-    });
+    const updated = { ...profileRef.current, ...updates };
+    profileRef.current = updated;
+    setProfile(updated);
+    await saveProfile(updated);
   }, []);
 
   const resetProfile = useCallback(async () => {
+    profileRef.current = defaultProfile;
     setProfile(defaultProfile);
     await AsyncStorage.removeItem(STORAGE_KEY);
   }, []);

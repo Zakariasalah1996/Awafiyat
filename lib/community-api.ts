@@ -20,6 +20,9 @@ export type CommunityComment = {
   authorName: string;
   body: string;
   createdAt: string;
+  updatedAt: string;
+  likeCount: number;
+  likedByCurrentUser: boolean;
 };
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
@@ -66,7 +69,8 @@ export async function togglePostLike(postId: number): Promise<boolean> {
 }
 
 export async function getPostComments(postId: number): Promise<CommunityComment[]> {
-  const result = await api<{ comments: CommunityComment[] }>(`/api/community/posts/${postId}/comments`);
+  const deviceId = await getDeviceId();
+  const result = await api<{ comments: CommunityComment[] }>(`/api/community/posts/${postId}/comments?deviceId=${encodeURIComponent(deviceId)}`);
   return result.comments;
 }
 
@@ -77,6 +81,24 @@ export async function publishPostComment(postId: number, body: string): Promise<
     body: JSON.stringify({ userId, body }),
   });
   return result.comment;
+}
+
+export async function updateCommunityComment(commentId: number, body: string): Promise<CommunityComment> {
+  const userId = await requireCommunityUserId();
+  const result = await api<{ comment: CommunityComment }>(`/api/community/comments/${commentId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ userId, body }),
+  });
+  return result.comment;
+}
+
+export async function toggleCommentLike(commentId: number): Promise<boolean> {
+  const deviceId = await getDeviceId();
+  const result = await api<{ liked: boolean }>(`/api/community/comments/${commentId}/like`, {
+    method: "POST",
+    body: JSON.stringify({ deviceId }),
+  });
+  return result.liked;
 }
 
 export async function getCommunityCurrentUserId() { return requireCommunityUserId(); }

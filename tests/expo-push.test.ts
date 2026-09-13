@@ -121,4 +121,27 @@ describe("Expo push tickets and receipts", () => {
       pendingReceiptCount: 1,
     });
   });
+
+  it("passes the community notification type and Android channel to Expo", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ data: [{ status: "ok", id: "ticket-community" }] }))
+      .mockResolvedValueOnce(jsonResponse({ data: { "ticket-community": { status: "ok" } } }));
+
+    await sendExpoPushNotifications({
+      tokens: [token],
+      title: "تعليق جديد على منشورك",
+      body: "أحمد: وصفة جميلة",
+      data: { type: "community_comment", postId: "44" },
+      channelId: "admin_updates",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      receiptDelayMs: 0,
+    });
+
+    const requestBody = JSON.parse(String(fetchImpl.mock.calls[0]?.[1]?.body));
+    expect(requestBody[0]).toMatchObject({
+      channelId: "admin_updates",
+      data: { type: "community_comment", postId: "44" },
+    });
+  });
 });

@@ -14,7 +14,20 @@ vi.mock("pg", () => ({
       if (text.includes('COUNT(*)::text AS "activeCount"')) {
         return { rows: [{ activeCount: "1" }], rowCount: 1 };
       }
+      if (text.includes('"isActive" = TRUE AND "userId" = $1')) {
+        return {
+          rows: [{ id: "1", userId: "17", token: "ExponentPushToken[test-device]", platform: "android", country: "iraq", deviceId: "device-123", isActive: true }],
+          rowCount: 1,
+        };
+      }
       return { rows: [], rowCount: 1 };
+    }
+
+    async connect() {
+      return {
+        query: (text: string, params?: unknown[]) => this.query(text, params),
+        release: vi.fn(),
+      };
     }
   },
 }));
@@ -43,6 +56,10 @@ describe("PostgreSQL push store", () => {
       "iraq",
       "device-123",
     ]);
+
+    const userTokens = await store.getPostgresPushTokensByUserId(17);
+    expect(userTokens).toHaveLength(1);
+    expect(state.queries.some(({ text, params }) => text.includes('"userId" = $1') && params?.[0] === 17)).toBe(true);
 
     const notificationId = await store.createPostgresAdminNotification({
       title: "اختبار",

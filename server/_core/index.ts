@@ -9,7 +9,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema, createCommunityComment, createCommunityPostWithHourlyLimit, createCommunityReport, deleteCommunityPost, getCommunityAuthor, getCommunityComments, getCommunityFeed, getCommunityPost, getCommunityPostCooldownSeconds, toggleCommunityLike, updateCommunityPost } from "../db";
+import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema, createCommunityComment, createCommunityPostWithHourlyLimit, createCommunityReport, deleteCommunityPost, getCommunityAuthor, getCommunityComment, getCommunityComments, getCommunityFeed, getCommunityPost, getCommunityPostCooldownSeconds, toggleCommunityCommentLike, toggleCommunityLike, updateCommunityComment, updateCommunityPost } from "../db";
 import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
@@ -17,6 +17,7 @@ import * as fs from "fs";
 import * as pushStore from "../push-store";
 import { sendExpoPushNotifications } from "../expo-push";
 import * as recipeImageStore from "../recipe-image-store";
+import { buildCommunityCommentNotification } from "../community-notifications";
 
 // ===== FCM V1 API Direct Send =====
 let _fcmAccessToken: string | null = null;
@@ -62,7 +63,12 @@ async function getFCMAccessToken(): Promise<string | null> {
   }
 }
 
-async function sendPushViaFCM(tokens: string[], title: string, body: string, dbDeactivate?: (token: string) => Promise<void>) {
+interface PushDeliveryOptions {
+  data?: Record<string, string>;
+  channelId?: string;
+}
+
+async function sendPushViaFCM(tokens: string[], title: string, body: string, dbDeactivate?: (token: string) => Promise<void>, options: PushDeliveryOptions = {}) {
   const expoTokenPattern = /^(Exponent|Expo)PushToken\[/;
   const expoTokens = tokens.filter((token) => expoTokenPattern.test(token));
   // Keep supporting legacy Android tokens registered by older app builds
@@ -78,6 +84,8 @@ async function sendPushViaFCM(tokens: string[], title: string, body: string, dbD
         tokens: expoTokens,
         title,
         body,
+        data: options.data,
+        channelId: options.channelId,
         deactivate: dbDeactivate,
       });
       successCount += expoResult.successCount;
@@ -115,10 +123,10 @@ async function sendPushViaFCM(tokens: string[], title: string, body: string, dbD
                     priority: 'normal',
                     notification: {
                       sound: 'default',
-                      channel_id: 'admin_updates',
+                      channel_id: options.channelId ?? 'admin_updates',
                     },
                   },
-                  data: { type: 'admin_notification' },
+                  data: options.data ?? { type: 'admin_notification' },
                 },
               }),
             }
@@ -147,6 +155,38 @@ async function sendPushViaFCM(tokens: string[], title: string, body: string, dbD
 
   console.log(`[Push] Total: ${tokens.length} (${expoTokens.length} Expo + ${fcmTokens.length} FCM), success: ${successCount}, fail: ${failCount}`);
   return { successCount, failCount, sentCount: tokens.length };
+}
+
+async function notifyCommunityPostOwner(input: {
+  postId: number;
+  postAuthorId: number;
+  commenterId: number;
+  commenterName: string;
+  commentBody: string;
+}): Promise<void> {
+  const notification = buildCommunityCommentNotification(input);
+  if (!notification || !pushStore.isPostgresPushStoreEnabled()) return;
+
+  const rows = await pushStore.getPostgresPushTokensByUserId(input.postAuthorId);
+  const tokens = [...new Set(rows.map((row) => row.token).filter(Boolean))];
+  if (tokens.length === 0) return;
+
+  const result = await sendPushViaFCM(
+    tokens,
+    notification.title,
+    notification.body,
+    pushStore.deactivatePostgresPushToken,
+    {
+      channelId: 'admin_updates',
+      data: notification.data,
+    },
+  );
+  console.info('[Community] Comment notification result', {
+    postId: input.postId,
+    recipientCount: tokens.length,
+    successCount: result.successCount,
+    failCount: result.failCount,
+  });
 }
 
 type CommunityImageModeration = {
@@ -923,8 +963,9 @@ async function startServer() {
   app.get('/api/community/posts/:postId/comments', async (req, res) => {
     try {
       const postId = Number(req.params.postId);
+      const deviceId = typeof req.query.deviceId === 'string' ? req.query.deviceId.trim() : '';
       if (!Number.isInteger(postId)) return res.status(400).json({ error: 'معرف المنشور غير صالح' });
-      const comments = await getCommunityComments(postId);
+      const comments = await getCommunityComments(postId, deviceId);
       res.json({ comments });
     } catch (error: any) {
       console.error('[Community] Comments failed:', error);
@@ -944,10 +985,53 @@ async function startServer() {
       if (!post || post.isHidden) return res.status(404).json({ error: 'المنشور غير موجود' });
       if (!author || !authorName || authorName === 'مستخدم عافيات') return res.status(400).json({ error: 'أضف اسماً ظاهراً ثابتاً من صفحة حسابي قبل التعليق' });
       const comment = await createCommunityComment({ postId, authorId: author.id, authorName, body });
-      res.status(201).json({ comment });
+      res.status(201).json({ comment: { ...comment, likeCount: 0, likedByCurrentUser: false } });
+      void notifyCommunityPostOwner({
+        postId,
+        postAuthorId: post.authorId,
+        commenterId: author.id,
+        commenterName: authorName,
+        commentBody: body,
+      }).catch((notificationError) => {
+        console.error('[Community] Comment notification failed without affecting the comment', notificationError);
+      });
     } catch (error: any) {
       console.error('[Community] Create comment failed:', error);
       res.status(500).json({ error: 'تعذر إضافة التعليق' });
+    }
+  });
+
+  app.patch('/api/community/comments/:commentId', async (req, res) => {
+    try {
+      const commentId = Number(req.params.commentId);
+      const userId = req.body?.userId;
+      const body = typeof req.body?.body === 'string' ? req.body.body.trim() : '';
+      if (!Number.isInteger(commentId) || !Number.isInteger(userId) || !body) return res.status(400).json({ error: 'بيانات تعديل التعليق غير مكتملة' });
+      if (body.length > 500) return res.status(400).json({ error: 'التعليق طويل جداً' });
+      const current = await getCommunityComment(commentId);
+      if (!current || current.isHidden) return res.status(404).json({ error: 'التعليق غير موجود' });
+      if (current.authorId !== userId) return res.status(403).json({ error: 'لا يمكنك تعديل تعليق مستخدم آخر' });
+      const comment = await updateCommunityComment(commentId, userId, body);
+      res.json({ comment });
+    } catch (error: any) {
+      console.error('[Community] Update comment failed:', error);
+      res.status(500).json({ error: 'تعذر تعديل التعليق' });
+    }
+  });
+
+  app.post('/api/community/comments/:commentId/like', async (req, res) => {
+    try {
+      const commentId = Number(req.params.commentId);
+      const deviceId = typeof req.body?.deviceId === 'string' ? req.body.deviceId.trim() : '';
+      if (!Number.isInteger(commentId) || !deviceId) return res.status(400).json({ error: 'بيانات الإعجاب غير مكتملة' });
+      const comment = await getCommunityComment(commentId);
+      if (!comment || comment.isHidden) return res.status(404).json({ error: 'التعليق غير موجود' });
+      const liked = await toggleCommunityCommentLike(commentId, deviceId);
+      res.json({ liked });
+    } catch (error: any) {
+      if (error?.code === '23505') return res.json({ liked: true });
+      console.error('[Community] Comment like failed:', error);
+      res.status(500).json({ error: 'تعذر تسجيل الإعجاب بالتعليق' });
     }
   });
 

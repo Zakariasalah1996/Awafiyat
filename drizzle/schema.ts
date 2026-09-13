@@ -211,6 +211,7 @@ export const communityComments = pgTable("community_comments", {
   body: text("body").notNull(),
   isHidden: boolean("isHidden").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
 export type CommunityComment = typeof communityComments.$inferSelect;
@@ -232,6 +233,23 @@ export const communityLikes = pgTable(
 
 export type CommunityLike = typeof communityLikes.$inferSelect;
 export type InsertCommunityLike = typeof communityLikes.$inferInsert;
+
+/** One stable device may like a comment once. */
+export const communityCommentLikes = pgTable(
+  "community_comment_likes",
+  {
+    id: serial("id").primaryKey(),
+    commentId: integer("commentId").notNull(),
+    deviceId: varchar("deviceId", { length: 128 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    commentDeviceUnique: uniqueIndex("community_comment_likes_comment_device_unique").on(table.commentId, table.deviceId),
+  }),
+);
+
+export type CommunityCommentLike = typeof communityCommentLikes.$inferSelect;
+export type InsertCommunityCommentLike = typeof communityCommentLikes.$inferInsert;
 
 export const communityReports = pgTable("community_reports", {
   id: serial("id").primaryKey(),

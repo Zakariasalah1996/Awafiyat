@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { getUnlockedWarnings, showRewardedAd, unlockWarning } from "@/lib/admob";
 import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
 
@@ -166,12 +166,9 @@ export default function RecipeDetailScreen() {
 
   const conditionLabel = getConditionLabel(profile.healthCondition);
   const hasWarnings = healthWarnings.length > 0;
-  const healthierRecipeAlternatives = useMemo(
-    () => hasWarnings
-      ? getHealthierRecipeAlternatives(recipe, RECIPES, profile.healthCondition)
-      : [],
-    [hasWarnings, recipe, profile.healthCondition],
-  );
+  const healthierRecipeAlternatives = hasWarnings
+    ? getHealthierRecipeAlternatives(recipe, RECIPES, profile.healthCondition)
+    : [];
 
   return (
     <ScreenContainer edges={["top", "bottom", "left", "right"]}>
