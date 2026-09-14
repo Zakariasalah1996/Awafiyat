@@ -43,7 +43,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: isEasIosBuild ? "1.0.61" : "1.0.90",
+  version: isEasIosBuild ? "1.0.61" : "1.0.91",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -67,7 +67,8 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    versionCode: 10069,
+    // A new Google Play artifact makes the explicit AD_ID declaration effective.
+    versionCode: 10070,
     googleServicesFile: "./google-services.json",
     permissions: [
       "POST_NOTIFICATIONS",
