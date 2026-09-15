@@ -43,7 +43,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: isEasIosBuild ? "1.0.61" : "1.0.91",
+  version: isEasIosBuild ? "1.0.61" : "1.0.92",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -68,12 +68,19 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
     // A new Google Play artifact makes the explicit AD_ID declaration effective.
-    versionCode: 10070,
+    versionCode: 10071,
     googleServicesFile: "./google-services.json",
     permissions: [
       "POST_NOTIFICATIONS",
       "VIBRATE",
       "com.google.android.gms.permission.AD_ID",
+    ],
+    // The app uses system notification sounds only. Remove foreground-service
+    // declarations inherited from optional audio/alarm libraries.
+    blockedPermissions: [
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+      "android.permission.FOREGROUND_SERVICE_MICROPHONE",
     ],
     intentFilters: [
       {
@@ -105,14 +112,6 @@ const config: ExpoConfig = {
       {
         "sounds": ["./assets/notification_female.mp3", "./assets/notification_male.mp3", "./assets/medication_reminder.mp3", "./assets/water_reminder.mp3"]
       }
-    ],
-    [
-      "expo-audio",
-      {
-        microphonePermission: false,
-        recordAudioAndroid: false,
-        enableBackgroundRecording: false,
-      },
     ],
     [
       "expo-image-picker",

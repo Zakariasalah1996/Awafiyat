@@ -106,6 +106,21 @@ describe("AdMob rewarded ads", () => {
     expect(appConfig).not.toContain("USE_FULL_SCREEN_INTENT");
   });
 
+  it("blocks unused Android foreground audio-service permissions", () => {
+    const appConfig = readProjectFile("app.config.ts");
+    const packageJson = readProjectFile("package.json");
+    const alarmContext = readProjectFile("lib", "alarm-context.tsx");
+
+    expect(appConfig).toContain("blockedPermissions");
+    expect(appConfig).toContain('"android.permission.FOREGROUND_SERVICE"');
+    expect(appConfig).toContain('"android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"');
+    expect(appConfig).toContain('"android.permission.FOREGROUND_SERVICE_MICROPHONE"');
+    expect(packageJson).not.toContain('"expo-audio"');
+    expect(packageJson).not.toContain('"expo-alarm-module"');
+    expect(alarmContext).toContain("Notifications.scheduleNotificationAsync");
+    expect(alarmContext).not.toContain("expo-audio");
+  });
+
   it("classifies no-fill without treating it as a configuration failure", () => {
     const result = normalizeRewardedAdError(
       {

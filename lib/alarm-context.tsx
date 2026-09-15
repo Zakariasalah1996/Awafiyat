@@ -1,19 +1,18 @@
-import React, { createContext, useContext, useCallback, useRef, useEffect, useState } from "react";
+import React, { createContext, useContext, useCallback, useEffect, useRef, useState } from "react";
 import { Platform } from "react-native";
-import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
+import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { VoiceGender, getVoiceGender, setVoiceGender, refreshAllAlarms } from "@/lib/notifications";
 
-// ============================================================
-// AlarmContext الجديد - بدون expo-alarm-module
-// يدير فقط: إعدادات الصوت (رجل/امرأة) + معاينة الصوت
-// الإشعارات الفعلية تُدار عبر lib/notifications.ts
-// ============================================================
+// التذكيرات تعمل عبر إشعارات النظام المجدولة. لا نستخدم خدمة صوت أمامية أو تشغيلًا مستمرًا بالخلفية.
+const PREVIEW_SOUNDS: Record<VoiceGender, string> = {
+  female: "notification_female.mp3",
+  male: "notification_male.mp3",
+};
 
-// أصوات المعاينة
-const PREVIEW_SOUNDS = {
-  female: require("@/assets/notification_female.mp3"),
-  male: require("@/assets/notification_male.mp3"),
+const PREVIEW_CHANNELS: Record<VoiceGender, string> = {
+  female: "meal_reminder_female",
+  male: "meal_reminder_male",
 };
 
 export interface AlarmSettings {
@@ -31,7 +30,7 @@ const STORAGE_KEY = "@alarm_settings_v2";
 interface AlarmContextType {
   settings: AlarmSettings;
   updateSettings: (newSettings: Partial<AlarmSettings>) => void;
-  previewVoice: (gender: VoiceGender) => void;
+  previewVoice: (gender: VoiceGender) => Promise<void>;
   stopPreview: () => void;
 }
 
@@ -41,18 +40,6 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<AlarmSettings>(DEFAULT_SETTINGS);
   const settingsRef = useRef<AlarmSettings>(DEFAULT_SETTINGS);
 
-  // مشغلات المعاينة
-  const femalePlayer = useAudioPlayer(PREVIEW_SOUNDS.female);
-  const malePlayer = useAudioPlayer(PREVIEW_SOUNDS.male);
-
-  const players: Record<VoiceGender, ReturnType<typeof useAudioPlayer>> = {
-    female: femalePlayer,
-    male: malePlayer,
-  };
-
-  const previewActiveRef = useRef<VoiceGender | null>(null);
-
-  // تحميل الإعدادات من AsyncStorage
   useEffect(() => {
     (async () => {
       try {
@@ -61,103 +48,68 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
           const saved = JSON.parse(data) as AlarmSettings;
           setSettings(saved);
           settingsRef.current = saved;
-        } else {
-          // محاولة قراءة الإعداد القديم
-          const oldGender = await getVoiceGender();
-          if (oldGender) {
-            const s = { ...DEFAULT_SETTINGS, voiceGender: oldGender };
-            setSettings(s);
-            settingsRef.current = s;
-          }
+          return;
+        }
+
+        const oldGender = await getVoiceGender();
+        if (oldGender) {
+          const restored = { ...DEFAULT_SETTINGS, voiceGender: oldGender };
+          setSettings(restored);
+          settingsRef.current = restored;
         }
       } catch {}
-
-      if (Platform.OS !== "web") {
-        setAudioModeAsync({ playsInSilentMode: true });
-      }
     })();
-
-    return () => {
-      Object.values(players).forEach((p) => {
-        try { p.release(); } catch {}
-      });
-    };
   }, []);
 
-  // حفظ الإعدادات
-  const saveSettings = useCallback(async (s: AlarmSettings) => {
+  const saveSettings = useCallback(async (nextSettings: AlarmSettings) => {
     try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-      // مزامنة voiceGender مع notifications.ts
-      await setVoiceGender(s.voiceGender);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(nextSettings));
+      await setVoiceGender(nextSettings.voiceGender);
     } catch {}
   }, []);
 
-  // تحديث الإعدادات
   const updateSettings = useCallback(
     (newSettings: Partial<AlarmSettings>) => {
-      setSettings((prev) => {
-        const updated = { ...prev, ...newSettings };
+      setSettings((previous) => {
+        const updated = { ...previous, ...newSettings };
         settingsRef.current = updated;
         saveSettings(updated);
 
-        // إذا تغير الصوت، إعادة جدولة الإشعارات بالصوت الجديد
-        if (newSettings.voiceGender && newSettings.voiceGender !== prev.voiceGender) {
-          refreshAllAlarms().catch((e) =>
-            console.warn("[AlarmContext] Failed to refresh alarms after voice change:", e)
+        if (newSettings.voiceGender && newSettings.voiceGender !== previous.voiceGender) {
+          refreshAllAlarms().catch((error) =>
+            console.warn("[AlarmContext] Failed to refresh reminders after voice change:", error),
           );
         }
 
         return updated;
       });
     },
-    [saveSettings]
+    [saveSettings],
   );
 
-  // معاينة صوت
-  const previewVoice = useCallback(
-    (gender: VoiceGender) => {
-      // إيقاف أي معاينة سابقة
-      if (previewActiveRef.current) {
-        try {
-          players[previewActiveRef.current].pause();
-          players[previewActiveRef.current].seekTo(0);
-        } catch {}
-      }
+  // يعرض إشعارًا محليًا قصيرًا للتجربة، باستخدام قناة تذكير النظام نفسها.
+  // لا يبدأ تشغيلًا صوتيًا مستمرًا ولا خدمة Android أمامية.
+  const previewVoice = useCallback(async (gender: VoiceGender) => {
+    if (Platform.OS === "web") return;
 
-      const player = players[gender];
-      try {
-        player.loop = false;
-        player.volume = 1.0;
-        player.seekTo(0);
-        player.play();
-        previewActiveRef.current = gender;
-
-        // إيقاف بعد 8 ثوانٍ (مدة الملف تقريباً)
-        setTimeout(() => {
-          try {
-            player.pause();
-            player.seekTo(0);
-          } catch {}
-          previewActiveRef.current = null;
-        }, 9000);
-      } catch (e) {
-        console.warn("[AlarmContext] Preview failed:", e);
-      }
-    },
-    [players]
-  );
-
-  // إيقاف المعاينة
-  const stopPreview = useCallback(() => {
-    if (previewActiveRef.current) {
-      try {
-        players[previewActiveRef.current].pause();
-        players[previewActiveRef.current].seekTo(0);
-      } catch {}
-      previewActiveRef.current = null;
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "معاينة صوت التذكير",
+          body: "هذا نموذج لصوت التذكير.",
+          sound: PREVIEW_SOUNDS[gender],
+          data: { type: "reminder_voice_preview" },
+          ...(Platform.OS === "android" && { channelId: PREVIEW_CHANNELS[gender] }),
+        },
+        trigger: null,
+      });
+    } catch (error) {
+      console.warn("[AlarmContext] Notification sound preview failed:", error);
     }
-  }, [players]);
+  }, []);
+
+  // بقيت الدالة لتوافق الواجهة؛ الإشعار القصير يديره نظام Android ولا توجد جلسة تشغيل مستمرة لإيقافها.
+  const stopPreview = useCallback(() => {}, []);
 
   return (
     <AlarmContext.Provider
@@ -174,7 +126,7 @@ export function AlarmProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useAlarm() {
-  const ctx = useContext(AlarmContext);
-  if (!ctx) throw new Error("useAlarm must be used within AlarmProvider");
-  return ctx;
+  const context = useContext(AlarmContext);
+  if (!context) throw new Error("useAlarm must be used within AlarmProvider");
+  return context;
 }
