@@ -144,4 +144,90 @@ describe("Expo push tickets and receipts", () => {
       data: { type: "community_comment", postId: "44" },
     });
   });
+
+  it("splits bulk sends into Expo-compliant batches of at most 100 messages", async () => {
+    let nextTicket = 1;
+    const fetchImpl = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const requestUrl = String(url);
+      if (requestUrl.includes("/push/send")) {
+        const messages = JSON.parse(String(init?.body)) as Array<{ to: string }>;
+        return jsonResponse({
+          data: messages.map(() => ({ status: "ok", id: `ticket-${nextTicket++}` })),
+        });
+      }
+
+      const { ids } = JSON.parse(String(init?.body)) as { ids: string[] };
+      return jsonResponse({
+        data: Object.fromEntries(ids.map((id) => [id, { status: "ok" }])),
+      });
+    });
+    const tokens = Array.from(
+      { length: 205 },
+      (_, index) => `ExponentPushToken[bulk-device-${index}]`,
+    );
+
+    const result = await sendExpoPushNotifications({
+      tokens,
+      title: "عنوان جماعي",
+      body: "نص جماعي",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      receiptDelayMs: 0,
+    });
+
+    const sendBodies = fetchImpl.mock.calls
+      .filter(([url]) => String(url).includes("/push/send"))
+      .map(([, init]) => JSON.parse(String(init?.body)) as unknown[]);
+
+    expect(sendBodies.map((batch) => batch.length)).toEqual([100, 100, 5]);
+    expect(result).toMatchObject({
+      successCount: 205,
+      failCount: 0,
+      acceptedCount: 205,
+      deliveredCount: 205,
+    });
+  });
+
+  it("continues with later batches when one Expo request fails", async () => {
+    let sendBatch = 0;
+    const fetchImpl = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const requestUrl = String(url);
+      if (requestUrl.includes("/push/send")) {
+        sendBatch += 1;
+        const messages = JSON.parse(String(init?.body)) as Array<{ to: string }>;
+        if (sendBatch === 1) {
+          return jsonResponse(
+            { errors: [{ code: "PUSH_TOO_MANY_REQUESTS", message: "temporary failure" }] },
+            503,
+          );
+        }
+        return jsonResponse({
+          data: messages.map((_, index) => ({ status: "ok", id: `recovered-${index}` })),
+        });
+      }
+
+      const { ids } = JSON.parse(String(init?.body)) as { ids: string[] };
+      return jsonResponse({
+        data: Object.fromEntries(ids.map((id) => [id, { status: "ok" }])),
+      });
+    });
+    const tokens = Array.from(
+      { length: 150 },
+      (_, index) => `ExponentPushToken[partial-device-${index}]`,
+    );
+
+    const result = await sendExpoPushNotifications({
+      tokens,
+      title: "عنوان جماعي",
+      body: "نص جماعي",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      receiptDelayMs: 0,
+    });
+
+    expect(result).toMatchObject({
+      successCount: 50,
+      failCount: 100,
+      acceptedCount: 50,
+      deliveredCount: 50,
+    });
+  });
 });

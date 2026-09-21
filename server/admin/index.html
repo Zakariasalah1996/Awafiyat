@@ -1065,10 +1065,17 @@ async function sendNotification() {
   const result = await api('notifications/send', 'POST', { title, body, targetType: selectedTarget, targetValue: selectedTargetValue || undefined });
   btn.disabled = false; btn.innerHTML = '📤 إرسال الإشعار';
   if (result && result.success) {
-    showToast(`تم إرسال الإشعار بنجاح (${result.sentCount||0} مستلم)`);
+    const sent = Number(result.sentCount || 0);
+    const succeeded = Number(result.successCount || 0);
+    const failed = Number(result.failCount || 0);
+    const message = failed > 0
+      ? `اكتمل الإرسال: نجح ${succeeded} من ${sent}، وفشل ${failed}`
+      : `تم إرسال الإشعار بنجاح إلى ${succeeded} جهاز`;
+    showToast(message, failed > 0 ? 'info' : 'success');
     document.getElementById('notifTitle').value = '';
     document.getElementById('notifBody').value = '';
     loadNotifications();
+    loadPushTokenStats();
   } else {
     showToast('فشل إرسال الإشعار', 'error');
   }

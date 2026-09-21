@@ -51,6 +51,16 @@ describe("FCM and Expo push notification setup", () => {
     expect(server).toContain("/^(Exponent|Expo)PushToken");
   });
 
+  it("batches Expo broadcasts and reports real delivery totals in the admin panel", () => {
+    const expoPush = readProjectFile("server", "expo-push.ts");
+    const adminPanel = readProjectFile("server", "admin", "index.html");
+
+    expect(expoPush).toContain("const EXPO_MAX_MESSAGES_PER_REQUEST = 100;");
+    expect(expoPush).toContain("chunkArray(messages, EXPO_MAX_MESSAGES_PER_REQUEST)");
+    expect(adminPanel).toContain("نجح ${succeeded} من ${sent}، وفشل ${failed}");
+    expect(adminPanel).not.toContain("تم إرسال الإشعار بنجاح (${result.sentCount||0} مستلم)");
+  });
+
   it("uses PostgreSQL for Render push registration and admin notification history", () => {
     const server = readProjectFile("server", "_core", "index.ts");
     const pushStore = readProjectFile("server", "push-store.ts");
