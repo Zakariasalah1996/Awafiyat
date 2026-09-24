@@ -14,6 +14,7 @@ import {
   subscriptionClicks, InsertSubscriptionClick,
   activeUserSessions, InsertActiveUserSession,
   communityPosts, InsertCommunityPost,
+  communitySettings,
   communityComments, InsertCommunityComment,
   communityLikes, communityCommentLikes,
   communityReports, InsertCommunityReport,
@@ -223,10 +224,30 @@ export async function ensureDatabaseSchema(): Promise<void> {
           "body" text,
           "imageUrl" text,
           "imageModeration" varchar(16) NOT NULL DEFAULT 'none',
+          "isOfficial" boolean NOT NULL DEFAULT false,
+          "isPinned" boolean NOT NULL DEFAULT false,
           "isHidden" boolean NOT NULL DEFAULT false,
           "createdAt" timestamp NOT NULL DEFAULT now(),
           "updatedAt" timestamp NOT NULL DEFAULT now()
         )
+      `);
+
+      await pool.query(`ALTER TABLE "community_posts" ADD COLUMN IF NOT EXISTS "isOfficial" boolean NOT NULL DEFAULT false`);
+      await pool.query(`ALTER TABLE "community_posts" ADD COLUMN IF NOT EXISTS "isPinned" boolean NOT NULL DEFAULT false`);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS "community_settings" (
+          "id" integer PRIMARY KEY,
+          "allowUserPosts" boolean NOT NULL DEFAULT true,
+          "allowUserImages" boolean NOT NULL DEFAULT true,
+          "allowComments" boolean NOT NULL DEFAULT true,
+          "allowLikes" boolean NOT NULL DEFAULT true,
+          "updatedAt" timestamp NOT NULL DEFAULT now()
+        )
+      `);
+      await pool.query(`
+        INSERT INTO "community_settings" ("id") VALUES (1)
+        ON CONFLICT ("id") DO NOTHING
       `);
 
       await pool.query(`
@@ -277,6 +298,7 @@ export async function ensureDatabaseSchema(): Promise<void> {
       `);
 
       await pool.query(`CREATE INDEX IF NOT EXISTS "community_posts_created_at_idx" ON "community_posts" ("createdAt" DESC)`);
+      await pool.query(`CREATE INDEX IF NOT EXISTS "community_posts_pinned_idx" ON "community_posts" ("isPinned" DESC, "createdAt" DESC)`);
       await pool.query(`CREATE INDEX IF NOT EXISTS "community_comments_post_id_idx" ON "community_comments" ("postId")`);
       await pool.query(`CREATE INDEX IF NOT EXISTS "community_comment_likes_comment_id_idx" ON "community_comment_likes" ("commentId")`);
 
@@ -630,6 +652,57 @@ export type CommunityFeedPost = typeof communityPosts.$inferSelect & {
   likedByCurrentUser: boolean;
 };
 
+export type CommunityControlSettings = {
+  allowUserPosts: boolean;
+  allowUserImages: boolean;
+  allowComments: boolean;
+  allowLikes: boolean;
+};
+
+const DEFAULT_COMMUNITY_SETTINGS: CommunityControlSettings = {
+  allowUserPosts: true,
+  allowUserImages: true,
+  allowComments: true,
+  allowLikes: true,
+};
+
+export async function getCommunitySettings(): Promise<CommunityControlSettings> {
+  if (!_db) return DEFAULT_COMMUNITY_SETTINGS;
+  const rows = await _db.select().from(communitySettings).where(eq(communitySettings.id, 1)).limit(1);
+  const row = rows[0];
+  if (!row) {
+    await _db.insert(communitySettings).values({ id: 1 }).onConflictDoNothing();
+    return DEFAULT_COMMUNITY_SETTINGS;
+  }
+  return {
+    allowUserPosts: row.allowUserPosts,
+    allowUserImages: row.allowUserImages,
+    allowComments: row.allowComments,
+    allowLikes: row.allowLikes,
+  };
+}
+
+export async function updateCommunitySettings(
+  patch: Partial<CommunityControlSettings>,
+): Promise<CommunityControlSettings> {
+  if (!_db) throw new Error("Database not available");
+  const current = await getCommunitySettings();
+  const next: CommunityControlSettings = {
+    allowUserPosts: typeof patch.allowUserPosts === "boolean" ? patch.allowUserPosts : current.allowUserPosts,
+    allowUserImages: typeof patch.allowUserImages === "boolean" ? patch.allowUserImages : current.allowUserImages,
+    allowComments: typeof patch.allowComments === "boolean" ? patch.allowComments : current.allowComments,
+    allowLikes: typeof patch.allowLikes === "boolean" ? patch.allowLikes : current.allowLikes,
+  };
+  await _db
+    .insert(communitySettings)
+    .values({ id: 1, ...next, updatedAt: new Date() })
+    .onConflictDoUpdate({
+      target: communitySettings.id,
+      set: { ...next, updatedAt: new Date() },
+    });
+  return next;
+}
+
 export async function getCommunityAuthor(userId: number) {
   if (!_db) return undefined;
   const result = await _db.select().from(users).where(eq(users.id, userId)).limit(1);
@@ -640,6 +713,35 @@ export async function createCommunityPost(data: InsertCommunityPost) {
   if (!_db) throw new Error("Database not available");
   const result = await _db.insert(communityPosts).values(data).returning();
   return result[0];
+}
+
+export async function createAdminCommunityPost(input: {
+  body: string | null;
+  imageUrl: string | null;
+  isPinned: boolean;
+}) {
+  if (!_db) throw new Error("Database not available");
+  return _db.transaction(async (tx) => {
+    if (input.isPinned) {
+      await tx
+        .update(communityPosts)
+        .set({ isPinned: false, updatedAt: new Date() })
+        .where(eq(communityPosts.isPinned, true));
+    }
+    const result = await tx
+      .insert(communityPosts)
+      .values({
+        authorId: -1,
+        authorName: "إدارة ألف عافيات",
+        body: input.body,
+        imageUrl: input.imageUrl,
+        imageModeration: input.imageUrl ? "approved" : "none",
+        isOfficial: true,
+        isPinned: input.isPinned,
+      })
+      .returning();
+    return result[0];
+  });
 }
 
 const COMMUNITY_POST_COOLDOWN_MS = 60 * 60 * 1000;
@@ -689,7 +791,7 @@ export async function getCommunityFeed(deviceId: string, limit = 30, offset = 0)
     .select()
     .from(communityPosts)
     .where(eq(communityPosts.isHidden, false))
-    .orderBy(desc(communityPosts.createdAt))
+    .orderBy(desc(communityPosts.isPinned), desc(communityPosts.createdAt))
     .limit(limit)
     .offset(offset);
 
@@ -709,6 +811,77 @@ export async function getCommunityFeed(deviceId: string, limit = 30, offset = 0)
       };
     }),
   );
+}
+
+export async function getCommunityPostsForAdmin(limit = 100, offset = 0): Promise<CommunityFeedPost[]> {
+  if (!_db) return [];
+  const posts = await _db
+    .select()
+    .from(communityPosts)
+    .orderBy(desc(communityPosts.isPinned), desc(communityPosts.createdAt))
+    .limit(Math.min(Math.max(limit, 1), 200))
+    .offset(Math.max(offset, 0));
+
+  return Promise.all(
+    posts.map(async (post) => {
+      const [likes, comments] = await Promise.all([
+        _db.select({ total: count() }).from(communityLikes).where(eq(communityLikes.postId, post.id)),
+        _db.select({ total: count() }).from(communityComments).where(and(eq(communityComments.postId, post.id), eq(communityComments.isHidden, false))),
+      ]);
+      return {
+        ...post,
+        likeCount: Number(likes[0]?.total ?? 0),
+        commentCount: Number(comments[0]?.total ?? 0),
+        likedByCurrentUser: false,
+      };
+    }),
+  );
+}
+
+export async function updateCommunityPostForAdmin(
+  postId: number,
+  input: { body: string | null; imageUrl: string | null },
+) {
+  if (!_db) throw new Error("Database not available");
+  const result = await _db
+    .update(communityPosts)
+    .set({
+      body: input.body,
+      imageUrl: input.imageUrl,
+      imageModeration: input.imageUrl ? "approved" : "none",
+      updatedAt: new Date(),
+    })
+    .where(eq(communityPosts.id, postId))
+    .returning();
+  return result[0];
+}
+
+export async function setCommunityPostPinnedForAdmin(postId: number, isPinned: boolean): Promise<boolean> {
+  if (!_db) throw new Error("Database not available");
+  return _db.transaction(async (tx) => {
+    if (isPinned) {
+      await tx
+        .update(communityPosts)
+        .set({ isPinned: false, updatedAt: new Date() })
+        .where(eq(communityPosts.isPinned, true));
+    }
+    const result = await tx
+      .update(communityPosts)
+      .set({ isPinned, updatedAt: new Date() })
+      .where(eq(communityPosts.id, postId))
+      .returning({ id: communityPosts.id });
+    return result.length > 0;
+  });
+}
+
+export async function setCommunityPostVisibilityForAdmin(postId: number, isHidden: boolean): Promise<boolean> {
+  if (!_db) throw new Error("Database not available");
+  const result = await _db
+    .update(communityPosts)
+    .set({ isHidden, ...(isHidden ? { isPinned: false } : {}), updatedAt: new Date() })
+    .where(eq(communityPosts.id, postId))
+    .returning({ id: communityPosts.id });
+  return result.length > 0;
 }
 
 export async function toggleCommunityLike(postId: number, deviceId: string) {
@@ -766,6 +939,39 @@ export async function getCommunityComments(postId: number, deviceId = ""): Promi
       };
     }),
   );
+}
+
+export async function getCommunityCommentsForAdmin(postId: number): Promise<CommunityFeedComment[]> {
+  if (!_db) return [];
+  const comments = await _db
+    .select()
+    .from(communityComments)
+    .where(eq(communityComments.postId, postId))
+    .orderBy(asc(communityComments.createdAt));
+
+  return Promise.all(
+    comments.map(async (comment) => {
+      const likes = await _db
+        .select({ total: count() })
+        .from(communityCommentLikes)
+        .where(eq(communityCommentLikes.commentId, comment.id));
+      return {
+        ...comment,
+        likeCount: Number(likes[0]?.total ?? 0),
+        likedByCurrentUser: false,
+      };
+    }),
+  );
+}
+
+export async function setCommunityCommentVisibilityForAdmin(commentId: number, isHidden: boolean): Promise<boolean> {
+  if (!_db) throw new Error("Database not available");
+  const result = await _db
+    .update(communityComments)
+    .set({ isHidden, updatedAt: new Date() })
+    .where(eq(communityComments.id, commentId))
+    .returning({ id: communityComments.id });
+  return result.length > 0;
 }
 
 export async function createCommunityComment(data: InsertCommunityComment) {

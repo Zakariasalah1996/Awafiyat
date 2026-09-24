@@ -9,7 +9,42 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { savePushToken, getDb, deactivatePushToken, trackSubscriptionClick, trackActiveUser, getActiveUserCount, getDailyActiveUserCount, getSubscriptionClickCount, getSubscriptionClicks, ensureDatabaseSchema, createCommunityComment, createCommunityPostWithHourlyLimit, createCommunityReport, deleteCommunityComment, deleteCommunityPost, getCommunityAuthor, getCommunityComment, getCommunityComments, getCommunityFeed, getCommunityPost, getCommunityPostCooldownSeconds, toggleCommunityCommentLike, toggleCommunityLike, updateCommunityComment, updateCommunityPost } from "../db";
+import {
+  createAdminCommunityPost,
+  createCommunityComment,
+  createCommunityPostWithHourlyLimit,
+  createCommunityReport,
+  deactivatePushToken,
+  deleteCommunityComment,
+  deleteCommunityPost,
+  ensureDatabaseSchema,
+  getActiveUserCount,
+  getCommunityAuthor,
+  getCommunityComment,
+  getCommunityComments,
+  getCommunityCommentsForAdmin,
+  getCommunityFeed,
+  getCommunityPost,
+  getCommunityPostCooldownSeconds,
+  getCommunityPostsForAdmin,
+  getCommunitySettings,
+  getDailyActiveUserCount,
+  getDb,
+  getSubscriptionClickCount,
+  getSubscriptionClicks,
+  savePushToken,
+  setCommunityCommentVisibilityForAdmin,
+  setCommunityPostPinnedForAdmin,
+  setCommunityPostVisibilityForAdmin,
+  toggleCommunityCommentLike,
+  toggleCommunityLike,
+  trackActiveUser,
+  trackSubscriptionClick,
+  updateCommunityComment,
+  updateCommunityPost,
+  updateCommunityPostForAdmin,
+  updateCommunitySettings,
+} from "../db";
 import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
@@ -575,6 +610,133 @@ async function startServer() {
     }
   });
 
+  // Community administration: permissions, official posts and moderation.
+  app.get('/api/admin/community/settings', adminAuth, async (_req, res) => {
+    try {
+      res.json(await getCommunitySettings());
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.put('/api/admin/community/settings', adminAuth, async (req, res) => {
+    try {
+      const keys = ['allowUserPosts', 'allowUserImages', 'allowComments', 'allowLikes'] as const;
+      const patch = Object.fromEntries(
+        keys.filter((key) => typeof req.body?.[key] === 'boolean').map((key) => [key, req.body[key]]),
+      );
+      const settings = await updateCommunitySettings(patch);
+      res.json({ success: true, settings });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get('/api/admin/community/posts', adminAuth, async (req, res) => {
+    try {
+      const limit = Math.min(Math.max(Number(req.query.limit) || 100, 1), 200);
+      const offset = Math.max(Number(req.query.offset) || 0, 0);
+      const posts = await getCommunityPostsForAdmin(limit, offset);
+      res.json({ posts, nextOffset: posts.length === limit ? offset + posts.length : null });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post('/api/admin/community/posts', adminAuth, async (req, res) => {
+    try {
+      const body = typeof req.body?.body === 'string' ? req.body.body.trim() : '';
+      const imageData = typeof req.body?.imageData === 'string' ? req.body.imageData : '';
+      const contentType = typeof req.body?.contentType === 'string' ? req.body.contentType : 'image/jpeg';
+      const isPinned = req.body?.isPinned !== false;
+      if (!body && !imageData) return res.status(400).json({ error: 'اكتب نص المنشور أو أضف صورة' });
+      if (body.length > 1200) return res.status(400).json({ error: 'المنشور طويل جداً' });
+      if (imageData.length > 8 * 1024 * 1024) return res.status(413).json({ error: 'حجم الصورة كبير جداً' });
+
+      let imageUrl: string | null = null;
+      if (imageData) {
+        const permittedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        const normalizedType = permittedTypes.includes(contentType) ? contentType : 'image/jpeg';
+        const extension = normalizedType === 'image/png' ? 'png' : normalizedType === 'image/webp' ? 'webp' : 'jpg';
+        const { storagePut } = await import('../storage');
+        const stored = await storagePut(`community-images/admin-${Date.now()}.${extension}`, Buffer.from(imageData, 'base64'), normalizedType);
+        imageUrl = stored.url;
+      }
+
+      const post = await createAdminCommunityPost({ body: body || null, imageUrl, isPinned });
+      res.status(201).json({ success: true, post });
+    } catch (e: any) {
+      console.error('[Community Admin] Create official post failed:', e);
+      res.status(500).json({ error: 'تعذر نشر منشور الإدارة' });
+    }
+  });
+
+  app.patch('/api/admin/community/posts/:postId', adminAuth, async (req, res) => {
+    try {
+      const postId = Number(req.params.postId);
+      if (!Number.isInteger(postId)) return res.status(400).json({ error: 'معرف المنشور غير صالح' });
+      const current = await getCommunityPost(postId);
+      if (!current) return res.status(404).json({ error: 'المنشور غير موجود' });
+      const body = typeof req.body?.body === 'string' ? req.body.body.trim() : (current.body ?? '');
+      const imageUrl = req.body?.removeImage === true ? null : current.imageUrl;
+      if (!body && !imageUrl) return res.status(400).json({ error: 'لا يمكن أن يكون المنشور فارغاً' });
+      if (body.length > 1200) return res.status(400).json({ error: 'المنشور طويل جداً' });
+      const post = await updateCommunityPostForAdmin(postId, { body: body || null, imageUrl });
+      res.json({ success: true, post });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.patch('/api/admin/community/posts/:postId/pinned', adminAuth, async (req, res) => {
+    try {
+      const postId = Number(req.params.postId);
+      const isPinned = req.body?.isPinned === true;
+      if (!Number.isInteger(postId)) return res.status(400).json({ error: 'معرف المنشور غير صالح' });
+      const updated = await setCommunityPostPinnedForAdmin(postId, isPinned);
+      if (!updated) return res.status(404).json({ error: 'المنشور غير موجود' });
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.patch('/api/admin/community/posts/:postId/visibility', adminAuth, async (req, res) => {
+    try {
+      const postId = Number(req.params.postId);
+      const isHidden = req.body?.isHidden === true;
+      if (!Number.isInteger(postId)) return res.status(400).json({ error: 'معرف المنشور غير صالح' });
+      const updated = await setCommunityPostVisibilityForAdmin(postId, isHidden);
+      if (!updated) return res.status(404).json({ error: 'المنشور غير موجود' });
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get('/api/admin/community/posts/:postId/comments', adminAuth, async (req, res) => {
+    try {
+      const postId = Number(req.params.postId);
+      if (!Number.isInteger(postId)) return res.status(400).json({ error: 'معرف المنشور غير صالح' });
+      res.json({ comments: await getCommunityCommentsForAdmin(postId) });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.patch('/api/admin/community/comments/:commentId/visibility', adminAuth, async (req, res) => {
+    try {
+      const commentId = Number(req.params.commentId);
+      const isHidden = req.body?.isHidden === true;
+      if (!Number.isInteger(commentId)) return res.status(400).json({ error: 'معرف التعليق غير صالح' });
+      const updated = await setCommunityCommentVisibilityForAdmin(commentId, isHidden);
+      if (!updated) return res.status(404).json({ error: 'التعليق غير موجود' });
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.get('/api/admin/community-reports', adminAuth, async (req, res) => {
     try {
       const limit = Math.min(parseInt(req.query.limit as string) || 100, 200);
@@ -824,6 +986,14 @@ async function startServer() {
   // ==================== PUBLIC COOKING COMMUNITY ====================
   // Feed is intentionally public. Publishing uses the server-side guest identity
   // so the author name cannot be changed from one post to the next.
+  app.get('/api/community/settings', async (_req, res) => {
+    try {
+      res.json(await getCommunitySettings());
+    } catch {
+      res.status(500).json({ error: 'تعذر تحميل إعدادات المجتمع' });
+    }
+  });
+
   app.get('/api/community/posts', async (req, res) => {
     try {
       const deviceId = typeof req.query.deviceId === 'string' ? req.query.deviceId : '';
@@ -842,6 +1012,17 @@ async function startServer() {
       const { userId, body, imageData, contentType } = req.body ?? {};
       const normalizedBody = typeof body === 'string' ? body.trim() : '';
       const hasImage = typeof imageData === 'string' && imageData.length > 0;
+      const settings = await getCommunitySettings();
+
+      if (!settings.allowUserPosts) {
+        return res.status(423).json({
+          error: 'النشر متوقف مؤقتاً أثناء المسابقة. يمكنك المشاركة بالتعليق على منشور الإدارة المثبّت.',
+          code: 'COMMUNITY_USER_POSTS_CLOSED',
+        });
+      }
+      if (hasImage && !settings.allowUserImages) {
+        return res.status(423).json({ error: 'نشر الصور متوقف مؤقتاً', code: 'COMMUNITY_USER_IMAGES_CLOSED' });
+      }
 
       if (!Number.isInteger(userId)) return res.status(401).json({ error: 'تعذر التحقق من هوية الناشر' });
       if (!normalizedBody && !hasImage) return res.status(400).json({ error: 'اكتب منشوراً أو أضف صورة طعام' });
@@ -946,6 +1127,8 @@ async function startServer() {
 
   app.post('/api/community/posts/:postId/like', async (req, res) => {
     try {
+      const settings = await getCommunitySettings();
+      if (!settings.allowLikes) return res.status(423).json({ error: 'الإعجابات متوقفة مؤقتاً', code: 'COMMUNITY_LIKES_CLOSED' });
       const postId = Number(req.params.postId);
       const deviceId = typeof req.body?.deviceId === 'string' ? req.body.deviceId.trim() : '';
       if (!Number.isInteger(postId) || !deviceId) return res.status(400).json({ error: 'بيانات الإعجاب غير مكتملة' });
@@ -975,6 +1158,8 @@ async function startServer() {
 
   app.post('/api/community/posts/:postId/comments', async (req, res) => {
     try {
+      const settings = await getCommunitySettings();
+      if (!settings.allowComments) return res.status(423).json({ error: 'التعليقات متوقفة مؤقتاً', code: 'COMMUNITY_COMMENTS_CLOSED' });
       const postId = Number(req.params.postId);
       const userId = req.body?.userId;
       const body = typeof req.body?.body === 'string' ? req.body.body.trim() : '';
@@ -1034,6 +1219,8 @@ async function startServer() {
 
   app.post('/api/community/comments/:commentId/like', async (req, res) => {
     try {
+      const settings = await getCommunitySettings();
+      if (!settings.allowLikes) return res.status(423).json({ error: 'الإعجابات متوقفة مؤقتاً', code: 'COMMUNITY_LIKES_CLOSED' });
       const commentId = Number(req.params.commentId);
       const deviceId = typeof req.body?.deviceId === 'string' ? req.body.deviceId.trim() : '';
       if (!Number.isInteger(commentId) || !deviceId) return res.status(400).json({ error: 'بيانات الإعجاب غير مكتملة' });

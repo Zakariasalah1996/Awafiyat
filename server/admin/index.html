@@ -115,6 +115,7 @@
       border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-weight: 500;
     }
     .logout-btn:hover { opacity: 0.85; }
+    .mobile-menu-btn { display:none; padding:7px 11px; border:1px solid var(--border); border-radius:8px; background:white; font-size:20px; cursor:pointer; }
     .content { padding: 28px 32px; }
 
     /* PAGES */
@@ -227,6 +228,17 @@
     .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* COMMUNITY ADMIN */
+    .community-control-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:18px; }
+    .community-control { border:1px solid var(--border); border-radius:12px; padding:16px; background:#FBFDFB; display:flex; align-items:flex-start; gap:12px; }
+    .community-control input { width:20px; height:20px; margin-top:2px; accent-color:var(--primary); }
+    .community-control strong { display:block; font-size:15px; margin-bottom:4px; }
+    .community-control small { display:block; color:var(--text-muted); line-height:1.6; }
+    .community-quick-actions { display:flex; gap:10px; flex-wrap:wrap; padding-top:4px; }
+    .community-post-image { width:72px; height:58px; object-fit:cover; border-radius:8px; border:1px solid var(--border); }
+    .community-content-preview { max-width:420px; white-space:pre-wrap; line-height:1.6; }
+    .community-status-note { padding:12px 14px; border-radius:10px; background:#EFF6FF; color:#1D4ED8; margin-bottom:18px; font-size:14px; }
+
     @media (max-width: 900px) {
       .sidebar { width: 220px; }
       :root { --sidebar-width: 220px; }
@@ -235,7 +247,12 @@
     }
     @media (max-width: 600px) {
       .sidebar { display: none; }
+      .sidebar.mobile-open { display:flex; width:min(280px,86vw); box-shadow:-8px 0 30px rgba(0,0,0,0.25); }
       .main { margin-right: 0; }
+      .mobile-menu-btn { display:inline-flex; }
+      .header { padding:0 14px; }
+      .header-user { display:none; }
+      .content { padding:12px; }
     }
   </style>
 </head>
@@ -291,6 +308,9 @@
       <span class="icon">💬</span> الملاحظات
       <span class="badge" id="feedbackBadge" style="display:none">0</span>
     </div>
+    <div class="nav-item" data-page="community-admin" onclick="navigateTo('community-admin')">
+      <span class="icon">🛡️</span> إدارة المجتمع
+    </div>
     <div class="nav-item" data-page="community-moderation" onclick="navigateTo('community-moderation')">
       <span class="icon">🚩</span> بلاغات المجتمع
       <span class="badge" id="communityReportsBadge" style="display:none">0</span>
@@ -317,7 +337,10 @@
 <!-- MAIN -->
 <div class="main" id="mainContent">
   <div class="header">
-    <h1 class="header-title" id="pageTitle">الرئيسية</h1>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="mobile-menu-btn" onclick="toggleAdminMenu()" aria-label="فتح القائمة">☰</button>
+      <h1 class="header-title" id="pageTitle">الرئيسية</h1>
+    </div>
     <div class="header-actions">
       <div class="header-user"><span>👤</span><span id="headerUserName">المسؤول</span></div>
       <button class="logout-btn" onclick="handleLogout()">تسجيل الخروج</button>
@@ -490,6 +513,78 @@
           <thead><tr><th>المستخدم</th><th>النوع</th><th>الرسالة</th><th>التقييم</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
           <tbody id="feedbackTableBody"><tr><td colspan="7" class="loading"><div class="spinner"></div>جاري التحميل...</td></tr></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- COMMUNITY ADMINISTRATION -->
+    <div class="page" id="page-community-admin">
+      <div class="notif-form-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap">
+          <div>
+            <h3 style="margin-bottom:6px">🛡️ صلاحيات مجتمع الطبخ</h3>
+            <p style="color:var(--text-muted);font-size:14px;line-height:1.7">تُطبّق هذه الإعدادات فوراً على جميع نسخ التطبيق دون إصدار AAB جديد.</p>
+          </div>
+          <span class="badge-status badge-active" id="communityModeBadge">جاري التحميل...</span>
+        </div>
+        <div class="community-status-note" id="communityModeDescription">جاري قراءة حالة المجتمع...</div>
+        <div class="community-control-grid">
+          <label class="community-control">
+            <input type="checkbox" id="communityAllowUserPosts">
+            <span><strong>منشورات المستخدمين</strong><small>السماح للمستخدمين بإنشاء منشورات جديدة.</small></span>
+          </label>
+          <label class="community-control">
+            <input type="checkbox" id="communityAllowUserImages">
+            <span><strong>صور المستخدمين</strong><small>السماح بإرفاق صور الطعام عند فتح النشر.</small></span>
+          </label>
+          <label class="community-control">
+            <input type="checkbox" id="communityAllowComments">
+            <span><strong>التعليقات</strong><small>السماح بالمشاركة والتعليق على المنشورات.</small></span>
+          </label>
+          <label class="community-control">
+            <input type="checkbox" id="communityAllowLikes">
+            <span><strong>الإعجابات</strong><small>السماح بإعجاب المنشورات والتعليقات.</small></span>
+          </label>
+        </div>
+        <div class="community-quick-actions">
+          <button class="btn btn-warning" onclick="setCommunityContestMode()">🏆 وضع المسابقة</button>
+          <button class="btn btn-danger" onclick="closeCommunityCompletely()">🔒 إغلاق المجتمع بالكامل</button>
+          <button class="btn btn-success" onclick="openCommunityCompletely()">🔓 فتح المجتمع بالكامل</button>
+          <button class="btn btn-primary" onclick="saveCommunitySettings()" id="saveCommunitySettingsBtn">💾 حفظ الصلاحيات</button>
+        </div>
+      </div>
+
+      <div class="notif-form-card">
+        <h3>📢 نشر منشور رسمي</h3>
+        <p style="color:var(--text-muted);font-size:14px;margin-bottom:18px">يظهر باسم ثابت «إدارة ألف عافيات» لجميع المستخدمين، ويمكن تثبيته أعلى المجتمع.</p>
+        <div class="form-group">
+          <label>نص المنشور</label>
+          <textarea class="form-control" id="communityOfficialPostBody" maxlength="1200" placeholder="اكتب إعلان المسابقة أو المنشور الرسمي..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>صورة اختيارية</label>
+          <input type="file" class="form-control" id="communityOfficialPostImage" accept="image/jpeg,image/png,image/webp">
+        </div>
+        <label class="community-control" style="max-width:420px;margin-bottom:18px">
+          <input type="checkbox" id="communityOfficialPostPinned" checked>
+          <span><strong>تثبيت أعلى المجتمع</strong><small>سيتم إلغاء تثبيت المنشور السابق تلقائياً.</small></span>
+        </label>
+        <button class="btn btn-primary" onclick="publishOfficialCommunityPost()" id="publishOfficialPostBtn">📣 نشر باسم الإدارة</button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div>
+            <h3>📋 جميع منشورات المجتمع</h3>
+            <p style="color:var(--text-muted);font-size:13px;margin-top:4px">تثبيت، تعديل، إخفاء، استعادة ومراجعة التعليقات.</p>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="loadCommunityAdminPosts()">🔄 تحديث</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>المنشور</th><th>الناشر</th><th>التفاعل</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+            <tbody id="communityAdminPostsBody"><tr><td colspan="6" class="loading"><div class="spinner"></div>جاري التحميل...</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -685,6 +780,41 @@
   </div>
 </div>
 
+<!-- COMMUNITY POST EDIT MODAL -->
+<div class="modal-overlay" id="communityPostEditModal">
+  <div class="modal">
+    <h3>✏️ تعديل منشور المجتمع</h3>
+    <input type="hidden" id="communityEditPostId">
+    <div class="form-group"><label>نص المنشور</label><textarea class="form-control" id="communityEditPostBody" maxlength="1200"></textarea></div>
+    <label class="community-control" id="communityRemoveImageControl" style="display:none">
+      <input type="checkbox" id="communityEditRemoveImage">
+      <span><strong>إزالة صورة المنشور</strong><small>لن يمكن استعادتها بعد الحفظ من لوحة التحكم.</small></span>
+    </label>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveCommunityPostEdit()">💾 حفظ التعديل</button>
+      <button class="btn btn-outline" onclick="closeCommunityPostEditModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMMUNITY COMMENTS MODAL -->
+<div class="modal-overlay" id="communityCommentsModal">
+  <div class="modal" style="width:760px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px">
+      <h3 style="margin:0">💬 تعليقات المنشور</h3>
+      <button class="btn btn-outline btn-sm" onclick="reloadCommunityAdminComments()">🔄 تحديث</button>
+    </div>
+    <input type="hidden" id="communityCommentsPostId">
+    <div style="overflow-x:auto;max-height:58vh">
+      <table>
+        <thead><tr><th>المستخدم</th><th>التعليق</th><th>الإعجابات</th><th>الحالة</th><th>إجراء</th></tr></thead>
+        <tbody id="communityAdminCommentsBody"><tr><td colspan="5" class="loading"><div class="spinner"></div>جاري التحميل...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeCommunityCommentsModal()">إغلاق</button></div>
+  </div>
+</div>
+
 <script>
 // ==================== CONFIG ====================
 const API_BASE = window.location.origin;
@@ -738,13 +868,18 @@ document.getElementById('loginPassword').addEventListener('keypress', e => { if 
 document.getElementById('loginUsername').addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('loginPassword').focus(); });
 
 // ==================== NAVIGATION ====================
+function toggleAdminMenu() {
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+}
+
 function navigateTo(page) {
   currentPage = page;
+  document.getElementById('sidebar').classList.remove('mobile-open');
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
-  const titles = { dashboard:'الرئيسية', users:'المستخدمون', subscriptions:'الاشتراكات', promo:'أكواد الترويج', notifications:'الإشعارات', feedback:'الملاحظات', 'community-moderation':'بلاغات المجتمع', recipes:'الوصفات', content:'إدارة المحتوى', reports:'التقارير', export:'تصدير البيانات' };
+  const titles = { dashboard:'الرئيسية', users:'المستخدمون', subscriptions:'الاشتراكات', promo:'أكواد الترويج', notifications:'الإشعارات', feedback:'الملاحظات', 'community-admin':'إدارة المجتمع', 'community-moderation':'بلاغات المجتمع', recipes:'الوصفات', content:'إدارة المحتوى', reports:'التقارير', export:'تصدير البيانات' };
   document.getElementById('pageTitle').textContent = titles[page] || page;
   switch(page) {
     case 'dashboard': loadDashboard(); break;
@@ -753,6 +888,7 @@ function navigateTo(page) {
     case 'promo': loadPromoCodes(); break;
     case 'notifications': loadNotifications(); loadPushTokenStats(); break;
     case 'feedback': loadFeedback(); break;
+    case 'community-admin': loadCommunityAdmin(); break;
     case 'community-moderation': loadCommunityReports(); break;
     case 'recipes': loadRecipes(); loadRecipeStats(); break;
     case 'content': loadContent(); break;
@@ -791,6 +927,254 @@ function formatAdminDate(value) {
 
 function communityReportStatusLabel(status) {
   return ({ new:'جديد', reviewed:'قيد المراجعة', resolved:'محلول', dismissed:'مرفوض' })[status] || status;
+}
+
+// ==================== COMMUNITY ADMINISTRATION ====================
+let communityAdminPosts = [];
+
+async function loadCommunityAdmin() {
+  await Promise.all([loadCommunitySettings(), loadCommunityAdminPosts()]);
+}
+
+function renderCommunityMode(settings) {
+  const badge = document.getElementById('communityModeBadge');
+  const description = document.getElementById('communityModeDescription');
+  const isOpen = settings.allowUserPosts && settings.allowUserImages && settings.allowComments && settings.allowLikes;
+  const isContest = !settings.allowUserPosts && settings.allowComments && settings.allowLikes;
+  const isClosed = !settings.allowUserPosts && !settings.allowComments && !settings.allowLikes;
+  badge.className = `badge-status ${isOpen ? 'badge-active' : isClosed ? 'badge-inactive' : 'badge-read'}`;
+  badge.textContent = isOpen ? 'المجتمع مفتوح' : isContest ? 'وضع المسابقة' : isClosed ? 'المجتمع مغلق' : 'إعدادات مخصصة';
+  description.textContent = isContest
+    ? 'منشورات المستخدمين متوقفة، بينما التعليقات والإعجابات متاحة للمشاركة في منشور المسابقة.'
+    : isOpen
+      ? 'جميع وظائف المجتمع متاحة للمستخدمين.'
+      : isClosed
+        ? 'القراءة متاحة فقط، ولا يمكن للمستخدمين النشر أو التعليق أو الإعجاب.'
+        : 'تم تطبيق مجموعة صلاحيات مخصصة على المجتمع.';
+}
+
+async function loadCommunitySettings() {
+  const settings = await api('community/settings');
+  if (!settings || settings.error) {
+    showToast(settings?.error || 'تعذر تحميل صلاحيات المجتمع', 'error');
+    return;
+  }
+  document.getElementById('communityAllowUserPosts').checked = Boolean(settings.allowUserPosts);
+  document.getElementById('communityAllowUserImages').checked = Boolean(settings.allowUserImages);
+  document.getElementById('communityAllowComments').checked = Boolean(settings.allowComments);
+  document.getElementById('communityAllowLikes').checked = Boolean(settings.allowLikes);
+  renderCommunityMode(settings);
+}
+
+async function saveCommunitySettings() {
+  const btn = document.getElementById('saveCommunitySettingsBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري الحفظ...';
+  const result = await api('community/settings', 'PUT', {
+    allowUserPosts: document.getElementById('communityAllowUserPosts').checked,
+    allowUserImages: document.getElementById('communityAllowUserImages').checked,
+    allowComments: document.getElementById('communityAllowComments').checked,
+    allowLikes: document.getElementById('communityAllowLikes').checked,
+  });
+  btn.disabled = false;
+  btn.textContent = '💾 حفظ الصلاحيات';
+  if (result?.success) {
+    renderCommunityMode(result.settings);
+    showToast('تم تطبيق صلاحيات المجتمع فوراً');
+  } else {
+    showToast(result?.error || 'تعذر حفظ صلاحيات المجتمع', 'error');
+  }
+}
+
+async function setCommunityContestMode() {
+  document.getElementById('communityAllowUserPosts').checked = false;
+  document.getElementById('communityAllowUserImages').checked = false;
+  document.getElementById('communityAllowComments').checked = true;
+  document.getElementById('communityAllowLikes').checked = true;
+  await saveCommunitySettings();
+}
+
+async function closeCommunityCompletely() {
+  if (!confirm('سيبقى المحتوى ظاهراً للقراءة، لكن سيتوقف النشر والتعليق والإعجاب. هل تريد المتابعة؟')) return;
+  document.getElementById('communityAllowUserPosts').checked = false;
+  document.getElementById('communityAllowUserImages').checked = false;
+  document.getElementById('communityAllowComments').checked = false;
+  document.getElementById('communityAllowLikes').checked = false;
+  await saveCommunitySettings();
+}
+
+async function openCommunityCompletely() {
+  document.getElementById('communityAllowUserPosts').checked = true;
+  document.getElementById('communityAllowUserImages').checked = true;
+  document.getElementById('communityAllowComments').checked = true;
+  document.getElementById('communityAllowLikes').checked = true;
+  await saveCommunitySettings();
+}
+
+function readImageAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+    reader.onerror = () => reject(new Error('تعذر قراءة الصورة'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function publishOfficialCommunityPost() {
+  const body = document.getElementById('communityOfficialPostBody').value.trim();
+  const imageInput = document.getElementById('communityOfficialPostImage');
+  const file = imageInput.files?.[0];
+  if (!body && !file) return showToast('اكتب نص المنشور أو أضف صورة', 'error');
+  if (file && file.size > 6 * 1024 * 1024) return showToast('حجم الصورة يجب أن يكون أقل من 6 ميغابايت', 'error');
+  const btn = document.getElementById('publishOfficialPostBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري النشر...';
+  try {
+    const imageData = file ? await readImageAsBase64(file) : undefined;
+    const result = await api('community/posts', 'POST', {
+      body,
+      imageData,
+      contentType: file?.type || 'image/jpeg',
+      isPinned: document.getElementById('communityOfficialPostPinned').checked,
+    });
+    if (!result?.success) throw new Error(result?.error || 'تعذر نشر المنشور');
+    document.getElementById('communityOfficialPostBody').value = '';
+    imageInput.value = '';
+    document.getElementById('communityOfficialPostPinned').checked = true;
+    showToast('تم نشر المنشور باسم إدارة ألف عافيات');
+    await loadCommunityAdminPosts();
+  } catch (error) {
+    showToast(error.message || 'تعذر نشر المنشور', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📣 نشر باسم الإدارة';
+  }
+}
+
+async function loadCommunityAdminPosts() {
+  const data = await api('community/posts?limit=200&offset=0');
+  const tbody = document.getElementById('communityAdminPostsBody');
+  if (!data || data.error) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">تعذر تحميل منشورات المجتمع</td></tr>';
+    return;
+  }
+  communityAdminPosts = Array.isArray(data.posts) ? data.posts : [];
+  if (communityAdminPosts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">لا توجد منشورات بعد</td></tr>';
+    return;
+  }
+  tbody.innerHTML = communityAdminPosts.map(post => {
+    const image = post.imageUrl
+      ? `<a href="${escapeHtml(post.imageUrl)}" target="_blank" rel="noopener"><img class="community-post-image" src="${escapeHtml(post.imageUrl)}" alt="صورة المنشور"></a>`
+      : '';
+    const badges = [
+      post.isOfficial ? '<span class="badge-status badge-new">رسمي</span>' : '',
+      post.isPinned ? '<span class="badge-status badge-read">مثبّت</span>' : '',
+      post.isHidden ? '<span class="badge-status badge-inactive">مخفي</span>' : '<span class="badge-status badge-active">ظاهر</span>',
+    ].filter(Boolean).join(' ');
+    return `<tr>
+      <td><div style="display:flex;gap:10px;align-items:flex-start">${image}<div class="community-content-preview"><strong>#${Number(post.id)}</strong><br>${escapeHtml(post.body || 'منشور بصورة فقط')}</div></div></td>
+      <td><strong>${escapeHtml(post.authorName || 'غير معروف')}</strong></td>
+      <td>❤️ ${Number(post.likeCount || 0)}<br>💬 ${Number(post.commentCount || 0)}</td>
+      <td>${badges}</td>
+      <td>${formatAdminDate(post.createdAt)}</td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="openCommunityPostEditModal(${Number(post.id)})">✏️ تعديل</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleCommunityPostPinned(${Number(post.id)}, ${!post.isPinned})">${post.isPinned ? 'إلغاء التثبيت' : '📌 تثبيت'}</button>
+        <button class="btn btn-outline btn-sm" onclick="openCommunityCommentsModal(${Number(post.id)})">💬 التعليقات</button>
+        <button class="btn ${post.isHidden ? 'btn-success' : 'btn-danger'} btn-sm" onclick="toggleCommunityPostVisibility(${Number(post.id)}, ${!post.isHidden})">${post.isHidden ? 'استعادة' : 'إخفاء'}</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openCommunityPostEditModal(postId) {
+  const post = communityAdminPosts.find(item => Number(item.id) === Number(postId));
+  if (!post) return;
+  document.getElementById('communityEditPostId').value = String(post.id);
+  document.getElementById('communityEditPostBody').value = post.body || '';
+  document.getElementById('communityEditRemoveImage').checked = false;
+  document.getElementById('communityRemoveImageControl').style.display = post.imageUrl ? 'flex' : 'none';
+  document.getElementById('communityPostEditModal').classList.add('show');
+}
+
+function closeCommunityPostEditModal() {
+  document.getElementById('communityPostEditModal').classList.remove('show');
+}
+
+async function saveCommunityPostEdit() {
+  const postId = Number(document.getElementById('communityEditPostId').value);
+  const result = await api(`community/posts/${postId}`, 'PATCH', {
+    body: document.getElementById('communityEditPostBody').value.trim(),
+    removeImage: document.getElementById('communityEditRemoveImage').checked,
+  });
+  if (result?.success) {
+    closeCommunityPostEditModal();
+    showToast('تم تعديل المنشور');
+    loadCommunityAdminPosts();
+  } else {
+    showToast(result?.error || 'تعذر تعديل المنشور', 'error');
+  }
+}
+
+async function toggleCommunityPostPinned(postId, isPinned) {
+  const result = await api(`community/posts/${postId}/pinned`, 'PATCH', { isPinned });
+  if (result?.success) {
+    showToast(isPinned ? 'تم تثبيت المنشور' : 'تم إلغاء تثبيت المنشور');
+    loadCommunityAdminPosts();
+  } else showToast(result?.error || 'تعذر تغيير التثبيت', 'error');
+}
+
+async function toggleCommunityPostVisibility(postId, isHidden) {
+  if (isHidden && !confirm('سيختفي المنشور من جميع المستخدمين. هل تريد المتابعة؟')) return;
+  const result = await api(`community/posts/${postId}/visibility`, 'PATCH', { isHidden });
+  if (result?.success) {
+    showToast(isHidden ? 'تم إخفاء المنشور' : 'تمت استعادة المنشور');
+    loadCommunityAdminPosts();
+  } else showToast(result?.error || 'تعذر تغيير حالة المنشور', 'error');
+}
+
+function openCommunityCommentsModal(postId) {
+  document.getElementById('communityCommentsPostId').value = String(postId);
+  document.getElementById('communityCommentsModal').classList.add('show');
+  reloadCommunityAdminComments();
+}
+
+function closeCommunityCommentsModal() {
+  document.getElementById('communityCommentsModal').classList.remove('show');
+}
+
+async function reloadCommunityAdminComments() {
+  const postId = Number(document.getElementById('communityCommentsPostId').value);
+  const tbody = document.getElementById('communityAdminCommentsBody');
+  tbody.innerHTML = '<tr><td colspan="5" class="loading"><div class="spinner"></div>جاري التحميل...</td></tr>';
+  const data = await api(`community/posts/${postId}/comments`);
+  const comments = Array.isArray(data?.comments) ? data.comments : [];
+  if (!data || data.error) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">تعذر تحميل التعليقات</td></tr>';
+    return;
+  }
+  if (comments.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">لا توجد تعليقات على هذا المنشور</td></tr>';
+    return;
+  }
+  tbody.innerHTML = comments.map(comment => `<tr>
+    <td><strong>${escapeHtml(comment.authorName || 'غير معروف')}</strong><br><small>${formatAdminDate(comment.createdAt)}</small></td>
+    <td><div style="max-width:360px;white-space:pre-wrap">${escapeHtml(comment.body || '')}</div></td>
+    <td>${Number(comment.likeCount || 0)}</td>
+    <td><span class="badge-status ${comment.isHidden ? 'badge-inactive' : 'badge-active'}">${comment.isHidden ? 'مخفي' : 'ظاهر'}</span></td>
+    <td><button class="btn ${comment.isHidden ? 'btn-success' : 'btn-danger'} btn-sm" onclick="toggleCommunityCommentVisibility(${Number(comment.id)}, ${!comment.isHidden})">${comment.isHidden ? 'استعادة' : 'إخفاء'}</button></td>
+  </tr>`).join('');
+}
+
+async function toggleCommunityCommentVisibility(commentId, isHidden) {
+  if (isHidden && !confirm('سيختفي هذا التعليق من المستخدمين. هل تريد المتابعة؟')) return;
+  const result = await api(`community/comments/${commentId}/visibility`, 'PATCH', { isHidden });
+  if (result?.success) {
+    showToast(isHidden ? 'تم إخفاء التعليق' : 'تمت استعادة التعليق');
+    reloadCommunityAdminComments();
+    loadCommunityAdminPosts();
+  } else showToast(result?.error || 'تعذر تغيير حالة التعليق', 'error');
 }
 
 async function loadCommunityReports() {

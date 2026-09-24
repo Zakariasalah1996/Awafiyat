@@ -194,6 +194,8 @@ export const communityPosts = pgTable("community_posts", {
   body: text("body"),
   imageUrl: text("imageUrl"),
   imageModeration: varchar("imageModeration", { length: 16 }).default("none").notNull(),
+  isOfficial: boolean("isOfficial").default(false).notNull(),
+  isPinned: boolean("isPinned").default(false).notNull(),
   isHidden: boolean("isHidden").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -201,6 +203,18 @@ export const communityPosts = pgTable("community_posts", {
 
 export type CommunityPost = typeof communityPosts.$inferSelect;
 export type InsertCommunityPost = typeof communityPosts.$inferInsert;
+
+/** Server-controlled community permissions editable from the admin panel. */
+export const communitySettings = pgTable("community_settings", {
+  id: integer("id").primaryKey(),
+  allowUserPosts: boolean("allowUserPosts").default(true).notNull(),
+  allowUserImages: boolean("allowUserImages").default(true).notNull(),
+  allowComments: boolean("allowComments").default(true).notNull(),
+  allowLikes: boolean("allowLikes").default(true).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+
+export type CommunitySettings = typeof communitySettings.$inferSelect;
 
 /** Public comments attached to a community post. */
 export const communityComments = pgTable("community_comments", {
