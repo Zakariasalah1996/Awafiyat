@@ -74,7 +74,10 @@ describe("Community administration controls", () => {
     expect(server).toContain("app.get('/api/admin/community/users/:userId/activity', adminAuth");
     expect(activityFunction).toContain("deviceSuffix");
     expect(activityFunction).toContain("lastActiveAt");
+    expect(activityFunction).not.toContain(".from(activeUserSessions)");
+    expect(activityFunction).not.toContain("...user");
     expect(activityFunction).not.toContain("openId:");
+    expect(server).toContain("تعذر تحميل نشاط المستخدم، حاول مرة أخرى");
     expect(admin).toContain("USER #${id}");
     expect(admin).toContain("openCommunityUserActivityModal");
     expect(admin).toContain("هوية ونشاط مستخدم المجتمع");

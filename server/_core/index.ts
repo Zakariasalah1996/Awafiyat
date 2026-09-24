@@ -652,7 +652,8 @@ async function startServer() {
       if (!activity) return res.status(404).json({ error: 'المستخدم غير موجود' });
       res.json(activity);
     } catch (e: any) {
-      res.status(500).json({ error: e.message });
+      console.error('[Community Admin] User activity lookup failed:', e);
+      res.status(500).json({ error: 'تعذر تحميل نشاط المستخدم، حاول مرة أخرى' });
     }
   });
 

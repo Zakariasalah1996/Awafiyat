@@ -840,7 +840,7 @@ export async function getCommunityPostsForAdmin(limit = 100, offset = 0): Promis
 
 export async function getCommunityUserActivityForAdmin(userId: number) {
   if (!_db) throw new Error("Database not available");
-  const [profileRows, sessions, posts, comments, postTotals, visiblePostTotals, commentTotals, visibleCommentTotals] = await Promise.all([
+  const [profileRows, posts, comments, postTotals, visiblePostTotals, commentTotals, visibleCommentTotals] = await Promise.all([
     _db
       .select({
         id: users.id,
@@ -850,15 +850,10 @@ export async function getCommunityUserActivityForAdmin(userId: number) {
         isActive: users.isActive,
         createdAt: users.createdAt,
         lastSignedIn: users.lastSignedIn,
+        loginIdentity: users.openId,
       })
       .from(users)
       .where(eq(users.id, userId))
-      .limit(1),
-    _db
-      .select({ deviceId: activeUserSessions.deviceId, platform: activeUserSessions.platform, lastActiveAt: activeUserSessions.lastActiveAt })
-      .from(activeUserSessions)
-      .where(eq(activeUserSessions.userId, userId))
-      .orderBy(desc(activeUserSessions.lastActiveAt))
       .limit(1),
     _db
       .select({ id: communityPosts.id, body: communityPosts.body, imageUrl: communityPosts.imageUrl, isHidden: communityPosts.isHidden, createdAt: communityPosts.createdAt })
@@ -880,8 +875,12 @@ export async function getCommunityUserActivityForAdmin(userId: number) {
 
   const user = profileRows[0];
   if (!user) return undefined;
-  const session = sessions[0];
-  const deviceSuffix = session?.deviceId ? session.deviceId.slice(-6).toUpperCase() : null;
+  const deviceIdentity = user.loginIdentity.startsWith("guest_") ? user.loginIdentity.slice("guest_".length) : "";
+  const platformCandidate = deviceIdentity.split("_")[0];
+  const platform = platformCandidate === "android" || platformCandidate === "ios" || platformCandidate === "web"
+    ? platformCandidate
+    : null;
+  const deviceSuffix = deviceIdentity ? deviceIdentity.slice(-6).toUpperCase() : null;
   const totalPosts = Number(postTotals[0]?.total ?? 0);
   const visiblePosts = Number(visiblePostTotals[0]?.total ?? 0);
   const totalComments = Number(commentTotals[0]?.total ?? 0);
@@ -889,9 +888,15 @@ export async function getCommunityUserActivityForAdmin(userId: number) {
 
   return {
     user: {
-      ...user,
-      lastActiveAt: session?.lastActiveAt ?? null,
-      platform: session?.platform ?? null,
+      id: user.id,
+      name: user.name,
+      country: user.country,
+      loginMethod: user.loginMethod,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      lastSignedIn: user.lastSignedIn,
+      lastActiveAt: user.lastSignedIn,
+      platform,
       deviceSuffix,
     },
     stats: {
