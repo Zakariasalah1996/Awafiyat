@@ -78,6 +78,7 @@ describe("Community administration controls", () => {
     expect(activityFunction).not.toContain("...user");
     expect(activityFunction).not.toContain("openId:");
     expect(server).toContain("تعذر تحميل نشاط المستخدم، حاول مرة أخرى");
+    expect(server).toContain("X-Awafiyat-Community-Admin-Version', '3");
     expect(admin).toContain("USER #${id}");
     expect(admin).toContain("openCommunityUserActivityModal");
     expect(admin).toContain("هوية ونشاط مستخدم المجتمع");

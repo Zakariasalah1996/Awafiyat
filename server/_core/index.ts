@@ -1002,6 +1002,7 @@ async function startServer() {
   // so the author name cannot be changed from one post to the next.
   app.get('/api/community/settings', async (_req, res) => {
     try {
+      res.setHeader('X-Awafiyat-Community-Admin-Version', '3');
       res.json(await getCommunitySettings());
     } catch {
       res.status(500).json({ error: 'تعذر تحميل إعدادات المجتمع' });
