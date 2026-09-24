@@ -28,6 +28,7 @@ import {
   getCommunityPostCooldownSeconds,
   getCommunityPostsForAdmin,
   getCommunitySettings,
+  getCommunityUserActivityForAdmin,
   getDailyActiveUserCount,
   getDb,
   getSubscriptionClickCount,
@@ -638,6 +639,18 @@ async function startServer() {
       const offset = Math.max(Number(req.query.offset) || 0, 0);
       const posts = await getCommunityPostsForAdmin(limit, offset);
       res.json({ posts, nextOffset: posts.length === limit ? offset + posts.length : null });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get('/api/admin/community/users/:userId/activity', adminAuth, async (req, res) => {
+    try {
+      const userId = Number(req.params.userId);
+      if (!Number.isInteger(userId) || userId <= 0) return res.status(400).json({ error: 'معرف المستخدم غير صالح' });
+      const activity = await getCommunityUserActivityForAdmin(userId);
+      if (!activity) return res.status(404).json({ error: 'المستخدم غير موجود' });
+      res.json(activity);
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }

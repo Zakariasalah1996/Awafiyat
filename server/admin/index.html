@@ -238,6 +238,11 @@
     .community-post-image { width:72px; height:58px; object-fit:cover; border-radius:8px; border:1px solid var(--border); }
     .community-content-preview { max-width:420px; white-space:pre-wrap; line-height:1.6; }
     .community-status-note { padding:12px 14px; border-radius:10px; background:#EFF6FF; color:#1D4ED8; margin-bottom:18px; font-size:14px; }
+    .community-user-id { display:inline-block; direction:ltr; font-family:monospace; font-weight:700; color:var(--primary-dark); background:#E8F5E9; border-radius:6px; padding:2px 7px; margin-top:5px; }
+    .community-user-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px; }
+    .community-user-card { border:1px solid var(--border); border-radius:10px; padding:12px; background:#FBFDFB; }
+    .community-user-card small { display:block; color:var(--text-muted); margin-bottom:4px; }
+    .community-user-card strong { display:block; overflow-wrap:anywhere; }
 
     @media (max-width: 900px) {
       .sidebar { width: 220px; }
@@ -815,6 +820,17 @@
   </div>
 </div>
 
+<!-- COMMUNITY USER ACTIVITY MODAL -->
+<div class="modal-overlay" id="communityUserActivityModal">
+  <div class="modal" style="width:880px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px">
+      <h3 style="margin:0">👤 هوية ونشاط مستخدم المجتمع</h3>
+      <button class="btn btn-outline btn-sm" onclick="closeCommunityUserActivityModal()">إغلاق</button>
+    </div>
+    <div id="communityUserActivityContent" class="loading"><div class="spinner"></div>جاري تحميل النشاط...</div>
+  </div>
+</div>
+
 <script>
 // ==================== CONFIG ====================
 const API_BASE = window.location.origin;
@@ -927,6 +943,69 @@ function formatAdminDate(value) {
 
 function communityReportStatusLabel(status) {
   return ({ new:'جديد', reviewed:'قيد المراجعة', resolved:'محلول', dismissed:'مرفوض' })[status] || status;
+}
+
+function communityUserIdentityHtml(userId, userName, includeButton = true) {
+  const id = Number(userId);
+  if (!Number.isInteger(id) || id <= 0) {
+    return `<strong>${escapeHtml(userName || 'إدارة ألف عافيات')}</strong><br><span class="badge-status badge-new">حساب رسمي</span>`;
+  }
+  return `<strong>${escapeHtml(userName || 'غير معروف')}</strong><br><span class="community-user-id">USER #${id}</span>${includeButton ? `<br><button class="btn btn-outline btn-sm" style="margin-top:6px" onclick="openCommunityUserActivityModal(${id})">👤 عرض النشاط</button>` : ''}`;
+}
+
+function communityCountryLabel(value) {
+  return ({ iraq:'العراق', saudi:'السعودية', uae:'الإمارات', egypt:'مصر' })[value] || value || 'غير محدد';
+}
+
+async function openCommunityUserActivityModal(userId) {
+  const modal = document.getElementById('communityUserActivityModal');
+  const content = document.getElementById('communityUserActivityContent');
+  modal.classList.add('show');
+  content.className = 'loading';
+  content.innerHTML = '<div class="spinner"></div>جاري تحميل النشاط...';
+  const data = await api(`community/users/${Number(userId)}/activity`);
+  if (!data || data.error) {
+    content.className = 'empty-state';
+    content.textContent = data?.error || 'تعذر تحميل نشاط المستخدم';
+    return;
+  }
+
+  const user = data.user || {};
+  const stats = data.stats || {};
+  const posts = Array.isArray(data.posts) ? data.posts : [];
+  const comments = Array.isArray(data.comments) ? data.comments : [];
+  const platform = ({ android:'Android', ios:'iOS', web:'Web' })[user.platform] || 'غير معروف';
+  const postsRows = posts.length
+    ? posts.map(post => `<tr><td>#${Number(post.id)}</td><td><div style="max-width:340px;white-space:pre-wrap">${escapeHtml(post.body || (post.imageUrl ? 'منشور بصورة' : 'بلا نص'))}</div></td><td><span class="badge-status ${post.isHidden ? 'badge-inactive' : 'badge-active'}">${post.isHidden ? 'مخفي' : 'ظاهر'}</span></td><td>${formatAdminDate(post.createdAt)}</td></tr>`).join('')
+    : '<tr><td colspan="4" class="empty-state">لا توجد منشورات لهذا المستخدم</td></tr>';
+  const commentsRows = comments.length
+    ? comments.map(comment => `<tr><td>#${Number(comment.id)}</td><td>منشور #${Number(comment.postId)}</td><td><div style="max-width:340px;white-space:pre-wrap">${escapeHtml(comment.body || '')}</div></td><td><span class="badge-status ${comment.isHidden ? 'badge-inactive' : 'badge-active'}">${comment.isHidden ? 'مخفي' : 'ظاهر'}</span></td><td>${formatAdminDate(comment.createdAt)}</td></tr>`).join('')
+    : '<tr><td colspan="5" class="empty-state">لا توجد تعليقات لهذا المستخدم</td></tr>';
+
+  content.className = '';
+  content.innerHTML = `
+    <div class="community-user-grid">
+      <div class="community-user-card"><small>الاسم الحالي</small><strong>${escapeHtml(user.name || 'غير معروف')}</strong></div>
+      <div class="community-user-card"><small>المعرّف الداخلي الثابت</small><strong class="community-user-id">USER #${Number(user.id)}</strong></div>
+      <div class="community-user-card"><small>الدولة</small><strong>${escapeHtml(communityCountryLabel(user.country))}</strong></div>
+      <div class="community-user-card"><small>الجهاز</small><strong>${escapeHtml(platform)}${user.deviceSuffix ? ` · …${escapeHtml(user.deviceSuffix)}` : ''}</strong></div>
+      <div class="community-user-card"><small>تاريخ التسجيل</small><strong>${formatAdminDate(user.createdAt)}</strong></div>
+      <div class="community-user-card"><small>آخر نشاط</small><strong>${formatAdminDate(user.lastActiveAt || user.lastSignedIn)}</strong></div>
+      <div class="community-user-card"><small>المنشورات</small><strong>${Number(stats.totalPosts || 0)}${Number(stats.hiddenPosts || 0) ? ` · مخفي ${Number(stats.hiddenPosts)}` : ''}</strong></div>
+      <div class="community-user-card"><small>التعليقات</small><strong>${Number(stats.totalComments || 0)}${Number(stats.hiddenComments || 0) ? ` · مخفي ${Number(stats.hiddenComments)}` : ''}</strong></div>
+    </div>
+    <div class="table-card" style="box-shadow:none;border:1px solid var(--border)">
+      <div class="table-header"><h3>منشورات المستخدم</h3></div>
+      <div style="overflow-x:auto;max-height:240px"><table><thead><tr><th>#</th><th>المحتوى</th><th>الحالة</th><th>التاريخ</th></tr></thead><tbody>${postsRows}</tbody></table></div>
+    </div>
+    <div class="table-card" style="box-shadow:none;border:1px solid var(--border);margin-bottom:0">
+      <div class="table-header"><h3>تعليقات المستخدم</h3></div>
+      <div style="overflow-x:auto;max-height:280px"><table><thead><tr><th>#</th><th>المنشور</th><th>التعليق</th><th>الحالة</th><th>التاريخ</th></tr></thead><tbody>${commentsRows}</tbody></table></div>
+    </div>`;
+}
+
+function closeCommunityUserActivityModal() {
+  document.getElementById('communityUserActivityModal').classList.remove('show');
 }
 
 // ==================== COMMUNITY ADMINISTRATION ====================
@@ -1074,7 +1153,7 @@ async function loadCommunityAdminPosts() {
     ].filter(Boolean).join(' ');
     return `<tr>
       <td><div style="display:flex;gap:10px;align-items:flex-start">${image}<div class="community-content-preview"><strong>#${Number(post.id)}</strong><br>${escapeHtml(post.body || 'منشور بصورة فقط')}</div></div></td>
-      <td><strong>${escapeHtml(post.authorName || 'غير معروف')}</strong></td>
+      <td>${communityUserIdentityHtml(post.authorId, post.authorName)}</td>
       <td>❤️ ${Number(post.likeCount || 0)}<br>💬 ${Number(post.commentCount || 0)}</td>
       <td>${badges}</td>
       <td>${formatAdminDate(post.createdAt)}</td>
@@ -1159,7 +1238,7 @@ async function reloadCommunityAdminComments() {
     return;
   }
   tbody.innerHTML = comments.map(comment => `<tr>
-    <td><strong>${escapeHtml(comment.authorName || 'غير معروف')}</strong><br><small>${formatAdminDate(comment.createdAt)}</small></td>
+    <td>${communityUserIdentityHtml(comment.authorId, comment.authorName)}<br><small>${formatAdminDate(comment.createdAt)}</small></td>
     <td><div style="max-width:360px;white-space:pre-wrap">${escapeHtml(comment.body || '')}</div></td>
     <td>${Number(comment.likeCount || 0)}</td>
     <td><span class="badge-status ${comment.isHidden ? 'badge-inactive' : 'badge-active'}">${comment.isHidden ? 'مخفي' : 'ظاهر'}</span></td>
@@ -1205,6 +1284,7 @@ async function loadCommunityReports() {
     const isComment = Boolean(report.commentId);
     const body = isComment ? report.commentBody : report.postBody;
     const author = isComment ? report.commentAuthorName : report.postAuthorName;
+    const authorId = isComment ? report.commentAuthorId : report.postAuthorId;
     const hidden = isComment ? report.commentHidden : report.postHidden;
     const typeLabel = isComment ? 'تعليق' : 'منشور';
     const statusClass = report.status === 'resolved' ? 'badge-resolved' : report.status === 'new' ? 'badge-new' : 'badge-read';
@@ -1213,7 +1293,7 @@ async function loadCommunityReports() {
       : '';
     return `<tr>
       <td><strong>${typeLabel}</strong><br><small>#${isComment ? Number(report.commentId) : Number(report.postId)}</small></td>
-      <td><strong>${escapeHtml(author || 'غير معروف')}</strong><div style="max-width:360px;white-space:pre-wrap">${escapeHtml(body || 'محتوى بلا نص')}</div>${image}${hidden ? '<span class="badge-status badge-inactive">مخفي</span>' : ''}</td>
+      <td>${communityUserIdentityHtml(authorId, author)}<div style="max-width:360px;white-space:pre-wrap;margin-top:8px">${escapeHtml(body || 'محتوى بلا نص')}</div>${image}${hidden ? '<span class="badge-status badge-inactive">مخفي</span>' : ''}</td>
       <td><div style="max-width:260px;white-space:pre-wrap">${escapeHtml(report.reason)}</div></td>
       <td>${formatAdminDate(report.createdAt)}</td>
       <td><span class="badge-status ${statusClass}">${escapeHtml(communityReportStatusLabel(report.status))}</span></td>

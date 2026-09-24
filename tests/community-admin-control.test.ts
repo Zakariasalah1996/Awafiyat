@@ -62,6 +62,37 @@ describe("Community administration controls", () => {
     expect(admin).toContain("toggleCommunityCommentVisibility");
   });
 
+  it("distinguishes same-name users privately inside the administration panel", () => {
+    const database = read("server", "db.ts");
+    const server = read("server", "_core", "index.ts");
+    const admin = read("server", "admin", "index.html");
+    const activityFunction = database.slice(
+      database.indexOf("export async function getCommunityUserActivityForAdmin"),
+      database.indexOf("export async function updateCommunityPostForAdmin"),
+    );
+
+    expect(server).toContain("app.get('/api/admin/community/users/:userId/activity', adminAuth");
+    expect(activityFunction).toContain("deviceSuffix");
+    expect(activityFunction).toContain("lastActiveAt");
+    expect(activityFunction).not.toContain("openId:");
+    expect(admin).toContain("USER #${id}");
+    expect(admin).toContain("openCommunityUserActivityModal");
+    expect(admin).toContain("هوية ونشاط مستخدم المجتمع");
+    expect(admin).toContain("المعرّف الداخلي الثابت");
+  });
+
+  it("includes author IDs in report moderation without exposing them to the mobile app", () => {
+    const database = read("server", "db.ts");
+    const admin = read("server", "admin", "index.html");
+    const client = read("lib", "community-api.ts");
+
+    expect(database).toContain("postAuthorId: communityPosts.authorId");
+    expect(database).toContain("commentAuthorId: communityComments.authorId");
+    expect(admin).toContain("report.commentAuthorId");
+    expect(admin).toContain("report.postAuthorId");
+    expect(client).not.toContain("deviceSuffix");
+  });
+
   it("keeps comment notifications for ordinary post owners", () => {
     const server = read("server", "_core", "index.ts");
     expect(server).toContain("void notifyCommunityPostOwner");

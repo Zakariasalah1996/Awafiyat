@@ -838,6 +838,73 @@ export async function getCommunityPostsForAdmin(limit = 100, offset = 0): Promis
   );
 }
 
+export async function getCommunityUserActivityForAdmin(userId: number) {
+  if (!_db) throw new Error("Database not available");
+  const [profileRows, sessions, posts, comments, postTotals, visiblePostTotals, commentTotals, visibleCommentTotals] = await Promise.all([
+    _db
+      .select({
+        id: users.id,
+        name: users.name,
+        country: users.country,
+        loginMethod: users.loginMethod,
+        isActive: users.isActive,
+        createdAt: users.createdAt,
+        lastSignedIn: users.lastSignedIn,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1),
+    _db
+      .select({ deviceId: activeUserSessions.deviceId, platform: activeUserSessions.platform, lastActiveAt: activeUserSessions.lastActiveAt })
+      .from(activeUserSessions)
+      .where(eq(activeUserSessions.userId, userId))
+      .orderBy(desc(activeUserSessions.lastActiveAt))
+      .limit(1),
+    _db
+      .select({ id: communityPosts.id, body: communityPosts.body, imageUrl: communityPosts.imageUrl, isHidden: communityPosts.isHidden, createdAt: communityPosts.createdAt })
+      .from(communityPosts)
+      .where(eq(communityPosts.authorId, userId))
+      .orderBy(desc(communityPosts.createdAt))
+      .limit(30),
+    _db
+      .select({ id: communityComments.id, postId: communityComments.postId, body: communityComments.body, isHidden: communityComments.isHidden, createdAt: communityComments.createdAt })
+      .from(communityComments)
+      .where(eq(communityComments.authorId, userId))
+      .orderBy(desc(communityComments.createdAt))
+      .limit(50),
+    _db.select({ total: count() }).from(communityPosts).where(eq(communityPosts.authorId, userId)),
+    _db.select({ total: count() }).from(communityPosts).where(and(eq(communityPosts.authorId, userId), eq(communityPosts.isHidden, false))),
+    _db.select({ total: count() }).from(communityComments).where(eq(communityComments.authorId, userId)),
+    _db.select({ total: count() }).from(communityComments).where(and(eq(communityComments.authorId, userId), eq(communityComments.isHidden, false))),
+  ]);
+
+  const user = profileRows[0];
+  if (!user) return undefined;
+  const session = sessions[0];
+  const deviceSuffix = session?.deviceId ? session.deviceId.slice(-6).toUpperCase() : null;
+  const totalPosts = Number(postTotals[0]?.total ?? 0);
+  const visiblePosts = Number(visiblePostTotals[0]?.total ?? 0);
+  const totalComments = Number(commentTotals[0]?.total ?? 0);
+  const visibleComments = Number(visibleCommentTotals[0]?.total ?? 0);
+
+  return {
+    user: {
+      ...user,
+      lastActiveAt: session?.lastActiveAt ?? null,
+      platform: session?.platform ?? null,
+      deviceSuffix,
+    },
+    stats: {
+      totalPosts,
+      hiddenPosts: totalPosts - visiblePosts,
+      totalComments,
+      hiddenComments: totalComments - visibleComments,
+    },
+    posts,
+    comments,
+  };
+}
+
 export async function updateCommunityPostForAdmin(
   postId: number,
   input: { body: string | null; imageUrl: string | null },
@@ -1046,9 +1113,11 @@ export async function getCommunityReportsForAdmin(limit = 100, offset = 0, statu
       createdAt: communityReports.createdAt,
       postBody: communityPosts.body,
       postImageUrl: communityPosts.imageUrl,
+      postAuthorId: communityPosts.authorId,
       postAuthorName: communityPosts.authorName,
       postHidden: communityPosts.isHidden,
       commentBody: communityComments.body,
+      commentAuthorId: communityComments.authorId,
       commentAuthorName: communityComments.authorName,
       commentHidden: communityComments.isHidden,
     })
