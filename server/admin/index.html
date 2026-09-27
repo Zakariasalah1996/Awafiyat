@@ -485,6 +485,43 @@
           ⚠️ لا توجد أجهزة مسجلة. يجب على المستخدمين فتح التطبيق وتفعيل الإشعارات من صفحة الحساب.
         </div>
       </div>
+      <div class="notif-form-card" id="automaticNotificationCampaignCard">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px">
+          <div>
+            <h3 style="margin-bottom:6px">🗓️ برنامج الإشعارات التلقائية — 30 يومًا</h3>
+            <p style="color:var(--text-muted);font-size:14px;line-height:1.7">إشعار صباحي وآخر مسائي إلى جميع الأجهزة المسجلة. يمكنك إيقاف البرنامج أو تعديل النصوص والمواعيد في أي وقت.</p>
+          </div>
+          <span class="badge-status badge-read" id="automaticCampaignBadge">جاري التحميل</span>
+        </div>
+        <div class="stats-grid" style="margin-bottom:18px">
+          <div class="stat-card"><div class="stat-icon notifs">📨</div><div class="stat-info"><h3 id="automaticCampaignProgress">—</h3><p>تم إرسالها من أصل 60</p></div></div>
+          <div class="stat-card"><div class="stat-icon users">⏰</div><div class="stat-info"><h3 id="automaticCampaignNext" style="font-size:17px">—</h3><p>الإرسال القادم بتوقيت بغداد</p></div></div>
+          <div class="stat-card"><div class="stat-icon subs">✅</div><div class="stat-info"><h3 id="automaticCampaignSuccess">—</h3><p>إجمالي الأجهزة الناجحة</p></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;align-items:end">
+          <div class="form-group" style="margin-bottom:0"><label>موعد الصباح</label><input class="form-control" id="automaticMorningTime" type="time" value="09:00"></div>
+          <div class="form-group" style="margin-bottom:0"><label>موعد المساء</label><input class="form-control" id="automaticEveningTime" type="time" value="19:30"></div>
+          <button class="btn btn-primary" id="automaticSaveScheduleBtn" onclick="saveAutomaticNotificationSchedule()">💾 حفظ المواعيد</button>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+          <button class="btn btn-warning" id="automaticToggleBtn" onclick="toggleAutomaticNotificationCampaign()">إيقاف مؤقت</button>
+          <button class="btn btn-outline" onclick="restartAutomaticNotificationCampaignFromAdmin()">↻ بدء شهر جديد</button>
+          <button class="btn btn-outline" onclick="loadAutomaticNotificationCampaign()">🔄 تحديث</button>
+        </div>
+        <div id="automaticCampaignError" style="display:none;margin-top:14px;padding:10px 14px;background:#FFEBEE;border-radius:8px;color:#C62828;font-size:13px"></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div><h3>📝 رسائل البرنامج التلقائي</h3><small style="color:var(--text-muted)">يمكن تعديل الرسائل التي لم تُرسل بعد فقط.</small></div>
+          <button class="btn btn-outline btn-sm" onclick="loadAutomaticNotificationCampaign()">🔄 تحديث</button>
+        </div>
+        <div style="overflow-x:auto;max-height:520px">
+          <table>
+            <thead><tr><th>اليوم</th><th>الفترة</th><th>الفئة</th><th>العنوان والنص</th><th>الحالة</th><th>إجراء</th></tr></thead>
+            <tbody id="automaticNotificationsTableBody"><tr><td colspan="6" class="loading"><div class="spinner"></div>جاري التحميل...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
       <div class="notif-form-card">
         <h3>📤 إرسال إشعار جديد</h3>
         <div class="form-group">
@@ -785,6 +822,21 @@
   </div>
 </div>
 
+<!-- AUTOMATIC NOTIFICATION EDIT MODAL -->
+<div class="modal-overlay" id="automaticNotificationEditModal">
+  <div class="modal">
+    <h3>✏️ تعديل إشعار تلقائي</h3>
+    <input type="hidden" id="automaticNotificationEditId">
+    <div class="form-group"><label>الفئة</label><input class="form-control" id="automaticNotificationEditCategory" maxlength="64"></div>
+    <div class="form-group"><label>العنوان</label><input class="form-control" id="automaticNotificationEditTitle" maxlength="80"></div>
+    <div class="form-group"><label>النص</label><textarea class="form-control" id="automaticNotificationEditBody" maxlength="180"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveAutomaticNotificationEdit()">💾 حفظ التعديل</button>
+      <button class="btn btn-outline" onclick="closeAutomaticNotificationEditModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 <!-- COMMUNITY POST EDIT MODAL -->
 <div class="modal-overlay" id="communityPostEditModal">
   <div class="modal">
@@ -902,7 +954,7 @@ function navigateTo(page) {
     case 'users': loadUsers(); break;
     case 'subscriptions': loadSubscriptions(); break;
     case 'promo': loadPromoCodes(); break;
-    case 'notifications': loadNotifications(); loadPushTokenStats(); break;
+    case 'notifications': loadNotifications(); loadPushTokenStats(); loadAutomaticNotificationCampaign(); break;
     case 'feedback': loadFeedback(); break;
     case 'community-admin': loadCommunityAdmin(); break;
     case 'community-moderation': loadCommunityReports(); break;
@@ -1511,6 +1563,147 @@ async function togglePromo(id, isActive) {
 
 // ==================== NOTIFICATIONS ====================
 let selectedTarget = 'all', selectedTargetValue = '';
+let automaticNotificationCampaign = null;
+
+function formatBaghdadDate(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleString('ar-IQ', {
+    timeZone: 'Asia/Baghdad',
+    day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit',
+  });
+}
+
+function automaticNotificationStatusLabel(status) {
+  return ({ pending:'بانتظار الإرسال', sending:'جاري الإرسال', sent:'تم الإرسال', failed:'إعادة محاولة' })[status] || status;
+}
+
+function automaticNotificationStatusClass(status) {
+  return status === 'sent' ? 'badge-active' : status === 'failed' ? 'badge-inactive' : status === 'sending' ? 'badge-new' : 'badge-read';
+}
+
+async function loadAutomaticNotificationCampaign() {
+  const data = await api('notifications/automatic');
+  const tbody = document.getElementById('automaticNotificationsTableBody');
+  const errorBox = document.getElementById('automaticCampaignError');
+  if (!data || data.error || !data.settings) {
+    errorBox.style.display = 'block';
+    errorBox.textContent = data?.error || 'تعذر تحميل برنامج الإشعارات التلقائية';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">تعذر تحميل الرسائل</td></tr>';
+    return;
+  }
+
+  automaticNotificationCampaign = data;
+  const settings = data.settings;
+  const items = Array.isArray(data.items) ? data.items : [];
+  const sentItems = items.filter(item => item.status === 'sent');
+  const totalSuccess = sentItems.reduce((sum, item) => sum + Number(item.successCount || 0), 0);
+  document.getElementById('automaticMorningTime').value = settings.morningTime || '09:00';
+  document.getElementById('automaticEveningTime').value = settings.eveningTime || '19:30';
+  document.getElementById('automaticCampaignProgress').textContent = `${sentItems.length} / ${items.length || 60}`;
+  document.getElementById('automaticCampaignSuccess').textContent = String(totalSuccess);
+  document.getElementById('automaticCampaignNext').textContent = settings.isCompleted ? 'اكتمل البرنامج' : formatBaghdadDate(settings.nextSendAt);
+
+  const badge = document.getElementById('automaticCampaignBadge');
+  const toggleButton = document.getElementById('automaticToggleBtn');
+  if (settings.isCompleted) {
+    badge.className = 'badge-status badge-active';
+    badge.textContent = 'مكتمل';
+    toggleButton.disabled = true;
+    toggleButton.textContent = 'اكتمل البرنامج';
+  } else if (settings.isActive) {
+    badge.className = 'badge-status badge-active';
+    badge.textContent = 'يعمل تلقائيًا';
+    toggleButton.disabled = false;
+    toggleButton.className = 'btn btn-warning';
+    toggleButton.textContent = '⏸ إيقاف مؤقت';
+  } else {
+    badge.className = 'badge-status badge-inactive';
+    badge.textContent = 'متوقف مؤقتًا';
+    toggleButton.disabled = false;
+    toggleButton.className = 'btn btn-success';
+    toggleButton.textContent = '▶ استئناف';
+  }
+
+  if (settings.lastError) {
+    errorBox.style.display = 'block';
+    errorBox.textContent = `آخر خطأ: ${settings.lastError}`;
+  } else {
+    errorBox.style.display = 'none';
+    errorBox.textContent = '';
+  }
+
+  tbody.innerHTML = items.map(item => `<tr>
+    <td>${Number(item.day)}</td>
+    <td>${item.period === 'morning' ? '☀️ صباحًا' : '🌙 مساءً'}</td>
+    <td>${escapeHtml(item.category)}</td>
+    <td><strong>${escapeHtml(item.title)}</strong><br><small style="color:var(--text-muted);line-height:1.6">${escapeHtml(item.body)}</small></td>
+    <td><span class="badge-status ${automaticNotificationStatusClass(item.status)}">${automaticNotificationStatusLabel(item.status)}</span>${item.sentAt ? `<br><small>${formatBaghdadDate(item.sentAt)}</small>` : ''}</td>
+    <td>${item.status === 'pending' || item.status === 'failed' ? `<button class="btn btn-outline btn-sm" onclick="openAutomaticNotificationEditModal(${Number(item.id)})">✏️ تعديل</button>` : '—'}</td>
+  </tr>`).join('');
+}
+
+async function saveAutomaticNotificationSchedule() {
+  const button = document.getElementById('automaticSaveScheduleBtn');
+  button.disabled = true;
+  const result = await api('notifications/automatic/schedule', 'PUT', {
+    morningTime: document.getElementById('automaticMorningTime').value,
+    eveningTime: document.getElementById('automaticEveningTime').value,
+  });
+  button.disabled = false;
+  if (result?.success) {
+    showToast('تم حفظ مواعيد الإشعارات');
+    await loadAutomaticNotificationCampaign();
+  } else showToast(result?.error || 'تعذر حفظ المواعيد', 'error');
+}
+
+async function toggleAutomaticNotificationCampaign() {
+  const settings = automaticNotificationCampaign?.settings;
+  if (!settings) return;
+  const result = await api('notifications/automatic/enabled', 'POST', { isActive: !settings.isActive });
+  if (result?.success) {
+    showToast(settings.isActive ? 'تم إيقاف البرنامج مؤقتًا' : 'تم استئناف البرنامج');
+    await loadAutomaticNotificationCampaign();
+  } else showToast(result?.error || 'تعذر تغيير حالة البرنامج', 'error');
+}
+
+async function restartAutomaticNotificationCampaignFromAdmin() {
+  if (!confirm('سيبدأ البرنامج من الإشعار الأول، وقد تُرسل الرسائل السابقة مرة أخرى. هل تريد المتابعة؟')) return;
+  const result = await api('notifications/automatic/restart', 'POST');
+  if (result?.success) {
+    showToast('بدأ برنامج إشعارات جديد لمدة 30 يومًا');
+    await loadAutomaticNotificationCampaign();
+  } else showToast(result?.error || 'تعذر إعادة بدء البرنامج', 'error');
+}
+
+function openAutomaticNotificationEditModal(itemId) {
+  const item = automaticNotificationCampaign?.items?.find(entry => Number(entry.id) === Number(itemId));
+  if (!item) return;
+  document.getElementById('automaticNotificationEditId').value = String(item.id);
+  document.getElementById('automaticNotificationEditCategory').value = item.category || '';
+  document.getElementById('automaticNotificationEditTitle').value = item.title || '';
+  document.getElementById('automaticNotificationEditBody').value = item.body || '';
+  document.getElementById('automaticNotificationEditModal').classList.add('show');
+}
+
+function closeAutomaticNotificationEditModal() {
+  document.getElementById('automaticNotificationEditModal').classList.remove('show');
+}
+
+async function saveAutomaticNotificationEdit() {
+  const itemId = Number(document.getElementById('automaticNotificationEditId').value);
+  const result = await api(`notifications/automatic/items/${itemId}`, 'PATCH', {
+    category: document.getElementById('automaticNotificationEditCategory').value.trim(),
+    title: document.getElementById('automaticNotificationEditTitle').value.trim(),
+    body: document.getElementById('automaticNotificationEditBody').value.trim(),
+  });
+  if (result?.success) {
+    closeAutomaticNotificationEditModal();
+    showToast('تم تعديل الإشعار');
+    await loadAutomaticNotificationCampaign();
+  } else showToast(result?.error || 'تعذر تعديل الإشعار', 'error');
+}
 
 function selectTarget(el) {
   document.querySelectorAll('.target-option').forEach(o => o.classList.remove('selected'));

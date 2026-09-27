@@ -14,11 +14,13 @@ import {
   createCommunityComment,
   createCommunityPostWithHourlyLimit,
   createCommunityReport,
+  createNotification,
   deactivatePushToken,
   deleteCommunityComment,
   deleteCommunityPost,
   ensureDatabaseSchema,
   getActiveUserCount,
+  getActivePushTokens,
   getCommunityAuthor,
   getCommunityComment,
   getCommunityComments,
@@ -30,6 +32,7 @@ import {
   getCommunitySettings,
   getCommunityUserActivityForAdmin,
   getDailyActiveUserCount,
+  getPushTokensByCountry,
   getDb,
   getSubscriptionClickCount,
   getSubscriptionClicks,
@@ -45,6 +48,7 @@ import {
   updateCommunityPost,
   updateCommunityPostForAdmin,
   updateCommunitySettings,
+  updateNotificationCounts,
 } from "../db";
 import { recipeImages } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -54,6 +58,14 @@ import * as pushStore from "../push-store";
 import { sendExpoPushNotifications } from "../expo-push";
 import * as recipeImageStore from "../recipe-image-store";
 import { buildCommunityCommentNotification } from "../community-notifications";
+import {
+  getAutomaticNotificationCampaignStatus,
+  restartAutomaticNotificationCampaign,
+  setAutomaticNotificationCampaignEnabled,
+  startAutomaticNotificationScheduler,
+  updateAutomaticNotificationMessage,
+  updateAutomaticNotificationSchedule,
+} from "../automatic-notification-scheduler";
 
 // ===== FCM V1 API Direct Send =====
 let _fcmAccessToken: string | null = null;
@@ -191,6 +203,57 @@ async function sendPushViaFCM(tokens: string[], title: string, body: string, dbD
 
   console.log(`[Push] Total: ${tokens.length} (${expoTokens.length} Expo + ${fcmTokens.length} FCM), success: ${successCount}, fail: ${failCount}`);
   return { successCount, failCount, sentCount: tokens.length };
+}
+
+async function deliverAdminNotification(
+  title: string,
+  body: string,
+  targetType: "all" | "country" = "all",
+  targetValue: string | null = null,
+  source: "manual" | "automatic" = "manual",
+) {
+  const tokenRows = pushStore.isPostgresPushStoreEnabled()
+    ? (targetType === "country" && targetValue
+        ? await pushStore.getPostgresPushTokensByCountry(targetValue)
+        : await pushStore.getPostgresActivePushTokens())
+    : (targetType === "country" && targetValue
+        ? await getPushTokensByCountry(targetValue)
+        : await getActivePushTokens());
+  const tokens = [...new Set(tokenRows.map((row: any) => row.token as string).filter(Boolean))];
+  const notificationInput = {
+    title: title.trim(),
+    body: body.trim(),
+    targetType,
+    targetValue,
+    sentCount: tokens.length,
+  };
+  const notificationId = pushStore.isPostgresPushStoreEnabled()
+    ? await pushStore.createPostgresAdminNotification(notificationInput)
+    : await createNotification(notificationInput);
+
+  let successCount = 0;
+  let failCount = 0;
+  if (tokens.length > 0) {
+    console.info("[Push] Starting admin notification broadcast", { source, tokenCount: tokens.length });
+    const deactivateToken = pushStore.isPostgresPushStoreEnabled()
+      ? pushStore.deactivatePostgresPushToken
+      : deactivatePushToken;
+    const result = await sendPushViaFCM(tokens, notificationInput.title, notificationInput.body, deactivateToken, {
+      data: { type: "admin_notification", source },
+      channelId: "admin_updates",
+    });
+    successCount = result.successCount;
+    failCount = result.failCount;
+    if (notificationId) {
+      if (pushStore.isPostgresPushStoreEnabled()) {
+        await pushStore.updatePostgresNotificationCounts(notificationId, tokens.length, successCount, failCount);
+      } else {
+        await updateNotificationCounts(notificationId, tokens.length, successCount, failCount);
+      }
+    }
+  }
+
+  return { sentCount: tokens.length, successCount, failCount };
 }
 
 async function notifyCommunityPostOwner(input: {
@@ -804,35 +867,69 @@ async function startServer() {
     }
   });
 
+  app.get('/api/admin/notifications/automatic', adminAuth, async (_req, res) => {
+    try {
+      res.setHeader('X-Awafiyat-Automatic-Notifications-Version', '1');
+      res.json(await getAutomaticNotificationCampaignStatus());
+    } catch (error) {
+      console.error('[Automatic Notifications] Failed to load campaign', error);
+      res.status(500).json({ error: 'تعذر تحميل برنامج الإشعارات التلقائية' });
+    }
+  });
+
+  app.put('/api/admin/notifications/automatic/schedule', adminAuth, async (req, res) => {
+    try {
+      const morningTime = typeof req.body?.morningTime === 'string' ? req.body.morningTime : '';
+      const eveningTime = typeof req.body?.eveningTime === 'string' ? req.body.eveningTime : '';
+      res.json({ success: true, ...(await updateAutomaticNotificationSchedule({ morningTime, eveningTime })) });
+    } catch (error: any) {
+      res.status(400).json({ error: error?.message || 'تعذر حفظ مواعيد الإرسال' });
+    }
+  });
+
+  app.post('/api/admin/notifications/automatic/enabled', adminAuth, async (req, res) => {
+    try {
+      if (typeof req.body?.isActive !== 'boolean') return res.status(400).json({ error: 'حالة البرنامج مطلوبة' });
+      res.json({ success: true, ...(await setAutomaticNotificationCampaignEnabled(req.body.isActive)) });
+    } catch (error: any) {
+      res.status(400).json({ error: error?.message || 'تعذر تغيير حالة البرنامج' });
+    }
+  });
+
+  app.post('/api/admin/notifications/automatic/restart', adminAuth, async (_req, res) => {
+    try {
+      res.json({ success: true, ...(await restartAutomaticNotificationCampaign()) });
+    } catch (error) {
+      console.error('[Automatic Notifications] Failed to restart campaign', error);
+      res.status(500).json({ error: 'تعذر إعادة بدء برنامج الإشعارات' });
+    }
+  });
+
+  app.patch('/api/admin/notifications/automatic/items/:id', adminAuth, async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const title = typeof req.body?.title === 'string' ? req.body.title : '';
+      const body = typeof req.body?.body === 'string' ? req.body.body : '';
+      const category = typeof req.body?.category === 'string' ? req.body.category : '';
+      res.json({ success: true, ...(await updateAutomaticNotificationMessage({ id, title, body, category })) });
+    } catch (error: any) {
+      res.status(400).json({ error: error?.message || 'تعذر تعديل الإشعار' });
+    }
+  });
+
   app.post('/api/admin/notifications/send', adminAuth, async (req, res) => {
     try {
       const { title, body, targetType, targetValue } = req.body;
       if (typeof title !== "string" || !title.trim() || typeof body !== "string" || !body.trim()) return res.status(400).json({ error: "title and body are required" });
       const normalizedTargetType: "all" | "country" = targetType === "country" ? "country" : "all";
-      const tokenRows = pushStore.isPostgresPushStoreEnabled()
-        ? (normalizedTargetType === "country" && targetValue ? await pushStore.getPostgresPushTokensByCountry(String(targetValue)) : await pushStore.getPostgresActivePushTokens())
-        : (normalizedTargetType === "country" && targetValue ? await adminDb.getPushTokensByCountry(String(targetValue)) : await adminDb.getActivePushTokens());
-      const tokens = [...new Set(tokenRows.map((row: any) => row.token as string))];
-      const notificationInput = { title: title.trim(), body: body.trim(), targetType: normalizedTargetType, targetValue: targetValue ? String(targetValue) : null, sentCount: tokens.length };
-      const notifId = pushStore.isPostgresPushStoreEnabled()
-        ? await pushStore.createPostgresAdminNotification(notificationInput)
-        : await adminDb.createNotification(notificationInput);
-
-      // Send via FCM V1 API (direct) + Expo Push API (fallback for ExponentPushToken)
-      let successCount = 0, failCount = 0;
-      if (tokens.length > 0) {
-        console.log('[Push] Sending to', tokens.length, 'tokens:', tokens.map(t => t.substring(0, 25) + '...'));
-        const deactivateToken = pushStore.isPostgresPushStoreEnabled() ? pushStore.deactivatePostgresPushToken : deactivatePushToken;
-        const result = await sendPushViaFCM(tokens, notificationInput.title, notificationInput.body, deactivateToken);
-        successCount = result.successCount;
-        failCount = result.failCount;
-        if (notifId) {
-          if (pushStore.isPostgresPushStoreEnabled()) await pushStore.updatePostgresNotificationCounts(notifId, tokens.length, successCount, failCount);
-          else await adminDb.updateNotificationCounts(notifId, tokens.length, successCount, failCount);
-        }
-      }
-
-      res.json({ success: true, sentCount: tokens.length, successCount, failCount });
+      const result = await deliverAdminNotification(
+        title.trim(),
+        body.trim(),
+        normalizedTargetType,
+        targetValue ? String(targetValue) : null,
+        "manual",
+      );
+      res.json({ success: true, ...result });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
@@ -1485,6 +1582,11 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`[api] server listening on port ${port}`);
+    void startAutomaticNotificationScheduler((title, body) =>
+      deliverAdminNotification(title, body, "all", null, "automatic"),
+    ).catch((error) => {
+      console.error('[Automatic Notifications] Scheduler failed to start', error);
+    });
   });
 }
 
