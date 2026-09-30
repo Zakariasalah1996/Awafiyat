@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { Platform } from "react-native";
-import Purchases, { type PurchasesOffering, type PurchasesPackage } from "react-native-purchases";
+import Purchases, { type PurchasesOffering, type PurchasesPackage, type SubscriptionOption } from "react-native-purchases";
 
 import { getApiBaseUrl } from "@/constants/oauth";
 import { getDeviceId, getGuestUserId } from "@/lib/guest-auth";
 import { getConfiguredPurchases, useSubscriptionContext } from "@/lib/subscription-context";
+import { selectPaidBasePlan } from "@/lib/subscription-pricing";
 import { useUser } from "@/lib/user-context";
 
 const ENTITLEMENT_ID = "premium";
 
-async function trackSubscriptionClick(plan: string, source: string) {
+async function trackSubscriptionClick(plan: string, source: string, country: string | undefined) {
   try {
     const deviceId = await getDeviceId();
     const userId = await getGuestUserId();
@@ -17,7 +18,7 @@ async function trackSubscriptionClick(plan: string, source: string) {
     await fetch(`${baseUrl}/api/user/subscription-click`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, deviceId, plan, source, country: "iraq" }),
+      body: JSON.stringify({ userId, deviceId, plan, source, country: country ?? "unknown" }),
     });
   } catch {
     // Analytics must never interrupt StoreKit.
@@ -82,6 +83,7 @@ export interface SubscriptionPackage {
   introductoryOffer: IntroductoryOffer | null;
   offering: PurchasesOffering;
   package: PurchasesPackage;
+  paidBasePlan: SubscriptionOption | null;
 }
 
 export interface UseSubscriptionsReturn {
@@ -100,7 +102,7 @@ export function useSubscriptions(): UseSubscriptionsReturn {
   const [error, setError] = useState<string | null>(null);
 
   const { isPremium, isLoading: contextLoading, refreshSubscription } = useSubscriptionContext();
-  const { updateProfile } = useUser();
+  const { profile, updateProfile } = useUser();
 
   const loadPackages = useCallback(async () => {
     if (Platform.OS === "web") {
@@ -133,7 +135,9 @@ export function useSubscriptions(): UseSubscriptionsReturn {
         const product = pkg.product;
         const productId = product.identifier;
         const period = getPeriodType(productId, product.subscriptionPeriod);
-        const introPrice = product.introPrice;
+        // لا تعرض أو تشترِ عروض التجربة على Android حتى إن بقي العرض في المتجر.
+        const paidBasePlan = Platform.OS === "android" ? selectPaidBasePlan(product) : null;
+        const introPrice = Platform.OS === "ios" ? product.introPrice : null;
         const iOSEligibility = eligibility[productId]?.status;
         const isIntroEligible =
           Platform.OS === "ios"
@@ -146,7 +150,7 @@ export function useSubscriptions(): UseSubscriptionsReturn {
           productId,
           name: product.title,
           description: product.description,
-          price: product.priceString,
+          price: paidBasePlan?.fullPricePhase?.price.formatted ?? product.priceString,
           pricePerMonth: formatMonthlyEquivalent(pkg, period),
           period,
           periodLabel: formatPeriod(product.subscriptionPeriod, period),
@@ -160,8 +164,15 @@ export function useSubscriptions(): UseSubscriptionsReturn {
               : null,
           offering: mainOffering,
           package: pkg,
+          paidBasePlan,
         };
-      });
+      }).filter((pkg) => Platform.OS !== "android" || pkg.paidBasePlan !== null);
+
+      if (availablePackages.length === 0) {
+        setPackages([]);
+        setError("لا تتوفر حاليًا خطة اشتراك مدفوعة مباشرة. يرجى المحاولة لاحقًا.");
+        return;
+      }
 
       availablePackages.sort((left, right) => (left.period === "monthly" ? -1 : 1) - (right.period === "monthly" ? -1 : 1));
       setPackages(availablePackages);
@@ -182,9 +193,20 @@ export function useSubscriptions(): UseSubscriptionsReturn {
     async (pkg: SubscriptionPackage): Promise<boolean> => {
       try {
         setError(null);
-        void trackSubscriptionClick(pkg.period, "subscription_screen");
+        void trackSubscriptionClick(pkg.period, "subscription_screen", profile.country);
         const configuredPurchases = (await getConfiguredPurchases()) as typeof Purchases;
-        const result = await configuredPurchases.purchasePackage(pkg.package);
+        if (Platform.OS === "ios" && pkg.package.product.introPrice?.price === 0) {
+          setError("لا يزال عرض التجربة المجانية متاحًا في App Store. لا يمكن إتمام الاشتراك قبل إيقافه في المتجر.");
+          return false;
+        }
+        // purchasePackage قد يختار عرض Google الترويجي افتراضيًا؛ استخدم رمز الخطة
+        // الأساسية مباشرة، ولا تنتقل إلى عرض تجريبي إذا اختفت الخطة من المتجر.
+        if (Platform.OS === "android" && !pkg.paidBasePlan) {
+          throw new Error("الخطة المدفوعة مباشرة غير متاحة في Google Play.");
+        }
+        const result = Platform.OS === "android"
+          ? await configuredPurchases.purchaseSubscriptionOption(pkg.paidBasePlan!)
+          : await configuredPurchases.purchasePackage(pkg.package);
         const entitlement = result.customerInfo.entitlements.active[ENTITLEMENT_ID];
 
         if (!entitlement) {
@@ -213,7 +235,7 @@ export function useSubscriptions(): UseSubscriptionsReturn {
         return false;
       }
     },
-    [refreshSubscription, updateProfile],
+    [profile.country, refreshSubscription, updateProfile],
   );
 
   const restorePurchases = useCallback(async (): Promise<boolean> => {

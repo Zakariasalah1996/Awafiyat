@@ -16,8 +16,8 @@ fi
 
 java -jar "$bundletool_jar" dump manifest --bundle="$bundle" --module=base > "$manifest"
 
-if ! grep -Fq 'android:name="com.google.android.gms.permission.AD_ID"' "$manifest"; then
-  echo "Missing required AD_ID permission in final AAB manifest." >&2
+if grep -Fq 'android:name="com.google.android.gms.permission.AD_ID"' "$manifest"; then
+  echo "Advertising ID permission unexpectedly remains in final AAB manifest." >&2
   exit 1
 fi
 
@@ -41,5 +41,5 @@ if [[ -n "$expected_version_code" && "$version_code" != "$expected_version_code"
   exit 1
 fi
 
-printf 'PASS\npackage=%s\nversionName=%s\nversionCode=%s\nAD_ID=present\nforegroundServicePermissions=absent\n' \
+printf 'PASS\npackage=%s\nversionName=%s\nversionCode=%s\nAD_ID=absent\nforegroundServicePermissions=absent\n' \
   "$package_name" "$version_name" "$version_code"

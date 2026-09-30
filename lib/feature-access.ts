@@ -1,16 +1,16 @@
 export interface HealthWarningAccessInput {
   isPremium: boolean;
-  unlockedByReward: boolean;
+  previouslyUnlocked: boolean;
 }
 
 /**
- * Health warnings are visible to subscribers or after a successful rewarded ad.
+ * Keep prior unlocks available while new access requires a subscription.
  */
 export function canViewHealthWarnings({
   isPremium,
-  unlockedByReward,
+  previouslyUnlocked,
 }: HealthWarningAccessInput): boolean {
-  return isPremium || unlockedByReward;
+  return isPremium || previouslyUnlocked;
 }
 
 /**

@@ -43,7 +43,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: isEasIosBuild ? "1.0.61" : "1.0.92",
+  version: isEasIosBuild ? "1.0.61" : "1.0.93",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -67,17 +67,16 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    // A new Google Play artifact makes the explicit AD_ID declaration effective.
-    versionCode: 10071,
+    versionCode: 10072,
     googleServicesFile: "./google-services.json",
     permissions: [
       "POST_NOTIFICATIONS",
       "VIBRATE",
-      "com.google.android.gms.permission.AD_ID",
     ],
-    // The app uses system notification sounds only. Remove foreground-service
-    // declarations inherited from optional audio/alarm libraries.
+    // No advertising SDK or advertising ID is used. Also block permission
+    // declarations contributed by transitive libraries in the merged manifest.
     blockedPermissions: [
+      "com.google.android.gms.permission.AD_ID",
       "android.permission.FOREGROUND_SERVICE",
       "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
       "android.permission.FOREGROUND_SERVICE_MICROPHONE",
@@ -138,21 +137,7 @@ const config: ExpoConfig = {
         android: {
           buildArchs: ["armeabi-v7a", "arm64-v8a"],
           minSdkVersion: 24,
-          // منع R8/ProGuard من إزالة كلاسات AdMob الداخلية في بناء الإنتاج
-          extraProguardRules: "-keep class com.google.android.gms.ads.** { *; }\n-keep class com.google.ads.** { *; }\n-keep class com.google.android.gms.common.** { *; }\n-dontwarn com.google.android.gms.ads.**",
         },
-      },
-    ],
-    [
-      "react-native-google-mobile-ads",
-      {
-        androidAppId: "ca-app-pub-9147941153313979~6652750828",
-        iosAppId: "ca-app-pub-9147941153313979~6652750828",
-        // SDK 24 يشغّل هذين الخيارين افتراضياً في خيوط خلفية. تعطيلهما يجعل
-        // التهيئة والتحميل متسلسلين مع Firebase Messaging ويمنع internal-error.
-        optimizeInitialization: false,
-        optimizeAdLoading: false,
-        skAdNetworkItems: [],
       },
     ],
   ],

@@ -69,7 +69,7 @@ export default function CommunityScreen() {
       setPosts(await getCommunityPosts());
       await markCommunityAsRead();
     } catch (error) {
-      Alert.alert("تعذر التحميل", error instanceof Error ? error.message : "حاول مرة أخرى");
+      Alert.alert("تعذر التحميل", error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى");
     } finally {
       setLoading(false);
     }
@@ -80,8 +80,8 @@ export default function CommunityScreen() {
 
   const requireName = () => {
     if (profile.name.trim().length >= 2) return true;
-    Alert.alert("الاسم مطلوب", "أضف اسماً ظاهراً ثابتاً من صفحة حسابي قبل النشر أو التعليق.", [
-      { text: "لاحقاً", style: "cancel" },
+    Alert.alert("الاسم مطلوب", "أضف اسمًا ظاهرًا ثابتًا من صفحة حسابي قبل النشر أو التعليق.", [
+      { text: "لاحقًا", style: "cancel" },
       { text: "فتح حسابي", onPress: () => router.navigate("/(tabs)/profile" as any) },
     ]);
     return false;
@@ -90,7 +90,7 @@ export default function CommunityScreen() {
   const selectImage = async (camera: boolean) => {
     if (camera) {
       const permission = await ImagePicker.requestCameraPermissionsAsync();
-      if (!permission.granted) return Alert.alert("الإذن مطلوب", "نحتاج إذن الكاميرا لالتقاط صورة الطبق.");
+      if (!permission.granted) return Alert.alert("الإذن مطلوب", "يلزم السماح باستخدام الكاميرا لالتقاط صورة للطبق.");
     }
     const result = camera
       ? await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [4, 3], quality: 0.6 })
@@ -100,7 +100,7 @@ export default function CommunityScreen() {
 
   const publish = async () => {
     const body = draft.trim();
-    if (!body && !image) return Alert.alert("أضف محتوى", "اكتب منشوراً أو أضف صورة طعام.");
+    if (!body && !image) return Alert.alert("أضف محتوى", "اكتب منشورًا أو أضف صورة لطعام.");
     if (!requireName()) return;
     try {
       setPublishing(true);
@@ -115,7 +115,7 @@ export default function CommunityScreen() {
       setImage(null);
       setEditingPostId(null);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "حاول مرة أخرى";
+      const message = error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى";
       Alert.alert(message.includes("احذف منشورك السابق") ? "النشر محدود مؤقتاً" : "تعذر النشر", message);
     } finally {
       setPublishing(false);
@@ -128,14 +128,14 @@ export default function CommunityScreen() {
       setPosts((current) => current.map((item) => item.id === post.id ? { ...item, likedByCurrentUser: liked, likeCount: item.likeCount + (liked ? 1 : -1) } : item));
       if (activePost?.id === post.id) setActivePost({ ...post, likedByCurrentUser: liked, likeCount: post.likeCount + (liked ? 1 : -1) });
     } catch (error) {
-      Alert.alert("تعذر تسجيل الإعجاب", error instanceof Error ? error.message : "حاول مرة أخرى");
+      Alert.alert("تعذر تسجيل الإعجاب", error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى");
     }
   };
 
   const openComments = async (post: CommunityPost) => {
     setActivePost(post);
     setComments([]);
-    try { setComments(await getPostComments(post.id)); } catch { Alert.alert("تعذر تحميل التعليقات", "حاول مرة أخرى"); }
+    try { setComments(await getPostComments(post.id)); } catch { Alert.alert("تعذر تحميل التعليقات", "يرجى المحاولة مرة أخرى"); }
   };
 
   const addComment = async () => {
@@ -147,7 +147,7 @@ export default function CommunityScreen() {
       setPosts((current) => current.map((item) => item.id === activePost.id ? { ...item, commentCount: item.commentCount + 1 } : item));
       setCommentDraft("");
     } catch (error) {
-      Alert.alert("تعذر إضافة التعليق", error instanceof Error ? error.message : "حاول مرة أخرى");
+      Alert.alert("تعذر إضافة التعليق", error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى");
     } finally { setCommenting(false); }
   };
 
@@ -166,7 +166,7 @@ export default function CommunityScreen() {
       setEditingCommentId(null);
       setEditingCommentDraft("");
     } catch (error) {
-      Alert.alert("تعذر تعديل التعليق", error instanceof Error ? error.message : "حاول مرة أخرى");
+      Alert.alert("تعذر تعديل التعليق", error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى");
     } finally {
       setSavingCommentId(null);
     }
@@ -183,7 +183,7 @@ export default function CommunityScreen() {
         likeCount: Math.max(0, item.likeCount + (liked ? 1 : -1)),
       } : item));
     } catch (error) {
-      Alert.alert("تعذر تسجيل الإعجاب", error instanceof Error ? error.message : "حاول مرة أخرى");
+      Alert.alert("تعذر تسجيل الإعجاب", error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى");
     } finally {
       setCommentLikeBusyId(null);
     }
@@ -203,9 +203,9 @@ export default function CommunityScreen() {
       else await reportCommunityComment(reportTarget.id, reportReason);
       setReportTarget(null);
       setReportReason("");
-      Alert.alert("تم إرسال البلاغ", "سيصل البلاغ إلى لوحة الإدارة للمراجعة.");
+      Alert.alert("تم إرسال البلاغ", "سيصل البلاغ إلى فريق الإدارة للمراجعة.");
     } catch (error) {
-      Alert.alert("تعذر إرسال البلاغ", error instanceof Error ? error.message : "حاول مرة أخرى");
+      Alert.alert("تعذر إرسال البلاغ", error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى");
     } finally {
       setReporting(false);
     }
@@ -225,7 +225,7 @@ export default function CommunityScreen() {
       if (activePost?.id === deleteTarget.id) setActivePost(null);
       setDeleteTarget(null);
     } catch (error) {
-      Alert.alert("تعذر الحذف", error instanceof Error ? error.message : "حاول مرة أخرى");
+      Alert.alert("تعذر الحذف", error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى");
     }
   };
 
@@ -242,7 +242,7 @@ export default function CommunityScreen() {
       setDeleteCommentTarget(null);
       setActionSheet(null);
     } catch (error) {
-      Alert.alert("تعذر حذف التعليق", error instanceof Error ? error.message : "حاول مرة أخرى");
+      Alert.alert("تعذر حذف التعليق", error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى");
     }
   };
 
@@ -309,7 +309,7 @@ export default function CommunityScreen() {
             >
               <MaterialIcons name={item.likedByCurrentUser ? "favorite" : "favorite-border"} size={18} color={item.likedByCurrentUser ? colors.error : colors.muted} />
               <Text style={{ color: item.likedByCurrentUser ? colors.error : colors.muted, fontSize: 12, fontWeight: "700" }}>
-                {item.likeCount > 0 ? item.likeCount : ""} أعجبني
+                {item.likeCount > 0 ? item.likeCount : ""} إعجاب
               </Text>
             </TouchableOpacity>
           </View>
@@ -328,7 +328,7 @@ export default function CommunityScreen() {
       {!!item.body && <Text style={[styles.body, { color: colors.foreground }]}>{item.body}</Text>}
       {!!item.imageUrl && <Image source={{ uri: item.imageUrl }} style={styles.postImage} resizeMode="cover" />}
       <View style={[styles.actions, { borderTopColor: colors.border }]}>
-        <TouchableOpacity onPress={() => like(item)} style={styles.action}><MaterialIcons name={item.likedByCurrentUser ? "favorite" : "favorite-border"} size={21} color={item.likedByCurrentUser ? colors.error : colors.muted} /><Text style={[styles.actionText, { color: item.likedByCurrentUser ? colors.error : colors.muted }]}>{item.likeCount || ""} أعجبني</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => like(item)} style={styles.action}><MaterialIcons name={item.likedByCurrentUser ? "favorite" : "favorite-border"} size={21} color={item.likedByCurrentUser ? colors.error : colors.muted} /><Text style={[styles.actionText, { color: item.likedByCurrentUser ? colors.error : colors.muted }]}>{item.likeCount || ""} إعجاب</Text></TouchableOpacity>
         <TouchableOpacity onPress={() => openComments(item)} style={styles.action}><MaterialIcons name="chat-bubble-outline" size={20} color={colors.muted} /><Text style={[styles.actionText, { color: colors.muted }]}>{item.commentCount || ""} تعليق</Text></TouchableOpacity>
       </View>
     </View>
@@ -352,7 +352,7 @@ export default function CommunityScreen() {
               <View style={styles.mediaActions}><TouchableOpacity onPress={() => selectImage(false)} style={styles.iconButton}><MaterialIcons name="photo-library" size={22} color={colors.primary} /></TouchableOpacity><TouchableOpacity onPress={() => selectImage(true)} style={styles.iconButton}><MaterialIcons name="camera-alt" size={22} color={colors.primary} /></TouchableOpacity></View>
               <TouchableOpacity onPress={publish} disabled={publishing} style={[styles.publishButton, { backgroundColor: colors.primary, opacity: publishing ? 0.6 : 1 }]}><Text style={styles.publishText}>{publishing ? "جارٍ الحفظ..." : editingPostId ? "حفظ التعديل" : "نشر"}</Text></TouchableOpacity>
             </View>
-            <Text style={[styles.note, { color: colors.muted }]}>النص حر. الصور تمر بفاحص يقبل الطعام والمشروبات فقط.</Text>
+            <Text style={[styles.note, { color: colors.muted }]}>يمكنك كتابة أي نص. وتُقبل صور الطعام والمشروبات فقط.</Text>
           </View>
           <Text style={[styles.feedLabel, { color: colors.foreground }]}>أحدث المنشورات</Text>
         </View>}
@@ -364,7 +364,7 @@ export default function CommunityScreen() {
           <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
           <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}><View><Text style={[styles.modalTitle, { color: colors.foreground }]}>التعليقات</Text><Text style={{ color: colors.muted, fontSize: 12, textAlign: "right", marginTop: 2 }}>{comments.length} تعليق</Text></View><TouchableOpacity onPress={closeComments} style={[styles.closeButton, { backgroundColor: colors.surface }]}><MaterialIcons name="close" size={22} color={colors.foreground} /></TouchableOpacity></View>
           <FlatList data={comments} keyExtractor={(comment) => String(comment.id)} contentContainerStyle={styles.comments} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"} renderItem={renderComment} ListEmptyComponent={<Text style={[styles.noComments, { color: colors.muted }]}>لا توجد تعليقات بعد. اكتب أول تعليق.</Text>} />
-          <View style={[styles.commentComposer, { borderTopColor: colors.border, paddingBottom: Math.max(insets.bottom, 12) }]}><TextInput value={commentDraft} onChangeText={setCommentDraft} placeholder="أضف تعليقاً..." placeholderTextColor={colors.muted} style={[styles.commentInput, { color: colors.foreground, borderColor: colors.border }]} maxLength={500} returnKeyType="send" onSubmitEditing={addComment} /><TouchableOpacity onPress={addComment} disabled={commenting || !commentDraft.trim()} style={[styles.sendButton, { backgroundColor: colors.primary, opacity: commenting || !commentDraft.trim() ? 0.45 : 1 }]}><MaterialIcons name="send" size={20} color="#fff" /></TouchableOpacity></View>
+          <View style={[styles.commentComposer, { borderTopColor: colors.border, paddingBottom: Math.max(insets.bottom, 12) }]}><TextInput value={commentDraft} onChangeText={setCommentDraft} placeholder="أضف تعليقًا..." placeholderTextColor={colors.muted} style={[styles.commentInput, { color: colors.foreground, borderColor: colors.border }]} maxLength={500} returnKeyType="send" onSubmitEditing={addComment} /><TouchableOpacity onPress={addComment} disabled={commenting || !commentDraft.trim()} style={[styles.sendButton, { backgroundColor: colors.primary, opacity: commenting || !commentDraft.trim() ? 0.45 : 1 }]}><MaterialIcons name="send" size={20} color="#fff" /></TouchableOpacity></View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -384,11 +384,11 @@ export default function CommunityScreen() {
               </>
             ) : actionSheet?.kind === "comment" && actionSheet.comment.authorId === currentUserId ? (
               <>
-                <TouchableOpacity onPress={() => startEditingComment(actionSheet.comment)} style={[styles.sheetOption, { borderColor: colors.border }]}><MaterialIcons name="edit" size={22} color={colors.primary} /><View style={{ flex: 1 }}><Text style={[styles.sheetOptionTitle, { color: colors.foreground }]}>تعديل التعليق</Text><Text style={[styles.sheetOptionText, { color: colors.muted }]}>صحح النص ثم احفظه</Text></View><MaterialIcons name="chevron-left" size={22} color={colors.muted} /></TouchableOpacity>
+                <TouchableOpacity onPress={() => startEditingComment(actionSheet.comment)} style={[styles.sheetOption, { borderColor: colors.border }]}><MaterialIcons name="edit" size={22} color={colors.primary} /><View style={{ flex: 1 }}><Text style={[styles.sheetOptionTitle, { color: colors.foreground }]}>تعديل التعليق</Text><Text style={[styles.sheetOptionText, { color: colors.muted }]}>عدّل النص ثم احفظه</Text></View><MaterialIcons name="chevron-left" size={22} color={colors.muted} /></TouchableOpacity>
                 <TouchableOpacity onPress={() => { setDeleteCommentTarget(actionSheet.comment); setActionSheet(null); }} style={[styles.sheetOption, { borderColor: colors.border }]}><MaterialIcons name="delete-outline" size={22} color={colors.error} /><View style={{ flex: 1 }}><Text style={[styles.sheetOptionTitle, { color: colors.error }]}>حذف التعليق</Text><Text style={[styles.sheetOptionText, { color: colors.muted }]}>إخفاؤه من المجتمع نهائياً</Text></View><MaterialIcons name="chevron-left" size={22} color={colors.muted} /></TouchableOpacity>
               </>
             ) : (
-              <TouchableOpacity onPress={() => actionSheet && openReport({ kind: actionSheet.kind, id: actionSheet.kind === "post" ? actionSheet.post.id : actionSheet.comment.id })} style={[styles.sheetOption, { borderColor: colors.border }]}><MaterialIcons name="flag" size={22} color={colors.error} /><View style={{ flex: 1 }}><Text style={[styles.sheetOptionTitle, { color: colors.foreground }]}>إرسال بلاغ</Text><Text style={[styles.sheetOptionText, { color: colors.muted }]}>سيصل إلى فريق المراجعة</Text></View><MaterialIcons name="chevron-left" size={22} color={colors.muted} /></TouchableOpacity>
+              <TouchableOpacity onPress={() => actionSheet && openReport({ kind: actionSheet.kind, id: actionSheet.kind === "post" ? actionSheet.post.id : actionSheet.comment.id })} style={[styles.sheetOption, { borderColor: colors.border }]}><MaterialIcons name="flag" size={22} color={colors.error} /><View style={{ flex: 1 }}><Text style={[styles.sheetOptionTitle, { color: colors.foreground }]}>إرسال بلاغ</Text><Text style={[styles.sheetOptionText, { color: colors.muted }]}>سيصل إلى فريق الإدارة للمراجعة</Text></View><MaterialIcons name="chevron-left" size={22} color={colors.muted} /></TouchableOpacity>
             )}
             <TouchableOpacity onPress={() => setActionSheet(null)} style={[styles.sheetCancel, { backgroundColor: colors.surface }]}><Text style={{ color: colors.foreground, fontWeight: "800" }}>إلغاء</Text></TouchableOpacity>
           </View>

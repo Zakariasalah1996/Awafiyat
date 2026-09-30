@@ -42,7 +42,7 @@ export const INGREDIENTS: Ingredient[] = [
   { id: "carp", name: "سمك شبوط", category: "fish", aliases: ["شبوط", "بني"] },
 
   // خضروات
-  { id: "tomato", name: "طماطة", category: "vegetables", aliases: ["طم", "طماط", "طماطة", "طماطم"] },
+  { id: "tomato", name: "طماطم", category: "vegetables", aliases: ["طم", "طماط", "طماطة", "طماطم"] },
   { id: "onion", name: "بصل", category: "vegetables", aliases: ["بص", "بصل"] },
   { id: "garlic", name: "ثوم", category: "vegetables", aliases: ["ثو", "ثوم"] },
   { id: "potato", name: "بطاطا", category: "vegetables", aliases: ["بط", "بطاط", "بطاطا", "بطاطس"] },
@@ -76,11 +76,11 @@ export const INGREDIENTS: Ingredient[] = [
   { id: "banana", name: "موز", category: "fruits", aliases: ["مو", "موز"] },
   { id: "dates", name: "تمر", category: "fruits", aliases: ["تم", "تمر", "رطب"] },
   { id: "pomegranate", name: "رمان", category: "fruits", aliases: ["رم", "رمان"] },
-  { id: "watermelon", name: "رقي", category: "fruits", aliases: ["رق", "رقي", "بطيخ"] },
+  { id: "watermelon", name: "بطيخ", category: "fruits", aliases: ["رق", "رقي", "بطيخ"] },
   { id: "grapes", name: "عنب", category: "fruits", aliases: ["عن", "عنب"] },
 
   // حبوب ونشويات
-  { id: "rice", name: "رز", category: "grains", aliases: ["رز", "تمن", "أرز", "رز بسمتي"] },
+  { id: "rice", name: "أرز", category: "grains", aliases: ["رز", "تمن", "أرز", "رز بسمتي"] },
   { id: "bread", name: "خبز", category: "grains", aliases: ["خب", "خبز", "صمون"] },
   { id: "flour", name: "طحين", category: "grains", aliases: ["طح", "طحين", "دقيق"] },
   { id: "pasta", name: "معكرونة", category: "grains", aliases: ["مع", "معكرونة", "باستا", "شعيرية"] },
@@ -108,7 +108,7 @@ export const INGREDIENTS: Ingredient[] = [
   { id: "noomi_basra", name: "نومي بصرة", category: "spices", aliases: ["نومي", "ليمون مجفف"] },
   { id: "sumac", name: "سماق", category: "spices", aliases: ["سم", "سماق"] },
   { id: "saffron", name: "زعفران", category: "spices", aliases: ["زع", "زعفران"] },
-  { id: "tomato_paste", name: "معجون طماطة", category: "spices", aliases: ["معجون", "رب", "صلصة"] },
+  { id: "tomato_paste", name: "معجون طماطم", category: "spices", aliases: ["معجون", "رب", "صلصة", "معجون طماطة"] },
   { id: "tamarind", name: "تمر هندي", category: "spices", aliases: ["تمر هندي", "حمر"] },
   { id: "dried_lime", name: "لومي", category: "spices", aliases: ["لومي", "نومي"] },
   { id: "curry", name: "كاري", category: "spices", aliases: ["كاري"] },
@@ -129,7 +129,7 @@ export const INGREDIENTS: Ingredient[] = [
   { id: "white_beans", name: "فاصوليا بيضاء", category: "legumes", aliases: ["فاصوليا بيضاء"] },
 
   // معلبات
-  { id: "canned_tomato", name: "طماطة معلبة", category: "canned", aliases: ["طماطة معلبة", "صلصة طماطم"] },
+  { id: "canned_tomato", name: "طماطم معلبة", category: "canned", aliases: ["طماطة معلبة", "صلصة طماطم"] },
   { id: "canned_tuna", name: "تونة", category: "canned", aliases: ["تو", "تونة"] },
   { id: "canned_corn", name: "ذرة معلبة", category: "canned", aliases: ["ذرة"] },
 

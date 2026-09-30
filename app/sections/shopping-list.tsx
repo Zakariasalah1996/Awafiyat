@@ -52,7 +52,7 @@ const CATEGORIES: { name: string; emoji: string; items: string[] }[] = [
     name: "خضروات",
     emoji: "🥬",
     items: [
-      "طماطة",
+      "طماطم",
       "بصل",
       "ثوم",
       "بامية",
@@ -74,12 +74,12 @@ const CATEGORIES: { name: string; emoji: string; items: string[] }[] = [
   {
     name: "بقوليات وحبوب",
     emoji: "🌾",
-    items: ["رز", "عدس", "حمص", "فاصوليا يابسة", "برغل", "فريكة", "شعيرية"],
+    items: ["أرز", "عدس", "حمص", "فاصوليا جافة", "برغل", "فريكة", "شعيرية"],
   },
   {
     name: "ألبان وبيض",
     emoji: "🥛",
-    items: ["حليب", "لبن", "قيمر", "جبن", "بيض", "زبدة"],
+    items: ["حليب", "لبن", "قشطة", "جبن", "بيض", "زبدة"],
   },
   {
     name: "بهارات وتوابل",
@@ -103,8 +103,8 @@ const CATEGORIES: { name: string; emoji: string; items: string[] }[] = [
     items: [
       "زيت نباتي",
       "زيت زيتون",
-      "سمن (دهن حر)",
-      "معجون طماطة",
+      "سمن بلدي",
+      "معجون طماطم",
       "خل",
       "دبس رمان",
     ],
@@ -112,21 +112,21 @@ const CATEGORIES: { name: string; emoji: string; items: string[] }[] = [
   {
     name: "خبز ومعجنات",
     emoji: "🍞",
-    items: ["صمون", "خبز تنور", "خبز أبيض", "طحين", "خميرة"],
+    items: ["خبز صغير", "خبز تنور", "خبز أبيض", "طحين", "خميرة"],
   },
 ];
 
 // أوقات التذكير المتاحة
 const REMINDER_TIMES: { hour: number; minute: number; label: string }[] = [
-  { hour: 8, minute: 0, label: "8:00 صباحاً" },
-  { hour: 9, minute: 0, label: "9:00 صباحاً" },
-  { hour: 10, minute: 0, label: "10:00 صباحاً" },
-  { hour: 11, minute: 0, label: "11:00 صباحاً" },
-  { hour: 12, minute: 0, label: "12:00 ظهراً" },
-  { hour: 13, minute: 0, label: "1:00 ظهراً" },
-  { hour: 14, minute: 0, label: "2:00 عصراً" },
-  { hour: 15, minute: 0, label: "3:00 عصراً" },
-  { hour: 16, minute: 0, label: "4:00 عصراً" },
+  { hour: 8, minute: 0, label: "8:00 صباحًا" },
+  { hour: 9, minute: 0, label: "9:00 صباحًا" },
+  { hour: 10, minute: 0, label: "10:00 صباحًا" },
+  { hour: 11, minute: 0, label: "11:00 صباحًا" },
+  { hour: 12, minute: 0, label: "12:00 ظهرًا" },
+  { hour: 13, minute: 0, label: "1:00 ظهرًا" },
+  { hour: 14, minute: 0, label: "2:00 عصرًا" },
+  { hour: 15, minute: 0, label: "3:00 عصرًا" },
+  { hour: 16, minute: 0, label: "4:00 عصرًا" },
   { hour: 17, minute: 0, label: "5:00 مساءً" },
   { hour: 18, minute: 0, label: "6:00 مساءً" },
   { hour: 19, minute: 0, label: "7:00 مساءً" },
@@ -231,7 +231,7 @@ export default function ShoppingListScreen() {
       setTimeout(() => setSaveMessage(""), 3000);
     } catch (e) {
       console.error("Failed to save shopping list:", e);
-      setSaveMessage("فشل الحفظ، حاول مرة أخرى");
+      setSaveMessage("تعذّر الحفظ؛ حاول مرة أخرى");
       setTimeout(() => setSaveMessage(""), 3000);
     }
   };
@@ -311,7 +311,7 @@ export default function ShoppingListScreen() {
       };
       setReminder(newReminder);
       await AsyncStorage.setItem(SHOPPING_REMINDER_KEY, JSON.stringify(newReminder));
-      setSaveMessage("تم إلغاء تذكير التسوق");
+      setSaveMessage("أُلغي تذكير التسوق");
       setTimeout(() => setSaveMessage(""), 3000);
     } catch (e) {
       console.error("Failed to cancel shopping reminder:", e);
@@ -440,7 +440,7 @@ export default function ShoppingListScreen() {
                       marginTop: 2,
                     }}
                   >
-                    متى تحب نذكرك بقائمة التسوق؟
+                    متى تود أن نذكّرك بقائمة التسوق؟
                   </Text>
                 )}
               </View>
@@ -495,7 +495,7 @@ export default function ShoppingListScreen() {
                 writingDirection: "rtl",
                 height: 48,
               }}
-              placeholder="أضيفي شي للقائمة..."
+              placeholder="أضف صنفًا إلى القائمة..."
               placeholderTextColor={colors.muted}
               value={newItemText}
               onChangeText={setNewItemText}
@@ -590,12 +590,12 @@ export default function ShoppingListScreen() {
                 className="text-foreground font-bold"
                 style={{ fontSize: 17, textAlign: "right" }}
               >
-                قائمتج ({uncheckedCount} باقي)
+                قائمة التسوق ({uncheckedCount} متبقٍ)
               </Text>
               {checkedCount > 0 && (
                 <TouchableOpacity onPress={clearChecked}>
                   <Text className="text-error" style={{ fontSize: 13 }}>
-                    حذف المشطوبات
+                    حذف العناصر المعلّمة
                   </Text>
                 </TouchableOpacity>
               )}
@@ -654,7 +654,7 @@ export default function ShoppingListScreen() {
                   writingDirection: "rtl",
                 }}
               >
-                تم شراؤها ({checkedCount})
+                العناصر المشتراة ({checkedCount})
               </Text>
             )}
             {items
@@ -757,13 +757,13 @@ export default function ShoppingListScreen() {
               // المواد المشتراة (المشطوبة)
               const boughtItems = items.filter((i) => i.checked);
               if (boughtItems.length > 0) {
-                message += "\n✅ تم شراؤها:\n";
+                message += "\n✅ العناصر المشتراة:\n";
                 boughtItems.forEach((item) => {
                   message += `\u2713 ${item.emoji} ${item.name}\n`;
                 });
               }
               
-              message += "\nبالعافية! 💚";
+              message += "\nمع تمنياتنا لك بالصحة والعافية! 💚";
               
               try {
                 await Share.share({
@@ -844,7 +844,7 @@ export default function ShoppingListScreen() {
                     textAlign: "right",
                   }}
                 >
-                  ⏰ متى تحب نذكرك؟
+                  ⏰ متى تود أن نذكّرك؟
                 </Text>
                 <TouchableOpacity onPress={() => setShowReminderModal(false)}>
                   <MaterialIcons name="close" size={24} color={colors.muted} />
@@ -859,7 +859,7 @@ export default function ShoppingListScreen() {
                   marginTop: 6,
                 }}
               >
-                اختر الوقت المناسب وسنذكرك يومياً بقائمة التسوق
+                اختر الوقت المناسب وسنذكّرك يوميًا بقائمة التسوق
               </Text>
             </View>
 

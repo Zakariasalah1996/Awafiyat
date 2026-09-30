@@ -297,7 +297,6 @@ function PlanCard({
   onPress: () => void;
 }) {
   const isYearly = pkg.period === "yearly";
-  const trial = pkg.introductoryOffer?.isFree ? pkg.introductoryOffer : null;
 
   return (
     <View
@@ -320,11 +319,6 @@ function PlanCard({
       {pkg.pricePerMonth && isYearly ? (
         <Text style={[styles.monthlyEquivalent, { color: colors.muted }]}>ما يعادل {pkg.pricePerMonth} شهرياً تقريباً</Text>
       ) : null}
-      {trial ? (
-        <View style={[styles.trialBadge, { backgroundColor: `${colors.success}18` }]}>
-          <Text style={[styles.trialText, { color: colors.success }]}>تجربة مجانية لمدة {trial.duration} للمؤهلين</Text>
-        </View>
-      ) : null}
       <Text style={[styles.planDescription, { color: colors.muted }]} numberOfLines={3}>{pkg.description}</Text>
       <Pressable
         accessibilityRole="button"
@@ -335,7 +329,7 @@ function PlanCard({
           { backgroundColor: colors.primary, opacity: pressed ? 0.82 : 1 },
         ]}
       >
-        <Text style={styles.primaryButtonText}>{trial ? `متابعة مع تجربة ${trial.duration}` : `الاشتراك عبر ${storeName}`}</Text>
+        <Text style={styles.primaryButtonText}>الاشتراك عبر {storeName}</Text>
       </Pressable>
       <Text style={[styles.planFinePrint, { color: colors.muted }]}>ثم {pkg.price} لكل {pkg.periodLabel} حتى الإلغاء.</Text>
     </View>
@@ -360,7 +354,6 @@ function PurchaseConfirmationSheet({
   onConfirm: () => void;
 }) {
   if (!pkg) return null;
-  const trial = pkg.introductoryOffer?.isFree ? pkg.introductoryOffer : null;
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
@@ -378,17 +371,10 @@ function PurchaseConfirmationSheet({
           <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
           <Text style={[styles.sheetTitle, { color: colors.foreground }]}>تأكيد اختيارك</Text>
           <Text style={[styles.sheetPlan, { color: colors.foreground }]}>{pkg.name}</Text>
-          {trial ? (
-            <View style={[styles.sheetSummary, { backgroundColor: `${colors.success}12`, borderColor: `${colors.success}55` }]}>
-              <Text style={[styles.sheetSummaryTitle, { color: colors.success }]}>تجربة مجانية لمدة {trial.duration}</Text>
-              <Text style={[styles.sheetSummaryText, { color: colors.foreground }]}>بعدها {pkg.price} لكل {pkg.periodLabel}، ويتجدد الاشتراك تلقائياً حتى الإلغاء.</Text>
-            </View>
-          ) : (
-            <View style={[styles.sheetSummary, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <Text style={[styles.sheetSummaryTitle, { color: colors.primary }]}>{pkg.price} لكل {pkg.periodLabel}</Text>
-              <Text style={[styles.sheetSummaryText, { color: colors.foreground }]}>يتجدد الاشتراك تلقائياً حتى الإلغاء.</Text>
-            </View>
-          )}
+          <View style={[styles.sheetSummary, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.sheetSummaryTitle, { color: colors.primary }]}>{pkg.price} لكل {pkg.periodLabel}</Text>
+            <Text style={[styles.sheetSummaryText, { color: colors.foreground }]}>يتجدد الاشتراك تلقائيًا حتى الإلغاء.</Text>
+          </View>
           <Text style={[styles.sheetDisclosure, { color: colors.muted }]}>سيعرض {storeName} نافذة التأكيد النهائية. لا يكتمل الشراء إلا بعد موافقتك داخل نافذة المتجر.</Text>
           <LegalLinks colors={colors} compact />
           <Pressable

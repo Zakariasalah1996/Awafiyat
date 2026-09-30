@@ -112,7 +112,7 @@ describe("مجتمع الطبخ", () => {
     expect(screen).toContain("الإبلاغ عن");
     expect(screen).toContain("sheetBackdrop");
     expect(screen).toContain("reportSubmit");
-    expect(screen).toContain("سيصل البلاغ إلى لوحة الإدارة للمراجعة");
+    expect(screen).toContain("سيُراجع البلاغ في لوحة الإدارة.");
   });
 
   it("يرسل إشعار التعليق لصاحب المنشور فقط ولا يعطل حفظ التعليق", () => {

@@ -20,7 +20,7 @@ const HEALTH_LABELS: Record<HealthCondition, string> = {
   hypertension: "ضغط الدم",
   obesity: "السمنة",
   cholesterol: "الكوليسترول",
-  none: "لا يعاني من شيء",
+  none: "لا توجد حالة صحية",
 };
 
 const HEALTH_CONDITIONS: HealthCondition[] = ["none", "diabetes", "hypertension", "obesity", "cholesterol"];
@@ -118,7 +118,7 @@ export default function FamilyMembersScreen() {
         <View className="mx-5">
           {profile.familyMembers.length === 0 ? (
             <View className="py-8 items-center">
-              <Text className="text-lg text-muted">لا توجد أفراد عائلة مضافين بعد</Text>
+              <Text className="text-lg text-muted">لا يوجد أفراد مضافون إلى العائلة بعد</Text>
             </View>
           ) : (
             profile.familyMembers.map((member) => (

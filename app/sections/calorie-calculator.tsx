@@ -24,7 +24,7 @@ interface FoodItem {
 
 const COMMON_FOODS: FoodItem[] = [
   // خبز ونشويات
-  { name: "صمون عراقي", caloriesPer100g: 275, emoji: "🍞", category: "نشويات" },
+  { name: "خبز عراقي", caloriesPer100g: 275, emoji: "🍞", category: "نشويات" },
   { name: "رز أبيض مطبوخ", caloriesPer100g: 130, emoji: "🍚", category: "نشويات" },
   { name: "رز بسمتي", caloriesPer100g: 150, emoji: "🍚", category: "نشويات" },
   { name: "خبز تنور", caloriesPer100g: 260, emoji: "🫓", category: "نشويات" },
@@ -38,7 +38,7 @@ const COMMON_FOODS: FoodItem[] = [
   { name: "كباب عراقي", caloriesPer100g: 220, emoji: "🍢", category: "لحوم" },
   { name: "لحم مفروم", caloriesPer100g: 250, emoji: "🥩", category: "لحوم" },
   // خضروات
-  { name: "طماطة", caloriesPer100g: 18, emoji: "🍅", category: "خضروات" },
+  { name: "طماطم", caloriesPer100g: 18, emoji: "🍅", category: "خضروات" },
   { name: "خيار", caloriesPer100g: 15, emoji: "🥒", category: "خضروات" },
   { name: "بصل", caloriesPer100g: 40, emoji: "🧅", category: "خضروات" },
   { name: "بامية", caloriesPer100g: 33, emoji: "🌿", category: "خضروات" },
@@ -52,17 +52,17 @@ const COMMON_FOODS: FoodItem[] = [
   { name: "برتقال", caloriesPer100g: 47, emoji: "🍊", category: "فواكه" },
   { name: "رمان", caloriesPer100g: 83, emoji: "🫐", category: "فواكه" },
   // ألبان
-  { name: "قيمر (قشطة)", caloriesPer100g: 195, emoji: "🥛", category: "ألبان" },
+  { name: "قشطة", caloriesPer100g: 195, emoji: "🥛", category: "ألبان" },
   { name: "لبن", caloriesPer100g: 61, emoji: "🥛", category: "ألبان" },
   { name: "جبن أبيض", caloriesPer100g: 264, emoji: "🧀", category: "ألبان" },
   { name: "حليب كامل الدسم", caloriesPer100g: 61, emoji: "🥛", category: "ألبان" },
   // مشروبات
-  { name: "شاي بسكر (استكان)", caloriesPer100g: 30, emoji: "🍵", category: "مشروبات" },
+  { name: "شاي محلى (كوب صغير)", caloriesPer100g: 30, emoji: "🍵", category: "مشروبات" },
   { name: "شاي بدون سكر", caloriesPer100g: 1, emoji: "🍵", category: "مشروبات" },
   { name: "قهوة عربية", caloriesPer100g: 2, emoji: "☕", category: "مشروبات" },
   // زيوت ودهون
   { name: "زيت زيتون", caloriesPer100g: 884, emoji: "🫒", category: "زيوت" },
-  { name: "سمن (دهن حر)", caloriesPer100g: 717, emoji: "🧈", category: "زيوت" },
+  { name: "سمن بلدي", caloriesPer100g: 717, emoji: "🧈", category: "زيوت" },
   { name: "زيت نباتي", caloriesPer100g: 884, emoji: "🫗", category: "زيوت" },
 ];
 
@@ -204,10 +204,10 @@ export default function CalorieCalculatorScreen() {
             style={{ fontSize: 12, textAlign: "center" }}
           >
             {caloriePercentage > 90
-              ? "تنبيه! وصلت إلى الحد الأقصى"
+              ? "تنبيه: لقد بلغت الحد اليومي"
               : caloriePercentage > 70
-              ? "قربتي من الحد اليومي، خففي شوية"
-              : "ماشاء الله، مستمرة بشكل صحي"}
+              ? "اقتربت من الحد اليومي، فخفّف الكمية"
+              : "أحسنت، اختياراتك متوازنة"}
           </Text>
         </View>
 
@@ -218,7 +218,7 @@ export default function CalorieCalculatorScreen() {
               className="text-foreground font-bold mb-2"
               style={{ fontSize: 16, textAlign: "right", writingDirection: "rtl" }}
             >
-              الأكل اللي أكلتيه اليوم
+              الأطعمة التي تناولتها اليوم
             </Text>
             {selectedFoods.map((sf, index) => (
               <View
@@ -281,7 +281,7 @@ export default function CalorieCalculatorScreen() {
             className="text-foreground font-bold mb-2"
             style={{ fontSize: 16, textAlign: "right", writingDirection: "rtl" }}
           >
-            أضيفي أكلك
+            أضف طعامًا
           </Text>
           <View
             className="flex-row items-center rounded-xl px-4"

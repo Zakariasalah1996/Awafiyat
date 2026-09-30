@@ -21,9 +21,9 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { cancelMedicationReminder } from "@/lib/medication-notifications";
 
 const FREQUENCY_LABELS: Record<string, string> = {
-  daily: "يومياً",
-  weekly: "أسبوعياً",
-  monthly: "شهرياً",
+  daily: "يوميًا",
+  weekly: "أسبوعيًا",
+  monthly: "شهريًا",
 };
 
 const DAY_LABELS: Record<string, string> = {
@@ -48,10 +48,10 @@ export default function MedicationHomeScreen() {
   const handleAddMedication = () => {
     if (!canUseMedicationReminders(isPremium) || !canAddMoreMedications(isPremium)) {
       Alert.alert(
-        "اشتراك مطلوب 👑",
-        "تذكير الدواء متاح حصراً للمشتركين في ألف عافيات المميزة.",
+        "الاشتراك مطلوب 👑",
+        "تذكيرات الأدوية متاحة حصريًا لمشتركي ألف عافيات.",
         [
-          { text: "لاحقاً", style: "cancel" },
+          { text: "لاحقًا", style: "cancel" },
           {
             text: "اشترك الآن",
             onPress: () => router.push("/(tabs)/subscription" as any),
@@ -103,7 +103,7 @@ export default function MedicationHomeScreen() {
       <SubscriptionFeatureGate
         emoji="🔒"
         title="تذكير الدواء للمشتركين"
-        description="اشترك في ألف عافيات المميزة لإضافة أدويتك، جدولة التنبيهات، تعديل المواعيد، ومتابعة الالتزام بالجرعات."
+        description="اشترك في ألف عافيات لإضافة أدويتك، وجدولة التنبيهات، وتعديل المواعيد، ومتابعة الالتزام بالجرعات."
         buttonLabel="اشترك لفتح تذكير الدواء"
       />
     );
@@ -126,7 +126,7 @@ export default function MedicationHomeScreen() {
               className="text-base text-muted text-center mb-10 leading-7"
               style={{ writingDirection: "rtl" }}
             >
-              سجّل أدويتك ونذكّرك بمواعيدها بكل حب ورعاية
+              سجّل أدويتك وسنذكّرك بمواعيدها بعناية
             </Text>
 
             <TouchableOpacity
@@ -324,7 +324,7 @@ export default function MedicationHomeScreen() {
                               ) : isMissed ? (
                                 <View className="px-3 py-1.5 rounded-full" style={{ backgroundColor: `${colors.error}20` }}>
                                   <Text className="text-xs font-bold" style={{ color: colors.error }}>
-                                    فاتني ❌
+                                    لم أتناوله ❌
                                   </Text>
                                 </View>
                               ) : (
@@ -346,7 +346,7 @@ export default function MedicationHomeScreen() {
                                     activeOpacity={0.7}
                                   >
                                     <Text className="text-xs font-bold" style={{ color: colors.error }}>
-                                      فاتني
+                                      لم أتناوله
                                     </Text>
                                   </TouchableOpacity>
                                 </>

@@ -1,7 +1,7 @@
 import config from "../app.config.ts";
 
 const expoConfig = config.default ?? config;
-const requiredPermission = "com.google.android.gms.permission.AD_ID";
+const forbiddenPermission = "com.google.android.gms.permission.AD_ID";
 const forbiddenForegroundPermissions = [
   "android.permission.FOREGROUND_SERVICE",
   "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
@@ -10,8 +10,12 @@ const forbiddenForegroundPermissions = [
 const permissions = expoConfig.android?.permissions ?? [];
 const blockedPermissions = expoConfig.android?.blockedPermissions ?? [];
 
-if (!permissions.includes(requiredPermission)) {
-  console.error(`Missing required Android permission: ${requiredPermission}`);
+if (permissions.includes(forbiddenPermission)) {
+  console.error(`Advertising permission must be removed: ${forbiddenPermission}`);
+  process.exit(1);
+}
+if (!blockedPermissions.includes(forbiddenPermission)) {
+  console.error(`Advertising permission must be blocked in merged manifest: ${forbiddenPermission}`);
   process.exit(1);
 }
 
@@ -20,8 +24,8 @@ if (expoConfig.android?.package !== "io.awafiyat.health") {
   process.exit(1);
 }
 
-if ((expoConfig.android?.versionCode ?? 0) <= 10070) {
-  console.error(`Android versionCode must exceed 10070; found ${expoConfig.android?.versionCode}`);
+if ((expoConfig.android?.versionCode ?? 0) <= 10071) {
+  console.error(`Android versionCode must exceed 10071; found ${expoConfig.android?.versionCode}`);
   process.exit(1);
 }
 
@@ -38,7 +42,7 @@ console.log(JSON.stringify({
   version: expoConfig.version,
   versionCode: expoConfig.android?.versionCode,
   package: expoConfig.android?.package,
-  adIdPermission: requiredPermission,
+  adIdPermission: "absent",
   permissions,
   blockedPermissions,
 }, null, 2));

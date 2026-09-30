@@ -45,7 +45,7 @@ export default function WellnessScreen() {
               className="text-base text-muted mt-1"
               style={{ textAlign: "right", writingDirection: "rtl" }}
             >
-              صحتك تهمنا، ونحن هنا لنساعدك
+              صحتك تهمنا، ونحن هنا لمساعدتك
             </Text>
           </View>
         </View>
@@ -93,7 +93,7 @@ export default function WellnessScreen() {
                       ? "متاح حصراً للمشتركين"
                       : hasMeds
                         ? `${activeMeds.length} ${activeMeds.length === 1 ? "دواء" : "أدوية"} مسجلة`
-                        : "سجّل أدويتك ونذكّرك بمواعيدها"}
+                        : "سجّل أدويتك وسنذكّرك بمواعيدها"}
                   </Text>
                 </View>
               </View>
@@ -185,7 +185,7 @@ export default function WellnessScreen() {
                   >
                     {waterSetupDone
                       ? `${waterCupsToday} من ${waterTotalCups} أكواب اليوم`
-                      : "تابع صحتك المائية وحافظ على ترطيب جسمك"}
+                      : "تابع استهلاكك للماء وحافظ على ترطيب جسمك"}
                   </Text>
                 </View>
               </View>

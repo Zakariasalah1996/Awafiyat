@@ -16,33 +16,29 @@ import { getSafeBottomPadding } from "../lib/safe-area-spacing";
 const readProjectFile = (relativePath: string): string =>
   fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
 
-describe("Health warning reward regression", () => {
-  it("opens health warnings immediately for a rewarded non-subscriber", () => {
+describe("Health warning access regression", () => {
+  it("keeps previously unlocked health warnings available", () => {
     expect(
       canViewHealthWarnings({
         isPremium: false,
-        unlockedByReward: true,
+        previouslyUnlocked: true,
       }),
     ).toBe(true);
   });
 
-  it("keeps warnings locked before subscription or reward", () => {
+  it("keeps warnings locked before subscription or a previous unlock", () => {
     expect(
       canViewHealthWarnings({
         isPremium: false,
-        unlockedByReward: false,
+        previouslyUnlocked: false,
       }),
     ).toBe(false);
   });
 
-  it("updates the same access state after a successful rewarded ad", () => {
+  it("does not offer an ad inside warning details", () => {
     const source = readProjectFile("app/sections/recipe-detail.tsx");
-    const rewardedBranch = source.match(
-      /if \(result\.status === "rewarded"\) \{[\s\S]*?return;/,
-    );
-
-    expect(rewardedBranch?.[0]).toContain("setWarningUnlockedByAd(true)");
-    expect(rewardedBranch?.[0]).toContain("setShowSubscriptionModal(false)");
+    expect(source).not.toContain("showRewardedAd");
+    expect(source).toContain("getPreviouslyUnlockedWarnings");
   });
 });
 
@@ -60,7 +56,7 @@ describe("Android bottom safe-area regression", () => {
     expect(source).toContain("getSafeBottomPadding(insets.bottom, 36)");
     expect(source).toContain("getSafeBottomPadding(insets.bottom, 28)");
     expect(source).toContain("تخطَّ الآن");
-    expect(source).toContain("بياناتك آمنة وسرّية 100%");
+    expect(source).toContain("تُحفظ بياناتك وفق سياسة الخصوصية.");
   });
 
   it("keeps the unified paywall and purchase dismiss actions clear of system navigation", () => {

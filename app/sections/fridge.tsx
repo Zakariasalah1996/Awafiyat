@@ -20,8 +20,6 @@ import { useSubscriptionContext } from "@/lib/subscription-context";
 import { useColors } from "@/hooks/use-colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Haptics from "expo-haptics";
-import { showRewardedAd } from "@/lib/admob";
-import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
 
 I18nManager.forceRTL(true);
 
@@ -37,9 +35,7 @@ export default function FridgeScreen() {
   const [aiResponse, setAiResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [showAdModal, setShowAdModal] = useState(false);
-  const [adLoading, setAdLoading] = useState(false);
-  const [adError, setAdError] = useState<string | null>(null);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   const suggestMutation = trpc.fridge.suggest.useMutation();
@@ -83,7 +79,7 @@ export default function FridgeScreen() {
     setSelectedIngredients((prev) => prev.filter((i) => i !== name));
   }, []);
 
-  // طلب اقتراح من الذكاء الاصطناعي (بعد مشاهدة الإعلان أو للمشترك)
+  // طلب اقتراح من المكونات للمشتركين.
   const performAIRequest = useCallback(async () => {
     if (selectedIngredients.length === 0) return;
 
@@ -107,44 +103,16 @@ export default function FridgeScreen() {
     }
   }, [selectedIngredients, profile?.healthCondition, suggestMutation]);
 
-  // طلب اقتراح - المشترك مباشرة، غير المشترك يشاهد إعلان
+  // غير المشترك يرى خيارات الاشتراك.
   const askAI = useCallback(async () => {
     if (selectedIngredients.length === 0) return;
 
     if (isSubscribed) {
-      // المشترك يستخدم مباشرة بلا حدود
       await performAIRequest();
     } else {
-      // غير المشترك يظهر له نافذة الإعلان
-      setAdError(null);
-      setShowAdModal(true);
+      setShowSubscriptionModal(true);
     }
   }, [selectedIngredients, isSubscribed, performAIRequest]);
-
-  // مشاهدة الإعلان ثم تنفيذ الطلب
-  const handleWatchAd = useCallback(async () => {
-    setAdLoading(true);
-    setAdError(null);
-    try {
-      const result = await showRewardedAd();
-      if (result.status === "rewarded") {
-        setShowAdModal(false);
-        await performAIRequest();
-        return;
-      }
-
-      if (result.status === "dismissed") {
-        setAdError("أُغلق الإعلان قبل اكتماله. شاهد الإعلان حتى النهاية للحصول على الاقتراح.");
-        return;
-      }
-
-      setAdError(formatRewardedAdErrorForUser(result.error, result.sdkHealthy));
-    } catch {
-      setAdError("تعذر تحميل الإعلان الآن. حاول مرة أخرى بعد قليل.\nرمز التشخيص: admob/unexpected");
-    } finally {
-      setAdLoading(false);
-    }
-  }, [performAIRequest]);
 
   // إعادة تعيين
   const resetAll = useCallback(() => {
@@ -202,7 +170,7 @@ export default function FridgeScreen() {
                     مواد طازجة
                   </Text>
                   <Text style={{ fontSize: 14, color: "#5D8A3C", lineHeight: 20 }}>
-                    عندك مكونات خامة؟ أخبرنا ونقترح لك وصفة!
+                    ما المكونات المتوفرة لديك؟ لنقترح لك وصفة مناسبة.
                   </Text>
                 </View>
                 <MaterialIcons name="chevron-left" size={24} color="#5D8A3C" />
@@ -277,7 +245,7 @@ export default function FridgeScreen() {
               {/* السؤال الرئيسي */}
               <View className="items-center mt-6 mb-4">
                 <Text className="text-lg text-center text-muted leading-8">
-                  اكتبي الشغلات الموجودة عندج{"\n"}حتى اقترح عليج أكلات لذيذة
+                  أضف مكونات ثلاجتك{"\n"}لنقترح عليك وصفات مناسبة.
                 </Text>
               </View>
 
@@ -492,7 +460,7 @@ export default function FridgeScreen() {
                     marginTop: 12,
                   }}
                 >
-                  عندج {selectedIngredients.length} مكون
+                  عدد المكونات المختارة: {selectedIngredients.length}
                   {selectedIngredients.length > 2 ? "ات" : selectedIngredients.length === 2 ? "ين" : ""}
                 </Text>
               )}
@@ -512,7 +480,7 @@ export default function FridgeScreen() {
                         textAlign: "center",
                       }}
                     >
-                      جاري التفكير بأكلة حلوة...
+                      جارٍ إعداد اقتراح وصفة...
                     </Text>
                     <Text
                       style={{
@@ -622,15 +590,12 @@ export default function FridgeScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* نافذة مشاهدة الإعلان */}
+      {/* نافذة الاشتراك */}
       <Modal
-        visible={showAdModal}
+        visible={showSubscriptionModal}
         transparent
         animationType="fade"
-        onRequestClose={() => {
-          setAdError(null);
-          setShowAdModal(false);
-        }}
+        onRequestClose={() => setShowSubscriptionModal(false)}
       >
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 24 }}>
           <View style={{ backgroundColor: "#fff", borderRadius: 24, padding: 28, width: "100%", maxWidth: 340, alignItems: "center" }}>
@@ -646,32 +611,13 @@ export default function FridgeScreen() {
 
             {/* الوصف */}
             <Text style={{ fontSize: 14, color: "#666", textAlign: "center", lineHeight: 22, marginBottom: 20 }}>
-              شاهد إعلاناً قصيراً للحصول على اقتراح وصفة من الذكاء الاصطناعي
+              اقتراحات الوصفات من المكونات متاحة للمشتركين.
             </Text>
-
-            {adError ? (
-              <View
-                style={{
-                  backgroundColor: "#FFF3F2",
-                  borderColor: "#F5B7B1",
-                  borderWidth: 1,
-                  borderRadius: 12,
-                  padding: 12,
-                  width: "100%",
-                  marginBottom: 14,
-                }}
-              >
-                <Text style={{ color: "#9B2C2C", fontSize: 13, lineHeight: 20, textAlign: "right" }}>
-                  {adError}
-                </Text>
-              </View>
-            ) : null}
 
             {/* زر الاشتراك */}
             <TouchableOpacity
               onPress={() => {
-                setAdError(null);
-                setShowAdModal(false);
+                setShowSubscriptionModal(false);
                 router.push("/(tabs)/subscription" as any);
               }}
               style={{
@@ -689,43 +635,10 @@ export default function FridgeScreen() {
               </Text>
             </TouchableOpacity>
 
-            {/* فاصل "أو" */}
-            <View style={{ flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 8 }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
-              <Text style={{ marginHorizontal: 12, color: "#999", fontSize: 13 }}>أو</Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
-            </View>
-
-            {/* زر مشاهدة الإعلان */}
-            <TouchableOpacity
-              onPress={handleWatchAd}
-              disabled={adLoading}
-              style={{
-                backgroundColor: "#FFF3E0",
-                borderRadius: 14,
-                paddingVertical: 14,
-                paddingHorizontal: 24,
-                width: "100%",
-                alignItems: "center",
-                borderWidth: 1,
-                borderColor: "#FFE0B2",
-                opacity: adLoading ? 0.7 : 1,
-              }}
-            >
-              {adLoading ? (
-                <ActivityIndicator color="#E65100" size="small" />
-              ) : (
-                <Text style={{ color: "#E65100", fontSize: 15, fontWeight: "600" }}>
-                  {adError ? "إعادة محاولة عرض الإعلان" : "▶️ شاهد إعلاناً قصيراً"}
-                </Text>
-              )}
-            </TouchableOpacity>
-
             {/* زر إغلاق */}
             <TouchableOpacity
               onPress={() => {
-                setAdError(null);
-                setShowAdModal(false);
+                setShowSubscriptionModal(false);
               }}
               style={{ marginTop: 16, padding: 8 }}
             >

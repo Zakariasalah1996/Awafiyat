@@ -19,8 +19,6 @@ import { useSubscriptionContext } from "@/lib/subscription-context";
 import { useColors } from "@/hooks/use-colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Haptics from "expo-haptics";
-import { showRewardedAd } from "@/lib/admob";
-import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
 
 I18nManager.forceRTL(true);
 
@@ -40,9 +38,7 @@ export default function LeftoversRenewScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [unsafeWarning, setUnsafeWarning] = useState("");
-  const [showAdModal, setShowAdModal] = useState(false);
-  const [adLoading, setAdLoading] = useState(false);
-  const [adError, setAdError] = useState<string | null>(null);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   const suggestMutation = trpc.leftovers.suggest.useMutation();
@@ -63,7 +59,7 @@ export default function LeftoversRenewScreen() {
     return true;
   }, [storageLocation, timeSince]);
 
-  // طلب اقتراح من الذكاء الاصطناعي (بعد مشاهدة الإعلان أو للمشترك)
+  // طلب اقتراح للمشتركين.
   const performAIRequest = useCallback(async () => {
     if (inputText.trim().length === 0) return;
     if (!storageLocation || !timeSince) return;
@@ -89,7 +85,7 @@ export default function LeftoversRenewScreen() {
     }
   }, [inputText, storageLocation, timeSince, profile?.healthCondition, suggestMutation]);
 
-  // طلب اقتراح - المشترك مباشرة، غير المشترك يشاهد إعلان
+  // تُعرض خطط الاشتراك لمن لا يملك اشتراكًا.
   const askAI = useCallback(async () => {
     if (inputText.trim().length === 0) return;
     if (!storageLocation || !timeSince) return;
@@ -98,39 +94,11 @@ export default function LeftoversRenewScreen() {
     if (!checkFoodSafety()) return;
 
     if (isSubscribed) {
-      // المشترك يستخدم مباشرة بلا حدود
       await performAIRequest();
     } else {
-      // غير المشترك يظهر له نافذة الإعلان
-      setAdError(null);
-      setShowAdModal(true);
+      setShowSubscriptionModal(true);
     }
   }, [inputText, storageLocation, timeSince, isSubscribed, performAIRequest, checkFoodSafety]);
-
-  // مشاهدة الإعلان ثم تنفيذ الطلب
-  const handleWatchAd = useCallback(async () => {
-    setAdLoading(true);
-    setAdError(null);
-    try {
-      const result = await showRewardedAd();
-      if (result.status === "rewarded") {
-        setShowAdModal(false);
-        await performAIRequest();
-        return;
-      }
-
-      if (result.status === "dismissed") {
-        setAdError("أُغلق الإعلان قبل اكتماله. شاهد الإعلان حتى النهاية للحصول على الاقتراح.");
-        return;
-      }
-
-      setAdError(formatRewardedAdErrorForUser(result.error, result.sdkHealthy));
-    } catch {
-      setAdError("تعذر تحميل الإعلان الآن. حاول مرة أخرى بعد قليل.\nرمز التشخيص: admob/unexpected");
-    } finally {
-      setAdLoading(false);
-    }
-  }, [performAIRequest]);
 
   // إعادة تعيين
   const resetAll = useCallback(() => {
@@ -174,7 +142,7 @@ export default function LeftoversRenewScreen() {
                   className="text-lg text-center text-muted leading-8"
                   style={{ writingDirection: "rtl" }}
                 >
-                  ماهي بقايا الأكلات عندك؟{"\n"}
+                  ما بقايا الطعام المتوفرة لديك؟{"\n"}
                   لا ترميها! خلّنا نحوّلها لأكلة جديدة
                 </Text>
               </View>
@@ -474,15 +442,12 @@ export default function LeftoversRenewScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* نافذة مشاهدة الإعلان */}
+      {/* نافذة الاشتراك */}
       <Modal
-        visible={showAdModal}
+        visible={showSubscriptionModal}
         transparent
         animationType="fade"
-        onRequestClose={() => {
-          setAdError(null);
-          setShowAdModal(false);
-        }}
+        onRequestClose={() => setShowSubscriptionModal(false)}
       >
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 24 }}>
           <View style={{ backgroundColor: "#fff", borderRadius: 24, padding: 28, width: "100%", maxWidth: 340, alignItems: "center" }}>
@@ -498,32 +463,13 @@ export default function LeftoversRenewScreen() {
 
             {/* الوصف */}
             <Text style={{ fontSize: 14, color: "#666", textAlign: "center", lineHeight: 22, marginBottom: 20 }}>
-              شاهد إعلاناً قصيراً لتحويل بقايا أكلك إلى وصفة جديدة ولذيذة
+              تتوفر اقتراحات الاستفادة من بقايا الطعام للمشتركين.
             </Text>
-
-            {adError ? (
-              <View
-                style={{
-                  backgroundColor: "#FFF3F2",
-                  borderColor: "#F5B7B1",
-                  borderWidth: 1,
-                  borderRadius: 12,
-                  padding: 12,
-                  width: "100%",
-                  marginBottom: 14,
-                }}
-              >
-                <Text style={{ color: "#9B2C2C", fontSize: 13, lineHeight: 20, textAlign: "right" }}>
-                  {adError}
-                </Text>
-              </View>
-            ) : null}
 
             {/* زر الاشتراك */}
             <TouchableOpacity
               onPress={() => {
-                setAdError(null);
-                setShowAdModal(false);
+                setShowSubscriptionModal(false);
                 router.push("/(tabs)/subscription" as any);
               }}
               style={{
@@ -541,43 +487,10 @@ export default function LeftoversRenewScreen() {
               </Text>
             </TouchableOpacity>
 
-            {/* فاصل "أو" */}
-            <View style={{ flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 8 }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
-              <Text style={{ marginHorizontal: 12, color: "#999", fontSize: 13 }}>أو</Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
-            </View>
-
-            {/* زر مشاهدة الإعلان */}
-            <TouchableOpacity
-              onPress={handleWatchAd}
-              disabled={adLoading}
-              style={{
-                backgroundColor: "#FFF3E0",
-                borderRadius: 14,
-                paddingVertical: 14,
-                paddingHorizontal: 24,
-                width: "100%",
-                alignItems: "center",
-                borderWidth: 1,
-                borderColor: "#FFE0B2",
-                opacity: adLoading ? 0.7 : 1,
-              }}
-            >
-              {adLoading ? (
-                <ActivityIndicator color="#E65100" size="small" />
-              ) : (
-                <Text style={{ color: "#E65100", fontSize: 15, fontWeight: "600" }}>
-                  {adError ? "إعادة محاولة عرض الإعلان" : "▶️ شاهد إعلاناً قصيراً"}
-                </Text>
-              )}
-            </TouchableOpacity>
-
             {/* زر إغلاق */}
             <TouchableOpacity
               onPress={() => {
-                setAdError(null);
-                setShowAdModal(false);
+                setShowSubscriptionModal(false);
               }}
               style={{ marginTop: 16, padding: 8 }}
             >

@@ -34,7 +34,7 @@ const HEALTH_LABELS: Record<HealthCondition, string> = {
   hypertension: "ضغط الدم",
   obesity: "السمنة",
   cholesterol: "الكوليسترول",
-  none: "لا أعاني من شيء",
+  none: "لا توجد حالة صحية محددة",
 };
 
 
@@ -103,10 +103,10 @@ export default function ProfileScreen() {
       if (token) {
         await registerPushToken(token);
         setPushTokenStatus("registered");
-        Alert.alert("تم بنجاح", "تم تسجيل الجهاز للإشعارات بنجاح");
+        Alert.alert("تم بنجاح", "تم تسجيل الجهاز لاستقبال الإشعارات بنجاح");
       } else {
         setPushTokenStatus("error");
-        Alert.alert("خطأ", "تعذر الحصول على رمز الإشعارات. تأكد من اتصال الإنترنت وحاول مجدداً.");
+        Alert.alert("خطأ", "تعذر الحصول على رمز الإشعارات. تحقّق من اتصالك بالإنترنت وحاول مرة أخرى.");
       }
     } catch (e) {
       setPushTokenStatus("error");
@@ -125,7 +125,7 @@ export default function ProfileScreen() {
       await updateProfile(normalized);
       setProfileDraft(normalized);
       setHasUnsavedChanges(false);
-      setSaveMessage("تم حفظ معلوماتك");
+      setSaveMessage("حُفظت معلوماتك بنجاح");
       setTimeout(() => setSaveMessage(""), 2500);
     } finally {
       setIsSavingProfile(false);
@@ -386,7 +386,7 @@ export default function ProfileScreen() {
                 }}
               >
                 {pushTokenStatus === "registered" ? "الجهاز مسجل لاستقبال الإشعارات" :
-                 pushTokenStatus === "checking" ? "جاري التحقق..." :
+                 pushTokenStatus === "checking" ? "جارٍ التحقق..." :
                  "الجهاز غير مسجل للإشعارات"}
               </Text>
             </View>
@@ -402,7 +402,7 @@ export default function ProfileScreen() {
                 }}
               >
                 <Text style={{ color: "#fff", fontSize: 12, fontWeight: "600" }}>
-                  {isRegisteringToken ? "جاري..." : "تسجيل"}
+                  {isRegisteringToken ? "جارٍ..." : "تسجيل"}
                 </Text>
               </TouchableOpacity>
             )}
@@ -411,13 +411,13 @@ export default function ProfileScreen() {
           {!permissionGranted && (
             <View className="mb-3 p-3 rounded-lg" style={{ backgroundColor: `${colors.warning}15` }}>
               <Text className="text-sm" style={{ color: colors.warning }}>
-                الإشعارات غير مفعّلة. فعّل أي إشعار لطلب الإذن.
+                الإشعارات غير مفعّلة. فعّل أحد الإشعارات لطلب الإذن.
               </Text>
             </View>
           )}
           {[
-            { key: "shopping", label: "تذكير التسوق", desc: "تنبيه بقائمة المشتريات" },
-            { key: "promotions", label: "نصائح وتحفيز", desc: "نصائح صحية يومية" },
+            { key: "shopping", label: "تذكير التسوق", desc: "تنبيه بقائمة التسوق" },
+            { key: "promotions", label: "نصائح وتشجيع", desc: "نصائح يومية للعافية" },
           ].map((item) => (
             <View
               key={item.key}
@@ -470,7 +470,7 @@ export default function ProfileScreen() {
           {alarmSettings.enabled && (
             <View className="py-3">
               <Text className="text-base text-foreground mb-1">صوت التذكير</Text>
-              <Text className="text-xs text-muted mb-3">اختر صوت التذكير المفضل • اضغط للمعاينة</Text>
+              <Text className="text-xs text-muted mb-3">اختر صوت التذكير المفضل لديك • اضغط للمعاينة</Text>
               {(["female", "male"] as VoiceGender[]).map((gender) => {
                 const isSelected = alarmSettings.voiceGender === gender;
                 const label = gender === "female" ? "👩 صوت امرأة" : "👨 صوت رجل";

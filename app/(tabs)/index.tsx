@@ -14,171 +14,96 @@ const COUNTRY_LABELS: Record<string, string> = {
 };
 
 const SECTIONS = [
-  { id: "fridge",             emoji: "❄️", title: "ذكاء الثلاجة",    route: "/sections/fridge",             color: "#5D8A3C", bg: "#F0F7EC" },
-  { id: "recipes-library",    emoji: "📖", title: "مكتبة الوصفات",   route: "/sections/recipes-library",    color: "#E85D5D", bg: "#FFF0F0" },
-  { id: "shopping-list",      emoji: "🛒", title: "قائمة التسوق",    route: "/sections/shopping-list",      color: "#7B68EE", bg: "#F3F0FF" },
-  { id: "calorie-calculator", emoji: "⚖️", title: "حاسبة السعرات",  route: "/sections/calorie-calculator", color: "#4ECDC4", bg: "#EEFBFA" },
-  { id: "health-tips",        emoji: "🩺", title: "نصائح صحية",      route: "/sections/health-tips",        color: "#FF6B9D", bg: "#FFF0F5" },
-  { id: "beverages",          emoji: "☕", title: "مشروبات وعصائر",  route: "/sections/beverages",          color: "#8B4513", bg: "#FFF8F0" },
-  { id: "saved-recipes",      emoji: "💝", title: "وصفاتي المحفوظة", route: "/sections/saved-recipes",      color: "#E8A359", bg: "#FFF8F0" },
+  { id: "fridge", title: "مكونات ثلاجتي", route: "/sections/fridge", image: require("@/assets/images/feature-cards/fridge-card.jpg") },
+  { id: "recipes", title: "مكتبة الوصفات", route: "/sections/recipes-library", image: require("@/assets/images/feature-cards/recipes-card.jpg") },
+  { id: "shopping", title: "قائمة التسوق", route: "/sections/shopping-list", image: require("@/assets/images/feature-cards/shopping-card.jpg") },
+  { id: "calories", title: "حاسبة السعرات", route: "/sections/calorie-calculator", image: require("@/assets/images/feature-cards/calories-card.jpg") },
+  { id: "health", title: "نصائح غذائية", route: "/sections/health-tips", image: require("@/assets/images/feature-cards/health-card.jpg") },
+  { id: "beverages", title: "المشروبات والعصائر", route: "/sections/beverages", image: require("@/assets/images/feature-cards/beverages-card.jpg") },
+  { id: "saved", title: "وصفاتي المحفوظة", route: "/sections/saved-recipes", image: require("@/assets/images/feature-cards/saved-card.jpg") },
+  { id: "community", title: "مجتمع الطبخ", route: "/(tabs)/community", image: require("@/assets/images/feature-cards/community-card.jpg") },
 ];
 
 export default function HomeScreen() {
   const colors = useColors();
   const { profile } = useUser();
   const { isPremium } = useSubscriptionContext();
-
-  const greeting = profile.name ? `أهلاً ${profile.name} 👋` : "أهلاً وسهلاً 👋";
+  const greeting = profile.name ? `أهلًا بك، ${profile.name}` : "أهلًا بك في ألف عافيات";
   const countryLabel = profile.country ? COUNTRY_LABELS[profile.country] : "";
 
   return (
     <ScreenContainer className="px-0">
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 24 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ─── Header ─── */}
-        <View style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+        <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16 }}>
           <View style={{ flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between" }}>
             <View style={{ alignItems: "flex-end", flex: 1 }}>
-              <Text style={{ fontSize: 20, fontWeight: "800", color: colors.foreground, textAlign: "right" }}>
-                {greeting}
-              </Text>
+              <Text style={{ fontSize: 21, fontWeight: "800", color: colors.foreground, textAlign: "right" }}>{greeting}</Text>
               {countryLabel ? (
-                <View style={{ flexDirection: "row-reverse", alignItems: "center", marginTop: 4,
-                  backgroundColor: `${colors.primary}12`, paddingHorizontal: 10, paddingVertical: 3,
-                  borderRadius: 20 }}>
-                  <Text style={{ fontSize: 12, color: colors.primary, fontWeight: "600" }}>{countryLabel}</Text>
-                </View>
+                <Text style={{ marginTop: 5, color: colors.muted, fontSize: 12 }}>{countryLabel}</Text>
               ) : null}
             </View>
-            <Image
-              source={require("@/assets/images/icon.png")}
-              style={{ width: 44, height: 44, borderRadius: 12, marginLeft: 12 }}
-            />
+            <Image source={require("@/assets/images/icon.png")} style={{ width: 44, height: 44, borderRadius: 13, marginLeft: 12 }} />
           </View>
-
-          {/* Health badge */}
-          {profile.healthCondition !== "none" && (
-            <View style={{ marginTop: 8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12,
-              backgroundColor: `${colors.primary}12`, flexDirection: "row-reverse", alignItems: "center" }}>
-              <Text style={{ fontSize: 14 }}>🩺</Text>
-              <Text style={{ fontSize: 12, color: colors.primary, fontWeight: "600", marginRight: 6,
-                textAlign: "right" }}>
-                الوصفات مخصصة لحالتك الصحية (
-                {profile.healthCondition === "diabetes" ? "السكري"
-                  : profile.healthCondition === "hypertension" ? "ضغط الدم"
-                  : profile.healthCondition === "obesity" ? "السمنة"
-                  : "الكوليسترول"})
+          {profile.healthCondition !== "none" ? (
+            <View style={{ marginTop: 12, backgroundColor: `${colors.primary}12`, borderRadius: 12, padding: 11 }}>
+              <Text style={{ fontSize: 12, lineHeight: 19, textAlign: "right", color: colors.primary }}>
+                معلومات غذائية مرتبطة بحالتك الصحية: {profile.healthCondition === "diabetes" ? "السكري" : profile.healthCondition === "hypertension" ? "ضغط الدم" : profile.healthCondition === "obesity" ? "السمنة" : "الكوليسترول"}
               </Text>
             </View>
-          )}
+          ) : null}
         </View>
 
-        {/* ─── بانر جدولة الطبخ ─── */}
-        <Animated.View entering={FadeInDown.delay(50).duration(350)} style={{ paddingHorizontal: 20, marginBottom: 16 }}>
+        <Animated.View entering={FadeInDown.delay(50).duration(350)} style={{ paddingHorizontal: 20, marginBottom: 18 }}>
           <TouchableOpacity
             onPress={() => router.push("/sections/meal-planner" as any)}
             activeOpacity={0.85}
-            style={{
-              borderRadius: 18,
-              overflow: "hidden",
-              backgroundColor: "#F0F7EC",
-              borderWidth: 1,
-              borderColor: "#C8E6C9",
-              flexDirection: "row-reverse",
-              alignItems: "center",
-              paddingHorizontal: 16,
-              paddingVertical: 14,
-            }}
+            style={{ borderRadius: 18, overflow: "hidden", backgroundColor: "#F0F7EC", borderWidth: 1, borderColor: "#C8E6C9", flexDirection: "row-reverse", alignItems: "center", padding: 13 }}
           >
-            {/* النص */}
             <View style={{ flex: 1, alignItems: "flex-end" }}>
-              <Text style={{ fontSize: 17, fontWeight: "800", color: "#2E5D1E", textAlign: "right" }}>
-                جدول الطبخ الأسبوعي 📅
-              </Text>
-              <Text style={{ fontSize: 12, color: "#5D8A3C", marginTop: 3, textAlign: "right" }}>
-                نظّم وجباتك لكل أسبوع مع تنبيهات ذكية
-              </Text>
-              <View style={{ marginTop: 8, backgroundColor: "#5D8A3C", borderRadius: 20,
-                paddingHorizontal: 14, paddingVertical: 5, alignSelf: "flex-end" }}>
-                <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>افتح الجدول ←</Text>
-              </View>
+              <Text style={{ fontSize: 17, fontWeight: "800", color: "#2E5D1E", textAlign: "right" }}>مخطط الوجبات الأسبوعي</Text>
+              <Text style={{ fontSize: 12, lineHeight: 18, color: "#4F7138", marginTop: 4, textAlign: "right" }}>نظّم وجباتك أسبوعيًا مع تذكيرات مفيدة.</Text>
+              <Text style={{ marginTop: 9, color: "#2E5D1E", fontSize: 12, fontWeight: "700" }}>استعرض المخطط ←</Text>
             </View>
-            {/* الأيقونة */}
-            <View style={{ width: 64, height: 64, borderRadius: 16, backgroundColor: "#C8E6C9",
-              alignItems: "center", justifyContent: "center", marginLeft: 12 }}>
-              <Text style={{ fontSize: 34 }}>🍽️</Text>
-            </View>
+            <Image source={require("@/assets/images/feature-cards/planner-card.jpg")} resizeMode="cover" style={{ width: 82, height: 82, borderRadius: 12, marginLeft: 12 }} />
           </TouchableOpacity>
         </Animated.View>
 
-        {/* ─── شبكة الأقسام ─── */}
-        <Animated.View entering={FadeInDown.delay(120).duration(350)}
-          style={{ paddingHorizontal: 20 }}>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
-            {SECTIONS.map((section, i) => (
+        <Animated.View entering={FadeInDown.delay(120).duration(350)} style={{ paddingHorizontal: 20 }}>
+          <Text style={{ fontSize: 17, fontWeight: "800", color: colors.foreground, textAlign: "right", marginBottom: 12 }}>استكشف ألف عافيات</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 12 }}>
+            {SECTIONS.map((section) => (
               <TouchableOpacity
                 key={section.id}
                 onPress={() => router.push(section.route as any)}
+                accessibilityRole="button"
+                accessibilityLabel={section.title}
                 activeOpacity={0.75}
-                style={{
-                  width: "47%",
-                  aspectRatio: 1.1,
-                  backgroundColor: section.bg,
-                  borderRadius: 18,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderWidth: 1,
-                  borderColor: `${section.color}25`,
-                  padding: 12,
-                }}
+                style={{ width: "48%", aspectRatio: 0.98, backgroundColor: colors.surface, borderRadius: 17, overflow: "hidden", borderWidth: 1, borderColor: colors.border }}
               >
-                <Text style={{ fontSize: 38, marginBottom: 8 }}>{section.emoji}</Text>
-                <Text style={{
-                  fontSize: 13,
-                  fontWeight: "700",
-                  color: colors.foreground,
-                  textAlign: "center",
-                  lineHeight: 18,
-                }}>
-                  {section.title}
-                </Text>
+                <Image source={section.image} resizeMode="cover" style={{ width: "100%", height: "72%" }} />
+                <View style={{ flex: 1, justifyContent: "center", paddingHorizontal: 8 }}>
+                  <Text style={{ fontSize: 14, fontWeight: "700", color: colors.foreground, textAlign: "center", lineHeight: 20 }} numberOfLines={2}>{section.title}</Text>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
         </Animated.View>
 
-        {/* ─── بانر الاشتراك (للغير مشتركين فقط) ─── */}
-        {!isPremium && (
-          <Animated.View entering={FadeInDown.delay(200).duration(350)}
-            style={{ paddingHorizontal: 20, marginTop: 14 }}>
+        {!isPremium ? (
+          <Animated.View entering={FadeInDown.delay(200).duration(350)} style={{ paddingHorizontal: 20, marginTop: 18 }}>
             <TouchableOpacity
               onPress={() => router.push("/(tabs)/subscription" as any)}
               activeOpacity={0.85}
-              style={{
-                borderRadius: 16,
-                backgroundColor: "#FFF3E0",
-                borderWidth: 1,
-                borderColor: "#FFE0B2",
-                flexDirection: "row-reverse",
-                alignItems: "center",
-                paddingHorizontal: 14,
-                paddingVertical: 12,
-              }}
+              style={{ borderRadius: 16, backgroundColor: "#FFF3E0", borderWidth: 1, borderColor: "#FFE0B2", flexDirection: "row-reverse", alignItems: "center", padding: 14 }}
             >
-              <Text style={{ fontSize: 28, marginLeft: 10 }}>👑</Text>
+              <Text style={{ fontSize: 24, marginLeft: 12 }}>✦</Text>
               <View style={{ flex: 1, alignItems: "flex-end" }}>
-                <Text style={{ fontSize: 14, fontWeight: "800", color: colors.foreground, textAlign: "right" }}>
-                  اشترك في النسخة الكاملة
-                </Text>
-                <Text style={{ fontSize: 11, color: colors.muted, marginTop: 2, textAlign: "right" }}>
-                  وصفات غير محدودة + ذكاء اصطناعي + تحذيرات صحية
-                </Text>
+                <Text style={{ fontSize: 15, fontWeight: "800", color: colors.foreground, textAlign: "right" }}>اكتشف الاشتراك المميز</Text>
+                <Text style={{ fontSize: 12, color: colors.muted, marginTop: 3, textAlign: "right", lineHeight: 18 }}>الوصفات الكاملة وأدوات التخطيط والتذكير.</Text>
               </View>
             </TouchableOpacity>
           </Animated.View>
-        )}
+        ) : null}
       </ScrollView>
     </ScreenContainer>
   );

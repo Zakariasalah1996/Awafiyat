@@ -20,18 +20,18 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 // رسائل تشجيعية
 const ENCOURAGEMENT_MESSAGES = [
-  "أحسنت! استمر 💪",
-  "رائع! جسمك يشكرك 💧",
-  "ممتاز! كل كوب يصنع فرقاً ✨",
-  "بارك الله فيك! 🌿",
-  "هيا نكمل المشوار! 🎯",
-  "صحتك أولوية! 💙",
+  "أحسنت! واصل التقدم 💪",
+  "رائع! واصل ترطيب جسمك 💧",
+  "ممتاز! كل كوب يُحدث فرقًا ✨",
+  "أحسنت! 🌿",
+  "لنواصل التقدم! 🎯",
+  "اجعل صحتك أولوية! 💙",
 ];
 
 const COMPLETION_MESSAGES = [
-  "🎉 مبارك! أكملت هدفك اليومي!",
-  "🏆 بطل! شربت كل الماء المطلوب!",
-  "✨ رائع! جسمك ممتن لك اليوم!",
+  "🎉 تهانينا! أكملت هدفك اليومي!",
+  "🏆 أحسنت! أكملت كمية الماء المطلوبة!",
+  "✨ رائع! أتممت هدفك اليومي!",
 ];
 
 export default function WaterHomeScreen() {
@@ -122,13 +122,13 @@ export default function WaterHomeScreen() {
                 className="text-2xl font-bold text-foreground"
                 style={{ writingDirection: "rtl" }}
               >
-                💧 رفيق الماء
+                💧 رفيقك لشرب الماء
               </Text>
               <Text
                 className="text-sm text-muted mt-1"
                 style={{ writingDirection: "rtl" }}
               >
-                هدفك: {totalCups} أكواب ({(state.settings.dailyGoalMl / 1000).toFixed(1)} لتر)
+                الهدف اليومي: {totalCups} كوب ({(state.settings.dailyGoalMl / 1000).toFixed(1)} لتر)
               </Text>
             </View>
             <TouchableOpacity
@@ -195,7 +195,7 @@ export default function WaterHomeScreen() {
                   <Text className="text-4xl font-bold" style={{ color: "#2196F3" }}>
                     {state.todayLog.cupsCount}
                   </Text>
-                  <Text className="text-sm text-muted">من {totalCups} أكواب</Text>
+                  <Text className="text-sm text-muted">من أصل {totalCups} كوب</Text>
                   <Text className="text-lg font-bold mt-1" style={{ color: "#2196F3" }}>
                     {progress}%
                   </Text>
@@ -233,7 +233,7 @@ export default function WaterHomeScreen() {
               <Text className="text-lg font-bold mt-1" style={{ color: "#2196F3" }}>
                 {state.todayLog.totalMl} مل
               </Text>
-              <Text className="text-xs text-muted mt-1">شربت اليوم</Text>
+              <Text className="text-xs text-muted mt-1">إجمالي اليوم</Text>
             </View>
             <View
               className="flex-1 rounded-xl p-4 items-center"
@@ -243,7 +243,7 @@ export default function WaterHomeScreen() {
               <Text className="text-lg font-bold mt-1" style={{ color: "#F57C00" }}>
                 {remainingCups}
               </Text>
-              <Text className="text-xs text-muted mt-1">أكواب متبقية</Text>
+              <Text className="text-xs text-muted mt-1">الأكواب المتبقية</Text>
             </View>
             <View
               className="flex-1 rounded-xl p-4 items-center"
@@ -253,7 +253,7 @@ export default function WaterHomeScreen() {
               <Text className="text-lg font-bold mt-1" style={{ color: "#388E3C" }}>
                 {getRemainingMl()} مل
               </Text>
-              <Text className="text-xs text-muted mt-1">متبقي</Text>
+              <Text className="text-xs text-muted mt-1">المتبقي</Text>
             </View>
           </View>
         </Animated.View>
@@ -273,7 +273,7 @@ export default function WaterHomeScreen() {
             >
               <Text style={{ fontSize: 24 }}>💧</Text>
               <Text className="text-white text-xl font-bold">
-                {isComplete ? "شربت كوب إضافي" : "شربت كوب"}
+                {isComplete ? "تسجيل كوب إضافي" : "تسجيل كوب"}
               </Text>
             </TouchableOpacity>
           </Animated.View>
@@ -285,7 +285,7 @@ export default function WaterHomeScreen() {
               className="mt-3 py-2 items-center"
               activeOpacity={0.7}
             >
-              <Text className="text-sm text-muted">↩️ تراجع عن آخر كوب</Text>
+              <Text className="text-sm text-muted">↩️ التراجع عن آخر كوب</Text>
             </TouchableOpacity>
           )}
         </Animated.View>
@@ -357,7 +357,7 @@ export default function WaterHomeScreen() {
               className="text-sm leading-6 text-center"
               style={{ color: "#6A1B9A", writingDirection: "rtl" }}
             >
-              🌿 هل تعلم؟ شرب الماء الكافي يُحسّن التركيز والذاكرة، ويُقلل الصداع، ويُنعش البشرة!
+              🌿 تذكير لطيف: وزّع شرب الماء على مدار اليوم.
             </Text>
           </View>
         </Animated.View>

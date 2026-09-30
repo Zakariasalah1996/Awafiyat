@@ -103,9 +103,9 @@ export default function TriedRecipesScreen() {
               >
                 {item.recipe.name}
               </Text>
-              <Text className="text-muted" style={{ fontSize: 12 }}>
-                ⏱️ {item.recipe.prepTime + item.recipe.cookTime} د | 🔥{" "}
-                {item.recipe.calories} سعرة
+              <Text className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
+                ⏱️ {item.recipe.prepTime + item.recipe.cookTime} دقيقة | 🔥{" "}
+                {item.recipe.calories} سعرة حرارية
               </Text>
             </View>
           </View>
@@ -117,7 +117,7 @@ export default function TriedRecipesScreen() {
               className="text-muted"
               style={{ fontSize: 12, textAlign: "right" }}
             >
-              تقييمج:
+              تقييمك:
             </Text>
             {renderStars(item.recipe.id, item.rating)}
           </View>
@@ -177,7 +177,7 @@ export default function TriedRecipesScreen() {
               className="text-foreground font-bold mt-4"
               style={{ fontSize: 18, textAlign: "center" }}
             >
-              ما جربتي وصفات بعد
+              لم تجرّبي أي وصفة بعد
             </Text>
             <Text
               className="text-muted mt-2"

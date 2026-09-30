@@ -39,7 +39,7 @@ const HEALTH_CONDITIONS: { id: HealthCondition; label: string; emoji: string }[]
   { id: "hypertension", label: "ضغط الدم", emoji: "💓" },
   { id: "obesity", label: "السمنة", emoji: "⚖️" },
   { id: "cholesterol", label: "الكوليسترول", emoji: "🫀" },
-  { id: "none", label: "لا أعاني من شيء 💪", emoji: "" },
+  { id: "none", label: "لا توجد حالة صحية محددة", emoji: "" },
 ];
 
 const CONDITION_LABELS: Record<HealthCondition, string> = {
@@ -145,7 +145,7 @@ export default function OnboardingScreen() {
 
         {/* والكثير غيرها */}
         <Animated.View entering={FadeIn.delay(400).duration(400)} style={styles.moreSection}>
-          <Text style={styles.moreText}>💚 والكثير غيرها... 💚</Text>
+          <Text style={styles.moreText}>والمزيد من الأدوات لتنظيم يومك</Text>
         </Animated.View>
 
         {/* الأزرار */}
@@ -170,7 +170,7 @@ export default function OnboardingScreen() {
           {/* نص الخصوصية */}
           <View style={styles.privacyRow}>
             <Text style={{ fontSize: 18 }}>🛡️</Text>
-            <Text style={styles.privacyText}>بياناتك آمنة وسرّية 100%</Text>
+            <Text style={styles.privacyText}>تُحفظ بياناتك وفق سياسة الخصوصية.</Text>
           </View>
         </Animated.View>
       </View>
@@ -186,7 +186,7 @@ export default function OnboardingScreen() {
           >
             <Text style={styles.modalTitle}>🩺 ما هي حالتك الصحية؟</Text>
             <Text style={styles.modalSubtitle}>
-              سنخصص لك تحذيرات صحية دقيقة بناءً على حالتك
+              سنعرض معلومات غذائية تناسب الحالة الصحية التي تختارها.
             </Text>
 
             <View style={{ gap: 8 }}>
@@ -242,16 +242,16 @@ export default function OnboardingScreen() {
               {selectedCondition !== "none" && (
                 <View style={styles.conditionBadge}>
                   <Text style={styles.conditionBadgeText}>
-                    🛡️ لديك {CONDITION_LABELS[selectedCondition]} — تحذيراتك جاهزة!
+                    🛡️ معلومات غذائية عن {CONDITION_LABELS[selectedCondition]}
                   </Text>
                 </View>
               )}
             </View>
 
-            {/* شارة التجربة المجانية */}
+            {/* عرض الاشتراك المدفوع دون مدة تجريبية */}
             <View style={styles.trialBadge}>
-              <Text style={styles.trialTitle}>🎁 3 أيام مجاناً</Text>
-              <Text style={styles.trialSubtitle}>استفد من جميع الميزات • إلغاء في أي وقت</Text>
+              <Text style={styles.trialTitle}>اكتشف مزايا الاشتراك</Text>
+              <Text style={styles.trialSubtitle}>تظهر الأسعار وفترة التجديد عند اختيار الخطة في المتجر.</Text>
             </View>
 
             {/* قائمة الميزات - مضغوطة */}
@@ -262,7 +262,7 @@ export default function OnboardingScreen() {
                 { icon: "❄️", text: "ذكاء الثلاجة بمحاولات غير محدودة" },
                 { icon: "♻️", text: "تجديد النعمة (5 مرات/يوم)" },
                 { icon: "📅", text: "جدولة الوجبات الأسبوعية" },
-                { icon: "📚", text: "مكتبة وصفات كاملة +250 وصفة" },
+                { icon: "📚", text: "مكتبة تضم 1000 وصفة" },
               ].map((f) => (
                 <View key={f.text} style={styles.offerItem}>
                   <Text style={{ fontSize: 18 }}>{f.icon}</Text>
@@ -273,13 +273,13 @@ export default function OnboardingScreen() {
 
             {/* زر الاشتراك */}
             <TouchableOpacity onPress={handleSubscribe} style={styles.subscribeButton} activeOpacity={0.85}>
-              <Text style={styles.subscribeButtonText}>ابدأ التجربة المجانية 3 أيام</Text>
-              <Text style={styles.subscribeButtonSub}>ثم 5,250 د.ع/شهر • إلغاء في أي وقت</Text>
+              <Text style={styles.subscribeButtonText}>استعرض خطط الاشتراك</Text>
+              <Text style={styles.subscribeButtonSub}>لن تُحصّل رسوم إلا بعد تأكيد الشراء في المتجر.</Text>
             </TouchableOpacity>
 
             {/* تخطي */}
             <TouchableOpacity onPress={handleSkipOffer} style={{ alignItems: "center", paddingVertical: 10 }}>
-              <Text style={{ color: "#999", fontSize: 14 }}>ليس الآن، ابدأ مجاناً</Text>
+              <Text style={{ color: "#999", fontSize: 14 }}>ليس الآن، تصفّح الميزات المجانية</Text>
             </TouchableOpacity>
           </View>
         </View>

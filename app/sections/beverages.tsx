@@ -2064,7 +2064,7 @@ const CATEGORIES = [
 const SUBTYPES = [
   { key: "all", label: "الكل" },
   { key: "healthy", label: "صحي" },
-  { key: "regular", label: "عادي" },
+  { key: "regular", label: "اعتيادي" },
 ];
 
 export default function BeveragesScreen() {
@@ -2088,7 +2088,7 @@ export default function BeveragesScreen() {
     try {
       await shareBeverage(selectedBeverage);
     } catch {
-      Alert.alert("تعذرت المشاركة", "حاول مرة أخرى بعد قليل.");
+      Alert.alert("تعذّرت المشاركة", "يرجى المحاولة مرة أخرى بعد قليل.");
     }
   }, [selectedBeverage]);
 
@@ -2106,7 +2106,7 @@ export default function BeveragesScreen() {
 
   const renderBeverageCard = useCallback(({ item }: { item: Beverage }) => (
     <TouchableOpacity
-      className="bg-surface rounded-2xl p-4 mb-3 border"
+      className="bg-surface rounded-2xl p-4 mb-4 border"
       style={{ borderColor: colors.border }}
       onPress={() => setSelectedBeverage(item)}
       activeOpacity={0.7}
@@ -2148,7 +2148,7 @@ export default function BeveragesScreen() {
                 color: item.subtype === "healthy" ? "#4CAF50" : "#FF9800",
               }}
             >
-              {item.subtype === "healthy" ? "صحي" : "عادي"}
+              {item.subtype === "healthy" ? "صحي" : "اعتيادي"}
             </Text>
           </View>
         </View>
@@ -2160,7 +2160,7 @@ export default function BeveragesScreen() {
           <MaterialIcons name="local-fire-department" size={16} color={colors.muted} />
         </View>
         <View className="flex-row items-center gap-1">
-          <Text className="text-sm text-muted">{item.ingredients.length} مكوّنات</Text>
+          <Text className="text-sm text-muted">عدد المكوّنات: {item.ingredients.length}</Text>
           <MaterialIcons name="restaurant" size={16} color={colors.muted} />
         </View>
       </View>
@@ -2194,7 +2194,7 @@ export default function BeveragesScreen() {
         </View>
         <View className="px-5 pb-4">
           <Text className="text-base text-muted" style={{ textAlign: "right" }}>
-            {filteredBeverages.length} مشروب متاح
+            عدد المشروبات المتاحة: {filteredBeverages.length}
           </Text>
         </View>
 

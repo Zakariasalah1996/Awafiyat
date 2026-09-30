@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { getUnlockedWarnings, showRewardedAd, unlockWarning } from "@/lib/admob";
-import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
+import { getPreviouslyUnlockedWarnings } from "@/lib/previously-unlocked-content";
 
 import {
   View,
@@ -52,23 +51,23 @@ export default function RecipeDetailScreen() {
 
   // حالة نافذة الاشتراك
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  // حالة فتح التحذير بالإعلان، مع استعادة الفتح المحفوظ لهذه الوصفة
-  const [warningUnlockedByAd, setWarningUnlockedByAd] = useState(false);
+  // يظل التحذير المفتوح سابقًا متاحًا لصاحبه بعد إزالة الإعلانات.
+  const [previouslyUnlocked, setPreviouslyUnlocked] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     const warningId = id || "";
 
-    setWarningUnlockedByAd(false);
+    setPreviouslyUnlocked(false);
     if (!warningId) {
       return () => {
         isMounted = false;
       };
     }
 
-    void getUnlockedWarnings().then((unlockedWarnings) => {
+    void getPreviouslyUnlockedWarnings().then((unlockedWarnings) => {
       if (isMounted && unlockedWarnings.includes(warningId)) {
-        setWarningUnlockedByAd(true);
+        setPreviouslyUnlocked(true);
       }
     });
 
@@ -260,9 +259,9 @@ export default function RecipeDetailScreen() {
           <View className="mx-5 mt-3">
             {canViewHealthWarnings({
               isPremium,
-              unlockedByReward: warningUnlockedByAd,
+              previouslyUnlocked,
             }) ? (
-              /* ✅ مشترك أو شاهد الإعلان: يرى التحذيرات الكاملة */
+              /* المشترك أو من سبق له فتح التفاصيل يرى التحذيرات الكاملة. */
               <View
                 style={{
                   backgroundColor: colors.error + "10",
@@ -728,7 +727,7 @@ export default function RecipeDetailScreen() {
             className="text-foreground font-bold mb-3"
             style={{ fontSize: 16, textAlign: "right", writingDirection: "rtl" }}
           >
-            قيمي هاي الأكلة
+            قيّم هذه الوصفة
           </Text>
           <View className="flex-row justify-center gap-2">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -746,7 +745,7 @@ export default function RecipeDetailScreen() {
           </View>
           {userRating > 0 && (
             <Text className="text-muted text-center mt-2" style={{ fontSize: 13 }}>
-              شكراً على تقييمج! ألف عافية
+              شكرًا لتقييمك! نتمنى لك وجبة شهية.
             </Text>
           )}
         </View>
@@ -870,7 +869,7 @@ export default function RecipeDetailScreen() {
               </View>
             ))}
 
-            {/* زر الاشتراك مع التجربة المجانية */}
+            {/* الاشتراك المدفوع عبر المتجر */}
             <TouchableOpacity
               onPress={() => {
                 setShowSubscriptionModal(false);
@@ -887,66 +886,10 @@ export default function RecipeDetailScreen() {
               }}
             >
               <Text style={{ color: "#fff", fontSize: 16, fontWeight: "800" }}>
-                🎁 جرّب مجاناً 3 أيام
+                استعرض خطط الاشتراك
               </Text>
               <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, marginTop: 2 }}>
-                ثم 5,250 د.ع/شهر • إلغاء في أي وقت
-              </Text>
-            </TouchableOpacity>
-
-            {/* فاصل */}
-            <View style={{ flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 12 }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
-              <Text style={{ color: "#999", fontSize: 12, marginHorizontal: 10 }}>أو</Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
-            </View>
-
-            {/* زر مشاهدة إعلان */}
-            <TouchableOpacity
-              onPress={async () => {
-                try {
-                  const result = await showRewardedAd();
-                  if (result.status === "rewarded") {
-                    await unlockWarning(id || "");
-                    setWarningUnlockedByAd(true);
-                    setShowSubscriptionModal(false);
-                    return;
-                  }
-
-                  if (result.status === "dismissed") {
-                    Alert.alert(
-                      "لم يكتمل الإعلان",
-                      "شاهد الإعلان حتى النهاية لفتح التحذيرات الصحية.",
-                    );
-                    return;
-                  }
-
-                  Alert.alert(
-                    "تعذر عرض الإعلان",
-                    formatRewardedAdErrorForUser(result.error, result.sdkHealthy),
-                  );
-                } catch {
-                  Alert.alert(
-                    "تعذر عرض الإعلان",
-                    "حاول مرة أخرى بعد قليل.\nرمز التشخيص: admob/unexpected",
-                  );
-                }
-              }}
-              style={{
-                borderWidth: 1.5,
-                borderColor: colors.primary,
-                borderRadius: 16,
-                paddingVertical: 13,
-                paddingHorizontal: 32,
-                width: "100%",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ color: colors.primary, fontSize: 15, fontWeight: "700" }}>
-                📺 شاهد إعلاناً لفتح التحذيرات
-              </Text>
-              <Text style={{ color: "#666", fontSize: 12, marginTop: 2 }}>
-                مجاناً • إعلان قصير 30 ثانية
+                تظهر الأسعار النهائية ومدة الاشتراك في المتجر
               </Text>
             </TouchableOpacity>
 

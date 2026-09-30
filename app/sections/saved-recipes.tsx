@@ -150,7 +150,7 @@ export default function SavedRecipesScreen() {
           className="text-muted"
           style={{ fontSize: 13, textAlign: "right", writingDirection: "rtl" }}
         >
-          {savedRecipes.length} وصفة محفوظة
+          عدد الوصفات المحفوظة: {savedRecipes.length}
         </Text>
       </View>
 
@@ -167,7 +167,7 @@ export default function SavedRecipesScreen() {
               className="text-foreground font-bold mt-4"
               style={{ fontSize: 18, textAlign: "center" }}
             >
-              ما عندج وصفات محفوظة بعد
+              لا توجد وصفات محفوظة بعد
             </Text>
             <Text
               className="text-muted mt-2"
@@ -178,7 +178,7 @@ export default function SavedRecipesScreen() {
                 writingDirection: "rtl",
               }}
             >
-              عندما تعجبك وصفة، اضغط على القلب{"\n"}لحفظها هنا
+              عندما تعجبكِ وصفة، اضغطي على رمز القلب{"\n"}لحفظها هنا
             </Text>
             <TouchableOpacity
               onPress={() => router.back()}

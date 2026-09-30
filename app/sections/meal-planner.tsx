@@ -38,8 +38,8 @@ const TIMES_SET_KEY = "@awafiyat_times_set";
 
 // تحويل الفترة إلى عربي
 const getPeriodLabel = (hour: number): string => {
-  if (hour >= 5 && hour < 12) return "صباحاً";
-  if (hour >= 12 && hour < 17) return "ظهراً";
+  if (hour >= 5 && hour < 12) return "صباحًا";
+  if (hour >= 12 && hour < 17) return "ظهرًا";
   return "مساءً";
 };
 
@@ -62,7 +62,7 @@ const generateTimeOptions = (): { value: string; label: string; hour: number }[]
 const TIME_OPTIONS = generateTimeOptions();
 
 const MEALS = [
-  { key: "breakfast" as const, label: "فطور", emoji: "🌅", defaultTime: "08:00" },
+  { key: "breakfast" as const, label: "الإفطار", emoji: "🌅", defaultTime: "08:00" },
   { key: "lunch" as const, label: "غداء", emoji: "☀️", defaultTime: "13:00" },
   { key: "dinner" as const, label: "عشاء", emoji: "🌙", defaultTime: "20:00" },
 ];
@@ -317,8 +317,8 @@ export default function MealPlannerScreen() {
               writingDirection: "rtl",
             }}
           >
-            اشترك في ألف عافيات المميزة لتخطيط وجبات الأسبوع بالكامل،{"\n"}
-            والاختيار من أكثر من 250 وصفة، وتفعيل تذكيرات الطبخ.
+            اشترك في النسخة المميزة من ألف عافيات لتخطيط وجبات الأسبوع كاملًا،{"\n"}
+            والاختيار من أكثر من 250 وصفة، وتفعيل تذكيرات إعداد الوجبات.
           </Text>
           <TouchableOpacity
             onPress={() => {
@@ -389,7 +389,7 @@ export default function MealPlannerScreen() {
               className="text-muted mb-6"
               style={{ fontSize: 14, textAlign: "right", writingDirection: "rtl" }}
             >
-              حددي أوقات الطبخ لنذكّرك في الوقت المناسب
+              حدّدي أوقات الوجبات لنذكّرك في الوقت المناسب
             </Text>
 
             {MEALS.map((meal) => (
@@ -407,7 +407,7 @@ export default function MealPlannerScreen() {
                     className="text-foreground font-bold"
                     style={{ fontSize: 17 }}
                   >
-                    متى تعدّين {meal.label === "فطور" ? "الفطور" : meal.label === "غداء" ? "الغداء" : "العشاء"}؟
+                    متى تُعِدّين {meal.label}؟
                   </Text>
                 </View>
 
@@ -454,7 +454,7 @@ export default function MealPlannerScreen() {
               activeOpacity={0.8}
             >
               <Text className="text-white font-bold" style={{ fontSize: 17 }}>
-                تم، نبدأ نخطط الجدول
+                حسنًا، لنخطط للجدول
               </Text>
             </TouchableOpacity>
           </View>
@@ -497,7 +497,7 @@ export default function MealPlannerScreen() {
                   }}
                 >
                   {showTimePicker === "breakfast"
-                    ? "🌅 وقت الفطور"
+                    ? "🌅 وقت الإفطار"
                     : showTimePicker === "lunch"
                     ? "☀️ وقت الغداء"
                     : "🌙 وقت العشاء"}
@@ -563,7 +563,7 @@ export default function MealPlannerScreen() {
             className="text-foreground font-bold mt-4"
             style={{ fontSize: 24, textAlign: "center" }}
           >
-            تم تنظيم الجدول!
+            تم تنظيم الجدول بنجاح!
           </Text>
           <Text
             className="text-muted mt-3"
@@ -574,9 +574,9 @@ export default function MealPlannerScreen() {
               writingDirection: "rtl",
             }}
           >
-            سنبدأ من باجر بإذن الله{"\n"}
+            سنبدأ غدًا بإذن الله{"\n"}
             سنذكّرك بأوقات الوجبات{"\n"}
-            ألف عافية مقدماً
+            نتمنى لك وجبة شهية
           </Text>
           <TouchableOpacity
             onPress={() => router.back()}
@@ -585,7 +585,7 @@ export default function MealPlannerScreen() {
             activeOpacity={0.8}
           >
             <Text className="text-white font-bold" style={{ fontSize: 17 }}>
-              تمام، رجعني للرئيسية
+              حسنًا، العودة إلى الرئيسية
             </Text>
           </TouchableOpacity>
         </View>
@@ -606,13 +606,13 @@ export default function MealPlannerScreen() {
               className="text-foreground font-bold"
               style={{ fontSize: 18, textAlign: "right" }}
             >
-              اختاري وصفة لـ{showRecipePicker.meal === "breakfast" ? "الفطور" : showRecipePicker.meal === "lunch" ? "الغداء" : "العشاء"}
+              اختاري وصفة لـ{showRecipePicker.meal === "breakfast" ? "الإفطار" : showRecipePicker.meal === "lunch" ? "الغداء" : "العشاء"}
             </Text>
             <Text
               className="text-muted"
               style={{ fontSize: 12, textAlign: "right", marginTop: 2 }}
             >
-              {suggestedRecipes.length} وصفة متاحة — الأنسب للوجبة أولاً
+              {suggestedRecipes.length} وصفة متاحة — الوصفات الأنسب أولًا
             </Text>
           </View>
           <TouchableOpacity onPress={() => setShowRecipePicker(null)}>
@@ -677,7 +677,7 @@ export default function MealPlannerScreen() {
             className="text-foreground font-bold"
             style={{ fontSize: 22, textAlign: "right" }}
           >
-            شنو نطبخ؟
+            ماذا نطبخ؟
           </Text>
           <View className="flex-row items-center gap-2" style={{ flexDirection: "row" }}>
             <TouchableOpacity
@@ -732,7 +732,7 @@ export default function MealPlannerScreen() {
               className="text-primary font-bold"
               style={{ fontSize: 15 }}
             >
-              تعبئة الجدول تلقائياً
+              ملء الجدول تلقائيًا
             </Text>
           </TouchableOpacity>
         </View>
@@ -842,8 +842,8 @@ export default function MealPlannerScreen() {
                       <TouchableOpacity
                         onPress={() => {
                           Alert.alert(
-                            "تذكير الطبخ",
-                            `هل تريد تفعيل تذكير لـ "${planned.recipeName}"?`,
+                            "تذكير بالطهي",
+                            `هل تريدين تفعيل تذكير بـ "${planned.recipeName}"?`,
                             [
                               { text: "إلغاء", style: "cancel" },
                               {
@@ -853,7 +853,7 @@ export default function MealPlannerScreen() {
                                   const time = mealTimes[mealKey];
                                   const [h, m] = time.split(":").map(Number);
                                   await scheduleMealReminder(mealKey, h, m, planned.recipeId, planned.recipeName);
-                                  Alert.alert("تم", `سيتم تذكيرك بـ "${planned.recipeName}" في الساعة ${time}`);
+                                  Alert.alert("تم التفعيل", `سنذكّرك بـ "${planned.recipeName}" في الساعة ${time}`);
                                 },
                               },
                             ]

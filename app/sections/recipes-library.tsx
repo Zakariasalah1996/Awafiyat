@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,6 @@ import {
   I18nManager,
   Platform,
   Modal,
-  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -26,8 +25,7 @@ import {
   isRecipeFree,
 } from "@/lib/data/recipes";
 
-import { showRewardedAd, getUnlockedRecipes, unlockRecipe } from "@/lib/admob";
-import { formatRewardedAdErrorForUser } from "@/lib/admob-result";
+import { getPreviouslyUnlockedRecipes } from "@/lib/previously-unlocked-content";
 import { Image } from "expo-image";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
@@ -77,16 +75,18 @@ export default function RecipesLibraryScreen() {
   const { profile, saveRecipe, unsaveRecipe } = useUser();
   const { isPremium } = useSubscriptionContext();
   const recipeImages = useRecipeImages();
-  const [unlockedByAd, setUnlockedByAd] = useState<Set<string>>(new Set());
+  const [previouslyUnlocked, setPreviouslyUnlocked] = useState<Set<string>>(new Set());
   const [showLockModal, setShowLockModal] = useState(false);
   const [lockedRecipe, setLockedRecipe] = useState<Recipe | null>(null);
-  const [adLoading, setAdLoading] = useState(false);
-  const [adError, setAdError] = useState<string | null>(null);
 
-  // تحميل الوصفات المفتوحة بالإعلانات
-  useState(() => {
-    getUnlockedRecipes().then((ids) => setUnlockedByAd(new Set(ids)));
-  });
+  // الاحتفاظ بإمكانية قراءة الوصفات التي فُتحت في الإصدارات السابقة.
+  useEffect(() => {
+    let active = true;
+    void getPreviouslyUnlockedRecipes().then((ids) => {
+      if (active) setPreviouslyUnlocked(new Set(ids));
+    });
+    return () => { active = false; };
+  }, []);
 
   const [activeFilter, setActiveFilter] = useState<FilterType>(
     (params.category as FilterType) || "all"
@@ -179,7 +179,7 @@ export default function RecipesLibraryScreen() {
       const totalTime = item.prepTime + item.cookTime;
       const cuisine = getCuisineGroup(item);
       const isFree = isRecipeFree(item.id);
-      const isLocked = !isFree && !isPremium && !unlockedByAd.has(item.id);
+      const isLocked = !isFree && !isPremium && !previouslyUnlocked.has(item.id);
 
       return (
         <TouchableOpacity
@@ -189,7 +189,6 @@ export default function RecipesLibraryScreen() {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
               }
               setLockedRecipe(item);
-              setAdError(null);
               setShowLockModal(true);
               return;
             }
@@ -316,7 +315,7 @@ export default function RecipesLibraryScreen() {
         </TouchableOpacity>
       );
     },
-    [colors, profile.savedRecipes, profile.healthCondition, handleToggleSave, router, recipeImages, unlockedByAd, isPremium]
+    [colors, profile.savedRecipes, profile.healthCondition, handleToggleSave, router, recipeImages, previouslyUnlocked, isPremium]
   );
 
   return (
@@ -534,64 +533,30 @@ export default function RecipesLibraryScreen() {
         visible={showLockModal}
         transparent
         animationType="fade"
-        onRequestClose={() => {
-          setAdError(null);
-          setShowLockModal(false);
-        }}
+        onRequestClose={() => setShowLockModal(false)}
       >
         <TouchableOpacity
           style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center", padding: 24 }}
           activeOpacity={1}
-          onPress={() => {
-            setAdError(null);
-            setShowLockModal(false);
-          }}
+          onPress={() => setShowLockModal(false)}
         >
           <TouchableOpacity activeOpacity={1} onPress={() => {}} style={{ backgroundColor: "#ffffff", borderRadius: 24, padding: 28, width: "100%", maxWidth: 340, alignItems: "center" }}>
-            {/* أيقونة */}
             <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: "#FFF3E0", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
               <Text style={{ fontSize: 36 }}>🔒</Text>
             </View>
-
-            {/* العنوان */}
             <Text style={{ fontSize: 20, fontWeight: "700", color: "#1a1a1a", textAlign: "center", marginBottom: 8 }}>
-              وصفة مقفلة
+              الوصفة متاحة للمشتركين
             </Text>
-
-            {/* اسم الوصفة */}
             {lockedRecipe && (
               <Text style={{ fontSize: 16, fontWeight: "600", color: "#E65100", textAlign: "center", marginBottom: 8 }}>
                 {lockedRecipe.name}
               </Text>
             )}
-
-            {/* الوصف */}
             <Text style={{ fontSize: 14, color: "#666", textAlign: "center", lineHeight: 22, marginBottom: 20, writingDirection: "rtl" }}>
-              افتح هذه الوصفة مجاناً بمشاهدة إعلان قصير، أو اشترك للوصول لجميع الوصفات
+              اشترك للوصول إلى المكتبة الكاملة من الوصفات والمزايا الأخرى.
             </Text>
-
-            {adError ? (
-              <View
-                style={{
-                  backgroundColor: "#FFF3F2",
-                  borderColor: "#F5B7B1",
-                  borderWidth: 1,
-                  borderRadius: 12,
-                  padding: 12,
-                  width: "100%",
-                  marginBottom: 14,
-                }}
-              >
-                <Text style={{ color: "#9B2C2C", fontSize: 13, lineHeight: 20, textAlign: "right" }}>
-                  {adError}
-                </Text>
-              </View>
-            ) : null}
-
-            {/* زر الاشتراك */}
             <TouchableOpacity
               onPress={() => {
-                setAdError(null);
                 setShowLockModal(false);
                 router.push("/(tabs)/subscription" as any);
               }}
@@ -601,64 +566,8 @@ export default function RecipesLibraryScreen() {
                 اشترك للوصول الكامل
               </Text>
             </TouchableOpacity>
-
-            {/* فاصل */}
-            <View style={{ flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 8 }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
-              <Text style={{ marginHorizontal: 12, color: "#999", fontSize: 13 }}>أو</Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: "#E0E0E0" }} />
-            </View>
-
-            {/* زر مشاهدة الإعلان */}
             <TouchableOpacity
-              onPress={async () => {
-                setAdLoading(true);
-                setAdError(null);
-                try {
-                  const result = await showRewardedAd();
-                  if (result.status === "rewarded" && lockedRecipe) {
-                    await unlockRecipe(lockedRecipe.id);
-                    setUnlockedByAd((prev) => new Set([...prev, lockedRecipe.id]));
-                    setShowLockModal(false);
-                    router.push({
-                      pathname: "/sections/recipe-detail" as any,
-                      params: { id: lockedRecipe.id },
-                    });
-                    return;
-                  }
-
-                  if (result.status === "dismissed") {
-                    setAdError("أُغلق الإعلان قبل اكتماله. شاهد الإعلان حتى النهاية لفتح الوصفة.");
-                    return;
-                  }
-
-                  if (result.status === "unavailable") {
-                    setAdError(formatRewardedAdErrorForUser(result.error, result.sdkHealthy));
-                  }
-                } catch {
-                  setAdError("تعذر تحميل الإعلان الآن. حاول مرة أخرى بعد قليل.\nرمز التشخيص: admob/unexpected");
-                } finally {
-                  setAdLoading(false);
-                }
-              }}
-              disabled={adLoading}
-              style={{ backgroundColor: "#FFF3E0", borderRadius: 14, paddingVertical: 14, paddingHorizontal: 24, width: "100%", alignItems: "center", borderWidth: 1, borderColor: "#FFE0B2", opacity: adLoading ? 0.7 : 1 }}
-            >
-              {adLoading ? (
-                <ActivityIndicator color="#E65100" size="small" />
-              ) : (
-                <Text style={{ color: "#E65100", fontSize: 15, fontWeight: "600" }}>
-                  {adError ? "إعادة محاولة عرض الإعلان" : "▶️ شاهد إعلاناً قصيراً"}
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            {/* زر إغلاق */}
-            <TouchableOpacity
-              onPress={() => {
-                setAdError(null);
-                setShowLockModal(false);
-              }}
+              onPress={() => setShowLockModal(false)}
               style={{ marginTop: 16, padding: 8 }}
             >
               <Text style={{ color: "#999", fontSize: 13 }}>إلغاء</Text>
