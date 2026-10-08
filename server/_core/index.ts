@@ -343,7 +343,12 @@ async function startServer() {
 
   app.get("/api/health", (_req, res) => {
     const dbUrl = process.env.DATABASE_URL || 'NOT SET';
-    res.json({ ok: true, timestamp: Date.now(), db_type: dbUrl.startsWith('postgresql') ? 'postgres' : dbUrl.startsWith('mysql') ? 'mysql' : 'unknown' });
+    res.json({
+      ok: true,
+      timestamp: Date.now(),
+      db_type: dbUrl.startsWith('postgresql') ? 'postgres' : dbUrl.startsWith('mysql') ? 'mysql' : 'unknown',
+      release: 'community-image-moderation-v2',
+    });
   });
   app.get("/api/db-test", async (_req, res) => {
     try {
