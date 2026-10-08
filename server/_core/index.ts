@@ -66,6 +66,7 @@ import {
   updateAutomaticNotificationMessage,
   updateAutomaticNotificationSchedule,
 } from "../automatic-notification-scheduler";
+import { moderateCommunityFoodImage } from "../community-image-moderation";
 
 // ===== FCM V1 API Direct Send =====
 let _fcmAccessToken: string | null = null;
@@ -286,86 +287,6 @@ async function notifyCommunityPostOwner(input: {
     successCount: result.successCount,
     failCount: result.failCount,
   });
-}
-
-type CommunityImageModeration = {
-  accepted: boolean;
-  reason: string;
-};
-
-/**
- * Fail closed: a photo is never published when the visual food check cannot
- * validate it. Text-only posts remain available to keep community discussion open.
- */
-async function moderateCommunityFoodImage(imageData: string, contentType: string): Promise<CommunityImageModeration> {
-  const forgeUrl = process.env.BUILT_IN_FORGE_API_URL;
-  const forgeKey = process.env.BUILT_IN_FORGE_API_KEY;
-  if (!forgeUrl || !forgeKey) {
-    return { accepted: false, reason: "فاحص الصور غير متاح مؤقتاً" };
-  }
-
-  try {
-    const response = await fetch(`${forgeUrl.replace(/\/$/, "")}/v1/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${forgeKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-5-mini",
-        messages: [
-          {
-            role: "system",
-            content: "أنت فاحص صور صارم لمجتمع طبخ. اقبل فقط صورة يظهر فيها بوضوح طبق طعام أو مشروب أو مكونات طبخ أو تحضير طعام. ارفض الصور الشخصية والوجوه والأشخاص، الحيوانات، الوثائق، المركبات، المناظر، الميمات، الشعارات، لقطات الشاشة، الإعلانات، أو أي صورة لا يكون الطعام محورها الواضح. عند الشك ارفض. أعد JSON فقط.",
-          },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: "هل يمكن نشر هذه الصورة في مجتمع طبخ؟" },
-              {
-                type: "image_url",
-                image_url: { url: `data:${contentType};base64,${imageData}`, detail: "low" },
-              },
-            ],
-          },
-        ],
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "community_food_image_check",
-            strict: true,
-            schema: {
-              type: "object",
-              properties: {
-                isFoodRelated: { type: "boolean" },
-                confidence: { type: "number" },
-                reason: { type: "string" },
-              },
-              required: ["isFoodRelated", "confidence", "reason"],
-              additionalProperties: false,
-            },
-          },
-        },
-        max_completion_tokens: 120,
-      }),
-    });
-
-    if (!response.ok) return { accepted: false, reason: "تعذر التحقق من الصورة" };
-
-    const result = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
-    const content = result.choices?.[0]?.message?.content;
-    if (!content) return { accepted: false, reason: "تعذر قراءة نتيجة فحص الصورة" };
-
-    const verdict = JSON.parse(content) as { isFoodRelated?: boolean; confidence?: number; reason?: string };
-    const accepted = verdict.isFoodRelated === true && Number(verdict.confidence) >= 0.7;
-    return {
-      accepted,
-      reason: accepted ? "" : (verdict.reason || "نقبل فقط صور الطعام والمشروبات"),
-    };
-  } catch (error) {
-    console.error("[Community] Image moderation failed:", error);
-    return { accepted: false, reason: "تعذر التحقق من الصورة" };
-  }
 }
 
 function isPortAvailable(port: number): Promise<boolean> {
